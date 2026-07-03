@@ -1,8 +1,8 @@
-# 2026-07-03T11:58:27-06:00 - Current Build Pathway
+# 2026-07-03T12:01:44-06:00 - Current Build Pathway
 
 Last Updated: 2026-07-03T11:35:41-06:00
 Status: active
-Status Updated: 2026-07-03T11:58:27-06:00
+Status Updated: 2026-07-03T12:01:44-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -12,6 +12,10 @@ Owner: Technical Lead
 This document keeps AI Task Router work small, detailed, timestamped, testable, and easy to resume.
 
 The current product source is [docs/PRODUCT_BRIEF.md](PRODUCT_BRIEF.md), derived from the uploaded coder build brief and Mermaid diagrams.
+
+## Future Distribution Note
+
+Reference only as of 2026-07-03T12:01:44-06:00: the likely future public hosting home is `oldskoolai.com`, with links planned from `guidedailabs.com` and `guidedaijourney.com`. Exact paths, placement, launch timing, deployment approach, and cross-site linking strategy are not decided yet.
 
 ## Required Work Pattern
 
