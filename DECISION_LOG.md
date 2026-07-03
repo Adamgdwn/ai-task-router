@@ -1,8 +1,8 @@
-# 2026-07-03T12:28:19-06:00 - Decision Log
+# 2026-07-03T12:47:24-06:00 - Decision Log
 
-Last Updated: 2026-07-03T12:28:19-06:00
+Last Updated: 2026-07-03T12:47:24-06:00
 Status: active
-Status Updated: 2026-07-03T12:28:19-06:00
+Status Updated: 2026-07-03T12:47:24-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -18,3 +18,5 @@ Owner: Technical Lead
 | 2026-07-03T12:23:53-06:00 | Add minimal schemas for policy defaults and task templates during Chunk Three. | The chunk requires policy and task template seeds to validate against runtime schemas, but Chunk Two had not yet defined those shapes. | The schema boundary now covers all default registries without adding routing, scoring, persistence, UI forms, or external calls. |
 | 2026-07-03T12:23:53-06:00 | Keep default model seeds generic and user-configured rather than provider-specific. | Provider lineups change, and the MVP should recommend routes based on user inventory without claiming permanent model catalogs. | Future UI can ask users which free agents and paid subscriptions they have, while defaults remain editable and non-connector based. |
 | 2026-07-03T12:28:19-06:00 | Expand remaining build chunks before implementing more code. | The owner requested consistent, detailed future chunks so later implementation does not drift or lose focus. | Chunks Four through Sixteen now have objectives, boundaries, acceptance criteria, tests, security notes, rollback paths, stop conditions, and handoffs before execution. |
+| 2026-07-03T12:47:24-06:00 | Keep hard-gate output as a typed domain result instead of adding new Zod schemas in Chunk Four. | Hard gates are an internal pure calculation boundary right now; route cards, imports, exports, and persistence are not consuming this shape yet. | Candidate generation can use the typed result immediately, and a runtime schema can be added later only if the result becomes persisted or imported/exported. |
+| 2026-07-03T12:47:24-06:00 | Report blocked source details only for requested sources that the gate rejects. | Unrequested sources are not route blockers; showing them as blocked would make later UI noisy and misleading. | Route results can focus on meaningful blocked reasons such as no access and sensitivity mismatch. |

@@ -1,34 +1,49 @@
-# 2026-07-03T12:23:53-06:00 - Implementation Status
+# 2026-07-03T12:47:24-06:00 - Implementation Status
 
-Last Updated: 2026-07-03T12:23:53-06:00
-Status: chunk-three-complete
-Status Updated: 2026-07-03T12:23:53-06:00
+Last Updated: 2026-07-03T12:47:24-06:00
+Status: chunk-four-complete
+Status Updated: 2026-07-03T12:47:24-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-Chunk Three - Default Registries And Policy Seeds.
+Chunk Four - Hard Gates.
 
 Completion target: Task complete.
 
 ## Scope
 
-Create editable seed data for models, source permissions, policy defaults, and task templates. Add minimal schema coverage for policy defaults and task templates so every seed registry validates at runtime.
+Implement deterministic hard gates for task intake, model inventory, and source permissions before route scoring exists.
+
+The completed gate evaluates:
+
+- requested source access
+- source sensitivity allowances
+- highly restricted routing limits
+- model enabled state
+- model permission limits
+- current-facts and citation support
+- human approval triggers
 
 ## Product Boundary
 
 The app recommends routes only. It does not call external AI APIs, connect to external systems, execute actions, store credentials, or include telemetry.
 
-External-looking default sources such as web, GitHub, Microsoft 365/SharePoint, and Google Drive are reference categories only, not connectors.
+Hard gates produce local warnings and blocked details only. They do not search sources, inspect local files, call providers, generate route candidates, score routes, store records, or render UI.
 
 ## Evidence
 
 - `bash scripts/governance-preflight.sh` passed with 0 warnings.
-- `npm audit --audit-level=moderate` passed with 0 vulnerabilities.
-- `npm run test -- defaultRegistries` passed with 1 test file and 8 tests.
-- `npm run test` passed with 3 test files and 15 tests.
-- `npm run build` passed after tightening test helper typing.
+- `npm run test -- hardGates` passed with 1 test file and 11 tests.
+- `npm run test` passed with 4 test files and 26 tests.
+- `npm run build` passed.
+- `git diff --check` passed; Git reported only normal Windows CRLF working-copy notices.
+
+## Known Gaps
+
+- Route candidate generation, scoring, route cards, prompt packages, persistence, exports, and real UI workflows remain future chunks.
+- Playwright is configured but has no runnable e2e specs yet; that remains deferred until real workflows exist.
 
 ## Next Chunk
 
-Chunk Four - Hard Gates.
+Chunk Five - Route Candidate Generation.

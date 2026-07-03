@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T12:28:19-06:00
+Last Updated: 2026-07-03T12:47:24-06:00
 Status: active
-Status Updated: 2026-07-03T12:28:19-06:00
+Status Updated: 2026-07-03T12:47:24-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -73,7 +73,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk 0 app skeleton | complete | 2026-07-03T11:58:27-06:00 | Technical Lead | Vite/React/TypeScript app shell, placeholder screens, smoke test, and control docs are in place. |
 | Chunk 1 domain schemas | complete | 2026-07-03T12:10:23-06:00 | Technical Lead | Core TypeScript domain types and Zod schemas are implemented and tested. |
 | Chunk 2 default registries | complete | 2026-07-03T12:23:53-06:00 | Technical Lead | Editable default registries and policy seeds validate against schemas without adding routing behavior. |
-| Chunk 3 hard gates | active next | 2026-07-03T12:23:53-06:00 | Technical Lead | Use schemas and default registries to block unsafe or impossible route candidates before scoring exists. |
+| Chunk Four hard gates | complete | 2026-07-03T12:47:24-06:00 | Technical Lead | Deterministic hard gates now return allowed model/source IDs, structured blocked items, warnings, and human approval requirements. |
+| Chunk Five route candidate generation | active next | 2026-07-03T12:47:24-06:00 | Technical Lead | Use hard-gate output to generate lean, balanced, and premium route candidates without scoring them. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -388,8 +389,8 @@ These chunks are intentionally detailed before implementation so later coding st
 
 ## Chunk Four - Hard Gates
 
-Status: planned next
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: complete
+Status Updated: 2026-07-03T12:47:24-06:00
 
 Completion target: Task complete
 
@@ -444,14 +445,28 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Highly restricted tasks block all non-local model/tool options and preserve manual human review as the safe fallback.
-- [ ] Requested sources with permission level `0` are excluded and reported as blocked.
-- [ ] Sources that do not allow the task sensitivity class are blocked with clear reason strings.
-- [ ] Tasks requiring current facts or citations produce a warning unless a research-capable model/tool and an allowed research source are available.
-- [ ] Public-facing, regulated, highly restricted, high-quality, or critical tasks require a human approval warning.
-- [ ] Gate output is deterministic and stable for repeated identical inputs.
-- [ ] Gate functions are pure and receive all inputs explicitly.
-- [ ] Tests cover allowed, warning, and blocked outcomes.
+- [x] Highly restricted tasks block all non-local model/tool options and preserve manual human review as the safe fallback.
+- [x] Requested sources with permission level `0` are excluded and reported as blocked.
+- [x] Sources that do not allow the task sensitivity class are blocked with clear reason strings.
+- [x] Tasks requiring current facts or citations produce a warning unless a research-capable model/tool and an allowed research source are available.
+- [x] Public-facing, regulated, highly restricted, high-quality, or critical tasks require a human approval warning.
+- [x] Gate output is deterministic and stable for repeated identical inputs.
+- [x] Gate functions are pure and receive all inputs explicitly.
+- [x] Tests cover allowed, warning, and blocked outcomes.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm run test -- hardGates`
+- `npm run test`
+- `npm run build`
+
+Implementation notes:
+
+- Added `evaluateHardGates` as a pure domain function with explicit task and model inputs.
+- Hard-gate output includes allowed model IDs, allowed source IDs, structured blocked model/source details, typed warnings, and a human approval flag.
+- Blocked sources are limited to requested sources that the gate rejects; unrequested sources are ignored rather than surfaced as route blockers.
+- No schema changes were needed, and no scoring, candidate generation, persistence, exports, UI forms, external calls, source search, or provider connections were added.
 
 Test expectations:
 
@@ -478,7 +493,7 @@ Hard gate module and tests can be reverted before candidate generation depends o
 
 Stop condition:
 
-Stop when hard gates return typed warnings and blocked-route details with passing unit tests. Do not continue into candidate generation in the same chunk.
+Reached. Hard gates return typed warnings and blocked details with passing unit tests. Candidate generation was not started.
 
 Handoff note:
 
@@ -486,8 +501,8 @@ Next chunk should use hard-gate output to generate lean, balanced, and premium r
 
 ## Chunk Five - Route Candidate Generation
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: planned next
+Status Updated: 2026-07-03T12:47:24-06:00
 
 Completion target: Task complete
 
@@ -1643,8 +1658,12 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T12:23:53-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after tightening test helper typing. |
 | 2026-07-03T12:28:19-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before expanding remaining build chunks. |
 | 2026-07-03T12:28:19-06:00 | pathway planning expansion | passed | Chunks Four through Sixteen were expanded with detailed objectives, boundaries, acceptance criteria, tests, rollback paths, stop conditions, and handoffs. |
+| 2026-07-03T12:43:29-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Chunk Four hard-gate implementation. |
+| 2026-07-03T12:47:24-06:00 | `npm run test -- hardGates` | passed | Hard-gate suite passed: 1 file, 11 tests. |
+| 2026-07-03T12:47:24-06:00 | `npm run test` | passed | Full unit suite passed after Chunk Four. |
+| 2026-07-03T12:47:24-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after tightening table fixture typing. |
 
 ## Next Handoff
 
-Resume from Chunk Four only: implement hard gates using the validated schemas, default registries, and the detailed Chunk Four work packet above. Do not add scoring, persistence, exports, UI forms, or external calls in that chunk.
+Resume from Chunk Five only: generate lean, balanced, and premium route candidates from task intake, default registries, policy defaults, and hard-gate output. Do not add weighted scoring, route card generation, prompt packages, persistence, exports, UI forms, external calls, or provider connections in that chunk.
 
