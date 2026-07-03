@@ -1,19 +1,19 @@
-# 2026-07-03T11:58:27-06:00 - Implementation Status
+# 2026-07-03T12:10:23-06:00 - Implementation Status
 
-Last Updated: 2026-07-03T11:58:27-06:00
-Status: chunk-one-complete
-Status Updated: 2026-07-03T11:58:27-06:00
+Last Updated: 2026-07-03T12:10:23-06:00
+Status: chunk-two-complete
+Status Updated: 2026-07-03T12:10:23-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-Chunk One - App Skeleton And Control Docs.
+Chunk Two - Domain Types And Runtime Schemas.
 
 Completion target: Task complete.
 
 ## Scope
 
-Create the Vite, React, and TypeScript skeleton for the local-first AI Task Router. This chunk is limited to placeholder screens, setup scripts, smoke testing, and control docs.
+Implement the core TypeScript domain model and Zod runtime schemas for models, source permissions, task intake, route options, route steps, prompt packages, route cards, and route log entries.
 
 ## Product Boundary
 
@@ -21,12 +21,13 @@ The app recommends routes only. It does not call external AI APIs, connect to ex
 
 ## Evidence
 
-- `npm install` completed and generated `package-lock.json`.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- `npm install zod` completed and updated `package-lock.json`.
 - `npm audit --audit-level=moderate` passed with 0 vulnerabilities.
-- `npm run test` passed with 1 smoke test.
-- `npm run build` passed after adding the Vite CSS import declaration.
-- Manual local start check returned HTTP 200 and found `AI Task Router` in the page content.
+- `npm run test -- domainSchemas` passed with 1 test file and 6 tests.
+- `npm run test` passed with 2 test files and 7 tests.
+- `npm run build` passed after typed test fixtures were tightened.
 
 ## Next Chunk
 
-Chunk Two - Domain Types And Runtime Schemas.
+Chunk Three - Default Registries And Policy Seeds.

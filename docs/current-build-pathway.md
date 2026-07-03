@@ -1,8 +1,8 @@
-# 2026-07-03T12:01:44-06:00 - Current Build Pathway
+# 2026-07-03T12:10:23-06:00 - Current Build Pathway
 
-Last Updated: 2026-07-03T11:35:41-06:00
+Last Updated: 2026-07-03T12:10:23-06:00
 Status: active
-Status Updated: 2026-07-03T12:01:44-06:00
+Status Updated: 2026-07-03T12:10:23-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -67,7 +67,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 |------|--------|-----------|-------|-------|
 | Charter lock | complete | 2026-07-03T11:35:41-06:00 | Technical Lead | Repo identity, product boundary, product brief, and detailed chunk rule are aligned. |
 | Chunk 0 app skeleton | complete | 2026-07-03T11:58:27-06:00 | Technical Lead | Vite/React/TypeScript app shell, placeholder screens, smoke test, and control docs are in place. |
-| Chunk 1 domain schemas | active next | 2026-07-03T11:58:27-06:00 | Technical Lead | Implement core types and Zod schemas after the skeleton exists. |
+| Chunk 1 domain schemas | complete | 2026-07-03T12:10:23-06:00 | Technical Lead | Core TypeScript domain types and Zod schemas are implemented and tested. |
+| Chunk 2 default registries | active next | 2026-07-03T12:10:23-06:00 | Technical Lead | Create editable seed data for models, source permissions, policies, and task templates. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -242,8 +243,8 @@ Next chunk should implement TypeScript domain types and Zod schemas from the pro
 
 ## Chunk Two - Domain Types And Runtime Schemas
 
-Status: planned
-Status Updated: 2026-07-03T11:49:34-06:00
+Status: complete
+Status Updated: 2026-07-03T12:10:23-06:00
 
 Completion target: Task complete
 
@@ -272,13 +273,20 @@ Non-goals:
 
 Acceptance criteria:
 
-- [ ] Permission level accepts only `0 | 1 | 2 | 3 | 4`.
-- [ ] Sensitivity class accepts only the product-defined values.
-- [ ] Task intake schema validates a representative valid task.
-- [ ] Task intake schema rejects invalid sensitivity and invalid permission references.
-- [ ] Route card schema validates a representative route card.
-- [ ] Route option, route step, prompt step, and route log entry schemas are covered.
-- [ ] Types infer cleanly from schemas or schemas are aligned with explicit interfaces.
+- [x] Permission level accepts only `0 | 1 | 2 | 3 | 4`.
+- [x] Sensitivity class accepts only the product-defined values.
+- [x] Task intake schema validates a representative valid task.
+- [x] Task intake schema rejects invalid sensitivity and invalid permission references.
+- [x] Route card schema validates a representative route card.
+- [x] Route option, route step, prompt step, and route log entry schemas are covered.
+- [x] Types infer cleanly from schemas or schemas are aligned with explicit interfaces.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm audit --audit-level=moderate`
+- `npm run test -- domainSchemas`
+- `npm run build`
 
 Test expectations:
 
@@ -295,7 +303,11 @@ Schema-only changes can be reverted before routing logic depends on them.
 
 Stop condition:
 
-Stop when schemas and tests pass. Do not add seed registries in this chunk.
+Reached. Schemas and tests pass. Seed registries were not added in this chunk.
+
+Handoff note:
+
+Next chunk should create default registries and policy seeds that validate against the schemas without adding routing behavior.
 
 ## Chunk Three - Default Registries And Policy Seeds
 
@@ -384,8 +396,13 @@ These will be expanded with the same level of detail before execution:
 | 2026-07-03T11:58:27-06:00 | `npm run test` | passed | Vitest smoke test passed: 1 file, 1 test. |
 | 2026-07-03T11:58:27-06:00 | `npm run build` | passed | First build exposed missing CSS import declaration; passed after adding `src/vite-env.d.ts`; final script uses `tsc --noEmit` to avoid generated config artifacts. |
 | 2026-07-03T11:58:27-06:00 | manual local app start check | passed | Vite returned HTTP 200 at `http://127.0.0.1:5173` and page content contained `AI Task Router`. |
+| 2026-07-03T12:07:56-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Chunk Two schema work. |
+| 2026-07-03T12:10:23-06:00 | `npm audit --audit-level=moderate` | passed | Found 0 vulnerabilities after adding Zod. |
+| 2026-07-03T12:10:23-06:00 | `npm run test -- domainSchemas` | passed | Domain schema suite passed: 1 file, 6 tests. |
+| 2026-07-03T12:10:23-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after tightening typed test fixtures. |
+| 2026-07-03T12:12:50-06:00 | `npm run test`; `npm run build`; `bash scripts/governance-preflight.sh` | passed | Full suite passed: 2 files, 7 tests; production build passed; governance check passed with 0 warnings. |
 
 ## Next Handoff
 
-Resume from Chunk Two only: implement TypeScript domain types and Zod schemas from the product brief. Do not add seed registries, routing behavior, persistence, exports, or external calls in that chunk.
+Resume from Chunk Three only: create editable default registries and policy seeds that validate against the Chunk Two schemas. Do not add hard gates, scoring, persistence, exports, UI forms, or external calls in that chunk.
 
