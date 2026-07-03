@@ -1,8 +1,8 @@
-# 2026-07-03T15:19:08-06:00 - Decision Log
+# 2026-07-03T17:19:32-06:00 - Decision Log
 
-Last Updated: 2026-07-03T15:19:08-06:00
+Last Updated: 2026-07-03T17:19:32-06:00
 Status: active
-Status Updated: 2026-07-03T15:19:08-06:00
+Status Updated: 2026-07-03T17:19:32-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -25,3 +25,4 @@ Owner: Technical Lead
 | 2026-07-03T14:44:17-06:00 | Apply the least-resource tie-breaker only when top route scores are within the ambiguity threshold. | Least-resource is a useful safety posture for equal or close scores, but it should not override a clearly stronger score under balanced or quality-first policies. | Recommendation selection first identifies the top score, then uses least-resource ordering only for candidates within the close-score threshold. |
 | 2026-07-03T14:56:22-06:00 | Keep route-card generation dependent on a supplied prompt-package boundary object instead of generating prompt content in Chunk Seven. | Chunk Seven must assemble valid route cards while the real deterministic prompt package generator remains a separate Chunk Eight responsibility. | `generateRouteCard` validates that the supplied prompt package belongs to the task, preserves the placeholder boundary, and avoids prompt generation, persistence, exports, provider calls, or execution workflows. |
 | 2026-07-03T15:19:08-06:00 | Generate prompt packages as pure local manual-use instructions, not as execution, clipboard, export, or provider-send behavior. | Chunk Eight needs useful, detailed prompts while preserving the recommendation-only MVP boundary and keeping prompt generation testable without side effects. | `generatePromptPackage` receives all inputs explicitly, filters usable source refs through hard gates, validates the `PromptPackage`, and leaves persistence, export, clipboard, UI, provider calls, telemetry, and execution workflows to future reviewed chunks only if approved. |
+| 2026-07-03T17:19:32-06:00 | Add Dexie for browser-local IndexedDB persistence and fake-indexeddb for unit tests. | Chunk Nine selected IndexedDB for local persistence; Dexie keeps the browser storage boundary small and testable, while fake-indexeddb gives deterministic Vitest coverage without a browser or external service. `npm audit --audit-level=moderate` found 0 vulnerabilities after install. | The MVP now has a versioned local store dependency before UI depends on it. Rollback is removing `src/storage/localStore.ts`, the storage tests, and the two packages before later chunks build on the storage API. |

@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T15:19:08-06:00
+Last Updated: 2026-07-03T17:19:32-06:00
 Status: active
-Status Updated: 2026-07-03T15:19:08-06:00
+Status Updated: 2026-07-03T17:19:32-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -78,7 +78,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Six scoring engine | complete | 2026-07-03T14:47:01-06:00 | Technical Lead | Generated route candidates now score against selected policy weights, task preferences, model capability fit, source fit, sensitivity fit, speed, and warnings. |
 | Chunk Seven route card generator | complete | 2026-07-03T15:00:18-06:00 | Technical Lead | Route cards now assemble from task intake, hard gates, scored candidates, blocked routes, warnings, and supplied prompt-package placeholders. |
 | Chunk Eight prompt package generator | complete | 2026-07-03T15:19:08-06:00 | Technical Lead | Deterministic local prompt packages now assemble from selected route steps, task context, allowed source IDs, route warnings, and approval requirements. |
-| Chunk Nine local persistence | active next | 2026-07-03T15:19:08-06:00 | Technical Lead | Add browser-local persistence for editable configuration and route records without cloud sync, auth, external APIs, or provider credentials. |
+| Chunk Nine local persistence | complete | 2026-07-03T17:19:32-06:00 | Technical Lead | Dexie/IndexedDB local store now persists and validates editable configuration, route cards, prompt packages, route logs, and feedback-ready records. |
+| Chunk Ten export/import functions | active next | 2026-07-03T17:19:32-06:00 | Technical Lead | Add schema-validated local export/import utilities without cloud sync, provider connections, account linking, or external services. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -946,8 +947,8 @@ Next chunk should add local persistence for user inventory, source permissions, 
 
 ## Chunk Nine - Local Persistence
 
-Status: active next
-Status Updated: 2026-07-03T15:19:08-06:00
+Status: complete
+Status Updated: 2026-07-03T17:19:32-06:00
 
 Completion target: Integration complete
 
@@ -999,13 +1000,13 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Adds Dexie only if it remains the selected IndexedDB dependency after dependency/audit check.
-- [ ] Defines versioned local tables for inventories, sources, policy settings, route cards, prompt packages, route logs, and feedback-ready records.
-- [ ] Seeds defaults only when no local user configuration exists.
-- [ ] Validates loaded records against schemas before use.
-- [ ] Surfaces validation failures as recoverable local errors.
-- [ ] Provides clear reset/reseed functions for development and future UI.
-- [ ] Includes tests for seed, save, load, update, validation failure, and reset behavior.
+- [x] Adds Dexie only if it remains the selected IndexedDB dependency after dependency/audit check.
+- [x] Defines versioned local tables for inventories, sources, policy settings, route cards, prompt packages, route logs, and feedback-ready records.
+- [x] Seeds defaults only when no local user configuration exists.
+- [x] Validates loaded records against schemas before use.
+- [x] Surfaces validation failures as recoverable local errors.
+- [x] Provides clear reset/reseed functions for development and future UI.
+- [x] Includes tests for seed, save, load, update, validation failure, and reset behavior.
 
 Test expectations:
 
@@ -1014,6 +1015,24 @@ Test expectations:
 - `npm audit --audit-level=moderate`
 - `npm run test -- storage`
 - `npm run build`
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm install dexie && npm install --save-dev fake-indexeddb`
+- `npm audit --audit-level=moderate`
+- `npm run test -- storage`
+- `npm run test`
+- `npm run build`
+- `git diff --check`
+
+Implementation notes:
+
+- Added `src/storage/localStore.ts` with a versioned Dexie database and domain-named tables for model inventory, source permissions, policy settings, route cards, prompt packages, and feedback-ready route log entries.
+- Added default configuration seeding that runs only when no local configuration exists, plus explicit reset and reseed functions for development and future UI.
+- Loaded and saved records are validated through existing Zod schemas; corrupt stored data surfaces as recoverable local validation errors without logging payloads.
+- Route-card saves also persist the attached prompt package so future UI can read either artifact shape.
+- Added `fake-indexeddb` only as a test dependency so IndexedDB behavior remains deterministic in Vitest.
 
 UX/product finish expectations:
 
@@ -1035,7 +1054,7 @@ Dexie and storage modules can be reverted before UI depends on them. If a schema
 
 Stop condition:
 
-Stop when local storage APIs pass tests and build. Do not implement import/export or UI screens in this chunk.
+Reached. Local storage APIs pass targeted storage tests, the full unit suite, governance preflight, audit, build, and whitespace checks. Import/export and UI screens were not implemented.
 
 Handoff note:
 
@@ -1758,7 +1777,11 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T15:18:50-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after adding the prompt package generator. |
 | 2026-07-03T15:18:58-06:00 | `npm run test` | passed | Full unit suite passed: 8 files, 51 tests. |
 | 2026-07-03T15:19:08-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final Chunk Eight close-out checks passed with 0 governance warnings and no whitespace errors. |
+| 2026-07-03T17:13:33-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Chunk Nine local persistence work; work timestamp captured. |
+| 2026-07-03T17:19:32-06:00 | `npm install dexie && npm install --save-dev fake-indexeddb`; `npm audit --audit-level=moderate` | passed | Added Dexie for local IndexedDB persistence and fake-indexeddb for tests; audit found 0 vulnerabilities. |
+| 2026-07-03T17:19:32-06:00 | `npm run test -- storage` | passed | Storage local store suite passed: 1 file, 7 tests covering seed, no-overwrite seed, save/load/update/reset, reseed, validation failure, and missing feedback target. |
+| 2026-07-03T17:19:32-06:00 | `npm run test`; `npm run build`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Full unit suite passed: 9 files, 58 tests; TypeScript and Vite production build passed; governance check passed with 0 warnings; whitespace check only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Nine only: add browser-local persistence for user inventory, source permissions, policy settings, route cards, prompt packages, route logs, and feedback. Do not add cloud sync, auth, accounts, remote databases, import/export, provider credentials, external API calls, UI forms beyond any test-only harness, telemetry, or execution workflows.
+Resume from Chunk Ten only: add explicit local export/import utilities for configuration, route cards, prompt packages, and route logs using the existing schemas and local storage data shapes. Do not add cloud sync, auth, accounts, provider credentials, external API calls, external destinations, automatic uploads, UI screens, telemetry, or execution workflows.
