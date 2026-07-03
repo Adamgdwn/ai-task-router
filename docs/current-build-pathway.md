@@ -1,8 +1,8 @@
-# 2026-07-03T11:51:11-06:00 - Current Build Pathway
+# 2026-07-03T11:58:27-06:00 - Current Build Pathway
 
 Last Updated: 2026-07-03T11:35:41-06:00
 Status: active
-Status Updated: 2026-07-03T11:51:11-06:00
+Status Updated: 2026-07-03T11:58:27-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -62,8 +62,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Step | Status | Timestamp | Owner | Notes |
 |------|--------|-----------|-------|-------|
 | Charter lock | complete | 2026-07-03T11:35:41-06:00 | Technical Lead | Repo identity, product boundary, product brief, and detailed chunk rule are aligned. |
-| Chunk 0 app skeleton | active next | 2026-07-03T11:35:41-06:00 | Technical Lead | Initialize Vite/React/TypeScript with placeholder screens and tests only. |
-| Chunk 1 domain schemas | planned | 2026-07-03T11:35:41-06:00 | Technical Lead | Implement core types and Zod schemas after the skeleton exists. |
+| Chunk 0 app skeleton | complete | 2026-07-03T11:58:27-06:00 | Technical Lead | Vite/React/TypeScript app shell, placeholder screens, smoke test, and control docs are in place. |
+| Chunk 1 domain schemas | active next | 2026-07-03T11:58:27-06:00 | Technical Lead | Implement core types and Zod schemas after the skeleton exists. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -132,8 +132,8 @@ Proceed to Chunk One when the owner is ready to scaffold the app.
 
 ## Chunk One - App Skeleton And Control Docs
 
-Status: planned
-Status Updated: 2026-07-03T11:49:34-06:00
+Status: complete
+Status Updated: 2026-07-03T11:58:27-06:00
 
 Completion target: Task complete
 
@@ -187,13 +187,21 @@ Product boundary reminders:
 
 Acceptance criteria:
 
-- [ ] App starts locally with the documented command.
-- [ ] Placeholder screens exist for welcome, tool inventory, source permissions, policy settings, task intake, route results, route card, prompt package, route log, and reference.
-- [ ] Placeholder UI clearly states the no-execution/no-external-API boundary.
-- [ ] Test command runs and passes with at least one smoke test.
-- [ ] README includes install/run/test instructions.
-- [ ] `IMPLEMENTATION_STATUS.md` records Chunk One complete and Chunk Two next.
-- [ ] `SESSION_STATE.md` records files changed, commands run, and known gaps.
+- [x] App starts locally with the documented command.
+- [x] Placeholder screens exist for welcome, tool inventory, source permissions, policy settings, task intake, route results, route card, prompt package, route log, and reference.
+- [x] Placeholder UI clearly states the no-execution/no-external-API boundary.
+- [x] Test command runs and passes with at least one smoke test.
+- [x] README includes install/run/test instructions.
+- [x] `IMPLEMENTATION_STATUS.md` records Chunk One complete and Chunk Two next.
+- [x] `SESSION_STATE.md` records files changed, commands run, and known gaps.
+
+Validation:
+
+- `npm install`
+- `npm audit --audit-level=moderate`
+- `npm run test`
+- `npm run build`
+- manual local app start check at `http://127.0.0.1:5173`
 
 Test expectations:
 
@@ -222,7 +230,7 @@ Revert scaffold files if the selected stack changes before routing logic is adde
 
 Stop condition:
 
-Stop after the skeleton runs and placeholder screens validate. Do not continue into domain schemas in the same chunk.
+Reached. The skeleton runs and placeholder screens validate. Do not continue into domain schemas in the same chunk.
 
 Handoff note:
 
@@ -366,8 +374,14 @@ These will be expanded with the same level of detail before execution:
 | 2026-07-03T11:49:34-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Git initialization. |
 | 2026-07-03T11:51:11-06:00 | `git init -b main`; `git commit`; `gh repo create ai-task-router --public --push` | passed | Created public repository `Adamgdwn/ai-task-router` and pushed `main`. |
 | 2026-07-03T11:51:11-06:00 | `gh repo view Adamgdwn/ai-task-router --json nameWithOwner,visibility,url,defaultBranchRef` | passed | Confirmed visibility `PUBLIC`, default branch `main`. |
+| 2026-07-03T11:54:20-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before scaffold work. |
+| 2026-07-03T11:58:27-06:00 | `npm install` | passed | Generated `package-lock.json`; initial older Vitest line reported audit findings, then dependencies were upgraded. |
+| 2026-07-03T11:58:27-06:00 | `npm audit --audit-level=moderate` | passed | Found 0 vulnerabilities after toolchain upgrade. |
+| 2026-07-03T11:58:27-06:00 | `npm run test` | passed | Vitest smoke test passed: 1 file, 1 test. |
+| 2026-07-03T11:58:27-06:00 | `npm run build` | passed | First build exposed missing CSS import declaration; passed after adding `src/vite-env.d.ts`; final script uses `tsc --noEmit` to avoid generated config artifacts. |
+| 2026-07-03T11:58:27-06:00 | manual local app start check | passed | Vite returned HTTP 200 at `http://127.0.0.1:5173` and page content contained `AI Task Router`. |
 
 ## Next Handoff
 
-Resume from Chunk One only: initialize the Vite/React/TypeScript skeleton with placeholder screens and smoke tests. Source control is now available, so future chunk close-out should commit and push normally.
+Resume from Chunk Two only: implement TypeScript domain types and Zod schemas from the product brief. Do not add seed registries, routing behavior, persistence, exports, or external calls in that chunk.
 

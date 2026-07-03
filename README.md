@@ -1,4 +1,4 @@
-# 2026-07-03T11:51:11-06:00 - AI Task Router
+# 2026-07-03T11:58:27-06:00 - AI Task Router
 
 AI Task Router is a local-first decision helper for choosing the smallest adequate AI route for a task.
 
@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: charter/planning baseline
-Status Updated: 2026-07-03T11:51:11-06:00
+Status: app skeleton complete
+Status Updated: 2026-07-03T11:58:27-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -52,7 +52,35 @@ Product brief: [docs/PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md)
 
 ## Local Setup
 
-The app scaffold has not been created yet. Chunk 0 will add package scripts and local setup commands.
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the local app:
+
+```bash
+npm run dev
+```
+
+Run the smoke test:
+
+```bash
+npm run test
+```
+
+Build the app:
+
+```bash
+npm run build
+```
+
+Manual local start check used for Chunk One:
+
+```bash
+npm run dev -- --host 127.0.0.1 --port 5173
+```
 
 ## Project Classification
 
