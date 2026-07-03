@@ -1,4 +1,4 @@
-# 2026-07-03T11:49:34-06:00 - AI Task Router
+# 2026-07-03T11:51:11-06:00 - AI Task Router
 
 AI Task Router is a local-first decision helper for choosing the smallest adequate AI route for a task.
 
@@ -30,7 +30,9 @@ The MVP must not:
 ## Current Status
 
 Status: charter/planning baseline
-Status Updated: 2026-07-03T11:49:34-06:00
+Status Updated: 2026-07-03T11:51:11-06:00
+
+Public repository: https://github.com/Adamgdwn/ai-task-router
 
 Current target: v0.2 Local Web App MVP
 

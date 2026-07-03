@@ -1,8 +1,8 @@
-# 2026-07-03T11:49:34-06:00 - Current Build Pathway
+# 2026-07-03T11:51:11-06:00 - Current Build Pathway
 
 Last Updated: 2026-07-03T11:35:41-06:00
 Status: active
-Status Updated: 2026-07-03T11:49:34-06:00
+Status Updated: 2026-07-03T11:51:11-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -64,6 +64,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Charter lock | complete | 2026-07-03T11:35:41-06:00 | Technical Lead | Repo identity, product boundary, product brief, and detailed chunk rule are aligned. |
 | Chunk 0 app skeleton | active next | 2026-07-03T11:35:41-06:00 | Technical Lead | Initialize Vite/React/TypeScript with placeholder screens and tests only. |
 | Chunk 1 domain schemas | planned | 2026-07-03T11:35:41-06:00 | Technical Lead | Implement core types and Zod schemas after the skeleton exists. |
+| Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
 
@@ -121,7 +122,7 @@ Reached. The charter baseline is clear and the next implementation chunk is defi
 
 Known gaps:
 
-- This folder was not a Git repository at session start, so chunk close-out commit/push cannot run until source control is initialized or the folder is moved into an existing repo.
+- This folder was not a Git repository at session start. Source control was initialized on 2026-07-03 and pushed to the public GitHub repository.
 - The app skeleton does not exist yet.
 - Uploaded Mermaid diagrams are not yet copied into repo-local docs.
 
@@ -361,8 +362,12 @@ These will be expanded with the same level of detail before execution:
 | 2026-07-03T11:35:41-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings after charter alignment. |
 | 2026-07-03T11:35:41-06:00 | `git status --short` | failed | Still not a Git repository, so commit/push close-out cannot run yet. |
 | 2026-07-03T11:35:41-06:00 | `rg -n "agent-picker|AI agent with tools|Agent Picker|autonomous" ...` | passed with expected boundary mentions | No stale Agent Picker identity found in updated planning files; remaining autonomous references state the no-agent boundary. |
+| 2026-07-03T11:49:34-06:00 | document-control timestamp pass | passed | Markdown H1 titles and real `Status:` metadata lines received timestamp fields. |
+| 2026-07-03T11:49:34-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Git initialization. |
+| 2026-07-03T11:51:11-06:00 | `git init -b main`; `git commit`; `gh repo create ai-task-router --public --push` | passed | Created public repository `Adamgdwn/ai-task-router` and pushed `main`. |
+| 2026-07-03T11:51:11-06:00 | `gh repo view Adamgdwn/ai-task-router --json nameWithOwner,visibility,url,defaultBranchRef` | passed | Confirmed visibility `PUBLIC`, default branch `main`. |
 
 ## Next Handoff
 
-Resume from Chunk One only: initialize the Vite/React/TypeScript skeleton with placeholder screens and smoke tests. Before chunk close-out, initialize or attach source control so the required commit/push step can run.
+Resume from Chunk One only: initialize the Vite/React/TypeScript skeleton with placeholder screens and smoke tests. Source control is now available, so future chunk close-out should commit and push normally.
 
