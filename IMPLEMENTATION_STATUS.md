@@ -1,50 +1,49 @@
-# 2026-07-03T17:19:32-06:00 - Implementation Status
+# 2026-07-03T17:44:01-06:00 - Implementation Status
 
-Last Updated: 2026-07-03T17:19:32-06:00
-Status: chunk-nine-complete
-Status Updated: 2026-07-03T17:19:32-06:00
+Last Updated: 2026-07-03T17:44:01-06:00
+Status: chunk-ten-complete
+Status Updated: 2026-07-03T17:44:01-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-Chunk Nine - Local Persistence.
+Chunk Ten - Export And Import Functions.
 
-Completion target: Integration complete.
+Completion target: Task complete.
 
 ## Scope
 
-Add browser-local persistence for editable configuration and route records using Dexie/IndexedDB.
+Add pure local export/import utilities for configuration, route records, route-card Markdown, prompt-package Markdown, and route-log CSV without UI, cloud sync, account linking, provider calls, uploads, telemetry, or execution workflows.
 
-The completed local store provides:
+The completed utility layer provides:
 
-- versioned IndexedDB tables for model inventory, source permissions, policy settings, route cards, prompt packages, and route log entries
-- default configuration seeding only when no local user configuration exists
-- explicit configuration reseed and full local reset functions
-- schema validation for loaded and saved records before use
-- recoverable local validation and missing-record errors for future UI display
-- route-card persistence that also saves the attached prompt package
-- feedback-ready route log updates for outcome, rating, and notes
-- deterministic IndexedDB tests with `fake-indexeddb`
+- centralized `exportImportSchemaVersion = 1`
+- schema-versioned JSON envelopes for configuration, route records, and full local bundles
+- import parsing that rejects malformed JSON, unexpected artifact kinds, unsupported schema versions, schema-invalid records, duplicate IDs, and inconsistent route-record references before returning data
+- readable route card and prompt package Markdown serializers
+- route-log CSV serialization with stable headers and CSV escaping
+- recoverable `ExportImportValidationError` objects suitable for future UI display
+- unit tests covering round trips, Markdown content, CSV headers and escaping, invalid imports, and hidden telemetry/secret-field checks
 
 ## Product Boundary
 
-The app stores local browser records only. It does not add cloud sync, auth, accounts, remote databases, provider credentials, external API calls, import/export UI, telemetry, local file indexing, or execution workflows.
+Exports are local artifacts only. Imports return validated data only; they do not mutate IndexedDB or bypass future user confirmation. No UI, file download/upload action, provider connection, external API call, cloud backup, telemetry, credential storage, or execution workflow was added.
 
 ## Evidence
 
 - `bash scripts/governance-preflight.sh` passed with 0 warnings.
-- `npm install dexie && npm install --save-dev fake-indexeddb` passed.
 - `npm audit --audit-level=moderate` found 0 vulnerabilities.
-- `npm run test -- storage` passed with 1 test file and 7 tests.
-- `npm run test` passed with 9 test files and 58 tests.
+- `npm run test -- exportImport` passed with 1 test file and 7 tests.
+- `npm run test` passed with 10 test files and 65 tests.
 - `npm run build` passed.
-- `git diff --check` passed, with only normal Windows LF-to-CRLF notices.
+- `git diff --check` passed.
 
 ## Known Gaps
 
-- Export/import utilities, UI workflows, route-log feedback UI, and end-to-end workflow tests remain future chunks.
+- Setup UI screens, task intake/results UI, route-log feedback UI, and end-to-end workflow tests remain future chunks.
+- Export/import UI is intentionally not implemented yet.
 - Playwright is configured but has no runnable e2e specs yet; that remains deferred until real workflows exist.
 
 ## Next Chunk
 
-Chunk Ten - Export And Import Functions.
+Chunk Eleven - Setup UI Screens.

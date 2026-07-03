@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T17:19:32-06:00
+Last Updated: 2026-07-03T17:44:01-06:00
 Status: active
-Status Updated: 2026-07-03T17:19:32-06:00
+Status Updated: 2026-07-03T17:44:01-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -79,7 +79,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Seven route card generator | complete | 2026-07-03T15:00:18-06:00 | Technical Lead | Route cards now assemble from task intake, hard gates, scored candidates, blocked routes, warnings, and supplied prompt-package placeholders. |
 | Chunk Eight prompt package generator | complete | 2026-07-03T15:19:08-06:00 | Technical Lead | Deterministic local prompt packages now assemble from selected route steps, task context, allowed source IDs, route warnings, and approval requirements. |
 | Chunk Nine local persistence | complete | 2026-07-03T17:19:32-06:00 | Technical Lead | Dexie/IndexedDB local store now persists and validates editable configuration, route cards, prompt packages, route logs, and feedback-ready records. |
-| Chunk Ten export/import functions | active next | 2026-07-03T17:19:32-06:00 | Technical Lead | Add schema-validated local export/import utilities without cloud sync, provider connections, account linking, or external services. |
+| Chunk Ten export/import functions | complete | 2026-07-03T17:44:01-06:00 | Technical Lead | Schema-versioned local JSON import/export utilities, route-card and prompt-package Markdown, route-log CSV, and recoverable import validation are implemented and tested. |
+| Chunk Eleven setup UI screens | active next | 2026-07-03T17:44:01-06:00 | Technical Lead | Build setup UI screens for tool inventory, source permissions, and policy defaults using local storage and existing domain modules. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -1062,8 +1063,8 @@ Next chunk should add explicit export/import utilities using the same schemas an
 
 ## Chunk Ten - Export And Import Functions
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: complete
+Status Updated: 2026-07-03T17:44:01-06:00
 
 Completion target: Task complete
 
@@ -1111,13 +1112,30 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Serializes a route card and prompt package to readable Markdown.
-- [ ] Serializes configuration and route records to schema-versioned JSON.
-- [ ] Serializes route logs to CSV-friendly text with stable headers.
-- [ ] Validates imported JSON before returning usable data.
-- [ ] Rejects malformed, unknown-version, or schema-invalid imports with actionable errors.
-- [ ] Does not include secrets or hidden telemetry fields in any export format.
-- [ ] Tests cover round-trip JSON, Markdown content, CSV headers, and invalid imports.
+- [x] Serializes a route card and prompt package to readable Markdown.
+- [x] Serializes configuration and route records to schema-versioned JSON.
+- [x] Serializes route logs to CSV-friendly text with stable headers.
+- [x] Validates imported JSON before returning usable data.
+- [x] Rejects malformed, unknown-version, or schema-invalid imports with actionable errors.
+- [x] Does not include secrets or hidden telemetry fields in any export format.
+- [x] Tests cover round-trip JSON, Markdown content, CSV headers, and invalid imports.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm audit --audit-level=moderate`
+- `npm run test -- exportImport`
+- `npm run test`
+- `npm run build`
+- `git diff --check`
+
+Implementation notes:
+
+- Added `src/domain/export/exportImport.ts` as a pure local utility boundary with centralized `exportImportSchemaVersion = 1`.
+- JSON export artifacts now include strict `configuration`, `route-records`, and `local-bundle` envelopes with product, artifact kind, schema version, and exported timestamp metadata.
+- Import parsing validates JSON, artifact kind, schema version, schema shape, duplicate IDs, and route-record consistency before returning usable local data.
+- Markdown serializers emit readable route card and prompt package documents without adding UI, clipboard, download, upload, or provider-send behavior.
+- Route-log CSV uses stable headers exported as `routeLogCsvHeaders` and escapes comma/quote/newline text for CSV-friendly output.
 
 Test expectations:
 
@@ -1143,7 +1161,7 @@ Export/import utilities can be reverted before UI calls them. Keep schema-versio
 
 Stop condition:
 
-Stop when utility tests pass and no UI has been added. Do not implement setup screens in this chunk.
+Reached. Utility tests pass, full checks pass, and no UI or setup screens were added in this chunk.
 
 Handoff note:
 
@@ -1151,8 +1169,8 @@ Next chunk should build setup UI screens for tool inventory, source permissions,
 
 ## Chunk Eleven - Setup UI Screens
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: active next
+Status Updated: 2026-07-03T17:44:01-06:00
 
 Completion target: Integration complete
 
@@ -1781,7 +1799,10 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T17:19:32-06:00 | `npm install dexie && npm install --save-dev fake-indexeddb`; `npm audit --audit-level=moderate` | passed | Added Dexie for local IndexedDB persistence and fake-indexeddb for tests; audit found 0 vulnerabilities. |
 | 2026-07-03T17:19:32-06:00 | `npm run test -- storage` | passed | Storage local store suite passed: 1 file, 7 tests covering seed, no-overwrite seed, save/load/update/reset, reseed, validation failure, and missing feedback target. |
 | 2026-07-03T17:19:32-06:00 | `npm run test`; `npm run build`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Full unit suite passed: 9 files, 58 tests; TypeScript and Vite production build passed; governance check passed with 0 warnings; whitespace check only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-03T17:37:53-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Chunk Ten export/import work; work timestamp captured. |
+| 2026-07-03T17:44:01-06:00 | `npm run test -- exportImport` | passed | Export/import utility suite passed: 1 file, 7 tests covering schema-versioned JSON round trips, Markdown output, CSV headers and escaping, invalid JSON, unknown versions, schema-invalid imports, unexpected artifact kinds, and no hidden telemetry fields. |
+| 2026-07-03T17:44:01-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Full unit suite passed: 10 files, 65 tests; TypeScript and Vite production build passed; audit found 0 vulnerabilities; governance check passed with 0 warnings; whitespace check passed. |
 
 ## Next Handoff
 
-Resume from Chunk Ten only: add explicit local export/import utilities for configuration, route cards, prompt packages, and route logs using the existing schemas and local storage data shapes. Do not add cloud sync, auth, accounts, provider credentials, external API calls, external destinations, automatic uploads, UI screens, telemetry, or execution workflows.
+Resume from Chunk Eleven only: build setup UI screens for tool inventory, source permissions, and policy defaults using local storage and existing domain modules. Do not implement best-stack recommendation logic, provider account connections, credential storage, task intake/results screens, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, or execution workflows.
