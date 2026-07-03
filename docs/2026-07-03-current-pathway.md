@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T14:47:01-06:00
+Last Updated: 2026-07-03T15:00:18-06:00
 Status: active
-Status Updated: 2026-07-03T14:47:01-06:00
+Status Updated: 2026-07-03T15:00:18-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -76,7 +76,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Four hard gates | complete | 2026-07-03T12:47:24-06:00 | Technical Lead | Deterministic hard gates now return allowed model/source IDs, structured blocked items, warnings, and human approval requirements. |
 | Chunk Five route candidate generation | complete | 2026-07-03T14:08:55-06:00 | Technical Lead | Score-free route candidates now generate lean, balanced, and premium plans or explicit unavailable states from hard-gate output. |
 | Chunk Six scoring engine | complete | 2026-07-03T14:47:01-06:00 | Technical Lead | Generated route candidates now score against selected policy weights, task preferences, model capability fit, source fit, sensitivity fit, speed, and warnings. |
-| Chunk Seven route card generator | active next | 2026-07-03T14:47:01-06:00 | Technical Lead | Assemble route cards from task intake, hard gates, scored candidates, blocked routes, warnings, and prompt-package placeholders. |
+| Chunk Seven route card generator | complete | 2026-07-03T15:00:18-06:00 | Technical Lead | Route cards now assemble from task intake, hard gates, scored candidates, blocked routes, warnings, and supplied prompt-package placeholders. |
+| Chunk Eight prompt package generator | active next | 2026-07-03T15:00:18-06:00 | Technical Lead | Replace placeholder prompt-package handling with a deterministic local prompt-package generator without sending prompts or calling providers. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -730,8 +731,8 @@ Next chunk should assemble route cards from task intake, scored candidates, bloc
 
 ## Chunk Seven - Route Card Generator
 
-Status: active next
-Status Updated: 2026-07-03T14:47:01-06:00
+Status: complete
+Status Updated: 2026-07-03T15:00:18-06:00
 
 Completion target: Task complete
 
@@ -780,13 +781,21 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Creates a `RouteCard` that validates against `routeCardSchema`.
-- [ ] Includes all generated route options that are safe to show.
-- [ ] Sets `recommendedOptionId` to the selected scored candidate.
-- [ ] Preserves hard-gate warnings and blocked route reasons.
-- [ ] Includes task sensitivity class and task ID.
-- [ ] Uses deterministic IDs where practical and a testable timestamp injection point.
-- [ ] Handles no-safe-route cases with a clear manual-review route card.
+- [x] Creates a `RouteCard` that validates against `routeCardSchema`.
+- [x] Includes all generated route options that are safe to show.
+- [x] Sets `recommendedOptionId` to the selected scored candidate.
+- [x] Preserves hard-gate warnings and blocked route reasons.
+- [x] Includes task sensitivity class and task ID.
+- [x] Uses deterministic IDs where practical and a testable timestamp injection point.
+- [x] Handles no-safe-route cases with a clear manual-review route card.
+
+Implementation notes:
+
+- Added `generateRouteCard` as a pure domain function with explicit task, hard-gate, scoring, prompt-package, and `createdAt` inputs.
+- The prompt package is supplied as a boundary object and must belong to the same task; real prompt-package generation remains Chunk Eight.
+- Scored candidates map into strict `RouteOption` objects, keeping route scores and option warnings/cautions available for later UI display.
+- Hard-gate blocked models, hard-gate blocked sources, and unavailable route candidates map into visible `blockedRoutes`.
+- If no safe scored candidate exists, the card gets a deterministic manual-review fallback route so the route card still validates and clearly explains the hold state.
 
 Test expectations:
 
@@ -794,6 +803,14 @@ Test expectations:
 - `npm run test -- routeCardGenerator`
 - `npm run build`
 - Tests should validate route cards with `routeCardSchema.safeParse`.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- `npm run test -- routeCardGenerator` passed with 1 test file and 5 tests.
+- `npm run test` passed with 7 test files and 44 tests.
+- `npm run build` passed.
+- `git diff --check` passed with only normal Windows LF-to-CRLF notices.
 
 UX/product finish expectations:
 
@@ -812,16 +829,16 @@ Route card generator can be reverted without affecting hard gates, candidate gen
 
 Stop condition:
 
-Stop when route-card objects validate and tests pass. Do not build the prompt package generator or UI in this chunk.
+Reached. Route-card objects validate, the focused route-card generator tests pass, and the prompt package generator/UI were not built.
 
 Handoff note:
 
-Next chunk should replace placeholder prompt package handling with a real deterministic prompt package generator.
+Next chunk should replace placeholder prompt package handling with a real deterministic prompt package generator. Do not call AI models, send prompts, persist prompt packages, export files, or add provider integrations in that chunk.
 
 ## Chunk Eight - Prompt Package Generator
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: active next
+Status Updated: 2026-07-03T15:00:18-06:00
 
 Completion target: Task complete
 
@@ -1713,8 +1730,12 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T14:44:17-06:00 | `npm run test` | passed | Full unit suite passed: 6 files, 39 tests. |
 | 2026-07-03T14:44:17-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after adding the scoring engine. |
 | 2026-07-03T14:47:01-06:00 | `bash scripts/governance-preflight.sh`; `npm run test -- routeScoring`; `npm run test`; `npm run build`; `git diff --check` | passed | Final Chunk Six close-out checks passed; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-03T14:52:37-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Chunk Seven route-card generator work. |
+| 2026-07-03T14:56:22-06:00 | `npm run test -- routeCardGenerator` | passed | Route card generator suite passed: 1 file, 5 tests covering schema-valid cards, blocked routes, warnings, human approval visibility, manual fallback, and prompt-package task mismatch. |
+| 2026-07-03T14:56:22-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after adding the route-card generator. |
+| 2026-07-03T15:00:18-06:00 | `bash scripts/governance-preflight.sh`; `npm run test -- routeCardGenerator`; `npm run test`; `npm run build`; `git diff --check` | passed | Final Chunk Seven close-out checks passed; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Seven only: assemble route cards from task intake, hard gates, scored candidates, blocked routes, warnings, and prompt-package placeholders. Create route-card objects that validate against `routeCardSchema`. Do not build the real prompt package generator, persistence, exports, UI, external calls, provider connections, telemetry, or any execution workflow in that chunk.
+Resume from Chunk Eight only: replace the route-card placeholder prompt-package input with a deterministic local prompt-package generator. Use the selected route, task intake, source permissions, warnings, and approval requirements to produce schema-valid prompt packages. Do not call AI models, send prompts to tools, add clipboard automation unless explicitly approved, persist or export prompt packages, build UI, connect providers, add telemetry, or create any execution workflow.
 
