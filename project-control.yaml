@@ -1,0 +1,71 @@
+project_name: ai-task-router
+project_type: web-app
+use_case:
+  primary: AI decision-support web application
+  secondary:
+    - local-first productivity tool
+    - routing and policy assistant
+  notes: This project is not an autonomous AI agent. The MVP recommends routes, generates prompt packages, logs decisions locally, and exports artifacts without executing external actions.
+risk_tier: low
+governance_level: 1
+repository_model: single-repo
+owner:
+  name: Project Owner
+  role: owner
+technical_lead:
+  name: hybrid session
+  role: technical-lead
+status: active
+environments:
+  - dev
+data_classification:
+  handles_sensitive_data: false
+  handles_money: false
+  notes: MVP stores user-entered task metadata and local route logs only. It must not store credentials or call external AI/provider APIs.
+controls:
+  required_docs:
+    - README.md
+    - START_HERE.md
+    - docs/context-map.md
+    - docs/architecture.md
+    - docs/current-build-pathway.md
+    - docs/manual.md
+    - docs/roadmap.md
+    - docs/policy/durable-development-engineering-policy.md
+    - docs/standards/README.md
+    - docs/standards/engineering-governance-by-use-case.md
+    - docs/standards/ship-ready-engineering-standard.md
+    - docs/deployment-guide.md
+    - docs/runbook.md
+    - docs/CHANGELOG.md
+    - docs/risks/risk-register.md
+  machine_enforcement:
+    - required-file-check
+    - lint
+    - tests
+    - secret-scan
+exceptions: []
+agent_controls:
+  applicable: false
+  autonomy_level: none
+  model_registry: []
+  prompt_registry: []
+agentic_coding:
+  principle: "The repository remembers. Agents rent context."
+  default_budget: medium
+  always_loaded_files:
+    - AGENTS.md
+  conditional_loaded_files:
+    START_HERE.md: material work, unclear scope, handoffs, or active-plan changes
+    docs/context-map.md: unclear context routing or broader task scoping
+    project-control.yaml: risk, governance level, controls, or required docs
+  context_limits:
+    agents_md_target_kb: 6
+    claude_md_target_kb: 6
+    task_packet_target_words: 1200
+    handoff_target_words: 900
+  subagent_policy:
+    max_parallel_readers: 3
+    max_parallel_editors: 1
+    require_summary_only: true
+    no_overlapping_file_edits: true
