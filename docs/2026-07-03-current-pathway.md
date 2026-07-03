@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T12:19:18-06:00
+Last Updated: 2026-07-03T12:23:53-06:00
 Status: active
-Status Updated: 2026-07-03T12:19:18-06:00
+Status Updated: 2026-07-03T12:23:53-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -72,7 +72,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Charter lock | complete | 2026-07-03T11:35:41-06:00 | Technical Lead | Repo identity, product boundary, product brief, and detailed chunk rule are aligned. |
 | Chunk 0 app skeleton | complete | 2026-07-03T11:58:27-06:00 | Technical Lead | Vite/React/TypeScript app shell, placeholder screens, smoke test, and control docs are in place. |
 | Chunk 1 domain schemas | complete | 2026-07-03T12:10:23-06:00 | Technical Lead | Core TypeScript domain types and Zod schemas are implemented and tested. |
-| Chunk 2 default registries | active next | 2026-07-03T12:10:23-06:00 | Technical Lead | Create editable seed data for models, source permissions, policies, and task templates. |
+| Chunk 2 default registries | complete | 2026-07-03T12:23:53-06:00 | Technical Lead | Editable default registries and policy seeds validate against schemas without adding routing behavior. |
+| Chunk 3 hard gates | active next | 2026-07-03T12:23:53-06:00 | Technical Lead | Use schemas and default registries to block unsafe or impossible route candidates before scoring exists. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -315,8 +316,8 @@ Next chunk should create default registries and policy seeds that validate again
 
 ## Chunk Three - Default Registries And Policy Seeds
 
-Status: planned
-Status Updated: 2026-07-03T11:49:34-06:00
+Status: complete
+Status Updated: 2026-07-03T12:23:53-06:00
 
 Completion target: Task complete
 
@@ -346,13 +347,27 @@ Non-goals:
 
 Acceptance criteria:
 
-- [ ] Default models load and validate against schemas.
-- [ ] Each enabled model has capability scores.
-- [ ] Human/manual review is always available as a final approval route step.
-- [ ] Default source registry includes local files, uploaded docs, web, GitHub, M365/SharePoint, Google Drive, personal memory, and other.
-- [ ] Default policies include least-resource, balanced, and quality-first scoring weights.
-- [ ] Tests reject duplicate IDs.
-- [ ] Tests confirm no seed item requires credentials or external calls.
+- [x] Default models load and validate against schemas.
+- [x] Each enabled model has capability scores.
+- [x] Human/manual review is always available as a final approval route step.
+- [x] Default source registry includes local files, uploaded docs, web, GitHub, M365/SharePoint, Google Drive, personal memory, and other.
+- [x] Default policies include least-resource, balanced, and quality-first scoring weights.
+- [x] Tests reject duplicate IDs.
+- [x] Tests confirm no seed item requires credentials or external calls.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm audit --audit-level=moderate`
+- `npm run test -- defaultRegistries`
+- `npm run test`
+- `npm run build`
+
+Implementation notes:
+
+- Added minimal policy default and task template schemas so the new seed data validates at the same runtime boundary as the existing domain model.
+- Seed model labels are intentionally generic user-configured placeholders, not claims about permanent provider lineups.
+- External-looking sources such as web, GitHub, Microsoft 365/SharePoint, and Google Drive are reference categories only; the app still does not connect to them.
 
 Test expectations:
 
@@ -361,7 +376,11 @@ Test expectations:
 
 Stop condition:
 
-Stop when all seed data validates and no routing behavior has been implemented.
+Reached. All seed data validates, duplicate IDs are tested, no seed item requires credentials or external calls, and no routing behavior has been implemented.
+
+Handoff note:
+
+Next chunk should implement hard gates using these schemas and defaults. Do not add scoring, persistence, exports, or UI forms in that chunk.
 
 ## Later Planned Chunks
 
@@ -405,8 +424,13 @@ These will be expanded with the same level of detail before execution:
 | 2026-07-03T12:10:23-06:00 | `npm run test -- domainSchemas` | passed | Domain schema suite passed: 1 file, 6 tests. |
 | 2026-07-03T12:10:23-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after tightening typed test fixtures. |
 | 2026-07-03T12:12:50-06:00 | `npm run test`; `npm run build`; `bash scripts/governance-preflight.sh` | passed | Full suite passed: 2 files, 7 tests; production build passed; governance check passed with 0 warnings. |
+| 2026-07-03T12:20:24-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Chunk Three default registry work. |
+| 2026-07-03T12:23:53-06:00 | `npm audit --audit-level=moderate` | passed | Found 0 vulnerabilities during Chunk Three validation. |
+| 2026-07-03T12:23:53-06:00 | `npm run test -- defaultRegistries` | passed | Default registry suite passed: 1 file, 8 tests. |
+| 2026-07-03T12:23:53-06:00 | `npm run test` | passed | Full suite passed: 3 files, 15 tests. |
+| 2026-07-03T12:23:53-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after tightening test helper typing. |
 
 ## Next Handoff
 
-Resume from Chunk Three only: create editable default registries and policy seeds that validate against the Chunk Two schemas. Do not add hard gates, scoring, persistence, exports, UI forms, or external calls in that chunk.
+Resume from Chunk Four only: implement hard gates using the validated schemas and default registries. Do not add scoring, persistence, exports, UI forms, or external calls in that chunk.
 

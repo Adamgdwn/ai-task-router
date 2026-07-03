@@ -44,6 +44,8 @@ export const routeStrategies = ["lean", "balanced", "premium"] as const;
 
 export const routeStepKinds = ["model", "research", "artifact", "human review", "manual"] as const;
 
+export const policyDefaultIds = ["least-resource", "balanced", "quality-first"] as const;
+
 export const permissionLevelSchema = z.union([
   z.literal(0),
   z.literal(1),
@@ -78,6 +80,8 @@ export const modelInventoryItemSchema = z
     localOnly: z.boolean(),
     capabilityScores: capabilityScoresSchema,
     maxPermissionLevel: permissionLevelSchema,
+    requiresCredentials: z.boolean().optional(),
+    requiresExternalCall: z.boolean().optional(),
     notes: z.string().trim().optional(),
   })
   .strict();
@@ -98,7 +102,54 @@ export const sourcePermissionSchema = z
     ]),
     permissionLevel: permissionLevelSchema,
     sensitivityAllowed: z.array(sensitivityClassSchema).min(1),
+    requiresCredentials: z.boolean().optional(),
+    requiresExternalCall: z.boolean().optional(),
     notes: z.string().trim().optional(),
+  })
+  .strict();
+
+export const scoringWeightsSchema = z
+  .object({
+    cost: z.number().min(0).max(1),
+    energy: z.number().min(0).max(1),
+    quality: z.number().min(0).max(1),
+    speed: z.number().min(0).max(1),
+    sourceFit: z.number().min(0).max(1),
+    sensitivityFit: z.number().min(0).max(1),
+  })
+  .strict();
+
+export const policyDefaultSchema = z
+  .object({
+    id: z.enum(policyDefaultIds),
+    label: nonEmptyTextSchema,
+    strategy: z.enum(routeStrategies),
+    description: nonEmptyTextSchema,
+    scoringWeights: scoringWeightsSchema,
+    requiresCredentials: z.boolean().optional(),
+    requiresExternalCall: z.boolean().optional(),
+  })
+  .strict();
+
+export const taskTemplateSchema = z
+  .object({
+    id: nonEmptyIdSchema,
+    label: nonEmptyTextSchema,
+    description: nonEmptyTextSchema,
+    dmaicPhase: z.enum(dmaicPhases),
+    lifecycleStage: z.enum(lifecycleStages),
+    knowledgeWorkType: z.enum(knowledgeWorkTypes),
+    outputType: z.enum(outputTypes),
+    qualityBar: z.enum(qualityBars),
+    defaultSensitivityClass: sensitivityClassSchema,
+    requiresCurrentFacts: z.boolean(),
+    requiresCitations: z.boolean(),
+    publicFacing: z.boolean(),
+    costPreference: z.enum(["minimize", "balanced", "quality first"]),
+    energyPreference: z.enum(["minimize", "balanced", "quality first"]),
+    suggestedSourceIds: z.array(nonEmptyIdSchema),
+    requiresCredentials: z.boolean().optional(),
+    requiresExternalCall: z.boolean().optional(),
   })
   .strict();
 
