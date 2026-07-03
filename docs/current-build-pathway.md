@@ -1,8 +1,8 @@
-# 2026-07-03T12:10:23-06:00 - Current Build Pathway
+# 2026-07-03T12:15:46-06:00 - Current Build Pathway
 
-Last Updated: 2026-07-03T12:10:23-06:00
+Last Updated: 2026-07-03T12:15:46-06:00
 Status: active
-Status Updated: 2026-07-03T12:10:23-06:00
+Status Updated: 2026-07-03T12:15:46-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -16,6 +16,10 @@ The current product source is [docs/PRODUCT_BRIEF.md](PRODUCT_BRIEF.md), derived
 ## Future Distribution Note
 
 Reference only as of 2026-07-03T12:01:44-06:00: the likely future public hosting home is `oldskoolai.com`, with links planned from `guidedailabs.com` and `guidedaijourney.com`. Exact paths, placement, launch timing, deployment approach, and cross-site linking strategy are not decided yet.
+
+## Future Product Planning Note
+
+Reference only as of 2026-07-03T12:15:46-06:00: in addition to asking users which free agents they use and which paid subscriptions they already have, the app should later ask whether the user wants a proposed best AI stack. That future recommendation mode should cover a free stack and multiple paid tiers, while keeping the MVP boundary intact: recommendations only, no subscriptions purchased, no provider accounts connected, and no external action taken by the app.
 
 ## Required Work Pattern
 
