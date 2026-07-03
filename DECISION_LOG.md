@@ -1,8 +1,8 @@
-# 2026-07-03T12:23:53-06:00 - Decision Log
+# 2026-07-03T12:28:19-06:00 - Decision Log
 
-Last Updated: 2026-07-03T12:23:53-06:00
+Last Updated: 2026-07-03T12:28:19-06:00
 Status: active
-Status Updated: 2026-07-03T12:23:53-06:00
+Status Updated: 2026-07-03T12:28:19-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -17,3 +17,4 @@ Owner: Technical Lead
 | 2026-07-03T12:10:23-06:00 | Add Zod as the schema validation dependency in Chunk Two. | The product brief names Zod as the planned runtime schema tool, and this chunk explicitly requires Zod schemas. | Dependency audit remains clean; rollback is removing schema files and the Zod package before downstream chunks depend on them. |
 | 2026-07-03T12:23:53-06:00 | Add minimal schemas for policy defaults and task templates during Chunk Three. | The chunk requires policy and task template seeds to validate against runtime schemas, but Chunk Two had not yet defined those shapes. | The schema boundary now covers all default registries without adding routing, scoring, persistence, UI forms, or external calls. |
 | 2026-07-03T12:23:53-06:00 | Keep default model seeds generic and user-configured rather than provider-specific. | Provider lineups change, and the MVP should recommend routes based on user inventory without claiming permanent model catalogs. | Future UI can ask users which free agents and paid subscriptions they have, while defaults remain editable and non-connector based. |
+| 2026-07-03T12:28:19-06:00 | Expand remaining build chunks before implementing more code. | The owner requested consistent, detailed future chunks so later implementation does not drift or lose focus. | Chunks Four through Sixteen now have objectives, boundaries, acceptance criteria, tests, security notes, rollback paths, stop conditions, and handoffs before execution. |
