@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T15:00:18-06:00
+Last Updated: 2026-07-03T15:19:08-06:00
 Status: active
-Status Updated: 2026-07-03T15:00:18-06:00
+Status Updated: 2026-07-03T15:19:08-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -77,7 +77,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Five route candidate generation | complete | 2026-07-03T14:08:55-06:00 | Technical Lead | Score-free route candidates now generate lean, balanced, and premium plans or explicit unavailable states from hard-gate output. |
 | Chunk Six scoring engine | complete | 2026-07-03T14:47:01-06:00 | Technical Lead | Generated route candidates now score against selected policy weights, task preferences, model capability fit, source fit, sensitivity fit, speed, and warnings. |
 | Chunk Seven route card generator | complete | 2026-07-03T15:00:18-06:00 | Technical Lead | Route cards now assemble from task intake, hard gates, scored candidates, blocked routes, warnings, and supplied prompt-package placeholders. |
-| Chunk Eight prompt package generator | active next | 2026-07-03T15:00:18-06:00 | Technical Lead | Replace placeholder prompt-package handling with a deterministic local prompt-package generator without sending prompts or calling providers. |
+| Chunk Eight prompt package generator | complete | 2026-07-03T15:19:08-06:00 | Technical Lead | Deterministic local prompt packages now assemble from selected route steps, task context, allowed source IDs, route warnings, and approval requirements. |
+| Chunk Nine local persistence | active next | 2026-07-03T15:19:08-06:00 | Technical Lead | Add browser-local persistence for editable configuration and route records without cloud sync, auth, external APIs, or provider credentials. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -837,8 +838,8 @@ Next chunk should replace placeholder prompt package handling with a real determ
 
 ## Chunk Eight - Prompt Package Generator
 
-Status: active next
-Status Updated: 2026-07-03T15:00:18-06:00
+Status: complete
+Status Updated: 2026-07-03T15:19:08-06:00
 
 Completion target: Task complete
 
@@ -886,13 +887,31 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Creates a `PromptPackage` that validates against `promptPackageSchema`.
-- [ ] Includes one or more prompt steps aligned with the recommended route steps.
-- [ ] Includes explicit expected output for each prompt step.
-- [ ] Marks steps requiring human approval where public-facing risk, regulated, highly restricted, critical, or high-quality work requires it.
-- [ ] Includes source-use reminders for allowed sources and excludes blocked sources.
-- [ ] Includes current-facts and citation reminders when the task requires them.
-- [ ] Avoids provider-specific prompt claims unless they come from user-configured inventory labels.
+- [x] Creates a `PromptPackage` that validates against `promptPackageSchema`.
+- [x] Includes one or more prompt steps aligned with the recommended route steps.
+- [x] Includes explicit expected output for each prompt step.
+- [x] Marks steps requiring human approval where public-facing risk, regulated, highly restricted, critical, or high-quality work requires it.
+- [x] Includes source-use reminders for allowed sources and excludes blocked sources.
+- [x] Includes current-facts and citation reminders when the task requires them.
+- [x] Avoids provider-specific prompt claims unless they come from user-configured inventory labels.
+
+Implementation notes:
+
+- Added `generatePromptPackage` as a pure domain function with explicit `task`, `selectedRoute`, `hardGateResult`, and optional prompt-package ID inputs.
+- Generated prompt packages validate through `promptPackageSchema.parse`.
+- Prompt step IDs are deterministic and route-step aligned by default.
+- Instructions are deliberately detailed enough for manual pasting while repeating that the app does not send prompts, call tools, connect accounts, approve output, or record outside-tool results.
+- Source-use reminders include only hard-gate-allowed source IDs and omit blocked, no-access, undeclared, and sensitivity-disallowed sources from usable prompt refs.
+- Human approval is represented either from a human review route step or from an added final approval step when hard gates require approval and the selected route lacks that step.
+- Route-card integration is verified with generated prompt packages rather than placeholder prompt-package stubs.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- `npm run test -- promptPackageGenerator` passed with 1 test file and 7 tests.
+- `npm run test` passed with 8 test files and 51 tests.
+- `npm run build` passed.
+- `git diff --check` passed.
 
 Test expectations:
 
@@ -919,7 +938,7 @@ Prompt package generation can be reverted independently. Route card generation s
 
 Stop condition:
 
-Stop when prompt packages validate and can be attached to route cards in tests. Do not add persistence or UI in this chunk.
+Reached. Prompt packages validate and can be attached to route cards in tests. Persistence, exports, clipboard actions, provider calls, and UI were not added.
 
 Handoff note:
 
@@ -927,8 +946,8 @@ Next chunk should add local persistence for user inventory, source permissions, 
 
 ## Chunk Nine - Local Persistence
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: active next
+Status Updated: 2026-07-03T15:19:08-06:00
 
 Completion target: Integration complete
 
@@ -1734,8 +1753,12 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T14:56:22-06:00 | `npm run test -- routeCardGenerator` | passed | Route card generator suite passed: 1 file, 5 tests covering schema-valid cards, blocked routes, warnings, human approval visibility, manual fallback, and prompt-package task mismatch. |
 | 2026-07-03T14:56:22-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after adding the route-card generator. |
 | 2026-07-03T15:00:18-06:00 | `bash scripts/governance-preflight.sh`; `npm run test -- routeCardGenerator`; `npm run test`; `npm run build`; `git diff --check` | passed | Final Chunk Seven close-out checks passed; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-03T15:13:17-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Chunk Eight prompt-package generator work. |
+| 2026-07-03T15:18:43-06:00 | `npm run test -- promptPackageGenerator` | passed | Prompt package generator suite passed: 1 file, 7 tests covering selected routes, current facts, citations, blocked sources, human approval, no-source routes, highly restricted fallback, and route-card attachment. |
+| 2026-07-03T15:18:50-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after adding the prompt package generator. |
+| 2026-07-03T15:18:58-06:00 | `npm run test` | passed | Full unit suite passed: 8 files, 51 tests. |
+| 2026-07-03T15:19:08-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final Chunk Eight close-out checks passed with 0 governance warnings and no whitespace errors. |
 
 ## Next Handoff
 
-Resume from Chunk Eight only: replace the route-card placeholder prompt-package input with a deterministic local prompt-package generator. Use the selected route, task intake, source permissions, warnings, and approval requirements to produce schema-valid prompt packages. Do not call AI models, send prompts to tools, add clipboard automation unless explicitly approved, persist or export prompt packages, build UI, connect providers, add telemetry, or create any execution workflow.
-
+Resume from Chunk Nine only: add browser-local persistence for user inventory, source permissions, policy settings, route cards, prompt packages, route logs, and feedback. Do not add cloud sync, auth, accounts, remote databases, import/export, provider credentials, external API calls, UI forms beyond any test-only harness, telemetry, or execution workflows.

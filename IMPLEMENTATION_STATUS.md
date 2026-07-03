@@ -1,52 +1,51 @@
-# 2026-07-03T15:00:18-06:00 - Implementation Status
+# 2026-07-03T15:19:08-06:00 - Implementation Status
 
-Last Updated: 2026-07-03T15:00:18-06:00
-Status: chunk-seven-complete
-Status Updated: 2026-07-03T15:00:18-06:00
+Last Updated: 2026-07-03T15:19:08-06:00
+Status: chunk-eight-complete
+Status Updated: 2026-07-03T15:19:08-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-Chunk Seven - Route Card Generator.
+Chunk Eight - Prompt Package Generator.
 
 Completion target: Task complete.
 
 ## Scope
 
-Generate complete local route-card artifacts from task intake, hard gates, scored route candidates, blocked routes, warnings, and a supplied prompt-package boundary object.
+Generate schema-valid local prompt packages from task intake, the selected route, hard-gate warnings, allowed source IDs, and approval requirements.
 
-The completed route-card generator returns:
+The completed prompt-package generator returns:
 
-- schema-valid `RouteCard` objects
-- deterministic route-card IDs by default
-- injected `createdAt` timestamps for testability
-- strict `RouteOption` records mapped from scored candidates
-- recommended option IDs aligned with the selected scored candidate
-- hard-gate blocked models and sources preserved as blocked routes
-- unavailable route candidates preserved as blocked routes
-- card-level hard-gate warnings, including human approval warnings
-- manual-review fallback route cards when no safe generated route exists
-- prompt-package task matching without generating real prompt packages yet
+- schema-valid `PromptPackage` objects
+- deterministic prompt-package and prompt-step IDs by default
+- ordered prompt steps aligned with selected route steps
+- task title, description, work type, output type, quality bar, and sensitivity reminders in each usable prompt
+- source-use reminders limited to hard-gate-allowed source IDs
+- current-facts and citation reminders when the task requires them
+- explicit expected output for every prompt step
+- human approval steps when the route or hard gates require approval
+- route-card integration without placeholder prompt-package stubs
 
 ## Product Boundary
 
-The app recommends routes only. It does not call external AI APIs, connect to external systems, execute actions, store credentials, or include telemetry.
+The app recommends routes and prepares local instructions only. It does not call external AI APIs, send prompts to tools, connect accounts, store credentials, approve output, persist prompt packages, export files, add clipboard automation, or include telemetry.
 
-Route cards are local decision artifacts, not executed routes. The prompt package is supplied at the boundary in this chunk; the app still does not generate final prompts, persist records, export files, or send anything to external tools.
+Prompt packages are manual-use guidance for the user to copy into chosen tools outside the app.
 
 ## Evidence
 
 - `bash scripts/governance-preflight.sh` passed with 0 warnings.
-- `npm run test -- routeCardGenerator` passed with 1 test file and 5 tests.
-- `npm run test` passed with 7 test files and 44 tests.
+- `npm run test -- promptPackageGenerator` passed with 1 test file and 7 tests.
+- `npm run test` passed with 8 test files and 51 tests.
 - `npm run build` passed.
-- `git diff --check` passed with only normal Windows LF-to-CRLF notices.
+- `git diff --check` passed.
 
 ## Known Gaps
 
-- Prompt package generation, persistence, exports, and real UI workflows remain future chunks.
+- Local persistence, exports, UI workflows, route-log feedback, and end-to-end workflow tests remain future chunks.
 - Playwright is configured but has no runnable e2e specs yet; that remains deferred until real workflows exist.
 
 ## Next Chunk
 
-Chunk Eight - Prompt Package Generator.
+Chunk Nine - Local Persistence.
