@@ -24,7 +24,7 @@ Current priorities:
 
 ## Current Build Pathway
 
-Default live build route: [docs/current-build-pathway.md](docs/current-build-pathway.md).
+Default live build route: [docs/2026-07-03-current-pathway.md](docs/2026-07-03-current-pathway.md).
 
 If this project later promotes a different active plan, name it here and route
 agents there instead of rereading archived pathway history.

@@ -15,7 +15,7 @@ using the same operating rules.
 
 ## Governance
 - For ordinary scoped work, start with `git status --short`, this file, and the specific files or errors relevant to the task.
-- Read `START_HERE.md` and follow the active plan named there, defaulting to `docs/current-build-pathway.md`, for material implementation work, unclear scope, handoffs, or changes that affect the active plan.
+- Read `START_HERE.md` and follow the active plan named there, defaulting to `docs/2026-07-03-current-pathway.md`, for material implementation work, unclear scope, handoffs, or changes that affect the active plan.
 - Use `docs/context-map.md` when deciding which docs, standards, or source areas to load.
 - Use `docs/standards/README.md` as the standards map for coding and release work.
 - Review `docs/standards/engineering-governance-by-use-case.md`, confirm the work matches `use_case.primary`, and do not override the selected `risk_tier` or `governance_level`.

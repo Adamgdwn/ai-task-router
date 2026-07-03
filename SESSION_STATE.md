@@ -7,11 +7,11 @@ Owner: Technical Lead
 
 ## Current Objective
 
-Execute Chunk Two from `docs/current-build-pathway.md`: implement core domain types and Zod runtime schemas.
+Execute Chunk Two from `docs/2026-07-03-current-pathway.md`: implement core domain types and Zod runtime schemas.
 
 ## Files Changed In This Session
 
-- `docs/current-build-pathway.md`
+- `docs/2026-07-03-current-pathway.md`
 - `package.json`
 - `package-lock.json`
 - `src/domain/schemas.ts`

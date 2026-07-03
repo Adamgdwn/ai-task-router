@@ -30,7 +30,7 @@ Primary builder: **hybrid**
 ## First session checklist
 
 - [ ] Read `START_HERE.md`
-- [ ] Review `docs/current-build-pathway.md`
+- [ ] Review `docs/2026-07-03-current-pathway.md`
 - [ ] Review `docs/standards/README.md`
 - [ ] Review `docs/standards/engineering-governance-by-use-case.md`
 - [ ] Review `docs/policy/durable-development-engineering-policy.md`

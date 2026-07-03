@@ -36,7 +36,7 @@ Public repository: https://github.com/Adamgdwn/ai-task-router
 
 Current target: v0.2 Local Web App MVP
 
-Active plan: [docs/current-build-pathway.md](docs/current-build-pathway.md)
+Active plan: [docs/2026-07-03-current-pathway.md](docs/2026-07-03-current-pathway.md)
 
 Product brief: [docs/PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md)
 
@@ -101,7 +101,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Product brief](docs/PRODUCT_BRIEF.md)
 - [Architecture](docs/architecture.md)
 - [Context map](docs/context-map.md)
-- [Current build pathway](docs/current-build-pathway.md)
+- [Current build pathway](docs/2026-07-03-current-pathway.md)
 - [Manual](docs/manual.md)
 - [Roadmap](docs/roadmap.md)
 - [Durable development policy](docs/policy/durable-development-engineering-policy.md)

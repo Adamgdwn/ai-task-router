@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T12:17:44-06:00
+Last Updated: 2026-07-03T12:19:18-06:00
 Status: active
-Status Updated: 2026-07-03T12:17:44-06:00
+Status Updated: 2026-07-03T12:19:18-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -97,7 +97,7 @@ Allowed files:
 - `README.md`
 - `project-control.yaml`
 - `docs/PRODUCT_BRIEF.md`
-- `docs/current-build-pathway.md`
+- `docs/2026-07-03-current-pathway.md`
 - `docs/architecture.md`
 - `docs/roadmap.md`
 - `START_HERE.md` only if the top-level active plan changes

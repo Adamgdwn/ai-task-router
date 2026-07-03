@@ -74,7 +74,7 @@ At the end of every chunk of work:
 5. Do not auto-compact. Do not skip the commit step without flagging why.
 
 A chunk ends when:
-- the current definition-of-done in `docs/current-build-pathway.md` is met, or
+- the current definition-of-done in `docs/2026-07-03-current-pathway.md` is met, or
 - a stop condition is reached (blocker, repeated failure, scope boundary), or
 - the user signals done.
 
