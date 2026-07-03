@@ -1,49 +1,49 @@
-# 2026-07-03T12:47:24-06:00 - Implementation Status
+# 2026-07-03T14:08:55-06:00 - Implementation Status
 
-Last Updated: 2026-07-03T12:47:24-06:00
-Status: chunk-four-complete
-Status Updated: 2026-07-03T12:47:24-06:00
+Last Updated: 2026-07-03T14:08:55-06:00
+Status: chunk-five-complete
+Status Updated: 2026-07-03T14:08:55-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-Chunk Four - Hard Gates.
+Chunk Five - Route Candidate Generation.
 
 Completion target: Task complete.
 
 ## Scope
 
-Implement deterministic hard gates for task intake, model inventory, and source permissions before route scoring exists.
+Generate lean, balanced, and premium route candidates from task intake, default registries, policy defaults, and hard-gate output before weighted scoring exists.
 
-The completed gate evaluates:
+The completed candidate generator returns:
 
-- requested source access
-- source sensitivity allowances
-- highly restricted routing limits
-- model enabled state
-- model permission limits
-- current-facts and citation support
-- human approval triggers
+- score-free route candidates
+- explicit unavailable strategy states
+- stable route IDs and step IDs
+- lean, balanced, and premium route labels
+- model, research, artifact, manual, and human review steps
+- hard-gate warning messages carried forward
+- candidate-specific final human approval steps when required
 
 ## Product Boundary
 
 The app recommends routes only. It does not call external AI APIs, connect to external systems, execute actions, store credentials, or include telemetry.
 
-Hard gates produce local warnings and blocked details only. They do not search sources, inspect local files, call providers, generate route candidates, score routes, store records, or render UI.
+Route candidates are local plans only. They may tell the user to manually consult a tool or source category, but the app does not search sources, inspect local files, call providers, score routes, store records, export artifacts, or render new UI in this chunk.
 
 ## Evidence
 
 - `bash scripts/governance-preflight.sh` passed with 0 warnings.
-- `npm run test -- hardGates` passed with 1 test file and 11 tests.
-- `npm run test` passed with 4 test files and 26 tests.
+- `npm run test -- routeCandidates` passed with 1 test file and 6 tests.
+- `npm run test` passed with 5 test files and 32 tests.
 - `npm run build` passed.
-- `git diff --check` passed; Git reported only normal Windows CRLF working-copy notices.
+- `git diff --check` passed with no whitespace errors.
 
 ## Known Gaps
 
-- Route candidate generation, scoring, route cards, prompt packages, persistence, exports, and real UI workflows remain future chunks.
+- Scoring, recommended-route selection, route cards, prompt packages, persistence, exports, and real UI workflows remain future chunks.
 - Playwright is configured but has no runnable e2e specs yet; that remains deferred until real workflows exist.
 
 ## Next Chunk
 
-Chunk Five - Route Candidate Generation.
+Chunk Six - Scoring Engine.

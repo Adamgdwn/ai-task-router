@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T12:47:24-06:00
+Last Updated: 2026-07-03T14:08:55-06:00
 Status: active
-Status Updated: 2026-07-03T12:47:24-06:00
+Status Updated: 2026-07-03T14:08:55-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -74,7 +74,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk 1 domain schemas | complete | 2026-07-03T12:10:23-06:00 | Technical Lead | Core TypeScript domain types and Zod schemas are implemented and tested. |
 | Chunk 2 default registries | complete | 2026-07-03T12:23:53-06:00 | Technical Lead | Editable default registries and policy seeds validate against schemas without adding routing behavior. |
 | Chunk Four hard gates | complete | 2026-07-03T12:47:24-06:00 | Technical Lead | Deterministic hard gates now return allowed model/source IDs, structured blocked items, warnings, and human approval requirements. |
-| Chunk Five route candidate generation | active next | 2026-07-03T12:47:24-06:00 | Technical Lead | Use hard-gate output to generate lean, balanced, and premium route candidates without scoring them. |
+| Chunk Five route candidate generation | complete | 2026-07-03T14:08:55-06:00 | Technical Lead | Score-free route candidates now generate lean, balanced, and premium plans or explicit unavailable states from hard-gate output. |
+| Chunk Six scoring engine | active next | 2026-07-03T14:08:55-06:00 | Technical Lead | Score generated candidates with policy weights and select a recommended route without producing route cards yet. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -501,8 +502,8 @@ Next chunk should use hard-gate output to generate lean, balanced, and premium r
 
 ## Chunk Five - Route Candidate Generation
 
-Status: planned next
-Status Updated: 2026-07-03T12:47:24-06:00
+Status: complete
+Status Updated: 2026-07-03T14:08:55-06:00
 
 Completion target: Task complete
 
@@ -554,14 +555,34 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Generates one lean candidate when at least one safe small/manual path exists.
-- [ ] Generates one balanced candidate when a safe mid-tier or synthesis path exists.
-- [ ] Generates one premium candidate when a safe frontier/research/artifact path exists.
-- [ ] Omits or marks unavailable strategies when no safe candidate can be built.
-- [ ] Uses `defaultFinalApprovalRouteStep` where human review is required.
-- [ ] Does not include blocked sources or blocked model options in candidate steps.
-- [ ] Produces stable route IDs and step IDs suitable for tests and later route-card generation.
-- [ ] Candidate summaries explain the route posture without score language.
+- [x] Generates one lean candidate when at least one safe small/manual path exists.
+- [x] Generates one balanced candidate when a safe mid-tier or synthesis path exists.
+- [x] Generates one premium candidate when a safe frontier/research/artifact path exists.
+- [x] Omits or marks unavailable strategies when no safe candidate can be built.
+- [x] Uses `defaultFinalApprovalRouteStep` where human review is required.
+- [x] Does not include blocked sources or blocked model options in candidate steps.
+- [x] Produces stable route IDs and step IDs suitable for tests and later route-card generation.
+- [x] Candidate summaries explain the route posture without score language.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm run test -- routeCandidates`
+- `npm run test`
+- `npm run build`
+- `git diff --check`
+
+Implementation notes:
+
+- Added `generateRouteCandidates` as a pure domain function in `src/domain/routing/candidateGeneration.ts`.
+- Candidate generation returns score-free `candidates` plus explicit `unavailable` strategy states instead of filling route option scores with placeholder numbers.
+- Stable route IDs use `route-{taskId}-{strategy}` and route step IDs use route-specific suffixes such as `-research`, `-synthesis`, `-manual`, `-artifact`, and `-human-approval`.
+- Lean routes prefer a safe small model and fall back to manual human preparation when hard gates remove the lighter model path.
+- Balanced routes require a safe mid-tier or frontier synthesis path.
+- Premium routes require a safe frontier, research, or artifact-capable path and may add artifact packaging when the task output calls for it.
+- Current-facts and citation tasks add a manual research step only when hard gates allow both a web source and a research-capable model/tool.
+- Human approval clones `defaultFinalApprovalRouteStep` with candidate-specific step IDs when hard gates require approval.
+- No scoring, recommendation selection, route cards, prompt packages, persistence, exports, UI, source search, provider calls, connectors, credentials, or telemetry were added.
 
 Test expectations:
 
@@ -588,7 +609,7 @@ Candidate generation can be reverted independently if scoring reveals the wrong 
 
 Stop condition:
 
-Stop when candidates are generated and validated by unit tests. Do not add scoring or recommendation selection in this chunk.
+Reached. Candidates are generated and validated by unit tests. Scoring and recommendation selection were not added.
 
 Handoff note:
 
@@ -596,8 +617,8 @@ Next chunk should score generated candidates with policy weights and select a re
 
 ## Chunk Six - Scoring Engine
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: active next
+Status Updated: 2026-07-03T14:08:55-06:00
 
 Completion target: Task complete
 
@@ -1662,8 +1683,13 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T12:47:24-06:00 | `npm run test -- hardGates` | passed | Hard-gate suite passed: 1 file, 11 tests. |
 | 2026-07-03T12:47:24-06:00 | `npm run test` | passed | Full unit suite passed after Chunk Four. |
 | 2026-07-03T12:47:24-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after tightening table fixture typing. |
+| 2026-07-03T14:00:37-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Chunk Five route candidate generation. |
+| 2026-07-03T14:08:55-06:00 | `npm run test -- routeCandidates` | passed | Route candidate suite passed: 1 file, 6 tests covering public writing, confidential synthesis, current-facts research, artifact packaging, public-facing draft, and highly restricted fallback. |
+| 2026-07-03T14:08:55-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after tightening permission-level typing. |
+| 2026-07-03T14:08:55-06:00 | `npm run test` | passed | Full unit suite passed: 5 files, 32 tests. |
+| 2026-07-03T14:08:55-06:00 | `git diff --check` | passed | No whitespace errors; Git printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Five only: generate lean, balanced, and premium route candidates from task intake, default registries, policy defaults, and hard-gate output. Do not add weighted scoring, route card generation, prompt packages, persistence, exports, UI forms, external calls, or provider connections in that chunk.
+Resume from Chunk Six only: score generated route candidates using policy weights, task preferences, quality needs, source fit, sensitivity fit, cost, energy, and speed. Select a recommended route with transparent score components. Do not generate route cards, prompt packages, persistence, exports, UI forms, external calls, provider connections, telemetry, or live provider cost lookups in that chunk.
 

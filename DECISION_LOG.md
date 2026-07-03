@@ -1,8 +1,8 @@
-# 2026-07-03T12:47:24-06:00 - Decision Log
+# 2026-07-03T14:08:55-06:00 - Decision Log
 
-Last Updated: 2026-07-03T12:47:24-06:00
+Last Updated: 2026-07-03T14:08:55-06:00
 Status: active
-Status Updated: 2026-07-03T12:47:24-06:00
+Status Updated: 2026-07-03T14:08:55-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -20,3 +20,4 @@ Owner: Technical Lead
 | 2026-07-03T12:28:19-06:00 | Expand remaining build chunks before implementing more code. | The owner requested consistent, detailed future chunks so later implementation does not drift or lose focus. | Chunks Four through Sixteen now have objectives, boundaries, acceptance criteria, tests, security notes, rollback paths, stop conditions, and handoffs before execution. |
 | 2026-07-03T12:47:24-06:00 | Keep hard-gate output as a typed domain result instead of adding new Zod schemas in Chunk Four. | Hard gates are an internal pure calculation boundary right now; route cards, imports, exports, and persistence are not consuming this shape yet. | Candidate generation can use the typed result immediately, and a runtime schema can be added later only if the result becomes persisted or imported/exported. |
 | 2026-07-03T12:47:24-06:00 | Report blocked source details only for requested sources that the gate rejects. | Unrequested sources are not route blockers; showing them as blocked would make later UI noisy and misleading. | Route results can focus on meaningful blocked reasons such as no access and sensitivity mismatch. |
+| 2026-07-03T14:08:55-06:00 | Keep route candidates score-free instead of reusing `RouteOption` with placeholder scores. | Chunk Five must generate route plans before weighted scoring exists; placeholder numeric scores would blur the product boundary and make tests assert fake precision. | Chunk Six can score candidates deliberately and convert or map them into scored route options when recommendation selection is implemented. |
