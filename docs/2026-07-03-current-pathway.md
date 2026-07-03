@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T14:08:55-06:00
+Last Updated: 2026-07-03T14:47:01-06:00
 Status: active
-Status Updated: 2026-07-03T14:08:55-06:00
+Status Updated: 2026-07-03T14:47:01-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -75,7 +75,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk 2 default registries | complete | 2026-07-03T12:23:53-06:00 | Technical Lead | Editable default registries and policy seeds validate against schemas without adding routing behavior. |
 | Chunk Four hard gates | complete | 2026-07-03T12:47:24-06:00 | Technical Lead | Deterministic hard gates now return allowed model/source IDs, structured blocked items, warnings, and human approval requirements. |
 | Chunk Five route candidate generation | complete | 2026-07-03T14:08:55-06:00 | Technical Lead | Score-free route candidates now generate lean, balanced, and premium plans or explicit unavailable states from hard-gate output. |
-| Chunk Six scoring engine | active next | 2026-07-03T14:08:55-06:00 | Technical Lead | Score generated candidates with policy weights and select a recommended route without producing route cards yet. |
+| Chunk Six scoring engine | complete | 2026-07-03T14:47:01-06:00 | Technical Lead | Generated route candidates now score against selected policy weights, task preferences, model capability fit, source fit, sensitivity fit, speed, and warnings. |
+| Chunk Seven route card generator | active next | 2026-07-03T14:47:01-06:00 | Technical Lead | Assemble route cards from task intake, hard gates, scored candidates, blocked routes, warnings, and prompt-package placeholders. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -617,8 +618,8 @@ Next chunk should score generated candidates with policy weights and select a re
 
 ## Chunk Six - Scoring Engine
 
-Status: active next
-Status Updated: 2026-07-03T14:08:55-06:00
+Status: complete
+Status Updated: 2026-07-03T14:47:01-06:00
 
 Completion target: Task complete
 
@@ -668,14 +669,33 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Scores each unblocked candidate on a `0` to `100` scale.
-- [ ] Applies policy default weights for least-resource, balanced, and quality-first modes.
-- [ ] Incorporates task cost and energy preferences.
-- [ ] Incorporates quality bar and knowledge work type fit using model capability scores.
-- [ ] Penalizes routes that carry warnings without hiding those warnings.
-- [ ] Uses least-resource-first tie-breakers when scores are equal or close enough to be ambiguous.
-- [ ] Never recommends a blocked route.
-- [ ] Returns transparent score components for later UI display.
+- [x] Scores each unblocked candidate on a `0` to `100` scale.
+- [x] Applies policy default weights for least-resource, balanced, and quality-first modes.
+- [x] Incorporates task cost and energy preferences.
+- [x] Incorporates quality bar and knowledge work type fit using model capability scores.
+- [x] Penalizes routes that carry warnings without hiding those warnings.
+- [x] Uses least-resource-first tie-breakers when scores are equal or close enough to be ambiguous.
+- [x] Never recommends a blocked route.
+- [x] Returns transparent score components for later UI display.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm run test -- routeScoring`
+- `npm run test`
+- `npm run build`
+
+Implementation notes:
+
+- Added `scoreRouteCandidates` as a pure domain function in `src/domain/routing/scoring.ts`.
+- Scoring accepts task intake, generated route candidates, model inventory, and one selected policy default.
+- Policy weights are normalized before use so the default policy totals do not need to add to exactly `1`.
+- Score components include cost fit, energy fit, quality fit, speed fit, source fit, sensitivity fit, and warning penalty.
+- Cost and energy remain qualitative MVP estimates from candidate posture and task preferences, not live provider billing or energy data.
+- Quality fit uses model capability scores mapped to the task knowledge work type and adjusted by the requested quality bar.
+- Warning messages remain visible on candidates while a capped warning penalty reduces the final score.
+- Recommendation selection never considers unavailable candidates and applies the least-resource tie-breaker only when the top scores are within the ambiguity threshold.
+- No route cards, prompt packages, persistence, exports, UI, provider-specific pricing, live cost lookup, external calls, connectors, credentials, or telemetry were added.
 
 Test expectations:
 
@@ -702,7 +722,7 @@ Scoring can be reverted if the weighting model proves confusing. Candidate gener
 
 Stop condition:
 
-Stop when route candidates can be scored and a recommendation can be selected in unit tests. Do not produce route cards in this chunk.
+Reached. Route candidates can be scored, transparent components are returned, and a recommendation can be selected in unit tests. Route cards were not produced.
 
 Handoff note:
 
@@ -710,8 +730,8 @@ Next chunk should assemble route cards from task intake, scored candidates, bloc
 
 ## Chunk Seven - Route Card Generator
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: active next
+Status Updated: 2026-07-03T14:47:01-06:00
 
 Completion target: Task complete
 
@@ -1688,8 +1708,13 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T14:08:55-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after tightening permission-level typing. |
 | 2026-07-03T14:08:55-06:00 | `npm run test` | passed | Full unit suite passed: 5 files, 32 tests. |
 | 2026-07-03T14:08:55-06:00 | `git diff --check` | passed | No whitespace errors; Git printed normal Windows LF-to-CRLF notices. |
+| 2026-07-03T14:37:52-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings before Chunk Six scoring engine work. |
+| 2026-07-03T14:44:17-06:00 | `npm run test -- routeScoring` | passed | Route scoring suite passed: 1 file, 7 tests covering scoring components, policy shifts, warning penalties, no-candidate states, unavailable strategies, source fit, and tie-breakers. |
+| 2026-07-03T14:44:17-06:00 | `npm run test` | passed | Full unit suite passed: 6 files, 39 tests. |
+| 2026-07-03T14:44:17-06:00 | `npm run build` | passed | TypeScript and Vite production build passed after adding the scoring engine. |
+| 2026-07-03T14:47:01-06:00 | `bash scripts/governance-preflight.sh`; `npm run test -- routeScoring`; `npm run test`; `npm run build`; `git diff --check` | passed | Final Chunk Six close-out checks passed; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Six only: score generated route candidates using policy weights, task preferences, quality needs, source fit, sensitivity fit, cost, energy, and speed. Select a recommended route with transparent score components. Do not generate route cards, prompt packages, persistence, exports, UI forms, external calls, provider connections, telemetry, or live provider cost lookups in that chunk.
+Resume from Chunk Seven only: assemble route cards from task intake, hard gates, scored candidates, blocked routes, warnings, and prompt-package placeholders. Create route-card objects that validate against `routeCardSchema`. Do not build the real prompt package generator, persistence, exports, UI, external calls, provider connections, telemetry, or any execution workflow in that chunk.
 

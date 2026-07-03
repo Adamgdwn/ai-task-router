@@ -1,8 +1,8 @@
-# 2026-07-03T14:08:55-06:00 - Decision Log
+# 2026-07-03T14:44:17-06:00 - Decision Log
 
-Last Updated: 2026-07-03T14:08:55-06:00
+Last Updated: 2026-07-03T14:44:17-06:00
 Status: active
-Status Updated: 2026-07-03T14:08:55-06:00
+Status Updated: 2026-07-03T14:44:17-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -21,3 +21,5 @@ Owner: Technical Lead
 | 2026-07-03T12:47:24-06:00 | Keep hard-gate output as a typed domain result instead of adding new Zod schemas in Chunk Four. | Hard gates are an internal pure calculation boundary right now; route cards, imports, exports, and persistence are not consuming this shape yet. | Candidate generation can use the typed result immediately, and a runtime schema can be added later only if the result becomes persisted or imported/exported. |
 | 2026-07-03T12:47:24-06:00 | Report blocked source details only for requested sources that the gate rejects. | Unrequested sources are not route blockers; showing them as blocked would make later UI noisy and misleading. | Route results can focus on meaningful blocked reasons such as no access and sensitivity mismatch. |
 | 2026-07-03T14:08:55-06:00 | Keep route candidates score-free instead of reusing `RouteOption` with placeholder scores. | Chunk Five must generate route plans before weighted scoring exists; placeholder numeric scores would blur the product boundary and make tests assert fake precision. | Chunk Six can score candidates deliberately and convert or map them into scored route options when recommendation selection is implemented. |
+| 2026-07-03T14:44:17-06:00 | Keep route scoring qualitative, deterministic, and local instead of adding provider-specific pricing or live cost intelligence. | The MVP boundary is recommendation-only and must not depend on stale provider claims, external calls, credentials, telemetry, or live billing data. | Scores use policy weights, task preferences, model capability assumptions, source fit, sensitivity fit, speed, and warning penalties; future provider-specific cost data would need a separate decision. |
+| 2026-07-03T14:44:17-06:00 | Apply the least-resource tie-breaker only when top route scores are within the ambiguity threshold. | Least-resource is a useful safety posture for equal or close scores, but it should not override a clearly stronger score under balanced or quality-first policies. | Recommendation selection first identifies the top score, then uses least-resource ordering only for candidates within the close-score threshold. |
