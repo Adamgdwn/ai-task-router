@@ -176,6 +176,81 @@ describe("App", () => {
     expect(screen.getByText("Web is set to no access and cannot be used in a route.")).toBeInTheDocument();
     expect(screen.getByText(/Current facts or citations need an allowed research source/)).toBeInTheDocument();
   });
+
+  it("shows an empty local artifact state before route cards are saved", async () => {
+    const user = userEvent.setup();
+
+    render(<App store={buildTestStore()} />);
+
+    await user.click(screen.getByRole("button", { name: "Route Card" }));
+
+    expect(await screen.findByRole("heading", { name: "No saved route artifacts yet" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open Task Intake" })).toBeInTheDocument();
+  });
+
+  it("shows saved route cards with local copy and Markdown download preparation", async () => {
+    const user = userEvent.setup();
+    const clipboardWriteText = vi.fn().mockResolvedValue(undefined);
+    installClipboardMock(clipboardWriteText);
+
+    render(<App store={buildTestStore()} />);
+
+    await generateAndSavePublicFacingRoute(user);
+    await user.click(screen.getByRole("button", { name: "Route Card" }));
+
+    expect(await screen.findByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Saved route card" })).toHaveValue("route-card-task-local-route");
+    expect(screen.getByText("Route options and tradeoffs")).toBeInTheDocument();
+    expect(screen.getByText("Blocked routes")).toBeInTheDocument();
+    expect(screen.getByText("Warnings")).toBeInTheDocument();
+
+    const markdownPreview = screen.getByLabelText("Prepared route card Markdown") as HTMLTextAreaElement;
+    expect(markdownPreview.value).toContain("# Route card: Draft public-facing copy");
+    expect(markdownPreview.value).toContain("## Route Options");
+
+    const downloadLink = screen.getByRole("link", { name: "Download Markdown" });
+    expect(downloadLink).toHaveAttribute("download", expect.stringMatching(/^route-card-.*\.md$/));
+    expect(downloadLink.getAttribute("href")).toContain("data:text/markdown;charset=utf-8");
+
+    await user.click(screen.getByRole("button", { name: "Copy Route card Markdown" }));
+
+    await waitFor(() => {
+      expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("# Route card: Draft public-facing copy"));
+    });
+    expect(screen.getByText("Route card Markdown copied locally.")).toBeInTheDocument();
+  });
+
+  it("shows saved prompt packages with ordered steps and step-level approval copy", async () => {
+    const user = userEvent.setup();
+    const clipboardWriteText = vi.fn().mockResolvedValue(undefined);
+    installClipboardMock(clipboardWriteText);
+
+    render(<App store={buildTestStore()} />);
+
+    await generateAndSavePublicFacingRoute(user);
+    await user.click(screen.getByRole("button", { name: "Prompt Package" }));
+
+    expect(await screen.findByRole("heading", { name: "Prompt package: Draft public-facing copy" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Prompt steps" })).toBeInTheDocument();
+    expect(screen.getByText("Human approval requirements stay attached to the step where they matter.")).toBeInTheDocument();
+    expect(screen.getByText("Human approval required")).toBeInTheDocument();
+    expect(screen.getAllByText("Expected output").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Input refs").length).toBeGreaterThan(0);
+
+    const markdownPreview = screen.getByLabelText("Prepared prompt package Markdown") as HTMLTextAreaElement;
+    expect(markdownPreview.value).toContain("# Prompt package: Draft public-facing copy");
+    expect(markdownPreview.value).toContain("Human approval: Required");
+
+    const downloadLink = screen.getByRole("link", { name: "Download Markdown" });
+    expect(downloadLink).toHaveAttribute("download", expect.stringMatching(/^prompt-package-.*\.md$/));
+
+    await user.click(screen.getAllByRole("button", { name: "Copy prompt step text" })[0]);
+
+    await waitFor(() => {
+      expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("Expected output:"));
+    });
+    expect(screen.getByText("Prompt step 1 copied locally.")).toBeInTheDocument();
+  });
 });
 
 function buildTestStore(): LocalStore {
@@ -187,4 +262,23 @@ function buildTestStore(): LocalStore {
   storesToDelete.push(store);
 
   return store;
+}
+
+async function generateAndSavePublicFacingRoute(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Task Intake" }));
+  await screen.findByText("Personal memory");
+  await user.selectOptions(screen.getByLabelText("Start from template"), "draft-public-facing-copy");
+  await user.click(screen.getByRole("button", { name: "Generate local routes" }));
+  await screen.findByRole("heading", { name: "Route Results", level: 2 });
+  await user.click(screen.getByRole("button", { name: "Save route card and prompt package" }));
+  await screen.findByText("Route card and prompt package saved locally.");
+}
+
+function installClipboardMock(writeText: ReturnType<typeof vi.fn>) {
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: {
+      writeText,
+    },
+  });
 }

@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createLocalStore, type LocalStore } from "./storage/localStore";
+import { SavedPromptPackageScreen, SavedRouteCardScreen } from "./ui/screens/RouteArtifactScreens";
 import {
   PlaceholderScreen,
   PolicySettingsScreen,
@@ -8,6 +9,7 @@ import {
 } from "./ui/screens/SetupScreens";
 import { RouteResultsScreen, TaskIntakeScreen } from "./ui/screens/TaskRoutingScreens";
 import { screenDefinitions } from "./ui/screens/screenDefinitions";
+import { useRouteArtifacts } from "./ui/state/useRouteArtifacts";
 import { useSetupConfiguration } from "./ui/state/useSetupConfiguration";
 import { useTaskRouting } from "./ui/state/useTaskRouting";
 
@@ -29,10 +31,17 @@ export function App({ store = browserLocalStore }: AppProps) {
   const [activeScreenId, setActiveScreenId] = useState(screenDefinitions[0].id);
   const setup = useSetupConfiguration(store);
   const taskRouting = useTaskRouting({ setup, store });
+  const routeArtifacts = useRouteArtifacts({ store });
   const activeScreen = useMemo(
     () => screenDefinitions.find((screen) => screen.id === activeScreenId) ?? screenDefinitions[0],
     [activeScreenId],
   );
+
+  useEffect(() => {
+    if (activeScreenId === "route-card" || activeScreenId === "prompt-package") {
+      void routeArtifacts.refresh();
+    }
+  }, [activeScreenId, routeArtifacts.refresh]);
 
   return (
     <main className="appShell">
@@ -94,7 +103,29 @@ export function App({ store = browserLocalStore }: AppProps) {
             setup={setup}
           />
         ) : null}
-        {!["tool-inventory", "source-permissions", "policy-settings", "task-intake", "route-results"].includes(activeScreen.id) ? (
+        {activeScreen.id === "route-card" ? (
+          <SavedRouteCardScreen
+            artifacts={routeArtifacts}
+            definition={activeScreen}
+            onOpenTaskIntake={() => setActiveScreenId("task-intake")}
+          />
+        ) : null}
+        {activeScreen.id === "prompt-package" ? (
+          <SavedPromptPackageScreen
+            artifacts={routeArtifacts}
+            definition={activeScreen}
+            onOpenTaskIntake={() => setActiveScreenId("task-intake")}
+          />
+        ) : null}
+        {![
+          "tool-inventory",
+          "source-permissions",
+          "policy-settings",
+          "task-intake",
+          "route-results",
+          "route-card",
+          "prompt-package",
+        ].includes(activeScreen.id) ? (
           <PlaceholderScreen definition={activeScreen} />
         ) : null}
       </section>

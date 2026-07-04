@@ -894,6 +894,323 @@ button:focus-visible {
   grid-column: 1 / -1;
 }
 
+.artifactPanel,
+.artifactStack {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.artifactToolbar {
+  align-items: end;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 26px rgba(15, 23, 32, 0.06);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px) auto;
+  padding: 14px;
+}
+
+.artifactToolbar h3,
+.artifactSummaryBand h3,
+.localExportPanel h3,
+.promptStepHeader h4 {
+  color: var(--brand-navy);
+  margin: 0;
+}
+
+.artifactToolbar h3,
+.artifactSummaryBand h3,
+.localExportPanel h3 {
+  font-size: 1rem;
+}
+
+.artifactToolbar p,
+.artifactSummaryBand p,
+.localExportPanel p,
+.promptStepDetail p {
+  color: var(--muted-ink);
+  line-height: 1.48;
+  margin: 0;
+}
+
+.artifactToolbar label,
+.localExportPanel label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.artifactToolbar label > span,
+.localExportPanel label > span {
+  color: #334b5a;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.artifactToolbar button,
+.artifactActions button,
+.promptStepDetail button {
+  background: #ffffff;
+  border-color: var(--line-strong);
+  color: var(--brand-navy);
+  min-height: 40px;
+  padding: 9px 12px;
+}
+
+.artifactToolbar button:hover:not(:disabled),
+.artifactToolbar button:focus-visible:not(:disabled),
+.artifactActions button:hover:not(:disabled),
+.artifactActions button:focus-visible:not(:disabled),
+.promptStepDetail button:hover:not(:disabled),
+.promptStepDetail button:focus-visible:not(:disabled) {
+  border-color: var(--brand-teal);
+}
+
+.artifactSummaryBand {
+  align-items: start;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--brand-teal);
+  border-radius: 8px;
+  box-shadow: 0 12px 26px rgba(15, 23, 32, 0.06);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  padding: 16px;
+}
+
+.artifactSummaryBand dl,
+.artifactMetricGrid,
+.artifactStepList dl,
+.promptStepMeta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.artifactSummaryBand dl,
+.artifactMetricGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.artifactSummaryBand dt,
+.artifactMetricGrid dt,
+.artifactStepList dt,
+.promptStepMeta dt {
+  color: var(--muted-ink);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.artifactSummaryBand dd,
+.artifactMetricGrid dd,
+.artifactStepList dd,
+.promptStepMeta dd {
+  color: var(--brand-navy);
+  font-weight: 800;
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.localExportPanel {
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.artifactActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.artifactActions a {
+  align-items: center;
+  background: var(--brand-teal);
+  border: 1px solid var(--brand-teal);
+  border-radius: 6px;
+  color: #ffffff;
+  display: inline-flex;
+  min-height: 40px;
+  padding: 9px 12px;
+  text-decoration: none;
+}
+
+.artifactActions a:hover,
+.artifactActions a:focus-visible {
+  background: #096f8e;
+  border-color: #096f8e;
+}
+
+.localExportPanel > span {
+  color: var(--muted-ink);
+  line-height: 1.4;
+}
+
+.localExportPanel textarea {
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.86rem;
+  min-height: 220px;
+  white-space: pre-wrap;
+}
+
+.artifactTwoColumn {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.blockedList li strong {
+  color: var(--brand-navy);
+  display: block;
+}
+
+.blockedList li span {
+  color: #2d3a44;
+  display: block;
+  line-height: 1.45;
+}
+
+.artifactRouteOptionList {
+  display: grid;
+  gap: 12px;
+}
+
+.artifactRouteOption,
+.promptStepDetail {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 32, 0.05);
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.selectedArtifactOption {
+  border-color: var(--brand-teal);
+  box-shadow:
+    inset 4px 0 0 var(--brand-teal),
+    0 10px 24px rgba(15, 23, 32, 0.05);
+}
+
+.artifactRouteOption p {
+  color: var(--muted-ink);
+  line-height: 1.46;
+  margin: 0;
+}
+
+.artifactStepList,
+.promptStepList {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.artifactStepList li {
+  color: #2d3a44;
+  line-height: 1.45;
+}
+
+.artifactStepList li strong {
+  color: var(--brand-navy);
+  display: block;
+}
+
+.artifactStepList li > span {
+  color: var(--muted-ink);
+  display: block;
+  font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+.artifactStepList li p {
+  margin: 8px 0;
+}
+
+.artifactStepList ul,
+.stepWarningList ul {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.stepWarningList > strong {
+  color: var(--brand-navy);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.promptStepList {
+  list-style-position: outside;
+}
+
+.promptStepHeader {
+  align-items: start;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.promptStepHeader div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.promptStepHeader div > span {
+  color: var(--brand-teal);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.promptStepHeader h4 {
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.approvalRequiredPill,
+.approvalNotRequiredPill {
+  border-radius: 999px;
+  flex: 0 0 auto;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 4px 8px;
+}
+
+.approvalRequiredPill {
+  background: #fff4e8;
+  border: 1px solid #d9b777;
+  color: #705228;
+}
+
+.approvalNotRequiredPill {
+  background: var(--brand-cloud);
+  border: 1px solid #d2dde5;
+  color: #30414f;
+}
+
+.promptStepMeta {
+  grid-template-columns: minmax(160px, 0.55fr) minmax(0, 1.45fr);
+}
+
+.promptStepDetail button {
+  justify-self: start;
+}
+
 @media (max-width: 1080px) {
   .boundaryStrip,
   .formGrid,
@@ -901,8 +1218,14 @@ button:focus-visible {
   .weightGrid,
   .checkboxGrid,
   .sourceChoiceGrid,
-  .routeComparisonGrid {
+  .routeComparisonGrid,
+  .artifactToolbar,
+  .artifactTwoColumn {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .artifactToolbar > div:first-child {
+    grid-column: 1 / -1;
   }
 }
 
@@ -942,19 +1265,26 @@ button:focus-visible {
   .sourceChoiceGrid,
   .routeComparisonGrid,
   .resultSummaryBand,
-  .saveRoutePanel {
+  .saveRoutePanel,
+  .artifactToolbar,
+  .artifactSummaryBand,
+  .artifactTwoColumn,
+  .artifactMetricGrid,
+  .promptStepMeta {
     grid-template-columns: 1fr;
   }
 
   .setupToolbar,
   .groupHeader,
   .recordHeader,
-  .routeCardHeader {
+  .routeCardHeader,
+  .promptStepHeader {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .routeCardHeader {
+  .routeCardHeader,
+  .promptStepHeader {
     align-items: flex-start;
   }
 
@@ -968,7 +1298,10 @@ button:focus-visible {
 
   .routingActions button,
   .emptyResultsState button,
-  .saveRoutePanel button {
+  .saveRoutePanel button,
+  .artifactToolbar button,
+  .artifactActions button,
+  .artifactActions a {
     width: 100%;
   }
 }
