@@ -361,9 +361,7 @@ function ModelInventoryRow({
   const selectedTool = inferEverydayToolSelection(model);
   const provider = getEverydayToolProvider(selectedTool.providerId);
   const selected = isEverydayToolSelected(model);
-  const frequencyOption =
-    provider.frequencyOptions.find((option) => option.id === selectedTool.frequencyId) ?? provider.frequencyOptions[0];
-  const rowTitle = selected ? provider.label : "Add an AI app";
+  const rowTitle = "Tool selection";
 
   return (
     <section className="setupRecord" aria-labelledby={`${model.id}-title`}>
@@ -372,7 +370,7 @@ function ModelInventoryRow({
           <h4 id={`${model.id}-title`}>{rowTitle}</h4>
           <p>{everydayToolSummary(model)}</p>
         </div>
-        <span className="recordPill">{selected ? frequencyOption.label : "Optional"}</span>
+        <span className="recordPill">{selected ? "Selected" : "Optional"}</span>
       </div>
 
       <div className="toolChoiceGrid">

@@ -7,6 +7,7 @@ export type EverydayToolProviderId =
   | "gemini"
   | "copilot"
   | "perplexity"
+  | "genspark"
   | "grok"
   | "meta-ai"
   | "poe"
@@ -76,6 +77,12 @@ export type EverydayToolSelection = {
   accountId: EverydayToolAccountId;
   frequencyId: EverydayToolFrequencyId;
 };
+
+const emptyEverydayToolSelection = {
+  providerId: "none",
+  accountId: "not-selected",
+  frequencyId: "not-selected",
+} satisfies EverydayToolSelection;
 
 const capabilityKeys = ["reasoning", "writing", "coding", "research", "packaging"] as const;
 
@@ -385,6 +392,7 @@ export const everydayToolProviders = [
   generalProvider("gemini", "Gemini"),
   artifactProvider("copilot", "Microsoft Copilot"),
   researchProvider("perplexity", "Perplexity"),
+  researchProvider("genspark", "Genspark"),
   generalProvider("grok", "Grok"),
   generalProvider("meta-ai", "Meta AI"),
   generalProvider("poe", "Poe"),
@@ -416,12 +424,27 @@ export const everydayToolProviders = [
 
 const fallbackProvider = everydayToolProviders.find((candidateProvider) => candidateProvider.id === "other") ?? everydayToolProviders[0];
 
-const defaultProviderByModelId: Partial<Record<ModelInventoryItem["id"], EverydayToolProviderId>> = {
-  "user-free-small-model": "gemini",
-  "user-mid-synthesis-model": "chatgpt",
-  "user-frontier-quality-model": "claude",
-  "user-research-tool": "perplexity",
-  "user-artifact-tool": "copilot",
+const legacyPrefilledToolDefaults: Partial<Record<ModelInventoryItem["id"], { label: string; provider: string }>> = {
+  "user-free-small-model": {
+    label: "Gemini: Flash - Quick",
+    provider: "Gemini",
+  },
+  "user-mid-synthesis-model": {
+    label: "ChatGPT: GPT-5.5 - Medium",
+    provider: "ChatGPT",
+  },
+  "user-frontier-quality-model": {
+    label: "Claude: Opus - Extended thinking",
+    provider: "Claude",
+  },
+  "user-research-tool": {
+    label: "Perplexity: Sonar - Pro search",
+    provider: "Perplexity",
+  },
+  "user-artifact-tool": {
+    label: "Microsoft Copilot: Create documents, tables, or slides - Balanced",
+    provider: "Microsoft Copilot",
+  },
 };
 
 export function getEverydayToolProvider(providerId: EverydayToolProviderId): EverydayToolProvider {
@@ -458,6 +481,10 @@ export function createEverydayToolModel(input: {
 }
 
 export function inferEverydayToolSelection(model: ModelInventoryItem): EverydayToolSelection {
+  if (isLegacyPrefilledEverydayTool(model)) {
+    return emptyEverydayToolSelection;
+  }
+
   const provider = inferProvider(model);
   const accountOption = inferAccountOption(provider, model);
   const frequencyOption = inferFrequencyOption(provider, model);
@@ -476,12 +503,10 @@ export function applyEverydayToolSelection(
   const currentSelection = inferEverydayToolSelection(model);
   const providerChanged = selection.providerId !== undefined && selection.providerId !== currentSelection.providerId;
   const provider = getEverydayToolProvider(selection.providerId ?? currentSelection.providerId);
-  const selectedAccountId = providerChanged
-    ? provider.defaultAccountId
-    : selection.accountId ?? currentSelection.accountId;
-  const selectedFrequencyId = providerChanged
-    ? provider.defaultFrequencyId
-    : selection.frequencyId ?? currentSelection.frequencyId;
+  const selectedAccountId =
+    selection.accountId ?? (providerChanged ? provider.defaultAccountId : currentSelection.accountId);
+  const selectedFrequencyId =
+    selection.frequencyId ?? (providerChanged ? provider.defaultFrequencyId : currentSelection.frequencyId);
   const accountOption =
     provider.accountOptions.find((option) => option.id === selectedAccountId) ?? provider.accountOptions[0];
   const frequencyOption =
@@ -521,6 +546,17 @@ export function applyEverydayToolSelection(
 
 export function isEverydayToolSelected(model: ModelInventoryItem): boolean {
   return inferEverydayToolSelection(model).providerId !== "none" && model.enabled;
+}
+
+export function isLegacyPrefilledEverydayTool(model: ModelInventoryItem): boolean {
+  const legacyDefault = legacyPrefilledToolDefaults[model.id];
+
+  return Boolean(
+    legacyDefault &&
+      model.enabled &&
+      model.label === legacyDefault.label &&
+      model.provider === legacyDefault.provider,
+  );
 }
 
 export function everydayToolFrequencyRank(model: ModelInventoryItem): number {
@@ -622,7 +658,11 @@ function inferProvider(model: ModelInventoryItem): EverydayToolProvider {
     return getEverydayToolProvider("none");
   }
 
-  return getEverydayToolProvider(defaultProviderByModelId[model.id] ?? "other");
+  if (!model.enabled) {
+    return getEverydayToolProvider("none");
+  }
+
+  return getEverydayToolProvider("other");
 }
 
 function inferAccountOption(provider: EverydayToolProvider, model: ModelInventoryItem): EverydayToolAccountOption {

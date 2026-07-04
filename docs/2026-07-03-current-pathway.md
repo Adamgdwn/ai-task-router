@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-04T09:03:11-06:00
+Last Updated: 2026-07-04T09:18:42-06:00
 Status: active
-Status Updated: 2026-07-04T09:03:11-06:00
+Status Updated: 2026-07-04T09:18:42-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -89,7 +89,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Usability surgery detour | complete | 2026-07-04T00:53:25-06:00 | Technical Lead | Reworked My AI Tools, What To Include, My Task, and Best Options so average users see normal tool/source/task choices instead of internal routing language. |
 | My AI Tools dropdown cleanup detour | complete | 2026-07-04T08:38:31-06:00 | Technical Lead | Replaced subscription/tier/text-field setup with provider, visible model, and thinking-setting dropdowns backed by an everyday tool catalog. |
 | My AI Tools progressive app setup detour | complete | 2026-07-04T09:00:27-06:00 | Technical Lead | Replaced the prefilled tool grid with progressive AI app, account-level, and frequency rows backed by a broader app catalog. |
-| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T09:00:27-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected plain-language MVP workflows. |
+| My AI Tools sparse selector correction | complete | 2026-07-04T09:18:42-06:00 | Technical Lead | Corrected stale local data and row headings so My AI Tools starts as one generic Tool selection row, not five named provider cards. |
+| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T09:18:42-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected plain-language MVP workflows. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -2150,10 +2151,98 @@ Handoff note:
 
 Chunk Fifteen should add E2E coverage for the progressive My AI Tools flow: empty first row, app selection, account level, frequency, automatic next row, local save, and no execution/provider workflow. Do not reintroduce app/model/thinking, subscription-level, model-tier, capability-score, routing-category, permission-level, or technical-routing-details language in the primary My AI Tools path.
 
+## My AI Tools Sparse Selector Correction
+
+Status: complete
+Status Updated: 2026-07-04T09:18:42-06:00
+
+Completion target: Integration complete
+
+Budget class: Small
+
+Objective:
+
+Correct the owner-reported mismatch where existing browser data still showed five named provider cards instead of one neutral selector.
+
+User outcome:
+
+My AI Tools now reads like a simple add-one-at-a-time list: one `Tool selection` card appears first, the AI app lives inside the dropdown, and older saved starter rows are cleared into the corrected empty starter state.
+
+Allowed files or folders:
+
+- `src/domain/defaults/everydayToolCatalog.ts`
+- `src/storage/localStore.ts`
+- `src/ui/screens/SetupScreens.tsx`
+- `src/ui/state/useSetupConfiguration.ts`
+- `src/tests/fixtures/*`
+- `src/tests/unit/*`
+- active pathway and status docs
+
+Non-goals:
+
+- Do not add custom provider text fields in this correction.
+- Do not add provider account connections, credentials, telemetry, external calls, or execution workflows.
+- Do not start Chunk Fifteen E2E implementation in this correction.
+
+Acceptance criteria:
+
+- [x] Primary row headings say `Tool selection`, not `ChatGPT`, `Gemini`, `Claude`, `Perplexity`, or `Microsoft Copilot`.
+- [x] A stale local database containing the old five prefilled starter rows migrates to `0 selected` and one blank selector.
+- [x] Selecting an app, account level, and frequency still reveals the next blank selector.
+- [x] The AI app dropdown includes `Genspark` as a normal app choice and still includes broader fallback options.
+- [x] Explicit route-ready fixtures keep their account and frequency assumptions after the catalog inference change.
+- [x] No provider calls, credentials, telemetry, remote sync, or execution behavior are added.
+
+Implementation notes:
+
+- Added legacy prefilled-row detection for the exact prior starter labels and providers.
+- Added local store migration so stale IndexedDB model inventories are reset to the corrected empty default slots.
+- Removed stable-ID provider fallback from everyday tool inference so empty slots cannot become provider-branded cards by ID alone.
+- Changed My AI Tools row headings to the generic `Tool selection`.
+- Added a `legacyPrefilledToolModels` fixture and regression coverage in App and storage tests.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the correction.
+- `npm run test -- App` passed with 1 file and 12 tests.
+- `npm run test -- storageLocalStore` passed with 1 file and 9 tests.
+- `npm run test` passed with 10 files and 78 tests.
+- `npm run build` passed.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5180` deliberately planted the old five-row starter inventory in IndexedDB, reloaded, confirmed `0 selected`, one `Tool selection` row, no provider-named regions, Genspark selection, automatic next row, and no mobile horizontal overflow.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings at close-out.
+- `git diff --check` passed; output only included normal Windows LF-to-CRLF notices.
+- Screenshots:
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tool-selection-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tool-selection-mobile.png`
+
+UX/product finish expectations:
+
+- The screen should not imply that the big-name tools are defaults or required.
+- Provider names should appear as dropdown options only until the user chooses one.
+- Existing users from the previous detour should get the corrected starter experience after refresh without needing to know about local storage.
+
+Security and privacy notes:
+
+- The migration touches only browser-local IndexedDB records.
+- The app remains recommendation-only and does not connect to, verify, or call AI providers.
+
+Rollback or recovery path:
+
+Revert the catalog inference changes, local store migration, row heading change, and regression tests. Existing records remain schema-compatible because the model inventory shape is unchanged.
+
+Stop condition:
+
+Reached. The reported screen mismatch is corrected, validated in tests/build/browser, and Chunk Fifteen remains active next.
+
+Handoff note:
+
+Chunk Fifteen should include E2E coverage for a stale five-row local store migrating into one blank `Tool selection`, plus the normal progressive add/save path.
+
 ## Chunk Fifteen - E2E Tests And Fixture Suite
 
 Status: active next
-Status Updated: 2026-07-04T09:00:27-06:00
+Status Updated: 2026-07-04T09:18:42-06:00
 
 Completion target: Integration complete
 
@@ -2444,7 +2533,8 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-04T08:38:31-06:00 | manual Playwright browser check using system Chrome at `http://127.0.0.1:5179` | passed | Browser check covered My AI Tools dropdown behavior, What To Include extra-settings label, desktop/mobile screenshots, no horizontal overflow, and no old My AI Tools leakage of subscription/tier/details wording. |
 | 2026-07-04T08:41:24-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final dropdown cleanup close-out validation passed: 10 files and 76 tests, production build, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 | 2026-07-04T09:03:11-06:00 | `npm run test -- App`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5180`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Progressive My AI Tools app setup close-out validation passed: focused App suite 1 file and 11 tests, full unit suite 10 files and 76 tests, production build, browser checks for app/account/frequency rows and desktop/mobile overflow, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-04T09:18:42-06:00 | `npm run test -- App`; `npm run test -- storageLocalStore`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5180`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Sparse selector correction passed: App suite 1 file and 12 tests, storage suite 1 file and 9 tests, full unit suite 10 files and 78 tests, production build, deliberate stale five-row IndexedDB browser migration to one `Tool selection`, Genspark selection, automatic next row, mobile overflow check, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with progressive AI app, account-level, and frequency dropdowns, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, progressive AI app/account-level/frequency dropdowns, stale five-row local-store migration, Genspark and broader app options, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.

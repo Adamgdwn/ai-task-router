@@ -250,16 +250,14 @@ function normalizeSetupPreferences(
   modelInventory: readonly ModelInventoryItem[],
 ): LocalSetupPreferences {
   const availablePolicyIds = new Set(policySettings.map((policy) => policy.id));
-  const enabledModelIds = new Set(modelInventory.filter((model) => model.enabled).map((model) => model.id));
+  const preferredModelIds = new Set(
+    modelInventory.filter((model) => model.enabled && model.tier !== "human").map((model) => model.id),
+  );
 
   const fallbackPolicy =
     policySettings.find((policy) => policy.id === defaultSetupPreferences.activePolicyDefaultId) ??
     policySettings[0];
-  const fallbackPreferredModel =
-    modelInventory.find((model) => model.enabled && model.id === defaultSetupPreferences.preferredModelId) ??
-    modelInventory.find((model) => model.enabled && model.tier !== "human") ??
-    modelInventory.find((model) => model.enabled) ??
-    modelInventory[0];
+  const fallbackPreferredModel = modelInventory.find((model) => model.enabled && model.tier !== "human");
 
   return {
     ...preferences,
@@ -267,7 +265,7 @@ function normalizeSetupPreferences(
       ? preferences.activePolicyDefaultId
       : fallbackPolicy?.id ?? defaultSetupPreferences.activePolicyDefaultId,
     preferredModelId:
-      preferences.preferredModelId && enabledModelIds.has(preferences.preferredModelId)
+      preferences.preferredModelId && preferredModelIds.has(preferences.preferredModelId)
         ? preferences.preferredModelId
         : fallbackPreferredModel?.id,
   };

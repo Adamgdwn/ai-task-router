@@ -1,5 +1,6 @@
 import Dexie, { type Table } from "dexie";
 import { z } from "zod";
+import { isLegacyPrefilledEverydayTool } from "../domain/defaults/everydayToolCatalog";
 import { defaultModels } from "../domain/defaults/defaultModels";
 import { defaultPolicies } from "../domain/defaults/defaultPolicies";
 import { defaultSources } from "../domain/defaults/defaultSources";
@@ -171,6 +172,8 @@ export class LocalStore {
   async seedDefaultConfigurationIfEmpty(): Promise<LocalConfigurationSeedResult> {
     return withLocalStoreErrors("seed default configuration", async () => {
       if (await this.hasLocalConfiguration()) {
+        await this.migrateLegacyPrefilledToolInventory();
+
         return {
           seeded: false,
           reason: "existing-configuration",
@@ -247,7 +250,7 @@ export class LocalStore {
   async loadConfiguration(): Promise<LocalConfiguration> {
     return withLocalStoreErrors("load configuration", async () => {
       const [modelInventory, sourcePermissionRegistry, policySettings] = await Promise.all([
-        loadValidatedTable(this.database.modelInventory, "modelInventory", modelInventoryItemSchema),
+        this.loadModelInventoryWithLegacyMigration(),
         loadValidatedTable(this.database.sourcePermissions, "sourcePermissions", sourcePermissionSchema),
         loadValidatedTable(this.database.policySettings, "policySettings", policyDefaultSchema),
       ]);
@@ -454,6 +457,70 @@ export class LocalStore {
       policySettings,
     };
   }
+
+  private async loadModelInventoryWithLegacyMigration(): Promise<ModelInventoryItem[]> {
+    const modelInventory = await this.loadValidatedModelInventory();
+    const migration = migrateLegacyPrefilledModelInventory(modelInventory);
+
+    if (!migration.changed) {
+      return modelInventory;
+    }
+
+    await this.replaceModelInventoryAfterMigration(migration.modelInventory);
+
+    return migration.modelInventory;
+  }
+
+  private async migrateLegacyPrefilledToolInventory(): Promise<void> {
+    const modelInventory = await this.loadValidatedModelInventory();
+    const migration = migrateLegacyPrefilledModelInventory(modelInventory);
+
+    if (!migration.changed) {
+      return;
+    }
+
+    await this.replaceModelInventoryAfterMigration(migration.modelInventory);
+  }
+
+  private async replaceModelInventoryAfterMigration(modelInventory: ModelInventoryItem[]): Promise<void> {
+    await this.database.transaction(
+      "rw",
+      this.database.modelInventory,
+      this.database.setupPreferences,
+      async () => {
+        await this.database.modelInventory.clear();
+        await this.database.modelInventory.bulkPut(modelInventory);
+        await this.clearUnavailablePreferredModel(modelInventory);
+      },
+    );
+  }
+
+  private async clearUnavailablePreferredModel(modelInventory: readonly ModelInventoryItem[]): Promise<void> {
+    const storedPreferences = await this.database.setupPreferences.get(defaultSetupPreferences.id);
+
+    if (!storedPreferences?.preferredModelId) {
+      return;
+    }
+
+    const enabledModelIds = new Set(
+      modelInventory.filter((model) => model.enabled && model.tier !== "human").map((model) => model.id),
+    );
+
+    if (enabledModelIds.has(storedPreferences.preferredModelId)) {
+      return;
+    }
+
+    const nextPreferences: LocalSetupPreferences = {
+      ...storedPreferences,
+    };
+    delete nextPreferences.preferredModelId;
+
+    await this.database.setupPreferences.put(nextPreferences);
+  }
+
+  private async loadValidatedModelInventory(): Promise<ModelInventoryItem[]> {
+    return loadValidatedTable(this.database.modelInventory, "modelInventory", modelInventoryItemSchema);
+  }
 }
 
 export function createLocalStoreDatabase(databaseName = localStoreDatabaseName): LocalStoreDatabase {
@@ -583,4 +650,28 @@ function orderNewestFirst<T extends { createdAt: string; id: string }>(records: 
 
 function orderById<T extends { id: string }>(records: T[]) {
   return [...records].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function migrateLegacyPrefilledModelInventory(modelInventory: ModelInventoryItem[]): {
+  changed: boolean;
+  modelInventory: ModelInventoryItem[];
+} {
+  if (!modelInventory.some(isLegacyPrefilledEverydayTool)) {
+    return {
+      changed: false,
+      modelInventory,
+    };
+  }
+
+  const storedManualReview = modelInventory.find((model) => model.id === "manual-human-review");
+  const defaultModelIds = new Set(defaultModels.map((model) => model.id));
+  const customModels = modelInventory.filter((model) => !defaultModelIds.has(model.id));
+  const resetDefaultModels = defaultModels.map((defaultModel) =>
+    defaultModel.id === "manual-human-review" && storedManualReview ? storedManualReview : defaultModel,
+  );
+
+  return {
+    changed: true,
+    modelInventory: [...resetDefaultModels, ...customModels],
+  };
 }

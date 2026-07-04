@@ -11,6 +11,7 @@ import {
   type LocalStore,
   type LocalStoreDatabase,
 } from "../../storage/localStore";
+import { legacyPrefilledToolModels } from "../fixtures/legacyPrefilledToolModels";
 
 let databaseCounter = 0;
 let store: LocalStore;
@@ -70,6 +71,26 @@ describe("local store", () => {
     expect(configuration.modelInventory).toEqual([customModel]);
     expect(configuration.sourcePermissionRegistry).toEqual([]);
     expect(configuration.policySettings).toEqual([]);
+  });
+
+  it("migrates the old prefilled AI tool starter rows to blank tool selections", async () => {
+    await store.seedDefaultConfigurationIfEmpty();
+    await store.saveModelInventory(legacyPrefilledToolModels);
+    await store.saveSetupPreferences({
+      ...defaultSetupPreferences,
+      preferredModelId: "user-mid-synthesis-model",
+    });
+
+    const seedResult = await store.seedDefaultConfigurationIfEmpty();
+    const configuration = await store.loadConfiguration();
+    const setupPreferences = await store.loadSetupPreferences();
+
+    expect(seedResult).toMatchObject({
+      seeded: false,
+      reason: "existing-configuration",
+    });
+    expect(configuration.modelInventory).toEqual(defaultModels);
+    expect(setupPreferences).toEqual(defaultSetupPreferences);
   });
 
   it("saves, loads, updates, and resets local route records", async () => {

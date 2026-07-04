@@ -8,6 +8,7 @@ import {
   type LocalStoreDatabase,
 } from "../../storage/localStore";
 import { screenDefinitions } from "../../ui/screens/screenDefinitions";
+import { legacyPrefilledToolModels } from "../fixtures/legacyPrefilledToolModels";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
 
 let databaseCounter = 0;
@@ -50,7 +51,7 @@ describe("App", () => {
     const { unmount } = render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "My AI Tools" }));
-    const firstToolRow = await screen.findByRole("region", { name: "Add an AI app" });
+    const firstToolRow = (await screen.findAllByRole("region", { name: "Tool selection" }))[0];
     const firstApp = within(firstToolRow).getByRole("combobox", {
       name: "AI app for user-mid-synthesis-model",
     });
@@ -65,28 +66,37 @@ describe("App", () => {
     expect(firstFrequency).toBeDisabled();
 
     await user.selectOptions(firstApp, "chatgpt");
-    const chatGptRow = await screen.findByRole("region", { name: "ChatGPT" });
+    await waitFor(() => {
+      expect(firstApp).toHaveDisplayValue("ChatGPT");
+    });
     await user.selectOptions(
-      within(chatGptRow).getByRole("combobox", { name: "Account level for user-mid-synthesis-model" }),
+      within(firstToolRow).getByRole("combobox", { name: "Account level for user-mid-synthesis-model" }),
       "pro",
     );
     await user.selectOptions(
-      within(chatGptRow).getByRole("combobox", { name: "How often for user-mid-synthesis-model" }),
+      within(firstToolRow).getByRole("combobox", { name: "How often for user-mid-synthesis-model" }),
       "hourly",
     );
 
-    const secondToolRow = screen.getByRole("region", { name: "Add an AI app" });
+    await waitFor(() => {
+      expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(2);
+    });
+    const secondToolRow = screen.getAllByRole("region", { name: "Tool selection" })[1];
     await user.selectOptions(
       within(secondToolRow).getByRole("combobox", { name: "AI app for user-free-small-model" }),
       "deepseek",
     );
-    const deepSeekRow = await screen.findByRole("region", { name: "DeepSeek" });
+    await waitFor(() => {
+      expect(
+        within(secondToolRow).getByRole("combobox", { name: "AI app for user-free-small-model" }),
+      ).toHaveDisplayValue("DeepSeek");
+    });
     await user.selectOptions(
-      within(deepSeekRow).getByRole("combobox", { name: "Account level for user-free-small-model" }),
+      within(secondToolRow).getByRole("combobox", { name: "Account level for user-free-small-model" }),
       "basic",
     );
     await user.selectOptions(
-      within(deepSeekRow).getByRole("combobox", { name: "How often for user-free-small-model" }),
+      within(secondToolRow).getByRole("combobox", { name: "How often for user-free-small-model" }),
       "weekly",
     );
     await user.click(screen.getByRole("button", { name: "Save my choices" }));
@@ -97,7 +107,8 @@ describe("App", () => {
     render(<App store={store} />);
     await user.click(screen.getByRole("button", { name: "My AI Tools" }));
 
-    const savedChatGptRow = await screen.findByRole("region", { name: "ChatGPT" });
+    const savedToolRows = await screen.findAllByRole("region", { name: "Tool selection" });
+    const savedChatGptRow = savedToolRows[0];
     expect(
       within(savedChatGptRow).getByRole("combobox", { name: "AI app for user-mid-synthesis-model" }),
     ).toHaveDisplayValue("ChatGPT");
@@ -108,17 +119,41 @@ describe("App", () => {
       within(savedChatGptRow).getByRole("combobox", { name: "How often for user-mid-synthesis-model" }),
     ).toHaveDisplayValue("Many times a day");
 
-    const savedDeepSeekRow = await screen.findByRole("region", { name: "DeepSeek" });
+    const savedDeepSeekRow = savedToolRows[1];
+    expect(
+      within(savedDeepSeekRow).getByRole("combobox", { name: "AI app for user-free-small-model" }),
+    ).toHaveDisplayValue("DeepSeek");
     expect(
       within(savedDeepSeekRow).getByRole("combobox", { name: "Account level for user-free-small-model" }),
     ).toHaveDisplayValue("Free or basic");
-    expect(screen.getAllByRole("region", { name: "Add an AI app" })).toHaveLength(1);
+    expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(3);
 
     await user.click(screen.getByRole("button", { name: "Restore starter choices" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("region", { name: "Add an AI app" })).toBeInTheDocument();
+      expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(1);
     });
+  });
+
+  it("upgrades the old prefilled AI tool starter rows into one blank selector", async () => {
+    const user = userEvent.setup();
+    const store = buildTestStore();
+
+    await store.seedDefaultConfigurationIfEmpty();
+    await store.saveModelInventory(legacyPrefilledToolModels);
+
+    render(<App store={store} />);
+
+    await user.click(screen.getByRole("button", { name: "My AI Tools" }));
+
+    expect(await screen.findByText("0 selected")).toBeInTheDocument();
+    expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(1);
+    expect(screen.queryByRole("region", { name: "ChatGPT" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Gemini" })).not.toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "AI app for user-mid-synthesis-model" })).toHaveDisplayValue(
+      "Choose an AI app",
+    );
+    expect(screen.getByRole("option", { name: "Genspark" })).toBeInTheDocument();
   });
 
   it("lets users save information comfort, choosing style, and the disabled toolkit note", async () => {
