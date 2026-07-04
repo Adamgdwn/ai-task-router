@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-04T10:20:07-06:00
+Last Updated: 2026-07-04T11:17:43-06:00
 Status: active
-Status Updated: 2026-07-04T10:20:07-06:00
+Status Updated: 2026-07-04T11:17:43-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -16,6 +16,10 @@ The current product source is [docs/PRODUCT_BRIEF.md](PRODUCT_BRIEF.md), derived
 ## Future Distribution Note
 
 Reference only as of 2026-07-03T12:01:44-06:00: the likely future public hosting home is `oldskoolai.com`, with links planned from `guidedailabs.com` and `guidedaijourney.com`. Exact paths, placement, launch timing, deployment approach, and cross-site linking strategy are not decided yet.
+
+## Future Desktop Trust Note
+
+Reference only as of 2026-07-04T11:17:43-06:00: the project should keep two future distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md). Desktop implementation is not part of v0.2 and should begin only after a separate owner decision, governance review, tool decision ADR, and trust-boundary design. The current local detector remains an explicit terminal command unless a later reviewed desktop workflow is approved.
 
 ## Future Product Planning Note
 
@@ -93,6 +97,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | My AI Tools manual add and local models detour | complete | 2026-07-04T09:40:46-06:00 | Technical Lead | Replaced automatic row reveal with an explicit branded add button, provider-specific plan labels, local model choices, and a local detector script. |
 | My AI Tools tailored account levels detour | complete | 2026-07-04T10:00:43-06:00 | Technical Lead | Researched and expanded provider-specific account dropdowns, added remove buttons, and fixed selected-chip/dropdown wrapping. |
 | Contextual task include detour | complete | 2026-07-04T10:20:07-06:00 | Technical Lead | Removed standalone What To Include onboarding and moved optional include choices into My Task. |
+| Desktop trust and distribution planning detour | complete | 2026-07-04T11:17:43-06:00 | Technical Lead | Added the future hosted/PWA plus signed desktop distribution plan, trust principles, phases, and governance review prompt without changing v0.2 scope. |
 | Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T10:20:07-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add and contextual task-include MVP workflows. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
@@ -2730,12 +2735,53 @@ Stop when docs, UI polish, validation evidence, and known limits support a v0.2 
 
 Handoff note:
 
-After this chunk, decide whether to run a release-readiness review, plan future hosting on `oldskoolai.com`, or open a v0.3 pathway for best-stack recommendation mode.
+After this chunk, decide whether to run a release-readiness review, plan future hosting on `oldskoolai.com`, open Desktop Chunk D0 from [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md), or open a v0.3 pathway for best-stack recommendation mode.
+
+## Future Desktop Track - Trusted Installable App
+
+Status: planned reference
+Status Updated: 2026-07-04T11:17:43-06:00
+
+Completion target: Not part of v0.2
+
+Budget class: Strategic
+
+Planning source:
+
+- [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md)
+
+Objective:
+
+Preserve a future path for a trusted installable AI Task Router desktop app on Windows, macOS, and Linux while keeping v0.2 focused on the local-first browser MVP.
+
+User outcome:
+
+Users eventually have both options: use the hosted/PWA version immediately, or download a signed desktop app when they want permissioned local AI tool/model discovery.
+
+Current decision:
+
+Do not add desktop code during Chunk Fifteen or Chunk Sixteen. Finish the web MVP validation and documentation first.
+
+Planned first desktop action:
+
+Open Desktop Chunk D0 after v0.2 release-readiness work. D0 should confirm first desktop scope, target OS order, publisher/signing identity, local discovery boundaries, and whether governance level changes are needed before implementation.
+
+Product boundary reminders:
+
+- The web/PWA version must not pretend it can scan the user's computer.
+- The desktop version must not silently scan, index files, upload data, connect provider accounts, store credentials, or execute actions.
+- The current `npm run detect:local-models` script remains explicit and terminal-only until a reviewed desktop-native workflow replaces or imports it.
+
+Stop condition:
+
+Stop desktop planning or implementation if the scope expands into background scanning, broad folder indexing, file-content reading, telemetry, credentials, provider API calls, or execution workflows without a separate owner-approved security review.
 
 ## Validation Log
 
 | Timestamp | Command | Result | Notes |
 |-----------|---------|--------|-------|
+| 2026-07-04T11:17:43-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before adding the desktop trust/distribution planning baseline; timestamp captured. |
+| 2026-07-04T11:17:43-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; placeholder `rg` search | passed | Final planning validation passed with 0 governance warnings and no whitespace errors; placeholder search returned no matches. |
 | 2026-07-03T11:16:47-06:00 | `git status --short` | failed | Folder was not a Git repository at session start. |
 | 2026-07-03T11:35:41-06:00 | `bash scripts/governance-preflight.sh` | failed | `project-control.yaml` had invalid checker values before charter alignment. |
 | 2026-07-03T11:35:41-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance check passed with 0 warnings after charter alignment. |

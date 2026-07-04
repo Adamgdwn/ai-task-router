@@ -68,10 +68,21 @@ Excluded from v0.2:
 - desktop wrappers
 - hosted multi-user infrastructure
 
+## Future Desktop Architecture
+
+Desktop packaging is intentionally excluded from v0.2. The future desktop track is documented in [desktop trust and distribution plan](desktop-trust-distribution-plan.md).
+
+The likely future architecture keeps the React frontend and adds a narrow native layer for desktop-only local discovery. The frontend should not receive broad filesystem access. Native commands should be allowlisted, read-only, timeout-bound, and triggered only after explicit user approval.
+
+The first desktop architecture decision should compare Tauri and Electron in an ADR. Tauri is the current leading candidate because it can wrap the existing Vite app while keeping local system access behind a Rust command boundary.
+
+Future desktop detection should remain limited to user-approved checks for local AI tools and model folders. It must not silently scan the machine, index files, upload local data, store credentials, or execute provider actions.
+
 ## Key Decisions
 
 - Use the uploaded coder build brief as the canonical product source until repo-local docs are expanded.
 - Build directly in this repository unless the owner later chooses a nested app folder.
 - Keep permission levels capped at local draft/export; there is no execute permission level.
 - Treat route recommendations and prompt packages as local decision artifacts, not actions.
+- Treat installable desktop distribution as a separate future product surface requiring a trust-boundary design, governance review, and signing plan before implementation.
 

@@ -1,6 +1,7 @@
 # 2026-07-03T11:49:34-06:00 - Roadmap
 
 Document status: draft baseline
+Status Updated: 2026-07-04T11:17:43-06:00
 
 ## Now
 
@@ -28,6 +29,15 @@ Document status: draft baseline
 - Add end-to-end tests for setup, routing, export, and feedback.
 - Polish documentation for v0.2 handoff.
 
+## Future Distribution
+
+- Host the web app publicly only after release-readiness review and deployment planning.
+- Keep `oldskoolai.com` as the likely canonical product home, with links from `guidedailabs.com` and `guidedaijourney.com`.
+- Add a PWA install path for the hosted app where supported.
+- Plan a separate signed desktop app for Windows, macOS, and Linux when local machine discovery is ready.
+- Use [desktop trust and distribution plan](desktop-trust-distribution-plan.md) as the baseline for desktop trust, signing, and release work.
+- Run an owner governance review before desktop implementation because local machine inspection is a higher-trust surface than the v0.2 browser app.
+
 ## Explicitly Deferred
 
 - External AI API calls
@@ -36,7 +46,7 @@ Document status: draft baseline
 - OAuth connectors
 - Auth and team mode
 - Hosted/cloud storage
-- Desktop packaging
+- Desktop packaging until the desktop trust plan is opened as a separate track
 - PDF export unless trivial
 - Agent mode or autonomous execution
 

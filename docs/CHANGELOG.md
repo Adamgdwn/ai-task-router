@@ -3,5 +3,6 @@
 ## Unreleased
 
 - Initial project setup.
+- Added the desktop trust and distribution planning baseline for future hosted/PWA and signed desktop release paths.
 
 
