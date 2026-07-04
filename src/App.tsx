@@ -17,6 +17,7 @@ const boundaryItems = [
 ];
 
 const browserLocalStore = createLocalStore();
+const guidedAiLabsLogo = "/brand/guided-ai-labs-logo-dark-safe.svg";
 
 type AppProps = {
   store?: LocalStore;
@@ -34,9 +35,13 @@ export function App({ store = browserLocalStore }: AppProps) {
     <main className="appShell">
       <aside className="sideRail" aria-label="AI Task Router sections">
         <div className="brandBlock">
-          <span className="versionTag">v0.2 local MVP</span>
+          <img alt="Guided AI Labs" className="brandLogo" src={guidedAiLabsLogo} />
+          <div className="brandMeta">
+            <span className="brandName">Guided AI Labs</span>
+            <span className="versionTag">v0.2 local MVP</span>
+          </div>
           <h1>AI Task Router</h1>
-          <p>Local-first route planning before any model, tool, or source is used.</p>
+          <p>Professional local-first route planning before any model, tool, or source is used.</p>
         </div>
 
         <nav className="screenTabs" aria-label="AI Task Router screens">

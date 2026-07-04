@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="560"
+   height="370"
+   viewBox="520 230 560 370"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="guided_ai_labs_logo_DESIGN_ONLY_ORIGINAL_COLORS_LIVE_SOURCE.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" />
+  <title
+     id="title1">Guided AI Labs logo - design only - original colours</title>
+  <g
+     fill="none"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="g3">
+    <path
+       d="M 560 555 L 800 315 L 1040 555"
+       stroke="#0F1720"
+       stroke-width="24"
+       id="path1" />
+    <path
+       d="M 625 555 H 975"
+       stroke="#0F1720"
+       stroke-width="24"
+       id="path2" />
+    <path
+       d="M 675 525 L 800 400 L 925 525"
+       stroke="#0B82A6"
+       stroke-width="20"
+       id="path3" />
+  </g>
+  <polygon
+     fill="#0B82A6"
+     points="800,265 835,315 800,365 765,315"
+     id="polygon3" />
+  <circle
+     cx="560"
+     cy="555"
+     fill="#0F1720"
+     r="18"
+     id="circle3" />
+  <circle
+     cx="1040"
+     cy="555"
+     fill="#0F1720"
+     r="18"
+     id="circle4" />
+</svg>

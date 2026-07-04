@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T19:36:52-06:00
+Last Updated: 2026-07-03T19:58:35-06:00
 Status: active
-Status Updated: 2026-07-03T19:36:52-06:00
+Status Updated: 2026-07-03T19:58:35-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -81,7 +81,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Nine local persistence | complete | 2026-07-03T17:19:32-06:00 | Technical Lead | Dexie/IndexedDB local store now persists and validates editable configuration, route cards, prompt packages, route logs, and feedback-ready records. |
 | Chunk Ten export/import functions | complete | 2026-07-03T17:44:01-06:00 | Technical Lead | Schema-versioned local JSON import/export utilities, route-card and prompt-package Markdown, route-log CSV, and recoverable import validation are implemented and tested. |
 | Chunk Eleven setup UI screens | complete | 2026-07-03T19:34:35-06:00 | Technical Lead | Setup screens now edit tool inventory, source permissions, policy defaults, and local setup preferences through IndexedDB-backed storage. |
-| Chunk Twelve task intake and results UI | active next | 2026-07-03T19:34:35-06:00 | Technical Lead | Replace task intake and route-results placeholders using the existing local routing modules. |
+| Brand polish detour | complete | 2026-07-03T19:54:49-06:00 | Technical Lead | Guided AI Labs logo assets, official navy/teal palette, branded app chrome, favicon/title metadata, and responsive setup polish are in place. |
+| Chunk Twelve task intake and results UI | active next | 2026-07-03T19:54:49-06:00 | Technical Lead | Replace task intake and route-results placeholders using the existing local routing modules. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -1278,12 +1279,114 @@ Reached. Setup screens are usable, local changes persist, tests/build pass, and 
 
 Handoff note:
 
-Next chunk should replace task intake and results placeholders using the routing modules already built.
+Next chunk should replace task intake and results placeholders using the routing modules already built. The Guided AI Labs brand polish detour has also been completed, so resume Chunk Twelve with the branded shell in place.
+
+## Brand Polish Detour - Guided AI Labs Identity
+
+Status: complete
+Status Updated: 2026-07-03T19:54:49-06:00
+
+Completion target: Task complete
+
+Budget class: Small
+
+Objective:
+
+Apply Guided AI Labs branding to the local app shell before continuing functional routing UI work.
+
+User outcome:
+
+When the owner or an early user downloads and runs the local app, it looks like a professional Guided AI Labs product with clear brand identity, clean palette, and usable setup screens.
+
+Allowed files or folders:
+
+- `public/brand/*`
+- `src/App.tsx`
+- `src/styles.css`
+- `index.html`
+- `src/tests/unit/App.test.tsx`
+- active pathway, status, session, and decision docs
+
+Non-goals:
+
+- Do not change setup persistence, routing, scoring, prompt-package, or export/import behavior.
+- Do not add a marketing landing page.
+- Do not add provider account connections, credentials, auth, telemetry, remote sync, external asset fetching, or execution workflows.
+- Do not add new dependencies just for branding.
+
+Product boundary reminders:
+
+- Brand assets are static local files packaged with the app.
+- Branding must not weaken the local-first and recommendation-only boundary.
+- The app still does not verify subscriptions, connect accounts, call external providers, send telemetry, or execute work.
+
+Domain terms to use:
+
+- Guided AI Labs
+- AI Task Router
+- local-first
+- recommendation-only
+- brand palette
+- public brand asset
+
+Acceptance criteria:
+
+- [x] Guided AI Labs logo is visible in the app shell.
+- [x] Brand assets are packaged locally under `public/brand`.
+- [x] Browser metadata includes Guided AI Labs title/description and a local SVG favicon.
+- [x] UI theme uses the official navy, AI teal, bright teal, and cloud-light palette from the brand assets.
+- [x] Setup-heavy screens remain clean, operational, and responsive on desktop and mobile.
+- [x] Existing product boundary copy remains visible.
+- [x] No provider, credential, auth, telemetry, remote sync, execution, or external asset-fetching behavior is introduced.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm run test -- App`
+- `npm run build`
+- manual Playwright/browser check with system Chrome at `http://127.0.0.1:5173` for logo load, branded title, desktop/mobile setup navigation, and horizontal overflow
+
+Implementation notes:
+
+- Copied only the selected vendor-provided SVG logo assets into `public/brand` instead of importing the full marketing folder.
+- Updated app shell lockup to show Guided AI Labs identity alongside the AI Task Router product name.
+- Reworked CSS variables and surfaces around the brand palette while keeping the UI dense and operational.
+- Kept mobile navigation compact as a two-column grid so branded chrome does not bury the working screen.
+
+Test expectations:
+
+- `npm run test`
+- `npm run build`
+- `bash scripts/governance-preflight.sh`
+- `git diff --check`
+
+UX/product finish expectations:
+
+- The branded shell should feel like a professional app, not a marketing page.
+- Logo, nav, boundary chips, setup toolbar, repeated records, and form fields should not overlap or overflow on desktop or mobile.
+- Brand color should support clarity and focus, not decoration.
+
+Security and privacy notes:
+
+- Static SVG assets do not introduce secrets, remote calls, telemetry, or external provider behavior.
+- No user data shape or storage schema changes are included in this detour.
+
+Rollback or recovery path:
+
+Revert the brand asset files, `src/App.tsx`, `src/styles.css`, `index.html`, and the related App test changes. Functional setup/storage behavior remains separate.
+
+Stop condition:
+
+Stop when the branded app shell and setup screens validate on desktop and mobile, and the next handoff still points to Chunk Twelve.
+
+Handoff note:
+
+Resume Chunk Twelve with the branded shell in place. Do not rework the brand unless new owner feedback identifies a specific issue.
 
 ## Chunk Twelve - Task Intake And Results UI
 
 Status: active next
-Status Updated: 2026-07-03T19:34:35-06:00
+Status Updated: 2026-07-03T19:54:49-06:00
 
 Completion target: Integration complete
 
@@ -1824,7 +1927,10 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T19:34:35-06:00 | `npm run test -- App storageLocalStore`; `npm run build` | passed | Focused setup UI/storage checks passed: 2 files, 11 tests; TypeScript and Vite production build passed. |
 | 2026-07-03T19:34:35-06:00 | manual Playwright browser check using system Chrome at `http://127.0.0.1:5173` | passed | Desktop and mobile setup navigation, local persistence after refresh, and horizontal overflow checks passed. |
 | 2026-07-03T19:36:52-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Full unit suite passed: 10 files, 68 tests; TypeScript and Vite production build passed; audit found 0 vulnerabilities; governance check passed with 0 warnings; whitespace check passed with normal Windows LF-to-CRLF notices. |
+| 2026-07-03T19:48:36-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Guided AI Labs brand polish detour; work timestamp captured. |
+| 2026-07-03T19:54:49-06:00 | `npm run test -- App`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5173` | passed | App test passed: 1 file, 3 tests; TypeScript and Vite production build passed; desktop and mobile browser checks confirmed local logo load, branded title, setup navigation, and no horizontal overflow. |
+| 2026-07-03T19:58:35-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Full unit suite passed: 10 files, 68 tests; TypeScript and Vite production build passed; audit found 0 vulnerabilities; governance check passed with 0 warnings; whitespace check passed with normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Twelve only: replace the task intake and route-results placeholders using the existing local domain modules for validation, hard gates, candidate generation, scoring, route-card generation, and prompt-package generation. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Twelve only with the Guided AI Labs branded shell in place: replace the task intake and route-results placeholders using the existing local domain modules for validation, hard gates, candidate generation, scoring, route-card generation, and prompt-package generation. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, best-stack recommendation logic, or execution workflows.

@@ -25,6 +25,11 @@ describe("App", () => {
 
     render(<App store={buildTestStore()} />);
 
+    expect(screen.getByAltText("Guided AI Labs")).toHaveAttribute(
+      "src",
+      "/brand/guided-ai-labs-logo-dark-safe.svg",
+    );
+    expect(screen.getByText("Guided AI Labs")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AI Task Router", level: 1 })).toBeInTheDocument();
     expect(screen.getByText("No external AI API calls")).toBeInTheDocument();
     expect(screen.getByText("No connectors or execution mode")).toBeInTheDocument();

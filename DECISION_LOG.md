@@ -1,8 +1,8 @@
-# 2026-07-03T19:34:35-06:00 - Decision Log
+# 2026-07-03T19:54:49-06:00 - Decision Log
 
-Last Updated: 2026-07-03T19:34:35-06:00
+Last Updated: 2026-07-03T19:54:49-06:00
 Status: active
-Status Updated: 2026-07-03T19:34:35-06:00
+Status Updated: 2026-07-03T19:54:49-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -28,3 +28,4 @@ Owner: Technical Lead
 | 2026-07-03T17:19:32-06:00 | Add Dexie for browser-local IndexedDB persistence and fake-indexeddb for unit tests. | Chunk Nine selected IndexedDB for local persistence; Dexie keeps the browser storage boundary small and testable, while fake-indexeddb gives deterministic Vitest coverage without a browser or external service. `npm audit --audit-level=moderate` found 0 vulnerabilities after install. | The MVP now has a versioned local store dependency before UI depends on it. Rollback is removing `src/storage/localStore.ts`, the storage tests, and the two packages before later chunks build on the storage API. |
 | 2026-07-03T17:44:01-06:00 | Keep export/import as a pure schema-versioned local utility boundary. | Chunk Ten needs reusable artifacts before UI exists, while imports must not mutate IndexedDB or bypass future user confirmation. A centralized schema version and strict envelopes make later migrations explicit. | Future UI can call JSON, Markdown, and CSV serializers, then separately decide when to apply validated imports to local storage. Rollback is removing `src/domain/export/exportImport.ts` and its tests before UI depends on them. |
 | 2026-07-03T19:34:35-06:00 | Store the selected setup policy default in a dedicated local setup preferences table. | `PolicyDefault` records define the three editable policy presets but do not represent which one the user has chosen. A small validated `setupPreferences` table preserves that choice without bending the policy schema or duplicating routing rules in UI state. | Local store schema version advances to 2 with an upgrade-safe table addition. Future routing UI can read the active policy default from storage, while rollback is removing the setup UI/state and `setupPreferences` table before later chunks depend on it. |
+| 2026-07-03T19:54:49-06:00 | Package selected Guided AI Labs SVG brand assets under `public/brand` and theme the app shell from those asset colors. | The owner requested branded, professional app screens before continuing functional work. Static local assets keep branding available in downloaded builds without external fetches, while the official navy, AI teal, bright teal, and cloud-light colors keep the UI aligned to the provided materials. | The local app now has visible Guided AI Labs identity, favicon/title metadata, and branded CSS variables. Rollback is removing the two public brand assets and reverting `src/App.tsx`, `src/styles.css`, `index.html`, and the related App test changes. |
