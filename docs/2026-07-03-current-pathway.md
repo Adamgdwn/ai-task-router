@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-04T09:18:42-06:00
+Last Updated: 2026-07-04T09:40:46-06:00
 Status: active
-Status Updated: 2026-07-04T09:18:42-06:00
+Status Updated: 2026-07-04T09:40:46-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -90,7 +90,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | My AI Tools dropdown cleanup detour | complete | 2026-07-04T08:38:31-06:00 | Technical Lead | Replaced subscription/tier/text-field setup with provider, visible model, and thinking-setting dropdowns backed by an everyday tool catalog. |
 | My AI Tools progressive app setup detour | complete | 2026-07-04T09:00:27-06:00 | Technical Lead | Replaced the prefilled tool grid with progressive AI app, account-level, and frequency rows backed by a broader app catalog. |
 | My AI Tools sparse selector correction | complete | 2026-07-04T09:18:42-06:00 | Technical Lead | Corrected stale local data and row headings so My AI Tools starts as one generic Tool selection row, not five named provider cards. |
-| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T09:18:42-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected plain-language MVP workflows. |
+| My AI Tools manual add and local models detour | complete | 2026-07-04T09:40:46-06:00 | Technical Lead | Replaced automatic row reveal with an explicit branded add button, provider-specific plan labels, local model choices, and a local detector script. |
+| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T09:40:46-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected manual-add plain-language MVP workflows. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -2149,7 +2150,7 @@ Reached. My AI Tools now adds AI apps progressively, saves locally, validates in
 
 Handoff note:
 
-Chunk Fifteen should add E2E coverage for the progressive My AI Tools flow: empty first row, app selection, account level, frequency, automatic next row, local save, and no execution/provider workflow. Do not reintroduce app/model/thinking, subscription-level, model-tier, capability-score, routing-category, permission-level, or technical-routing-details language in the primary My AI Tools path.
+Superseded by the later manual-add detour. Chunk Fifteen should use the current My AI Tools behavior from the latest handoff, not this earlier automatic-next-row workflow.
 
 ## My AI Tools Sparse Selector Correction
 
@@ -2237,12 +2238,99 @@ Reached. The reported screen mismatch is corrected, validated in tests/build/bro
 
 Handoff note:
 
-Chunk Fifteen should include E2E coverage for a stale five-row local store migrating into one blank `Tool selection`, plus the normal progressive add/save path.
+Superseded by the later manual-add detour. Chunk Fifteen should still cover stale five-row local-store migration, but the normal add/save path now uses the explicit `Add another tool` button.
+
+## My AI Tools Manual Add And Local Models Detour
+
+Status: complete
+Status Updated: 2026-07-04T09:40:46-06:00
+
+Completion target: Integration complete
+
+Budget class: Small
+
+Objective:
+
+Correct the remaining owner-reported My AI Tools mismatch: selecting one tool should not automatically create another selector, account-level choices should match the selected app more closely, and Local should expose recognizable local model tools.
+
+User outcome:
+
+The user sees one `Tool selection` card, picks the AI app and matching account/setup level, and uses a branded `Add another tool` button only when they choose to add another row. Choosing Local now shows local model options such as Ollama and LM Studio instead of a generic account level.
+
+Allowed files or folders:
+
+- `src/domain/defaults/everydayToolCatalog.ts`
+- `src/ui/screens/SetupScreens.tsx`
+- `src/styles.css`
+- `src/tests/fixtures/*`
+- `src/tests/unit/*`
+- `scripts/*`
+- `package.json`
+- README/manual/status/pathway docs
+
+Non-goals:
+
+- Do not connect provider accounts, verify paid plans, call AI providers, scan files from the browser, or run local models from the app.
+- Do not auto-import local detector results into IndexedDB in this detour.
+- Do not start Chunk Fifteen E2E implementation in this detour.
+
+Acceptance criteria:
+
+- [x] My AI Tools still starts with one generic `Tool selection` row.
+- [x] Selecting an app no longer automatically reveals a second blank selector.
+- [x] A branded `Add another tool` button reveals the next blank selector when the user chooses it.
+- [x] ChatGPT, Claude, Gemini, Microsoft Copilot, Perplexity, Canva, GitHub Copilot, and Cursor use provider-specific account or plan labels.
+- [x] Choosing Local changes the second dropdown to `Local model` with local model tools such as Ollama, LM Studio, Jan, llama.cpp, GPT4All, Open WebUI, and other local model.
+- [x] A local detector script can summarize common local model tooling without changing app state or making network calls.
+- [x] No provider calls, credentials, telemetry, remote sync, automatic uploads, file indexing, or execution behavior are added.
+
+Implementation notes:
+
+- Replaced automatic empty-row display after selection with explicit UI state controlled by `Add another tool`.
+- Expanded the everyday tool catalog with provider-specific plan labels based on official provider plan pages checked on 2026-07-04.
+- Preserved the existing model inventory schema and route-ready fixture behavior; richer UI labels still map to local deterministic routing fields.
+- Added `npm run detect:local-models`, which checks Ollama plus common local model folders and prints a summary by default.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the detour.
+- `npm run test -- App everydayToolCatalog` passed with 2 files and 14 tests.
+- `npm run detect:local-models` passed and produced a summary without printing model names.
+- `npm run test` passed with 11 files and 80 tests.
+- `npm run build` passed.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5181` passed for one-row initial state, no automatic second row after ChatGPT selection, provider-specific `Go`/`Plus` account options, branded `Add another tool`, Local model choices, desktop/mobile layout, and no horizontal overflow.
+- Screenshots:
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-manual-add-tools-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-manual-add-tools-mobile.png`
+
+UX/product finish expectations:
+
+- The screen should feel like the user controls the list, not like the app is assigning homework.
+- Local setup should be recognizable to people who use Ollama, LM Studio, Jan, llama.cpp, GPT4All, Open WebUI, or another private model path.
+- Provider-specific plan names need periodic review because AI product packaging changes.
+
+Security and privacy notes:
+
+- The browser app remains recommendation-only and does not scan the machine.
+- The local detector is an explicit terminal command, performs no network calls, and does not mutate app settings.
+- `--details` and `--json` can print local model names, so normal validation used the default summary output only.
+
+Rollback or recovery path:
+
+Revert the catalog additions, manual add button state, local detector script/package command, docs, and related tests. Existing IndexedDB records remain schema-compatible because the model inventory record shape is unchanged.
+
+Stop condition:
+
+Reached. The reported UX behavior is corrected, local model choices exist, the detector boundary is documented, and focused/full/browser validation passed.
+
+Handoff note:
+
+Chunk Fifteen should add E2E coverage for the manual-add My AI Tools flow: one blank starter row, selecting an app does not add a second row, `Add another tool` reveals the next selector, provider-specific account labels are available, Local shows local model choices, stale five-row migration still lands on one blank row, and the detector remains a separate local command rather than browser execution.
 
 ## Chunk Fifteen - E2E Tests And Fixture Suite
 
 Status: active next
-Status Updated: 2026-07-04T09:18:42-06:00
+Status Updated: 2026-07-04T09:40:46-06:00
 
 Completion target: Integration complete
 
@@ -2534,7 +2622,8 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-04T08:41:24-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final dropdown cleanup close-out validation passed: 10 files and 76 tests, production build, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 | 2026-07-04T09:03:11-06:00 | `npm run test -- App`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5180`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Progressive My AI Tools app setup close-out validation passed: focused App suite 1 file and 11 tests, full unit suite 10 files and 76 tests, production build, browser checks for app/account/frequency rows and desktop/mobile overflow, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 | 2026-07-04T09:18:42-06:00 | `npm run test -- App`; `npm run test -- storageLocalStore`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5180`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Sparse selector correction passed: App suite 1 file and 12 tests, storage suite 1 file and 9 tests, full unit suite 10 files and 78 tests, production build, deliberate stale five-row IndexedDB browser migration to one `Tool selection`, Genspark selection, automatic next row, mobile overflow check, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-04T09:40:46-06:00 | `npm run test -- App everydayToolCatalog`; `npm run detect:local-models`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5181`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Manual-add/local-model detour passed: focused suite 2 files and 14 tests, local detector summary with no model-name details, full unit suite 11 files and 80 tests, production build, browser checks for one starter row, no automatic second row after ChatGPT selection, branded add button, provider-specific account options, Local model dropdown, desktop/mobile overflow, screenshots, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, progressive AI app/account-level/frequency dropdowns, stale five-row local-store migration, Genspark and broader app options, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, provider-specific account dropdowns, Local model choices, stale five-row local-store migration, Genspark and broader app options, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.

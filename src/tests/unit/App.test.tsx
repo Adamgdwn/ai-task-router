@@ -69,6 +69,8 @@ describe("App", () => {
     await waitFor(() => {
       expect(firstApp).toHaveDisplayValue("ChatGPT");
     });
+    expect(screen.getByRole("option", { name: "Go" })).toBeInTheDocument();
+    expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(1);
     await user.selectOptions(
       within(firstToolRow).getByRole("combobox", { name: "Account level for user-mid-synthesis-model" }),
       "pro",
@@ -78,22 +80,26 @@ describe("App", () => {
       "hourly",
     );
 
+    await user.click(screen.getByRole("button", { name: /Add another tool/ }));
     await waitFor(() => {
       expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(2);
     });
     const secondToolRow = screen.getAllByRole("region", { name: "Tool selection" })[1];
     await user.selectOptions(
       within(secondToolRow).getByRole("combobox", { name: "AI app for user-free-small-model" }),
-      "deepseek",
+      "local",
     );
     await waitFor(() => {
       expect(
         within(secondToolRow).getByRole("combobox", { name: "AI app for user-free-small-model" }),
-      ).toHaveDisplayValue("DeepSeek");
+      ).toHaveDisplayValue("Local or private AI");
     });
+    expect(within(secondToolRow).getByRole("combobox", { name: "Local model for user-free-small-model" })).toHaveDisplayValue(
+      "Ollama",
+    );
     await user.selectOptions(
-      within(secondToolRow).getByRole("combobox", { name: "Account level for user-free-small-model" }),
-      "basic",
+      within(secondToolRow).getByRole("combobox", { name: "Local model for user-free-small-model" }),
+      "local-lm-studio",
     );
     await user.selectOptions(
       within(secondToolRow).getByRole("combobox", { name: "How often for user-free-small-model" }),
@@ -114,19 +120,19 @@ describe("App", () => {
     ).toHaveDisplayValue("ChatGPT");
     expect(
       within(savedChatGptRow).getByRole("combobox", { name: "Account level for user-mid-synthesis-model" }),
-    ).toHaveDisplayValue("Pro or strongest");
+    ).toHaveDisplayValue("Pro");
     expect(
       within(savedChatGptRow).getByRole("combobox", { name: "How often for user-mid-synthesis-model" }),
     ).toHaveDisplayValue("Many times a day");
 
-    const savedDeepSeekRow = savedToolRows[1];
+    const savedLocalRow = savedToolRows[1];
     expect(
-      within(savedDeepSeekRow).getByRole("combobox", { name: "AI app for user-free-small-model" }),
-    ).toHaveDisplayValue("DeepSeek");
+      within(savedLocalRow).getByRole("combobox", { name: "AI app for user-free-small-model" }),
+    ).toHaveDisplayValue("Local or private AI");
     expect(
-      within(savedDeepSeekRow).getByRole("combobox", { name: "Account level for user-free-small-model" }),
-    ).toHaveDisplayValue("Free or basic");
-    expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(3);
+      within(savedLocalRow).getByRole("combobox", { name: "Local model for user-free-small-model" }),
+    ).toHaveDisplayValue("LM Studio");
+    expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(2);
 
     await user.click(screen.getByRole("button", { name: "Restore starter choices" }));
 

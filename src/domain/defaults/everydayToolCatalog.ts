@@ -31,11 +31,31 @@ export type EverydayToolProviderId =
 export type EverydayToolAccountId =
   | "not-selected"
   | "basic"
+  | "go"
   | "paid"
+  | "plus"
   | "pro"
+  | "business"
   | "team"
-  | "local-basic"
-  | "local-strong";
+  | "max-5x"
+  | "max-20x"
+  | "google-ai-pro"
+  | "google-ai-ultra"
+  | "m365-personal"
+  | "m365-copilot"
+  | "enterprise-pro"
+  | "enterprise-max"
+  | "pro-plus"
+  | "max"
+  | "hobby"
+  | "ultra"
+  | "local-ollama"
+  | "local-lm-studio"
+  | "local-jan"
+  | "local-llama-cpp"
+  | "local-gpt4all"
+  | "local-open-webui"
+  | "local-other";
 
 export type EverydayToolFrequencyId =
   | "not-selected"
@@ -66,6 +86,7 @@ export type EverydayToolProvider = {
   id: EverydayToolProviderId;
   label: string;
   summary: string;
+  accountLabel?: string;
   defaultAccountId: EverydayToolAccountId;
   defaultFrequencyId: EverydayToolFrequencyId;
   accountOptions: EverydayToolAccountOption[];
@@ -162,7 +183,7 @@ const placeholderAccountOptions = [
   },
 ] satisfies EverydayToolAccountOption[];
 
-const generalAccountOptions = [
+const consumerAccountOptions = [
   {
     id: "basic",
     label: "Free or basic",
@@ -173,7 +194,7 @@ const generalAccountOptions = [
   },
   {
     id: "paid",
-    label: "Paid everyday",
+    label: "Paid or premium",
     tier: "mid",
     capabilityScores: balancedGeneralScores,
     maxPermissionLevel: 2,
@@ -181,7 +202,7 @@ const generalAccountOptions = [
   },
   {
     id: "pro",
-    label: "Pro or strongest",
+    label: "Highest personal plan",
     tier: "frontier",
     capabilityScores: strongGeneralScores,
     maxPermissionLevel: 2,
@@ -189,11 +210,167 @@ const generalAccountOptions = [
   },
   {
     id: "team",
-    label: "Work, team, or enterprise",
+    label: "Team, work, or enterprise",
     tier: "frontier",
     capabilityScores: strongGeneralScores,
     maxPermissionLevel: 3,
     note: "Use only for work information your organization allows in that account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const chatGptAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Useful for quick, low-stakes help.",
+  },
+  {
+    id: "go",
+    label: "Go",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when the account has expanded everyday access but not the full Plus tier.",
+  },
+  {
+    id: "plus",
+    label: "Plus",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Good for regular writing, planning, analysis, and expanded research features.",
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when quality, deep reasoning, or higher limits matter more than speed.",
+  },
+  {
+    id: "business",
+    label: "Business or Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work information your organization allows in that workspace.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const claudeAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Useful for occasional low-stakes help.",
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Good for regular writing, planning, and analysis.",
+  },
+  {
+    id: "max-5x",
+    label: "Max 5x",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when you have the higher-capacity Max tier for frequent work.",
+  },
+  {
+    id: "max-20x",
+    label: "Max 20x",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for the heaviest personal Claude usage.",
+  },
+  {
+    id: "team",
+    label: "Team or Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work information your organization allows in that Claude organization.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const geminiAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Useful for quick, low-stakes Gemini help.",
+  },
+  {
+    id: "google-ai-pro",
+    label: "Google AI Pro",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Good for regular Gemini app use with expanded AI access.",
+  },
+  {
+    id: "google-ai-ultra",
+    label: "Google AI Ultra",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for the highest personal Gemini usage tier.",
+  },
+  {
+    id: "team",
+    label: "Google Workspace or enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work information your organization allows in Google Workspace.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const copilotAccountOptions = [
+  {
+    id: "basic",
+    label: "Free Copilot",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Useful for quick public or personal help.",
+  },
+  {
+    id: "m365-personal",
+    label: "Microsoft 365 Personal, Family, or Premium",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 2,
+    note: "Good when Copilot is part of your personal Microsoft 365 apps.",
+  },
+  {
+    id: "pro",
+    label: "Copilot Pro",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 2,
+    note: "Use when you have paid personal Copilot access.",
+  },
+  {
+    id: "m365-copilot",
+    label: "Microsoft 365 Copilot for work",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work information your organization allows in Microsoft 365 Copilot.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -208,7 +385,7 @@ const researchAccountOptions = [
   },
   {
     id: "paid",
-    label: "Paid everyday",
+    label: "Pro or paid",
     tier: "research",
     capabilityScores: researchScores,
     maxPermissionLevel: 1,
@@ -216,7 +393,7 @@ const researchAccountOptions = [
   },
   {
     id: "pro",
-    label: "Pro or strongest",
+    label: "Highest research tier",
     tier: "research",
     capabilityScores: strongResearchScores,
     maxPermissionLevel: 2,
@@ -224,11 +401,46 @@ const researchAccountOptions = [
   },
   {
     id: "team",
-    label: "Work, team, or enterprise",
+    label: "Team or enterprise",
     tier: "research",
     capabilityScores: strongResearchScores,
     maxPermissionLevel: 3,
     note: "Use only for work research your organization allows in that account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const perplexityAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "research",
+    capabilityScores: researchScores,
+    maxPermissionLevel: 1,
+    note: "Good for public questions and basic source-backed answers.",
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 2,
+    note: "Use for regular current-facts checks, research, and citation-heavy work.",
+  },
+  {
+    id: "enterprise-pro",
+    label: "Enterprise Pro",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work research your organization allows in Perplexity Enterprise.",
+  },
+  {
+    id: "enterprise-max",
+    label: "Enterprise Max",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 3,
+    note: "Use for the highest approved Perplexity Enterprise tier.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -243,7 +455,7 @@ const artifactAccountOptions = [
   },
   {
     id: "paid",
-    label: "Paid everyday",
+    label: "Paid or premium",
     tier: "artifact",
     capabilityScores: artifactScores,
     maxPermissionLevel: 2,
@@ -251,7 +463,7 @@ const artifactAccountOptions = [
   },
   {
     id: "pro",
-    label: "Pro or strongest",
+    label: "Highest creator plan",
     tier: "artifact",
     capabilityScores: scores({
       reasoning: 4,
@@ -265,11 +477,46 @@ const artifactAccountOptions = [
   },
   {
     id: "team",
-    label: "Work, team, or enterprise",
+    label: "Team, business, or enterprise",
     tier: "artifact",
     capabilityScores: artifactScores,
     maxPermissionLevel: 3,
     note: "Use only for work artifacts your organization allows in that account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const canvaAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 1,
+    note: "Useful for simple design or visual-output help.",
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 2,
+    note: "Use when Canva Pro AI and premium design features are available.",
+  },
+  {
+    id: "business",
+    label: "Business",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work artifacts your organization allows in Canva Business.",
+  },
+  {
+    id: "team",
+    label: "Enterprise",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved brand or design work.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -284,7 +531,7 @@ const codingAccountOptions = [
   },
   {
     id: "paid",
-    label: "Paid everyday",
+    label: "Pro or paid",
     tier: "frontier",
     capabilityScores: codingScores,
     maxPermissionLevel: 2,
@@ -292,7 +539,7 @@ const codingAccountOptions = [
   },
   {
     id: "pro",
-    label: "Pro or strongest",
+    label: "Highest individual plan",
     tier: "frontier",
     capabilityScores: scores({
       reasoning: 5,
@@ -306,7 +553,7 @@ const codingAccountOptions = [
   },
   {
     id: "team",
-    label: "Work, team, or enterprise",
+    label: "Team, business, or enterprise",
     tier: "frontier",
     capabilityScores: codingScores,
     maxPermissionLevel: 3,
@@ -314,24 +561,179 @@ const codingAccountOptions = [
   },
 ] satisfies EverydayToolAccountOption[];
 
-const localAccountOptions = [
+const githubCopilotAccountOptions = [
   {
-    id: "local-basic",
-    label: "Local or private basic",
+    id: "basic",
+    label: "Free",
+    tier: "mid",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 1,
+    note: "Useful for light coding help.",
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Good for regular coding with GitHub Copilot.",
+  },
+  {
+    id: "pro-plus",
+    label: "Pro+",
+    tier: "frontier",
+    capabilityScores: scores({
+      reasoning: 5,
+      writing: 3,
+      coding: 5,
+      research: 3,
+      packaging: 4,
+    }),
+    maxPermissionLevel: 2,
+    note: "Use when your individual Copilot plan has higher premium usage.",
+  },
+  {
+    id: "max",
+    label: "Max",
+    tier: "frontier",
+    capabilityScores: scores({
+      reasoning: 5,
+      writing: 3,
+      coding: 5,
+      research: 3,
+      packaging: 4,
+    }),
+    maxPermissionLevel: 2,
+    note: "Use for the highest individual GitHub Copilot usage tier.",
+  },
+  {
+    id: "team",
+    label: "Business or Enterprise",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 3,
+    note: "Use only for code your organization allows in GitHub Copilot.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const cursorAccountOptions = [
+  {
+    id: "hobby",
+    label: "Hobby",
+    tier: "mid",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 1,
+    note: "Useful for light Cursor use.",
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Good for regular Cursor agent and coding work.",
+  },
+  {
+    id: "pro-plus",
+    label: "Pro+",
+    tier: "frontier",
+    capabilityScores: scores({
+      reasoning: 5,
+      writing: 3,
+      coding: 5,
+      research: 3,
+      packaging: 4,
+    }),
+    maxPermissionLevel: 2,
+    note: "Use when your Cursor plan has higher included usage than Pro.",
+  },
+  {
+    id: "ultra",
+    label: "Ultra",
+    tier: "frontier",
+    capabilityScores: scores({
+      reasoning: 5,
+      writing: 3,
+      coding: 5,
+      research: 3,
+      packaging: 4,
+    }),
+    maxPermissionLevel: 2,
+    note: "Use for the heaviest individual Cursor usage tier.",
+  },
+  {
+    id: "team",
+    label: "Team or Enterprise",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 3,
+    note: "Use only for code your organization allows in Cursor.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const localModelOptions = [
+  {
+    id: "local-ollama",
+    label: "Ollama",
     tier: "mid",
     capabilityScores: balancedGeneralScores,
     maxPermissionLevel: 4,
     localOnly: true,
-    note: "Useful when the work should stay private.",
+    note: "Use when Ollama is installed and the model runs on your own machine or private host.",
   },
   {
-    id: "local-strong",
-    label: "Local or private strongest",
+    id: "local-lm-studio",
+    label: "LM Studio",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 4,
+    localOnly: true,
+    note: "Use when LM Studio is the local model app you recognize.",
+  },
+  {
+    id: "local-jan",
+    label: "Jan",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 4,
+    localOnly: true,
+    note: "Use when Jan is the local model app you recognize.",
+  },
+  {
+    id: "local-llama-cpp",
+    label: "llama.cpp",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 4,
+    localOnly: true,
+    note: "Use when a llama.cpp model or server is the local setup you recognize.",
+  },
+  {
+    id: "local-gpt4all",
+    label: "GPT4All",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 4,
+    localOnly: true,
+    note: "Use when GPT4All is the local model app you recognize.",
+  },
+  {
+    id: "local-open-webui",
+    label: "Open WebUI or private endpoint",
     tier: "frontier",
     capabilityScores: strongGeneralScores,
     maxPermissionLevel: 4,
     localOnly: true,
-    note: "Private help for harder work.",
+    note: "Use when a private local server or workplace-hosted model is the setup you recognize.",
+  },
+  {
+    id: "local-other",
+    label: "Other local model",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 4,
+    localOnly: true,
+    note: "Use when your local model app is not listed here.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -387,20 +789,20 @@ export const everydayToolProviders = [
     accountOptions: placeholderAccountOptions,
     frequencyOptions: placeholderFrequencyOptions,
   }),
-  generalProvider("chatgpt", "ChatGPT"),
-  generalProvider("claude", "Claude"),
-  generalProvider("gemini", "Gemini"),
-  artifactProvider("copilot", "Microsoft Copilot"),
-  researchProvider("perplexity", "Perplexity"),
+  chatGptProvider(),
+  claudeProvider(),
+  geminiProvider(),
+  copilotProvider(),
+  perplexityProvider(),
   researchProvider("genspark", "Genspark"),
   generalProvider("grok", "Grok"),
   generalProvider("meta-ai", "Meta AI"),
   generalProvider("poe", "Poe"),
   researchProvider("you-com", "You.com"),
   researchProvider("notebooklm", "NotebookLM"),
-  artifactProvider("canva", "Canva Magic Studio"),
-  codingProvider("github-copilot", "GitHub Copilot"),
-  codingProvider("cursor", "Cursor"),
+  canvaProvider(),
+  githubCopilotProvider(),
+  cursorProvider(),
   codingProvider("replit", "Replit AI"),
   generalProvider("deepseek", "DeepSeek"),
   generalProvider("qwen", "Qwen"),
@@ -413,10 +815,11 @@ export const everydayToolProviders = [
   provider({
     id: "local",
     label: "Local or private AI",
-    summary: "Use this when your tool runs locally or stays inside a private workplace environment.",
-    defaultAccountId: "local-basic",
+    summary: "Use this for Ollama, LM Studio, Jan, llama.cpp, GPT4All, Open WebUI, or another private model.",
+    accountLabel: "Local model",
+    defaultAccountId: "local-ollama",
     defaultFrequencyId: "weekly",
-    accountOptions: localAccountOptions,
+    accountOptions: localModelOptions,
     frequencyOptions: realFrequencyOptions,
   }),
   generalProvider("other", "Something else"),
@@ -529,6 +932,11 @@ export function applyEverydayToolSelection(
     };
   }
 
+  const boundaryNote =
+    provider.id === "local"
+      ? "The app only remembers this choice; it does not scan your computer or start local model tools."
+      : `The app only remembers this choice; it does not connect to ${provider.label}.`;
+
   return {
     ...model,
     label: everydayToolLabel(provider, accountOption, frequencyOption),
@@ -540,7 +948,7 @@ export function applyEverydayToolSelection(
     maxPermissionLevel: accountOption.maxPermissionLevel,
     requiresCredentials: false,
     requiresExternalCall: false,
-    notes: `${accountOption.note} ${frequencyOption.note} The app only remembers this choice; it does not connect to ${provider.label}.`,
+    notes: `${accountOption.note} ${frequencyOption.note} ${boundaryNote}`,
   };
 }
 
@@ -579,14 +987,112 @@ export function everydayToolSummary(model: ModelInventoryItem): string {
     provider.frequencyOptions.find((option) => option.id === selection.frequencyId) ?? provider.frequencyOptions[0];
 
   if (provider.id === "none") {
-    return "Choose one AI app you already know. A new blank line appears after each selection.";
+    return "Choose one AI app you already know. Add another row only when you want another tool.";
   }
 
-  return `${provider.summary} Account: ${accountOption.label}. Use: ${frequencyOption.label}.`;
+  return `${provider.summary} ${provider.accountLabel ?? "Account level"}: ${accountOption.label}. Use: ${
+    frequencyOption.label
+  }.`;
 }
 
 function provider(providerConfig: EverydayToolProvider): EverydayToolProvider {
   return providerConfig;
+}
+
+function chatGptProvider(): EverydayToolProvider {
+  return provider({
+    id: "chatgpt",
+    label: "ChatGPT",
+    summary: "Use this if ChatGPT is one of the AI apps you already know.",
+    defaultAccountId: "plus",
+    defaultFrequencyId: "daily",
+    accountOptions: chatGptAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function claudeProvider(): EverydayToolProvider {
+  return provider({
+    id: "claude",
+    label: "Claude",
+    summary: "Use this if Claude is one of the AI apps you already know.",
+    defaultAccountId: "pro",
+    defaultFrequencyId: "daily",
+    accountOptions: claudeAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function geminiProvider(): EverydayToolProvider {
+  return provider({
+    id: "gemini",
+    label: "Gemini",
+    summary: "Use this if Gemini is one of the AI apps you already know.",
+    defaultAccountId: "google-ai-pro",
+    defaultFrequencyId: "daily",
+    accountOptions: geminiAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function copilotProvider(): EverydayToolProvider {
+  return provider({
+    id: "copilot",
+    label: "Microsoft Copilot",
+    summary: "Use this when Copilot helps create documents, tables, slides, images, or polished outputs.",
+    defaultAccountId: "m365-copilot",
+    defaultFrequencyId: "weekly",
+    accountOptions: copilotAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function perplexityProvider(): EverydayToolProvider {
+  return provider({
+    id: "perplexity",
+    label: "Perplexity",
+    summary: "Use this when Perplexity helps you check current facts, sources, or research.",
+    defaultAccountId: "pro",
+    defaultFrequencyId: "weekly",
+    accountOptions: perplexityAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function canvaProvider(): EverydayToolProvider {
+  return provider({
+    id: "canva",
+    label: "Canva Magic Studio",
+    summary: "Use this when Canva helps create designs, images, slides, or polished outputs.",
+    defaultAccountId: "pro",
+    defaultFrequencyId: "weekly",
+    accountOptions: canvaAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function githubCopilotProvider(): EverydayToolProvider {
+  return provider({
+    id: "github-copilot",
+    label: "GitHub Copilot",
+    summary: "Use this when GitHub Copilot helps you write, review, or understand code.",
+    defaultAccountId: "pro",
+    defaultFrequencyId: "weekly",
+    accountOptions: githubCopilotAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function cursorProvider(): EverydayToolProvider {
+  return provider({
+    id: "cursor",
+    label: "Cursor",
+    summary: "Use this when Cursor helps you write, review, or understand code.",
+    defaultAccountId: "pro",
+    defaultFrequencyId: "weekly",
+    accountOptions: cursorAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
 }
 
 function generalProvider(id: EverydayToolProviderId, label: string): EverydayToolProvider {
@@ -596,7 +1102,7 @@ function generalProvider(id: EverydayToolProviderId, label: string): EverydayToo
     summary: `Use this if ${label} is one of the AI apps you already know.`,
     defaultAccountId: "paid",
     defaultFrequencyId: "daily",
-    accountOptions: generalAccountOptions,
+    accountOptions: consumerAccountOptions,
     frequencyOptions: realFrequencyOptions,
   });
 }

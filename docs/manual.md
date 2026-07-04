@@ -37,5 +37,16 @@ For material or risk-triggering work, add the full governance path:
 
 ## Operator Notes
 
-Capture practical operating tips, common gotchas, and handoff guidance.
+The browser app stays local-first and recommendation-only. It does not sign in to providers, verify paid plans, call AI
+APIs, scan files, or run local model tools.
+
+To inspect this machine for common local model tooling, run:
+
+```bash
+npm run detect:local-models
+```
+
+The detector checks common local folders and the Ollama CLI only. It prints a summary by default and does not change app
+settings. Add `-- --details` if local model names should be printed, or `-- --json` if a report is needed for a later
+manual import workflow.
 

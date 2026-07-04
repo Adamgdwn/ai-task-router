@@ -499,6 +499,38 @@ button:focus-visible {
   padding: 16px;
 }
 
+.addToolButton {
+  align-items: center;
+  background: var(--brand-teal);
+  border-color: var(--brand-teal);
+  color: #ffffff;
+  display: inline-flex;
+  gap: 10px;
+  justify-self: start;
+  min-height: 42px;
+  padding: 9px 14px;
+}
+
+.addToolButton span {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 1.12rem;
+  font-weight: 900;
+  height: 24px;
+  justify-content: center;
+  line-height: 1;
+  width: 24px;
+}
+
+.addToolButton:hover:not(:disabled),
+.addToolButton:focus-visible:not(:disabled) {
+  background: #096f8e;
+  border-color: #096f8e;
+}
+
 .selectedRecord {
   border-color: var(--brand-teal);
   box-shadow:

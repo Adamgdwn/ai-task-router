@@ -1,4 +1,4 @@
-import type { ChangeEvent, ReactNode } from "react";
+import { useState, type ChangeEvent, type ReactNode } from "react";
 import { permissionLevels, sensitivityClasses } from "../../domain/schemas";
 import {
   applyEverydayToolSelection,
@@ -102,8 +102,9 @@ export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
   return (
     <SetupScreenLayout definition={definition} setup={setup}>
       <SetupBoundaryNote>
-        Add one AI app at a time. Pick the app, the account level you use, and how often you reach for it. The app does
-        not sign in, verify paid plans, call providers, or store credentials.
+        Add one AI app at a time. Pick the app, the account level you use, and how often you reach for it. Use Add
+        another tool only when you want another row. The app does not sign in, verify paid plans, call providers, or
+        store credentials.
       </SetupBoundaryNote>
 
       <section className="conversationCard" aria-labelledby="tool-quick-check-heading">
@@ -112,8 +113,8 @@ export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
           <h3 id="tool-quick-check-heading">What do you actually click when you use AI?</h3>
         </div>
         <p>
-          Start with the first app you recognize. After you choose one, another blank line appears for the next tool you
-          know.
+          Start with the first app you recognize. When you genuinely want another one, use the add button below the
+          selection.
         </p>
       </section>
 
@@ -315,16 +316,36 @@ function InventoryGroup({
   title: string;
 }) {
   const toolSlots = models.filter((model) => model.id !== "manual-human-review");
-  const visibleModels = visibleToolRows(toolSlots);
+  const [extraEmptyRows, setExtraEmptyRows] = useState(0);
   const selectedCount = toolSlots.filter(isEverydayToolSelected).length;
+  const emptySlotCount = toolSlots.length - selectedCount;
+  const emptyRowsToShow = selectedCount === 0 ? 1 : extraEmptyRows;
+  const visibleModels = visibleToolRows(toolSlots, emptyRowsToShow);
+  const canAddAnotherTool = emptySlotCount > emptyRowsToShow;
 
   function updateToolSlot(updatedModel: ModelInventoryItem) {
+    const currentModel = models.find((model) => model.id === updatedModel.id);
+    const rowBecameSelected =
+      currentModel !== undefined && !isEverydayToolSelected(currentModel) && isEverydayToolSelected(updatedModel);
     const nextModels = replaceRecord(models, updatedModel);
+
+    if (rowBecameSelected) {
+      setExtraEmptyRows((currentRows) => Math.max(0, currentRows - 1));
+    }
+
     setup.updateModelInventory(nextModels);
     setup.updateSetupPreferences({
       ...setup.preferences,
       preferredModelId: preferredToolIdFromFrequency(nextModels),
     });
+  }
+
+  function addToolRow() {
+    if (!canAddAnotherTool) {
+      return;
+    }
+
+    setExtraEmptyRows((currentRows) => currentRows + 1);
   }
 
   return (
@@ -347,6 +368,16 @@ function InventoryGroup({
           ))
         )}
       </div>
+
+      <button
+        className="addToolButton"
+        disabled={!canAddAnotherTool || setup.status === "saving"}
+        onClick={addToolRow}
+        type="button"
+      >
+        <span aria-hidden="true">+</span>
+        Add another tool
+      </button>
     </section>
   );
 }
@@ -362,6 +393,7 @@ function ModelInventoryRow({
   const provider = getEverydayToolProvider(selectedTool.providerId);
   const selected = isEverydayToolSelected(model);
   const rowTitle = "Tool selection";
+  const accountLabel = provider.accountLabel ?? "Account level";
 
   return (
     <section className="setupRecord" aria-labelledby={`${model.id}-title`}>
@@ -396,9 +428,9 @@ function ModelInventoryRow({
         </label>
 
         <label>
-          <span>Account level</span>
+          <span>{accountLabel}</span>
           <select
-            aria-label={`Account level for ${model.id}`}
+            aria-label={`${accountLabel} for ${model.id}`}
             disabled={!selected}
             onChange={(event) =>
               onChange(
@@ -756,10 +788,11 @@ function friendlyPolicyDescription(policy: PolicyDefault) {
   return "Balance quality, speed, caution, and effort for normal work.";
 }
 
-function visibleToolRows(models: ModelInventoryItem[]): ModelInventoryItem[] {
-  const firstEmptyIndex = models.findIndex((model) => !isEverydayToolSelected(model));
+function visibleToolRows(models: ModelInventoryItem[], emptyRowsToShow: number): ModelInventoryItem[] {
+  const selectedModels = models.filter(isEverydayToolSelected);
+  const emptyModels = models.filter((model) => !isEverydayToolSelected(model)).slice(0, emptyRowsToShow);
 
-  return models.filter((model, index) => isEverydayToolSelected(model) || index === firstEmptyIndex);
+  return [...selectedModels, ...emptyModels];
 }
 
 function preferredToolIdFromFrequency(models: ModelInventoryItem[]): ModelInventoryItem["id"] | undefined {

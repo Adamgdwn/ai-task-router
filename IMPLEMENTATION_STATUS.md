@@ -1,48 +1,50 @@
-# 2026-07-04T09:18:42-06:00 - Implementation Status
+# 2026-07-04T09:40:46-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T09:18:42-06:00
-Status: my-ai-tools-sparse-selector-correction-complete
-Status Updated: 2026-07-04T09:18:42-06:00
+Last Updated: 2026-07-04T09:40:46-06:00
+Status: my-ai-tools-manual-add-local-models-complete
+Status Updated: 2026-07-04T09:40:46-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-My AI Tools Sparse Selector Correction.
+My AI Tools Manual Add And Local Models Detour.
 
 Completion target: Integration complete.
 
 ## Scope
 
-The local app now correctly presents My AI Tools as a sparse add-one-at-a-time selector, including for browsers that already had the previous five prefilled starter rows saved locally.
+The local app now presents My AI Tools as a user-controlled selector: one starter row, an explicit branded add button, provider-specific account labels, and recognizable local model choices.
 
 The completed slice provides:
 
 - `My AI Tools` starts with one generic `Tool selection` row instead of provider-named cards.
-- stale local IndexedDB records from the old five-tool starter inventory migrate to `0 selected` and the corrected empty tool slots.
-- selecting an app enables that row and automatically reveals one new empty row.
-- primary tool setup uses only AI app, account level, and frequency dropdowns.
-- the AI app catalog includes mainstream apps plus broader options such as Genspark, DeepSeek, Qwen, Kimi, Doubao, MiniMax, Tencent Hunyuan, and `Something else`.
+- selecting an app enables that row but does not automatically reveal another row.
+- the branded `Add another tool` button reveals the next blank selector only when the user chooses it.
+- primary tool setup uses AI app, account level or local model, and frequency dropdowns.
+- ChatGPT, Claude, Gemini, Microsoft Copilot, Perplexity, Canva, GitHub Copilot, and Cursor use provider-specific account or plan labels.
+- Local or private AI exposes local model choices such as Ollama, LM Studio, Jan, llama.cpp, GPT4All, Open WebUI, and other local model.
+- `npm run detect:local-models` can summarize common local model tooling without changing app state.
 - first-run setup records remain schema-compatible and stable-ID-compatible while no longer claiming the user has five tools selected.
 - routing/domain tests now use explicit `routeReadyModels` fixtures instead of first-run UI defaults.
 
 ## Product Boundary
 
-This detour keeps the app local-first and recommendation-only. It does not add provider account connections, paid-plan verification, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+This detour keeps the app local-first and recommendation-only. It does not add provider account connections, paid-plan verification, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
 
 ## Evidence
 
-- `bash scripts/governance-preflight.sh` passed with 0 warnings before the correction.
-- `npm run test -- App` passed with 1 test file and 12 tests.
-- `npm run test -- storageLocalStore` passed with 1 test file and 9 tests.
-- `npm run test` passed with 10 test files and 78 tests.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the detour.
+- `npm run test -- App everydayToolCatalog` passed with 2 test files and 14 tests.
+- `npm run detect:local-models` passed and produced a summary without printing model names.
+- `npm run test` passed with 11 test files and 80 tests.
 - `npm run build` passed.
 - `npm audit --audit-level=moderate` found 0 vulnerabilities.
 - `bash scripts/governance-preflight.sh` passed with 0 warnings at close-out.
 - `git diff --check` passed; output only included normal Windows LF-to-CRLF notices.
-- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5180` deliberately planted the old five-row starter inventory into IndexedDB, reloaded, and passed for migration to `0 selected`, one `Tool selection` row, no provider-named regions, Genspark selection, automatic next row, mobile layout, and no horizontal overflow.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5181` passed for one starter row, no automatic second row after ChatGPT selection, provider-specific account labels, branded add button, Local model choices, mobile layout, and no horizontal overflow.
 - Screenshots:
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tool-selection-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tool-selection-mobile.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-manual-add-tools-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-manual-add-tools-mobile.png`
 
 ## Known Gaps
 
@@ -50,6 +52,7 @@ This detour keeps the app local-first and recommendation-only. It does not add p
 - Import/export UI remains a later chunk; pure export/import utilities and artifact download prep already exist.
 - Proposed best stack remains a disabled planning note only.
 - Provider/app wording will need periodic review because AI app names and plan labels change.
+- Local detector results are not imported into the app yet; a future reviewed workflow would need an explicit import or confirmation step.
 
 ## Next Chunk
 

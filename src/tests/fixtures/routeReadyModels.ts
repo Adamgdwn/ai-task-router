@@ -19,13 +19,13 @@ export const routeReadyModels = [
   createEverydayToolModel({
     id: "user-mid-synthesis-model",
     providerId: "chatgpt",
-    accountId: "paid",
+    accountId: "plus",
     frequencyId: "daily",
   }),
   createEverydayToolModel({
     id: "user-frontier-quality-model",
     providerId: "claude",
-    accountId: "pro",
+    accountId: "max-5x",
     frequencyId: "daily",
   }),
   createEverydayToolModel({
@@ -37,7 +37,7 @@ export const routeReadyModels = [
   createEverydayToolModel({
     id: "user-artifact-tool",
     providerId: "copilot",
-    accountId: "paid",
+    accountId: "m365-copilot",
     frequencyId: "weekly",
   }),
 ] satisfies ModelInventoryItem[];

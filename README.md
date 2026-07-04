@@ -70,6 +70,15 @@ Run the smoke test:
 npm run test
 ```
 
+Check for local model tools on this machine:
+
+```bash
+npm run detect:local-models
+```
+
+This local check does not change the browser app, connect accounts, call AI providers, or send data anywhere.
+Use `npm run detect:local-models -- --details` only when you want local model names printed in the terminal.
+
 Build the app:
 
 ```bash
