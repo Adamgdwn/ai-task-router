@@ -5,6 +5,7 @@ import { defaultPolicies } from "../domain/defaults/defaultPolicies";
 import { defaultSources } from "../domain/defaults/defaultSources";
 import {
   modelInventoryItemSchema,
+  policyDefaultIds,
   policyDefaultSchema,
   promptPackageSchema,
   routeCardSchema,
@@ -21,15 +22,21 @@ import type {
 } from "../domain/types";
 
 export const localStoreDatabaseName = "ai-task-router-local-store";
-export const localStoreSchemaVersion = 1;
+export const localStoreSchemaVersion = 2;
 
 export type LocalStoreTableName =
   | "modelInventory"
   | "sourcePermissions"
   | "policySettings"
+  | "setupPreferences"
   | "routeCards"
   | "promptPackages"
   | "routeLogEntries";
+
+export type LocalSetupPreferences = {
+  id: "setup-preferences";
+  activePolicyDefaultId: PolicyDefault["id"];
+};
 
 export type LocalConfiguration = {
   modelInventory: ModelInventoryItem[];
@@ -63,6 +70,18 @@ export type RouteLogFeedbackUpdate = {
   outcome: RouteLogEntry["outcome"];
   feedback?: RouteLogEntry["feedback"];
 };
+
+export const defaultSetupPreferences = {
+  id: "setup-preferences",
+  activePolicyDefaultId: "balanced",
+} satisfies LocalSetupPreferences;
+
+const setupPreferencesSchema = z
+  .object({
+    id: z.literal("setup-preferences"),
+    activePolicyDefaultId: z.enum(policyDefaultIds),
+  })
+  .strict();
 
 export class LocalStoreValidationError extends Error {
   readonly kind = "validation";
@@ -107,6 +126,7 @@ export class LocalStoreDatabase extends Dexie {
   modelInventory!: Table<ModelInventoryItem, string>;
   sourcePermissions!: Table<SourcePermission, string>;
   policySettings!: Table<PolicyDefault, string>;
+  setupPreferences!: Table<LocalSetupPreferences, string>;
   routeCards!: Table<RouteCard, string>;
   promptPackages!: Table<PromptPackage, string>;
   routeLogEntries!: Table<RouteLogEntry, string>;
@@ -114,7 +134,7 @@ export class LocalStoreDatabase extends Dexie {
   constructor(databaseName = localStoreDatabaseName) {
     super(databaseName);
 
-    this.version(localStoreSchemaVersion).stores({
+    this.version(1).stores({
       modelInventory: "id, enabled, tier",
       sourcePermissions: "id, sourceType, permissionLevel",
       policySettings: "id, strategy",
@@ -123,9 +143,20 @@ export class LocalStoreDatabase extends Dexie {
       routeLogEntries: "id, taskId, routeCardId, selectedStrategy, outcome, createdAt",
     });
 
+    this.version(localStoreSchemaVersion).stores({
+      modelInventory: "id, enabled, tier",
+      sourcePermissions: "id, sourceType, permissionLevel",
+      policySettings: "id, strategy",
+      setupPreferences: "id, activePolicyDefaultId",
+      routeCards: "id, taskId, recommendedOptionId, createdAt",
+      promptPackages: "id, taskId",
+      routeLogEntries: "id, taskId, routeCardId, selectedStrategy, outcome, createdAt",
+    });
+
     this.modelInventory = this.table("modelInventory");
     this.sourcePermissions = this.table("sourcePermissions");
     this.policySettings = this.table("policySettings");
+    this.setupPreferences = this.table("setupPreferences");
     this.routeCards = this.table("routeCards");
     this.promptPackages = this.table("promptPackages");
     this.routeLogEntries = this.table("routeLogEntries");
@@ -154,10 +185,12 @@ export class LocalStore {
         this.database.modelInventory,
         this.database.sourcePermissions,
         this.database.policySettings,
+        this.database.setupPreferences,
         async () => {
           await this.database.modelInventory.bulkPut(modelInventory);
           await this.database.sourcePermissions.bulkPut(sourcePermissions);
           await this.database.policySettings.bulkPut(policySettings);
+          await this.database.setupPreferences.put(defaultSetupPreferences);
         },
       );
 
@@ -184,13 +217,16 @@ export class LocalStore {
         this.database.modelInventory,
         this.database.sourcePermissions,
         this.database.policySettings,
+        this.database.setupPreferences,
         async () => {
           await this.database.modelInventory.clear();
           await this.database.sourcePermissions.clear();
           await this.database.policySettings.clear();
+          await this.database.setupPreferences.clear();
           await this.database.modelInventory.bulkPut(modelInventory);
           await this.database.sourcePermissions.bulkPut(sourcePermissions);
           await this.database.policySettings.bulkPut(policySettings);
+          await this.database.setupPreferences.put(defaultSetupPreferences);
         },
       );
 
@@ -238,6 +274,24 @@ export class LocalStore {
 
   async savePolicySettings(policySettings: PolicyDefault[]): Promise<PolicyDefault[]> {
     return this.replaceTable("save policy settings", this.database.policySettings, "policySettings", policyDefaultSchema, policySettings);
+  }
+
+  async loadSetupPreferences(): Promise<LocalSetupPreferences> {
+    return withLocalStoreErrors("load setup preferences", async () => {
+      const storedPreferences = await this.database.setupPreferences.get(defaultSetupPreferences.id);
+
+      if (!storedPreferences) {
+        await this.database.setupPreferences.put(defaultSetupPreferences);
+
+        return defaultSetupPreferences;
+      }
+
+      return validateRecord(storedPreferences, "setupPreferences", setupPreferencesSchema);
+    });
+  }
+
+  async saveSetupPreferences(preferences: LocalSetupPreferences): Promise<LocalSetupPreferences> {
+    return this.putRecord("save setup preferences", this.database.setupPreferences, "setupPreferences", setupPreferencesSchema, preferences);
   }
 
   async saveRouteCard(routeCard: RouteCard): Promise<RouteCard> {
@@ -316,6 +370,7 @@ export class LocalStore {
           this.database.modelInventory,
           this.database.sourcePermissions,
           this.database.policySettings,
+          this.database.setupPreferences,
           this.database.routeCards,
           this.database.promptPackages,
           this.database.routeLogEntries,
@@ -325,6 +380,7 @@ export class LocalStore {
             this.database.modelInventory.clear(),
             this.database.sourcePermissions.clear(),
             this.database.policySettings.clear(),
+            this.database.setupPreferences.clear(),
             this.database.routeCards.clear(),
             this.database.promptPackages.clear(),
             this.database.routeLogEntries.clear(),

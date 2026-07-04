@@ -1,49 +1,51 @@
-# 2026-07-03T17:44:01-06:00 - Implementation Status
+# 2026-07-03T19:36:52-06:00 - Implementation Status
 
-Last Updated: 2026-07-03T17:44:01-06:00
-Status: chunk-ten-complete
-Status Updated: 2026-07-03T17:44:01-06:00
+Last Updated: 2026-07-03T19:36:52-06:00
+Status: chunk-eleven-complete
+Status Updated: 2026-07-03T19:36:52-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-Chunk Ten - Export And Import Functions.
+Chunk Eleven - Setup UI Screens.
 
-Completion target: Task complete.
+Completion target: Integration complete.
 
 ## Scope
 
-Add pure local export/import utilities for configuration, route records, route-card Markdown, prompt-package Markdown, and route-log CSV without UI, cloud sync, account linking, provider calls, uploads, telemetry, or execution workflows.
+Replace setup placeholders with usable local setup screens for tool inventory, source permissions, policy settings, and a future best-stack planning note.
 
-The completed utility layer provides:
+The completed setup slice provides:
 
-- centralized `exportImportSchemaVersion = 1`
-- schema-versioned JSON envelopes for configuration, route records, and full local bundles
-- import parsing that rejects malformed JSON, unexpected artifact kinds, unsupported schema versions, schema-invalid records, duplicate IDs, and inconsistent route-record references before returning data
-- readable route card and prompt package Markdown serializers
-- route-log CSV serialization with stable headers and CSV escaping
-- recoverable `ExportImportValidationError` objects suitable for future UI display
-- unit tests covering round trips, Markdown content, CSV headers and escaping, invalid imports, and hidden telemetry/secret-field checks
+- editable tool inventory grouped into free agents, paid subscriptions, and research/artifact/review tools
+- enable/disable controls, label/provider editing, max permission level, local-only flag, notes, and capability assumptions
+- editable source permission levels and sensitivity allowances
+- least-resource, balanced, and quality-first policy default selection
+- policy label, description, and scoring-weight editing
+- IndexedDB-backed setup save, reload, restore defaults, loading, saved, dirty, empty, and recoverable error states
+- a disabled proposed best stack control with no recommendation logic
+- focused React and storage tests for setup rendering, persistence after refresh, reset, and preference validation
 
 ## Product Boundary
 
-Exports are local artifacts only. Imports return validated data only; they do not mutate IndexedDB or bypass future user confirmation. No UI, file download/upload action, provider connection, external API call, cloud backup, telemetry, credential storage, or execution workflow was added.
+Setup remains descriptive and local-only. The app records what the user says they have; it does not verify subscriptions, connect accounts, ask for credentials, call providers, search sources, sync remotely, send telemetry, upload data, or execute workflows.
 
 ## Evidence
 
 - `bash scripts/governance-preflight.sh` passed with 0 warnings.
 - `npm audit --audit-level=moderate` found 0 vulnerabilities.
-- `npm run test -- exportImport` passed with 1 test file and 7 tests.
-- `npm run test` passed with 10 test files and 65 tests.
+- `npm run test -- App storageLocalStore` passed with 2 test files and 11 tests.
+- `npm run test` passed with 10 test files and 68 tests.
 - `npm run build` passed.
-- `git diff --check` passed.
+- Manual browser check at `http://127.0.0.1:5173` using system Chrome through Playwright passed for desktop and mobile setup navigation, persistence after refresh, and horizontal overflow.
+- `git diff --check` passed with only normal Windows LF-to-CRLF notices.
 
 ## Known Gaps
 
-- Setup UI screens, task intake/results UI, route-log feedback UI, and end-to-end workflow tests remain future chunks.
-- Export/import UI is intentionally not implemented yet.
-- Playwright is configured but has no runnable e2e specs yet; that remains deferred until real workflows exist.
+- Task intake/results UI, route-card view, prompt-package view, route-log feedback UI, import/export UI, and end-to-end workflow tests remain future chunks.
+- Proposed best stack remains a disabled planning note only.
+- Playwright is configured but still has no committed e2e specs; browser validation for this chunk was run through an inline manual check.
 
 ## Next Chunk
 
-Chunk Eleven - Setup UI Screens.
+Chunk Twelve - Task Intake And Results UI.

@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T17:44:01-06:00
+Last Updated: 2026-07-03T19:36:52-06:00
 Status: active
-Status Updated: 2026-07-03T17:44:01-06:00
+Status Updated: 2026-07-03T19:36:52-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -80,7 +80,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Eight prompt package generator | complete | 2026-07-03T15:19:08-06:00 | Technical Lead | Deterministic local prompt packages now assemble from selected route steps, task context, allowed source IDs, route warnings, and approval requirements. |
 | Chunk Nine local persistence | complete | 2026-07-03T17:19:32-06:00 | Technical Lead | Dexie/IndexedDB local store now persists and validates editable configuration, route cards, prompt packages, route logs, and feedback-ready records. |
 | Chunk Ten export/import functions | complete | 2026-07-03T17:44:01-06:00 | Technical Lead | Schema-versioned local JSON import/export utilities, route-card and prompt-package Markdown, route-log CSV, and recoverable import validation are implemented and tested. |
-| Chunk Eleven setup UI screens | active next | 2026-07-03T17:44:01-06:00 | Technical Lead | Build setup UI screens for tool inventory, source permissions, and policy defaults using local storage and existing domain modules. |
+| Chunk Eleven setup UI screens | complete | 2026-07-03T19:34:35-06:00 | Technical Lead | Setup screens now edit tool inventory, source permissions, policy defaults, and local setup preferences through IndexedDB-backed storage. |
+| Chunk Twelve task intake and results UI | active next | 2026-07-03T19:34:35-06:00 | Technical Lead | Replace task intake and route-results placeholders using the existing local routing modules. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -1169,8 +1170,8 @@ Next chunk should build setup UI screens for tool inventory, source permissions,
 
 ## Chunk Eleven - Setup UI Screens
 
-Status: active next
-Status Updated: 2026-07-03T17:44:01-06:00
+Status: complete
+Status Updated: 2026-07-03T19:34:35-06:00
 
 Completion target: Integration complete
 
@@ -1222,13 +1223,30 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Tool inventory screen lists default model/tool entries and lets users enable, disable, and edit key labels/capability assumptions.
-- [ ] Tool inventory includes clear fields for free agents and paid subscriptions the user already has.
-- [ ] Source permissions screen lets users set source permission levels and sensitivity allowances.
-- [ ] Policy settings screen lets users choose least-resource, balanced, or quality-first defaults.
-- [ ] Setup screens persist local changes through the storage API.
-- [ ] UI copy reinforces that no provider connection or credential storage exists.
-- [ ] Future best-stack prompt is represented only as a planning note or disabled/coming-later control, not functional logic.
+- [x] Tool inventory screen lists default model/tool entries and lets users enable, disable, and edit key labels/capability assumptions.
+- [x] Tool inventory includes clear fields for free agents and paid subscriptions the user already has.
+- [x] Source permissions screen lets users set source permission levels and sensitivity allowances.
+- [x] Policy settings screen lets users choose least-resource, balanced, or quality-first defaults.
+- [x] Setup screens persist local changes through the storage API.
+- [x] UI copy reinforces that no provider connection or credential storage exists.
+- [x] Future best-stack prompt is represented only as a planning note or disabled/coming-later control, not functional logic.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `npm run test -- App storageLocalStore`
+- `npm run test`
+- `npm run build`
+- `npm audit --audit-level=moderate`
+- manual browser check at `http://127.0.0.1:5173` using system Chrome through Playwright for desktop and mobile setup navigation, persistence after refresh, and horizontal overflow
+- `git diff --check`
+
+Implementation notes:
+
+- Added `setupPreferences` to the local Dexie store at schema version 2 for the active policy default, leaving `PolicyDefault` records schema-clean.
+- Added `useSetupConfiguration` as the UI state boundary for seed/load/save/reset, dirty state, storage errors, and active policy display.
+- Replaced only tool inventory, source permissions, and policy settings placeholders; task intake, route results, route cards, prompt packages, route log, reference, and welcome remain bounded for later chunks.
+- Kept proposed best stack as a disabled coming-later control with no recommendation logic, account connection, credential field, provider API call, telemetry, remote sync, or execution workflow.
 
 Test expectations:
 
@@ -1256,7 +1274,7 @@ Setup UI can be reverted to placeholders if storage integration becomes unstable
 
 Stop condition:
 
-Stop when setup screens are usable, local changes persist, tests/build pass, and task intake/results placeholders remain untouched.
+Reached. Setup screens are usable, local changes persist, tests/build pass, and task intake/results placeholders remain untouched.
 
 Handoff note:
 
@@ -1264,8 +1282,8 @@ Next chunk should replace task intake and results placeholders using the routing
 
 ## Chunk Twelve - Task Intake And Results UI
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: active next
+Status Updated: 2026-07-03T19:34:35-06:00
 
 Completion target: Integration complete
 
@@ -1802,7 +1820,11 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T17:37:53-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Chunk Ten export/import work; work timestamp captured. |
 | 2026-07-03T17:44:01-06:00 | `npm run test -- exportImport` | passed | Export/import utility suite passed: 1 file, 7 tests covering schema-versioned JSON round trips, Markdown output, CSV headers and escaping, invalid JSON, unknown versions, schema-invalid imports, unexpected artifact kinds, and no hidden telemetry fields. |
 | 2026-07-03T17:44:01-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Full unit suite passed: 10 files, 65 tests; TypeScript and Vite production build passed; audit found 0 vulnerabilities; governance check passed with 0 warnings; whitespace check passed. |
+| 2026-07-03T19:24:21-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Chunk Eleven setup UI work; work timestamp captured. |
+| 2026-07-03T19:34:35-06:00 | `npm run test -- App storageLocalStore`; `npm run build` | passed | Focused setup UI/storage checks passed: 2 files, 11 tests; TypeScript and Vite production build passed. |
+| 2026-07-03T19:34:35-06:00 | manual Playwright browser check using system Chrome at `http://127.0.0.1:5173` | passed | Desktop and mobile setup navigation, local persistence after refresh, and horizontal overflow checks passed. |
+| 2026-07-03T19:36:52-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Full unit suite passed: 10 files, 68 tests; TypeScript and Vite production build passed; audit found 0 vulnerabilities; governance check passed with 0 warnings; whitespace check passed with normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Eleven only: build setup UI screens for tool inventory, source permissions, and policy defaults using local storage and existing domain modules. Do not implement best-stack recommendation logic, provider account connections, credential storage, task intake/results screens, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, or execution workflows.
+Resume from Chunk Twelve only: replace the task intake and route-results placeholders using the existing local domain modules for validation, hard gates, candidate generation, scoring, route-card generation, and prompt-package generation. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, best-stack recommendation logic, or execution workflows.

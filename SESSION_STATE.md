@@ -1,18 +1,23 @@
-# 2026-07-03T17:44:01-06:00 - Session State
+# 2026-07-03T19:36:52-06:00 - Session State
 
-Last Updated: 2026-07-03T17:44:01-06:00
-Status: chunk-ten-complete
-Status Updated: 2026-07-03T17:44:01-06:00
+Last Updated: 2026-07-03T19:36:52-06:00
+Status: chunk-eleven-complete
+Status Updated: 2026-07-03T19:36:52-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Complete Chunk Ten by adding schema-validated local export/import utilities for configuration, route cards, prompt packages, and route logs without cloud sync, auth, accounts, provider credentials, external API calls, external destinations, automatic uploads, UI screens, telemetry, or execution workflows.
+Complete Chunk Eleven by replacing setup placeholders with usable local UI for tool inventory, source permissions, and policy defaults while preserving the no-credential, no-provider-connection, no-execution product boundary.
 
 ## Files Changed In This Session
 
-- `src/domain/export/exportImport.ts`
-- `src/tests/unit/exportImport.test.ts`
+- `src/App.tsx`
+- `src/ui/screens/SetupScreens.tsx`
+- `src/ui/state/useSetupConfiguration.ts`
+- `src/storage/localStore.ts`
+- `src/styles.css`
+- `src/tests/unit/App.test.tsx`
+- `src/tests/unit/storageLocalStore.test.ts`
 - `docs/2026-07-03-current-pathway.md`
 - `IMPLEMENTATION_STATUS.md`
 - `SESSION_STATE.md`
@@ -21,21 +26,24 @@ Complete Chunk Ten by adding schema-validated local export/import utilities for 
 ## Commands Run
 
 - `git status --short`
-- `Get-Content -Raw ...` and `Select-String ...` for targeted agent, pathway, governance, project-control, storage, domain, test, status, decision, and carry-forward files
+- `Get-Content -Raw ...`, `Select-Object ...`, and `rg ...` for targeted agent, pathway, governance, project-control, domain, storage, UI, test, status, decision, and carry-forward files
 - `bash scripts/governance-preflight.sh`
 - `bash -lc "date -Iseconds"`
-- `npm run test -- exportImport`
+- `npm run test -- App storageLocalStore`
 - `npm run test`
 - `npm run build`
 - `npm audit --audit-level=moderate`
+- `Start-Process npm.cmd ... vite --host 127.0.0.1 --port 5173`
+- manual Playwright browser check through system Chrome at `http://127.0.0.1:5173`
 - `git diff --check`
 
 ## Known Gaps
 
-- Export/import UI, setup UI screens, task intake/results UI, route-log feedback UI, and end-to-end workflow tests remain future implementation chunks.
-- Playwright is configured but has no runnable e2e specs yet; that remains deferred until real workflows exist.
-- The VS Code tab for `docs/current-build-pathway.md` may still point to the old filename. The active plan file is `docs/2026-07-03-current-pathway.md`.
+- Task intake/results UI, route-card view, prompt-package view, route-log feedback UI, import/export UI, and end-to-end workflow tests remain future implementation chunks.
+- Proposed best stack remains nonfunctional and disabled by design.
+- The manual browser check used an inline Playwright script and system Chrome because Playwright's bundled Chromium executable is not installed.
+- The Vite dev server was started for manual review at `http://127.0.0.1:5173`.
 
 ## Next Handoff
 
-Resume from Chunk Eleven only: build setup UI screens for tool inventory, source permissions, and policy defaults using local storage and existing domain modules. Do not implement best-stack recommendation logic, provider account connections, credential storage, task intake/results screens, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, or execution workflows.
+Resume from Chunk Twelve only: replace the task intake and route-results placeholders using the existing local routing modules. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, best-stack recommendation logic, or execution workflows.

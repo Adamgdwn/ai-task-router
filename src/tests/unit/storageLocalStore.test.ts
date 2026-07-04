@@ -5,6 +5,7 @@ import type { ModelInventoryItem, PromptPackage, RouteCard, RouteLogEntry } from
 import {
   createLocalStore,
   createLocalStoreDatabase,
+  defaultSetupPreferences,
   LocalStoreRecordNotFoundError,
   LocalStoreValidationError,
   type LocalStore,
@@ -29,6 +30,7 @@ describe("local store", () => {
   it("seeds default configuration only when no local user configuration exists", async () => {
     const firstSeed = await store.seedDefaultConfigurationIfEmpty();
     const configuration = await store.loadConfiguration();
+    const setupPreferences = await store.loadSetupPreferences();
     const secondSeed = await store.seedDefaultConfigurationIfEmpty();
 
     expect(firstSeed).toEqual({
@@ -43,6 +45,7 @@ describe("local store", () => {
     expect(configuration.modelInventory).toEqual(defaultModels);
     expect(configuration.sourcePermissionRegistry).toEqual(defaultSources);
     expect(configuration.policySettings).toEqual(defaultPolicies);
+    expect(setupPreferences).toEqual(defaultSetupPreferences);
     expect(secondSeed).toMatchObject({
       seeded: false,
       reason: "existing-configuration",
@@ -108,6 +111,26 @@ describe("local store", () => {
       promptPackages: [],
       routeLogEntries: [],
     });
+    expect(await store.loadSetupPreferences()).toEqual(defaultSetupPreferences);
+  });
+
+  it("saves and validates setup preferences for the selected policy default", async () => {
+    await store.seedDefaultConfigurationIfEmpty();
+
+    const savedPreferences = await store.saveSetupPreferences({
+      id: "setup-preferences",
+      activePolicyDefaultId: "quality-first",
+    });
+
+    expect(savedPreferences.activePolicyDefaultId).toBe("quality-first");
+    expect(await store.loadSetupPreferences()).toEqual(savedPreferences);
+
+    await expect(
+      store.saveSetupPreferences({
+        id: "setup-preferences",
+        activePolicyDefaultId: "unknown-policy",
+      } as never),
+    ).rejects.toBeInstanceOf(LocalStoreValidationError);
   });
 
   it("reseed default configuration replaces configuration tables without deleting route records", async () => {
