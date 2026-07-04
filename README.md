@@ -2,7 +2,7 @@
 
 AI Task Router is a local-first decision helper for choosing the smallest adequate AI route for a task.
 
-It recommends lean, balanced, and premium tool/model routes while respecting source permissions, sensitivity, privacy posture, cost, energy, quality needs, and user-configured tool availability.
+It recommends lean, balanced, and premium tool/model routes while respecting task information choices, sensitivity, privacy posture, cost, energy, quality needs, and user-configured tool availability.
 
 ## Product Boundary
 

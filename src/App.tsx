@@ -5,7 +5,6 @@ import { RouteLogScreen } from "./ui/screens/RouteLogScreen";
 import {
   PlaceholderScreen,
   PolicySettingsScreen,
-  SourcePermissionsScreen,
   StartHereScreen,
   ToolInventoryScreen,
 } from "./ui/screens/SetupScreens";
@@ -86,9 +85,6 @@ export function App({ store = browserLocalStore }: AppProps) {
         {activeScreen.id === "tool-inventory" ? (
           <ToolInventoryScreen definition={activeScreen} setup={setup} />
         ) : null}
-        {activeScreen.id === "source-permissions" ? (
-          <SourcePermissionsScreen definition={activeScreen} setup={setup} />
-        ) : null}
         {activeScreen.id === "policy-settings" ? (
           <PolicySettingsScreen definition={activeScreen} setup={setup} />
         ) : null}
@@ -136,7 +132,6 @@ export function App({ store = browserLocalStore }: AppProps) {
         {![
           "welcome",
           "tool-inventory",
-          "source-permissions",
           "policy-settings",
           "task-intake",
           "route-results",

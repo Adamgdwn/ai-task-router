@@ -36,6 +36,8 @@ describe("App", () => {
     expect(screen.getByText("Your browser only")).toBeInTheDocument();
     expect(screen.getByText("No hidden AI calls or telemetry")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Choose my tools" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "What To Include" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Choose what to include" })).not.toBeInTheDocument();
 
     for (const definition of screenDefinitions) {
       await user.click(screen.getByRole("button", { name: definition.label }));
@@ -170,13 +172,18 @@ describe("App", () => {
     expect(screen.getByRole("option", { name: "Genspark" })).toBeInTheDocument();
   });
 
-  it("lets users save information comfort, choosing style, and the disabled toolkit note", async () => {
+  it("lets users save choosing style and keeps task include choices contextual", async () => {
     const user = userEvent.setup();
     const store = await buildRouteReadyTestStore();
     const { unmount } = render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "What To Include" }));
-    await user.click(await screen.findByRole("checkbox", { name: "Include Websites or web search" }));
+    await user.click(screen.getByRole("button", { name: "My Task" }));
+    expect(await screen.findByRole("heading", { name: "Do you want to include anything specific?" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Nothing specific/ })).toHaveAttribute("aria-pressed", "true");
+    await user.click(screen.getByRole("checkbox", { name: /A website or current search/ }));
+    expect(screen.getByRole("button", { name: /Nothing specific/ })).toHaveAttribute("aria-pressed", "false");
+    await user.click(screen.getByRole("button", { name: /Nothing specific/ }));
+    expect(screen.getByRole("button", { name: /Nothing specific/ })).toHaveAttribute("aria-pressed", "true");
 
     await user.click(screen.getByRole("button", { name: "Choosing Style" }));
     expect(screen.getByRole("checkbox", { name: /Suggest a full AI toolkit/ })).toBeDisabled();
@@ -188,11 +195,6 @@ describe("App", () => {
 
     unmount();
     render(<App store={store} />);
-
-    await user.click(screen.getByRole("button", { name: "What To Include" }));
-    await waitFor(() => {
-      expect(screen.getByRole("checkbox", { name: "Include Websites or web search" })).not.toBeChecked();
-    });
 
     await user.click(screen.getByRole("button", { name: "Choosing Style" }));
     await waitFor(() => {
@@ -224,7 +226,7 @@ describe("App", () => {
     render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "My Task" }));
-    await screen.findByText("What I already know");
+    await screen.findByText("Notes or background I already know");
     await user.click(screen.getByRole("button", { name: "Use shortcut Draft public-facing copy" }));
     await user.click(screen.getByRole("button", { name: "Show me my best options" }));
 
@@ -265,13 +267,13 @@ describe("App", () => {
     render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "My Task" }));
-    await screen.findByText("Websites or web search");
+    await screen.findByRole("heading", { name: "Do you want to include anything specific?" });
     await user.click(screen.getByRole("button", { name: "Use shortcut Research current facts" }));
     await user.click(screen.getByRole("button", { name: "Show me my best options" }));
 
     expect(await screen.findByRole("heading", { name: "Best Options", level: 2 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Left out for safety" })).toBeInTheDocument();
-    expect(screen.getByText("Websites or web search is turned off in What To Include.")).toBeInTheDocument();
+    expect(screen.getByText("Websites or web search is left out for this task.")).toBeInTheDocument();
     expect(screen.getByText(/Current facts or citations need an allowed research source/)).toBeInTheDocument();
   });
 
@@ -431,7 +433,7 @@ async function buildRouteReadyTestStore(): Promise<LocalStore> {
 
 async function generateAndSavePublicFacingRoute(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "My Task" }));
-  await screen.findByText("What I already know");
+  await screen.findByText("Notes or background I already know");
   await user.click(screen.getByRole("button", { name: "Use shortcut Draft public-facing copy" }));
   await user.click(screen.getByRole("button", { name: "Show me my best options" }));
   await screen.findByRole("heading", { name: "Best Options", level: 2 });

@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-04T10:00:43-06:00
+Last Updated: 2026-07-04T10:20:07-06:00
 Status: active
-Status Updated: 2026-07-04T10:00:43-06:00
+Status Updated: 2026-07-04T10:20:07-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -92,7 +92,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | My AI Tools sparse selector correction | complete | 2026-07-04T09:18:42-06:00 | Technical Lead | Corrected stale local data and row headings so My AI Tools starts as one generic Tool selection row, not five named provider cards. |
 | My AI Tools manual add and local models detour | complete | 2026-07-04T09:40:46-06:00 | Technical Lead | Replaced automatic row reveal with an explicit branded add button, provider-specific plan labels, local model choices, and a local detector script. |
 | My AI Tools tailored account levels detour | complete | 2026-07-04T10:00:43-06:00 | Technical Lead | Researched and expanded provider-specific account dropdowns, added remove buttons, and fixed selected-chip/dropdown wrapping. |
-| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T10:00:43-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add plain-language MVP workflows. |
+| Contextual task include detour | complete | 2026-07-04T10:20:07-06:00 | Technical Lead | Removed standalone What To Include onboarding and moved optional include choices into My Task. |
+| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T10:20:07-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add and contextual task-include MVP workflows. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -2439,10 +2440,101 @@ Handoff note:
 
 Chunk Fifteen should now cover the researched account-level list, remove-tool behavior, no selected-chip wrapping, no horizontal overflow, explicit add behavior, stale five-row migration, Local model choices, and the existing no-provider/no-execution boundary.
 
+## Contextual Task Include Detour
+
+Status: complete
+Status Updated: 2026-07-04T10:20:07-06:00
+
+Completion target: Integration complete
+
+Budget class: Small
+
+Objective:
+
+Remove the standalone `What To Include` setup screen from the primary path and make information selection a contextual, optional question inside `My Task`.
+
+User outcome:
+
+The user does not have to configure sites, drives, folders, documents, or privacy/source settings before knowing what they are trying to do. When a task needs specific information, the task screen asks in ordinary language and defaults to `Nothing specific`.
+
+Allowed files or folders:
+
+- `src/App.tsx`
+- `src/ui/screens/screenDefinitions.ts`
+- `src/ui/screens/SetupScreens.tsx`
+- `src/ui/screens/TaskRoutingScreens.tsx`
+- `src/ui/state/useTaskRouting.ts`
+- `src/styles.css`
+- `src/tests/unit/App.test.tsx`
+- status/pathway/decision docs
+
+Non-goals:
+
+- Do not remove the internal source registry or hard-gate safety model.
+- Do not add file scanning, uploads, provider connectors, credentials, telemetry, external calls, or execution workflows.
+- Do not begin Chunk Fifteen E2E implementation in this detour.
+
+Acceptance criteria:
+
+- [x] Start Here no longer presents a `What To Include` aisle.
+- [x] Side navigation no longer exposes a standalone `What To Include` screen.
+- [x] `My Task` asks `Do you want to include anything specific?`.
+- [x] `Nothing specific` is the default task information choice.
+- [x] Optional task choices use everyday labels such as website/current search, file or folder, pasted documents, repo/code page, work docs, Google Drive, and notes/background.
+- [x] Shortcut templates can still select source IDs for routing and hard gates.
+- [x] Blocked-source messages no longer tell users to fix a removed `What To Include` screen.
+
+Implementation notes:
+
+- Removed `source-permissions` from `screenDefinitions` and from the App render switch.
+- Removed the visible `SourcePermissionsScreen` setup component and its primary-flow source editing controls.
+- Kept the source registry in local configuration because existing schemas, templates, hard gates, scoring, and prompt packaging still rely on deterministic source IDs.
+- Added a `Nothing specific` tile to the task include section that clears requested source IDs.
+- Added task-specific source labels and hints so users see "A website or current search" instead of implementation-flavored source records.
+- Source records with `permissionLevel: 0` stay hidden from manual task choices unless a shortcut has already selected them, which keeps template-driven safety checks visible without pushing unavailable choices.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the detour.
+- `npm run test -- App` passed with 1 file and 12 tests.
+- `npm run test` passed with 11 files and 81 tests.
+- `npm run build` passed with the existing Vite chunk-size warning.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5183` passed for no standalone `What To Include` navigation, Start Here's three-step path, My Task's optional include question, `Nothing specific` default/clear behavior, desktop/mobile layout, and no horizontal overflow.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings at close-out.
+- `git diff --check` passed; output only included normal Windows LF-to-CRLF notices.
+- Screenshots:
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-contextual-include-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-contextual-include-mobile.png`
+
+UX/product finish expectations:
+
+- The primary path should feel like tools, choosing style, then a task conversation.
+- Source/privacy setup should not be front-loaded on average users.
+- Task include choices should stay optional and understandable without explaining permissions.
+
+Security and privacy notes:
+
+- The app still does not open, scan, upload, search, connect, or send any source.
+- Task include choices are local routing hints only.
+- Internal safety checks continue to evaluate source availability and task sensitivity.
+
+Rollback or recovery path:
+
+Re-add the `source-permissions` screen definition and App branch, restore `SourcePermissionsScreen`, and revert the task include section if the owner decides source setup belongs in onboarding after further testing.
+
+Stop condition:
+
+Reached. The standalone include screen is removed from the primary flow, task-specific include choices exist, and focused App validation passed.
+
+Handoff note:
+
+Chunk Fifteen should protect this UX with E2E coverage: no standalone `What To Include` navigation, Start Here's three-step path, `My Task` optional include question, `Nothing specific` default and clear behavior, shortcut-selected source IDs, blocked-source copy, and no horizontal overflow.
+
 ## Chunk Fifteen - E2E Tests And Fixture Suite
 
 Status: active next
-Status Updated: 2026-07-04T10:00:43-06:00
+Status Updated: 2026-07-04T10:20:07-06:00
 
 Completion target: Integration complete
 
@@ -2494,6 +2586,8 @@ Acceptance criteria:
 - [ ] Adds at least 20 fixture tasks covering public, internal, confidential, regulated, highly restricted, public-facing risk, current-facts, citation, coding, writing, planning, packaging, and review scenarios.
 - [ ] Adds E2E coverage for first-run setup or seeded defaults.
 - [ ] Adds E2E coverage for My AI Tools: one blank starter row, explicit `Add another tool`, researched provider-specific account dropdowns, Local model choices, `Remove tool`, selected-count updates, stale five-row migration, no selected-chip wrapping, and no horizontal overflow.
+- [ ] Adds E2E coverage that no standalone `What To Include` onboarding screen is present.
+- [ ] Adds E2E coverage for My Task's optional include question, `Nothing specific` default, source-choice selection, and clear behavior.
 - [ ] Adds E2E coverage for task intake to route results.
 - [ ] Adds E2E coverage for route card and prompt package viewing.
 - [ ] Adds E2E coverage for saving a route log entry and adding feedback.
@@ -2737,7 +2831,8 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-04T09:18:42-06:00 | `npm run test -- App`; `npm run test -- storageLocalStore`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5180`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Sparse selector correction passed: App suite 1 file and 12 tests, storage suite 1 file and 9 tests, full unit suite 10 files and 78 tests, production build, deliberate stale five-row IndexedDB browser migration to one `Tool selection`, Genspark selection, automatic next row, mobile overflow check, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 | 2026-07-04T09:40:46-06:00 | `npm run test -- App everydayToolCatalog`; `npm run detect:local-models`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5181`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Manual-add/local-model detour passed: focused suite 2 files and 14 tests, local detector summary with no model-name details, full unit suite 11 files and 80 tests, production build, browser checks for one starter row, no automatic second row after ChatGPT selection, branded add button, provider-specific account options, Local model dropdown, desktop/mobile overflow, screenshots, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 | 2026-07-04T10:00:43-06:00 | `npm run test -- App everydayToolCatalog`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5182`; `npm run detect:local-models`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Tailored account-level detour passed: focused suite 2 files and 15 tests, full unit suite 11 files and 81 tests, production build with existing Vite chunk-size warning, browser checks for researched account labels, long dropdown values, three selected rows, remove button behavior, selected-count update, desktop/mobile layout, no selected-chip wrapping, no horizontal overflow, detector summary only, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-04T10:20:07-06:00 | `npm run test -- App`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5183`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Contextual task-include detour passed: focused App suite 1 file and 12 tests, full unit suite 11 files and 81 tests, production build with existing Vite chunk-size warning, browser checks for no standalone What To Include navigation, Start Here's three-step path, My Task optional include question, Nothing specific default/clear behavior, desktop/mobile layout, no horizontal overflow, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, stale five-row local-store migration, Genspark and broader app options, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.

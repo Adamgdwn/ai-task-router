@@ -1,5 +1,4 @@
 import { useState, type ChangeEvent, type ReactNode } from "react";
-import { permissionLevels, sensitivityClasses } from "../../domain/schemas";
 import {
   applyEverydayToolSelection,
   everydayToolFrequencyRank,
@@ -14,19 +13,13 @@ import {
 } from "../../domain/defaults/everydayToolCatalog";
 import type {
   ModelInventoryItem,
-  PermissionLevel,
   PolicyDefault,
   ScoringWeights,
-  SensitivityClass,
-  SourcePermission,
 } from "../../domain/types";
 import type { SetupConfigurationController } from "../state/useSetupConfiguration";
 import type { ScreenDefinition } from "./screenDefinitions";
 
 const scoringWeightKeys = ["cost", "energy", "quality", "speed", "sourceFit", "sensitivityFit"] as const;
-const sourceComfortLevels = ["none", "public", "work", "confidential", "restricted"] as const;
-type SourceComfortLevel = (typeof sourceComfortLevels)[number];
-const visibleSourceComfortLevels = sourceComfortLevels.filter((level) => level !== "none");
 const shoppingPathSteps = [
   {
     screenId: "tool-inventory",
@@ -36,15 +29,8 @@ const shoppingPathSteps = [
     buttonLabel: "Choose my tools",
   },
   {
-    screenId: "source-permissions",
-    eyebrow: "Aisle 2",
-    title: "What should be included?",
-    body: "Choose whether public info, pasted documents, work notes, or sensitive material can be considered.",
-    buttonLabel: "Choose what to include",
-  },
-  {
     screenId: "policy-settings",
-    eyebrow: "Aisle 3",
+    eyebrow: "Aisle 2",
     title: "How should tradeoffs be handled?",
     body: "Tell the app whether today is about speed, balance, or best quality when the stakes are higher.",
     buttonLabel: "Pick choosing style",
@@ -53,7 +39,7 @@ const shoppingPathSteps = [
     screenId: "task-intake",
     eyebrow: "Checkout",
     title: "What are you trying to get done?",
-    body: "Describe the task and get a few practical options, plus copy-ready prompts you can use manually.",
+    body: "Describe the task, choose anything specific to include, and get practical options you can use manually.",
     buttonLabel: "Describe my task",
   },
 ] as const;
@@ -123,46 +109,6 @@ export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
         setup={setup}
         title="AI apps on my screen"
       />
-    </SetupScreenLayout>
-  );
-}
-
-export function SourcePermissionsScreen({ definition, setup }: SetupScreenProps) {
-  const sourcePermissions = setup.configuration?.sourcePermissionRegistry ?? [];
-
-  return (
-    <SetupScreenLayout definition={definition} setup={setup}>
-      <SetupBoundaryNote>
-        Pick the sites, drives, folders, documents, and personal context you may want included in recommendations. The
-        app still does not open, scan, upload, search, or connect to any of them.
-      </SetupBoundaryNote>
-
-      <section className="conversationCard" aria-labelledby="information-comfort-heading">
-        <div>
-          <p className="screenKicker">Information to include</p>
-          <h3 id="information-comfort-heading">What should the app be allowed to consider?</h3>
-        </div>
-        <p>
-          Turn on the places you may consult yourself, then choose the plain privacy level that best describes them.
-          You can still narrow this down for each task.
-        </p>
-      </section>
-
-      <div className="setupRecordList">
-        {sourcePermissions.length === 0 ? (
-          <EmptySetupState label="No information shelves are stored yet." />
-        ) : (
-          sourcePermissions.map((source) => (
-            <SourcePermissionRow
-              key={source.id}
-              onChange={(updatedSource) =>
-                setup.updateSourcePermissionRegistry(replaceRecord(sourcePermissions, updatedSource))
-              }
-              source={source}
-            />
-          ))
-        )}
-      </div>
     </SetupScreenLayout>
   );
 }
@@ -513,119 +459,6 @@ function ModelInventoryRow({
   );
 }
 
-function SourcePermissionRow({
-  source,
-  onChange,
-}: {
-  source: SourcePermission;
-  onChange: (source: SourcePermission) => void;
-}) {
-  const comfortValue = comfortLevelForSource(source);
-  const included = comfortValue !== "none";
-
-  return (
-    <section className="setupRecord" aria-labelledby={`${source.id}-title`}>
-      <div className="recordHeader">
-        <div>
-          <h4 id={`${source.id}-title`}>{source.label}</h4>
-          <p>{sourceComfortDescription(source)}</p>
-        </div>
-        <span className="recordPill">{included ? comfortLabel(comfortValue) : "Left out"}</span>
-      </div>
-
-      <div className="sourceIncludeGrid">
-        <label className="toggleField sourceIncludeToggle">
-          <input
-            aria-label={`Include ${source.label}`}
-            checked={included}
-            onChange={(event) =>
-              onChange(sourceFromComfortLevel(source, event.target.checked ? "public" : "none"))
-            }
-            type="checkbox"
-          />
-          <span>Include this</span>
-        </label>
-
-        <label>
-          <span>Most of this information is</span>
-          <select
-            aria-label={`Information type for ${source.id}`}
-            disabled={!included}
-            onChange={(event) => onChange(sourceFromComfortLevel(source, event.target.value as SourceComfortLevel))}
-            value={included ? comfortValue : "public"}
-          >
-            {visibleSourceComfortLevels.map((level) => (
-              <option key={level} value={level}>
-                {comfortLabel(level)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span>Name shown in the app</span>
-          <input
-            aria-label={`Source label for ${source.id}`}
-            onChange={(event) => onChange({ ...source, label: event.target.value })}
-            value={source.label}
-          />
-        </label>
-      </div>
-
-      <details className="advancedDrawer">
-        <summary>Show extra settings</summary>
-
-        <div className="formGrid compactFormGrid">
-          <label>
-            <span>Privacy guardrail</span>
-            <select
-              aria-label={`Privacy guardrail for ${source.id}`}
-              onChange={(event) =>
-                onChange({
-                  ...source,
-                  permissionLevel: Number(event.target.value) as PermissionLevel,
-                })
-              }
-              value={source.permissionLevel}
-            >
-              {permissionLevels.map((level) => (
-                <option key={level} value={level}>
-                  {permissionLevelLabel(level)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Information shelf type</span>
-            <input aria-label={`Information shelf type for ${source.id}`} readOnly value={source.sourceType} />
-          </label>
-        </div>
-
-        <fieldset className="checkboxGrid">
-          <legend>Extra privacy categories</legend>
-          {sensitivityClasses.map((sensitivityClass) => {
-            const checked = source.sensitivityAllowed.includes(sensitivityClass);
-            const onlyChecked = checked && source.sensitivityAllowed.length === 1;
-
-            return (
-              <label key={sensitivityClass}>
-                <input
-                  checked={checked}
-                  disabled={onlyChecked}
-                  onChange={() => onChange(toggleSensitivity(source, sensitivityClass))}
-                  type="checkbox"
-                />
-                <span>{sensitivityLabel(sensitivityClass)}</span>
-              </label>
-            );
-          })}
-        </fieldset>
-
-        <p className="advancedNote">{source.notes}</p>
-      </details>
-    </section>
-  );
-}
-
 function PolicyCard({
   policy,
   selected,
@@ -700,108 +533,6 @@ function EmptySetupState({ label }: { label: string }) {
   return <p className="emptySetupState">{label}</p>;
 }
 
-function comfortLevelForSource(source: SourcePermission): SourceComfortLevel {
-  if (source.permissionLevel === 0) {
-    return "none";
-  }
-
-  if (source.permissionLevel >= 4 || source.sensitivityAllowed.includes("regulated") || source.sensitivityAllowed.includes("highly restricted")) {
-    return "restricted";
-  }
-
-  if (source.permissionLevel >= 3 || source.sensitivityAllowed.includes("confidential")) {
-    return "confidential";
-  }
-
-  if (source.permissionLevel >= 2 || source.sensitivityAllowed.includes("internal")) {
-    return "work";
-  }
-
-  return "public";
-}
-
-function sourceFromComfortLevel(source: SourcePermission, comfortLevel: SourceComfortLevel): SourcePermission {
-  const comfortSettings: Record<SourceComfortLevel, Pick<SourcePermission, "permissionLevel" | "sensitivityAllowed">> = {
-    none: {
-      permissionLevel: 0,
-      sensitivityAllowed: ["public"],
-    },
-    public: {
-      permissionLevel: 1,
-      sensitivityAllowed: ["public", "public-facing risk"],
-    },
-    work: {
-      permissionLevel: 2,
-      sensitivityAllowed: ["public", "internal"],
-    },
-    confidential: {
-      permissionLevel: 3,
-      sensitivityAllowed: ["public", "internal", "confidential"],
-    },
-    restricted: {
-      permissionLevel: 4,
-      sensitivityAllowed: [...sensitivityClasses],
-    },
-  };
-
-  return {
-    ...source,
-    ...comfortSettings[comfortLevel],
-  };
-}
-
-function comfortLabel(comfortLevel: SourceComfortLevel) {
-  switch (comfortLevel) {
-    case "none":
-      return "Do not use this";
-    case "public":
-      return "Public or shareable";
-    case "work":
-      return "Ordinary work info";
-    case "confidential":
-      return "Confidential info";
-    case "restricted":
-      return "Sensitive info";
-  }
-}
-
-function permissionLevelLabel(permissionLevel: PermissionLevel) {
-  switch (permissionLevel) {
-    case 0:
-      return "Do not use this";
-    case 1:
-      return "Public or shareable only";
-    case 2:
-      return "Ordinary work info";
-    case 3:
-      return "Confidential info";
-    case 4:
-      return "Sensitive info";
-  }
-}
-
-function sourceComfortDescription(source: SourcePermission) {
-  const comfortLevel = comfortLevelForSource(source);
-
-  if (comfortLevel === "none") {
-    return "This will be left out of recommendations.";
-  }
-
-  if (comfortLevel === "public") {
-    return "Include this when the information is public or already shareable.";
-  }
-
-  if (comfortLevel === "work") {
-    return "Include this for ordinary work context that is not confidential.";
-  }
-
-  if (comfortLevel === "confidential") {
-    return "Include this when confidential context is acceptable for the task.";
-  }
-
-  return "Include this only when sensitive context is explicitly okay for the task.";
-}
-
 function friendlyPolicyLabel(policy: PolicyDefault) {
   if (policy.id === "least-resource") {
     return "Save time and cost";
@@ -851,24 +582,6 @@ function replaceRecord<T extends { id: string }>(records: readonly T[], updatedR
   return records.map((record) => (record.id === updatedRecord.id ? updatedRecord : record));
 }
 
-function toggleSensitivity(source: SourcePermission, sensitivityClass: SensitivityClass): SourcePermission {
-  if (source.sensitivityAllowed.includes(sensitivityClass)) {
-    if (source.sensitivityAllowed.length === 1) {
-      return source;
-    }
-
-    return {
-      ...source,
-      sensitivityAllowed: source.sensitivityAllowed.filter((currentClass) => currentClass !== sensitivityClass),
-    };
-  }
-
-  return {
-    ...source,
-    sensitivityAllowed: [...source.sensitivityAllowed, sensitivityClass],
-  };
-}
-
 function boundedNumber(event: ChangeEvent<HTMLInputElement>, min: number, max: number) {
   const parsedValue = Number(event.target.value);
 
@@ -893,18 +606,6 @@ function weightLabel(weightKey: keyof ScoringWeights) {
   }
 
   return capitalize(weightKey);
-}
-
-function sensitivityLabel(sensitivityClass: SensitivityClass) {
-  if (sensitivityClass === "public-facing risk") {
-    return "public-facing";
-  }
-
-  if (sensitivityClass === "highly restricted") {
-    return "very sensitive";
-  }
-
-  return sensitivityClass;
 }
 
 function capitalize(value: string) {

@@ -485,7 +485,7 @@ function friendlyValidationMessage(field: TaskRoutingErrorField, issue: z.ZodIss
   }
 
   if (field === "requestedSourceIds") {
-    return issue.message.replace("sourcePermissions", "information comfort choices");
+    return issue.message.replace("sourcePermissions", "information choices");
   }
 
   return issue.message;

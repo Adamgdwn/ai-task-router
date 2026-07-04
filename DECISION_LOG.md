@@ -1,8 +1,8 @@
-# 2026-07-04T10:00:43-06:00 - Decision Log
+# 2026-07-04T10:20:07-06:00 - Decision Log
 
-Last Updated: 2026-07-04T10:00:43-06:00
+Last Updated: 2026-07-04T10:20:07-06:00
 Status: active
-Status Updated: 2026-07-04T10:00:43-06:00
+Status Updated: 2026-07-04T10:20:07-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -39,3 +39,4 @@ Owner: Technical Lead
 | 2026-07-04T09:18:42-06:00 | Treat the previous five prefilled My AI Tools rows as legacy starter data, not user-selected tools. | Owner testing showed that stale local storage still made the screen appear preloaded with ChatGPT, Gemini, Claude, Perplexity, and Copilot, which contradicted the sparse selector intent. | Local store load/seed now migrates those exact legacy starter rows back to blank tool slots, row headings say `Tool selection`, provider names stay inside the dropdown, and Chunk Fifteen should protect this stale-data migration with E2E coverage. |
 | 2026-07-04T09:40:46-06:00 | Make adding more My AI Tools rows an explicit user action and keep local model detection outside the browser app. | Owner feedback clarified that even automatic blank rows felt like the app was pushing work onto the user. Browser apps also cannot safely scan a user's machine for local models without a reviewed local workflow. | Selecting a tool no longer reveals another row; users press `Add another tool` when they want one. Local shows recognizable local model choices, and `npm run detect:local-models` is a separate explicit terminal command that summarizes local tooling without mutating app state. |
 | 2026-07-04T10:00:43-06:00 | Treat AI app account levels as researched provider catalog data and keep account IDs flexible. | Owner feedback showed generic account buckets were still too much work for normal users. Provider plan names change quickly and differ by app, so a giant TypeScript union would become stale faster than the product data. | The catalog now has provider-specific account labels for common and broader AI apps, `legacyLabels` preserve older saved choices, selected/added rows can be removed, and Chunk Fifteen should protect the researched dropdowns plus remove/no-wrap behavior with E2E coverage. |
+| 2026-07-04T10:15:51-06:00 | Remove `What To Include` as a standalone onboarding screen and make information selection contextual in `My Task`. | Owner feedback and product review showed that abstract include/privacy setup is still too much ceremony for average users. Users understand source choices best when they already know the task. | Start Here now routes through tools, choosing style, and task description only. `My Task` asks an optional "Do you want to include anything specific?" question with `Nothing specific` as the default, while the source registry remains an internal safety input for routing. |

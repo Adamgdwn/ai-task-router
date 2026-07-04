@@ -6,7 +6,7 @@ import {
   routeStrategies,
   sensitivityClasses,
 } from "../../domain/schemas";
-import type { RouteOption, TaskIntake } from "../../domain/types";
+import type { RouteOption, SourcePermission, TaskIntake } from "../../domain/types";
 import type {
   GeneratedRouteResult,
   TaskRoutingController,
@@ -31,6 +31,12 @@ type RouteResultsScreenProps = TaskRoutingScreenProps & {
 };
 
 export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated }: TaskIntakeScreenProps) {
+  const sourceChoices =
+    setup.configuration?.sourcePermissionRegistry.filter(
+      (source) => source.permissionLevel > 0 || routing.draft.requestedSourceIds.includes(source.id),
+    ) ?? [];
+  const nothingSpecificSelected = routing.draft.requestedSourceIds.length === 0;
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -189,14 +195,23 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
 
         <section className="routingSection" aria-labelledby="requested-sources-heading">
           <div className="sectionHeading">
-            <h3 id="requested-sources-heading">What should be included?</h3>
-            <p>Choose the sites, drives, folders, documents, or memory you intend to consult yourself.</p>
+            <h3 id="requested-sources-heading">Do you want to include anything specific?</h3>
+            <p>Skip this when your description is enough. Pick only what you plan to paste, open, or check yourself.</p>
           </div>
 
-          {setup.configuration?.sourcePermissionRegistry.length ? (
+          {sourceChoices.length ? (
             <fieldset className="sourceChoiceGrid">
-              <legend>Sites, drives, folders, and context</legend>
-              {setup.configuration.sourcePermissionRegistry.map((source) => (
+              <legend>Optional information</legend>
+              <button
+                aria-pressed={nothingSpecificSelected}
+                className={nothingSpecificSelected ? "selectedSourceChoice" : undefined}
+                onClick={() => routing.updateDraftField("requestedSourceIds", [])}
+                type="button"
+              >
+                <strong>Nothing specific</strong>
+                <small>Use only what I wrote above.</small>
+              </button>
+              {sourceChoices.map((source) => (
                 <label key={source.id}>
                   <input
                     checked={routing.draft.requestedSourceIds.includes(source.id)}
@@ -204,14 +219,14 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
                     type="checkbox"
                   />
                   <span>
-                    <strong>{source.label}</strong>
-                    <small>{sourceChoiceHint(source.permissionLevel)}</small>
+                    <strong>{taskSourceLabel(source)}</strong>
+                    <small>{taskSourceHint(source)}</small>
                   </span>
                 </label>
               ))}
             </fieldset>
           ) : (
-            <p className="emptySetupState">Information comfort choices are not loaded yet.</p>
+            <p className="emptySetupState">Optional information choices are not loaded yet.</p>
           )}
           <FieldError field="requestedSourceIds" routing={routing} />
         </section>
@@ -368,7 +383,7 @@ function TaskStructurePreview({
   const selectedSources =
     setup.configuration?.sourcePermissionRegistry
       .filter((source) => routing.draft.requestedSourceIds.includes(source.id))
-      .map((source) => source.label) ?? [];
+      .map(taskSourceLabel) ?? [];
 
   return (
     <section className="taskShapePanel" aria-labelledby="task-shape-heading">
@@ -385,7 +400,7 @@ function TaskStructurePreview({
         </div>
         <div>
           <dt>Information</dt>
-          <dd>{selectedSources.length ? selectedSources.join(", ") : "Nothing selected yet"}</dd>
+          <dd>{selectedSources.length ? selectedSources.join(", ") : "Nothing specific"}</dd>
         </div>
         <div>
           <dt>Extra care</dt>
@@ -411,7 +426,7 @@ function GeneratedResults({
     <div className="resultsStack">
       {result.noSafeGeneratedRoute ? (
         <div className="setupAlert" role="alert">
-          No safe option is available yet. Use manual review only until the task details or comfort choices are corrected.
+          No safe option is available yet. Use manual review only until the task details or information choices are adjusted.
         </div>
       ) : null}
 
@@ -637,7 +652,7 @@ function userFacingRouteMessage(message: string) {
   const noAccessMatch = message.match(/^(.*) is set to no access and cannot be used in a route\.$/);
 
   if (noAccessMatch?.[1]) {
-    return `${noAccessMatch[1]} is turned off in What To Include.`;
+    return `${noAccessMatch[1]} is left out for this task.`;
   }
 
   const permissionMatch = message.match(/^(.*) only supports permission level \d+, but this task needs level \d+\.$/);
@@ -730,24 +745,38 @@ function formatTimestamp(timestamp: string) {
   }).format(new Date(timestamp));
 }
 
-function sourceChoiceHint(permissionLevel: number) {
-  if (permissionLevel === 0) {
-    return "Left out by your information choices";
+function taskSourceLabel(source: SourcePermission) {
+  const labels: Record<string, string> = {
+    "local-files": "A file or folder",
+    "uploaded-documents": "Documents or text I will paste",
+    web: "A website or current search",
+    github: "A repo or code page",
+    "m365-sharepoint": "Work docs or SharePoint",
+    "google-drive": "Google Drive",
+    "personal-memory": "Notes or background I already know",
+    "other-source": "Something else I will supply",
+  };
+
+  return labels[source.id] ?? source.label;
+}
+
+function taskSourceHint(source: SourcePermission) {
+  const hints: Record<string, string> = {
+    "local-files": "Use when a document, spreadsheet, folder, or screenshot matters.",
+    "uploaded-documents": "Use when you will paste the relevant text yourself.",
+    web: "Use when a page, article, or fresh fact needs checking.",
+    github: "Use when code, issues, docs, or repo context matter.",
+    "m365-sharepoint": "Use only for work material you are allowed to use.",
+    "google-drive": "Use when Drive docs or sheets should shape the answer.",
+    "personal-memory": "Use when your own notes or background context matter.",
+    "other-source": "Use when the information does not fit the other choices.",
+  };
+
+  if (source.permissionLevel === 0) {
+    return "This was selected by a shortcut but is not available in this setup.";
   }
 
-  if (permissionLevel === 1) {
-    return "Public or shareable information";
-  }
-
-  if (permissionLevel === 2) {
-    return "Ordinary work information";
-  }
-
-  if (permissionLevel === 3) {
-    return "Confidential information when appropriate";
-  }
-
-  return "Sensitive information only when you explicitly choose it";
+  return hints[source.id] ?? "Use when this information should shape the answer.";
 }
 
 function domIdFor(value: string) {

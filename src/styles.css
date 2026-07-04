@@ -983,7 +983,8 @@ button:focus-visible {
   margin-bottom: 2px;
 }
 
-.sourceChoiceGrid label {
+.sourceChoiceGrid label,
+.sourceChoiceGrid button {
   align-items: flex-start;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -992,9 +993,22 @@ button:focus-visible {
   gap: 8px;
   min-height: 72px;
   padding: 10px;
+  text-align: left;
 }
 
-.sourceChoiceGrid label:has(input:checked) {
+.sourceChoiceGrid button {
+  color: inherit;
+  cursor: pointer;
+}
+
+.sourceChoiceGrid button:hover,
+.sourceChoiceGrid button:focus-visible {
+  border-color: var(--brand-teal);
+  box-shadow: 0 0 0 3px rgba(7, 132, 168, 0.14);
+}
+
+.sourceChoiceGrid label:has(input:checked),
+.sourceChoiceGrid .selectedSourceChoice {
   background: #eef8fb;
   border-color: var(--brand-teal);
   box-shadow: inset 0 -3px 0 var(--brand-teal-bright);
@@ -1006,7 +1020,8 @@ button:focus-visible {
   width: auto;
 }
 
-.sourceChoiceGrid span {
+.sourceChoiceGrid span,
+.sourceChoiceGrid button {
   display: grid;
   gap: 3px;
   min-width: 0;

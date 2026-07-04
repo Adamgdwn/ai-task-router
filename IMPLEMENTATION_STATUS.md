@@ -1,52 +1,47 @@
-# 2026-07-04T10:00:43-06:00 - Implementation Status
+# 2026-07-04T10:20:07-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T10:00:43-06:00
-Status: my-ai-tools-tailored-account-levels-complete
-Status Updated: 2026-07-04T10:00:43-06:00
+Last Updated: 2026-07-04T10:20:07-06:00
+Status: contextual-task-include-detour-complete
+Status Updated: 2026-07-04T10:20:07-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-My AI Tools Tailored Account Levels Detour.
+Contextual Task Include Detour.
 
 Completion target: Integration complete.
 
 ## Scope
 
-The local app now presents My AI Tools as a user-controlled selector: one starter row, an explicit branded add button, researched provider-specific account labels, recognizable local model choices, and row-level removal.
+The local app no longer asks users to configure a standalone `What To Include` setup screen. Information selection is now an optional task-context question inside `My Task`.
 
 The completed slice provides:
 
-- `My AI Tools` starts with one generic `Tool selection` row instead of provider-named cards.
-- selecting an app enables that row but does not automatically reveal another row.
-- the branded `Add another tool` button reveals the next blank selector only when the user chooses it.
-- primary tool setup uses AI app, account level or local model, and frequency dropdowns.
-- ChatGPT, Claude, Gemini, Microsoft Copilot, Perplexity, Canva, GitHub Copilot, Cursor, Genspark, Grok, Meta AI, Poe, You.com, NotebookLM, Replit, DeepSeek, Qwen, Kimi, Doubao, MiniMax, Zhipu, Tencent Hunyuan, and Mistral use provider-specific account or access labels.
-- Local or private AI exposes local model choices such as Ollama, LM Studio, Jan, llama.cpp, GPT4All, Open WebUI, and other local model.
-- selected and added rows include `Remove tool`.
-- selected-count and selected-chip layout remain stable without wrapping.
-- `npm run detect:local-models` can summarize common local model tooling without changing app state.
-- first-run setup records remain schema-compatible and stable-ID-compatible while no longer claiming the user has five tools selected.
-- routing/domain tests now use explicit `routeReadyModels` fixtures instead of first-run UI defaults.
+- Start Here now routes through `My AI Tools`, `Choosing Style`, and `My Task`.
+- The side navigation no longer exposes `What To Include`.
+- `My Task` asks `Do you want to include anything specific?`.
+- `Nothing specific` is the default include choice.
+- Users can choose optional task ingredients such as a website/current search, file or folder, pasted documents, repo/code page, work docs, Google Drive, or notes/background.
+- Shortcut-driven source choices still feed the existing local routing and hard-gate safety model.
+- User-facing blocked-source copy now refers to task information choices instead of a removed setup screen.
 
 ## Product Boundary
 
-This detour keeps the app local-first and recommendation-only. It does not add provider account connections, paid-plan verification, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+This detour keeps the app local-first and recommendation-only. It does not add account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
 
 ## Evidence
 
 - `bash scripts/governance-preflight.sh` passed with 0 warnings before the detour.
-- `npm run test -- App everydayToolCatalog` passed with 2 test files and 15 tests.
-- `npm run detect:local-models` passed and produced a summary without printing model names.
+- `npm run test -- App` passed with 1 test file and 12 tests.
 - `npm run test` passed with 11 test files and 81 tests.
 - `npm run build` passed with the existing Vite chunk-size warning.
-- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5182` passed for researched account labels, long dropdown values, three selected rows, remove button behavior, selected-count update, desktop/mobile layout, no selected-chip wrapping, and no horizontal overflow.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5183` passed for no standalone `What To Include` navigation, Start Here's three-step path, My Task's optional include question, `Nothing specific` default/clear behavior, desktop/mobile layout, and no horizontal overflow.
 - `npm audit --audit-level=moderate` found 0 vulnerabilities.
 - `bash scripts/governance-preflight.sh` passed with 0 warnings at close-out.
 - `git diff --check` passed; output only included normal Windows LF-to-CRLF notices.
 - Screenshots:
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tailored-tools-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tailored-tools-mobile.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-contextual-include-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-contextual-include-mobile.png`
 
 ## Known Gaps
 
@@ -55,6 +50,7 @@ This detour keeps the app local-first and recommendation-only. It does not add p
 - Proposed best stack remains a disabled planning note only.
 - Provider/app wording will need periodic review because AI app names and plan labels change.
 - Local detector results are not imported into the app yet; a future reviewed workflow would need an explicit import or confirmation step.
+- The source registry remains an internal routing/safety input; there is no primary UI for editing those defaults now.
 
 ## Next Chunk
 
