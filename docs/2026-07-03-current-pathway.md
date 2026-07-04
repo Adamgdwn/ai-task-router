@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-04T14:56:49-06:00
-Status Updated: 2026-07-04T14:56:49-06:00
+Last Updated: 2026-07-04T14:58:04-06:00
+Status Updated: 2026-07-04T14:58:04-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -2746,12 +2746,12 @@ Stop when docs, UI polish, validation evidence, and known limits support a v0.2 
 
 Handoff note:
 
-After this chunk, decide whether to run a release-readiness review, plan future hosting on `oldskoolai.com`, return to Desktop Chunk D0 owner decisions in [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md), or open a v0.3 pathway for best-stack recommendation mode.
+After this chunk, decide whether to run a release-readiness review, plan future hosting on `oldskoolai.com`, continue to Desktop Chunk D2 in [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md), or open a v0.3 pathway for best-stack recommendation mode.
 
 ## Future Desktop Track - Trusted Installable App
 
 Status: active planning
-Status Updated: 2026-07-04T14:51:54-06:00
+Status Updated: 2026-07-04T14:58:04-06:00
 
 Completion target: D1 task complete; D2 shell spike is next; desktop local discovery remains outside v0.2
 
@@ -2801,6 +2801,7 @@ Stop desktop planning or implementation if the scope expands into background sca
 
 | Timestamp | Command | Result | Notes |
 |-----------|---------|--------|-------|
+| 2026-07-04T14:58:04-06:00 | stale desktop handoff `rg` check | passed | Corrected an older handoff sentence that still pointed back to Desktop Chunk D0 after D1 completion. |
 | 2026-07-04T14:56:49-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; stale D0/D1 `rg` check | passed | Final Desktop Chunk D1 close-out validation passed. Governance reported 0 warnings; whitespace check had only normal Windows line-ending notices; stale D0 waiting/D1-not-started wording was not found. |
 | 2026-07-04T14:51:54-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before confirming Desktop Chunk D0 for planning and creating the Desktop Chunk D1 ADR; timestamp captured. |
 | 2026-07-04T11:35:38-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; D0/doc-control `rg` check | passed | Final document-control and Desktop Chunk D0 validation passed; governance found the new required standard, whitespace check had only normal Windows line-ending notices, and D0 references no longer point to opening D0 later. |
