@@ -1,12 +1,12 @@
 # Document Control Standard
 
 Document ID: STD-ENG-008
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-05-31
-Last Reviewed: 2026-05-31
+Last Reviewed: 2026-07-04
 Next Review: 2027-05-31
 
 ## Purpose
@@ -334,6 +334,7 @@ File names should remain human-readable and stable:
 - include the document purpose, not the control ID
 - avoid version numbers in file names
 - include dates in audit/report file names when date is part of the record identity
+- prefix active working pathway or planning documents with `YYYY-MM-DD-` when the owner needs chronology visible in file lists or IDE tabs
 
 Examples:
 
@@ -341,6 +342,7 @@ Examples:
 - `engineering-governance-policy.md`
 - `project-intake-process.md`
 - `current-build-pathway.md`
+- `2026-07-04-desktop-trust-distribution-plan.md`
 - `repository-audit-2026-05-31.md`
 
 ## Review Cadence

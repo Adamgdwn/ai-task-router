@@ -1,14 +1,14 @@
-# Desktop Trust And Distribution Plan
+# 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.3.0
+Version: 0.3.1
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before Desktop Chunk D2
-Last Updated: 2026-07-04T14:56:49-06:00
+Last Updated: 2026-07-04T15:22:04-06:00
 Status Updated: 2026-07-04T14:56:49-06:00
 
 Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop implementation remains limited to a shell spike until the trust-boundary design is complete.

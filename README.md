@@ -113,7 +113,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Current build pathway](docs/2026-07-03-current-pathway.md)
 - [Manual](docs/manual.md)
 - [Roadmap](docs/roadmap.md)
-- [Desktop trust and distribution plan](docs/desktop-trust-distribution-plan.md)
+- [Desktop trust and distribution plan](docs/2026-07-04-desktop-trust-distribution-plan.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)
 - [Durable development policy](docs/policy/durable-development-engineering-policy.md)
 - [Engineering standards](docs/standards/README.md)

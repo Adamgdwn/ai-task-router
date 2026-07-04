@@ -44,7 +44,7 @@ Future hosted web/PWA release should use this shape:
 6. Smoke test primary flows on desktop and mobile browsers.
 7. Add public links only after the preview passes.
 
-Future desktop distribution is separate from web hosting. Use [desktop trust and distribution plan](desktop-trust-distribution-plan.md) before adding desktop packaging, signing, notarization, checksums, or public installers.
+Future desktop distribution is separate from web hosting. Use [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) before adding desktop packaging, signing, notarization, checksums, or public installers.
 
 ## Rollback
 

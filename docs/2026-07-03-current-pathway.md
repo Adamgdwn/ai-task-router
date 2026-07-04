@@ -1,15 +1,15 @@
 # Current Build Pathway
 
 Document ID: PATH-ENG-001
-Version: 0.4.0
+Version: 0.4.1
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-04T14:58:04-06:00
-Status Updated: 2026-07-04T14:58:04-06:00
+Last Updated: 2026-07-04T15:22:04-06:00
+Status Updated: 2026-07-04T15:22:04-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -25,7 +25,7 @@ Reference only as of 2026-07-03T12:01:44-06:00: the likely future public hosting
 
 ## Future Desktop Trust Note
 
-Reference only as of 2026-07-04T14:51:54-06:00: the project should keep two future distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md). Desktop Chunk D0 is confirmed for planning, and Desktop Chunk D1 selected Tauri for the first shell spike in [ADR-0001](decisions/adr-0001-desktop-wrapper.md). Desktop implementation is still outside v0.2 and must not add native local discovery until a trust-boundary design is complete. The current local detector remains an explicit terminal command unless a later reviewed desktop workflow is approved.
+Reference only as of 2026-07-04T15:22:04-06:00: the project should keep two future distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md). Desktop Chunk D0 is confirmed for planning, and Desktop Chunk D1 selected Tauri for the first shell spike in [ADR-0001](decisions/adr-0001-desktop-wrapper.md). Desktop implementation is still outside v0.2 and must not add native local discovery until a trust-boundary design is complete. The current local detector remains an explicit terminal command unless a later reviewed desktop workflow is approved.
 
 ## Future Product Planning Note
 
@@ -108,6 +108,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Document control standard adoption | complete | 2026-07-04T11:28:22-06:00 | Technical Lead | Added the local document-control standard and routed governed docs, validation logs, ADRs, registers, and handoffs through it. |
 | Desktop Chunk D0 owner decision and governance review | complete | 2026-07-04T14:51:54-06:00 | Technical Lead | Owner's request to carry on was treated as confirmation of the D0 recommended defaults for planning. No desktop implementation was approved by D0. |
 | Desktop Chunk D1 desktop wrapper ADR | complete | 2026-07-04T14:51:54-06:00 | Technical Lead | Added [ADR-0001](decisions/adr-0001-desktop-wrapper.md), selecting Tauri for the first desktop shell spike, keeping PWA as the hosted path and Electron as fallback. |
+| Document control date-first working-doc correction | complete | 2026-07-04T15:22:04-06:00 | Technical Lead | Renamed the desktop trust working plan to [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md), updated repo links, and clarified the date-first working-document convention. |
 | Desktop Chunk D2 Tauri shell spike | active next | 2026-07-04T14:51:54-06:00 | Technical Lead | Next desktop chunk may scaffold the minimum Tauri shell and launch the existing UI. No native discovery, folder inspection, packaging, signing, updater, provider connection, telemetry, or file indexing. |
 | Chunk Fifteen E2E tests and fixture suite | queued | 2026-07-04T10:20:07-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add and contextual task-include MVP workflows when the owner returns to the web MVP lane. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
@@ -2746,7 +2747,7 @@ Stop when docs, UI polish, validation evidence, and known limits support a v0.2 
 
 Handoff note:
 
-After this chunk, decide whether to run a release-readiness review, plan future hosting on `oldskoolai.com`, continue to Desktop Chunk D2 in [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md), or open a v0.3 pathway for best-stack recommendation mode.
+After this chunk, decide whether to run a release-readiness review, plan future hosting on `oldskoolai.com`, continue to Desktop Chunk D2 in [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md), or open a v0.3 pathway for best-stack recommendation mode.
 
 ## Future Desktop Track - Trusted Installable App
 
@@ -2759,7 +2760,7 @@ Budget class: Strategic
 
 Planning source:
 
-- [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md)
+- [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md)
 - [docs/decisions/adr-0001-desktop-wrapper.md](decisions/adr-0001-desktop-wrapper.md)
 
 Objective:
@@ -2801,6 +2802,7 @@ Stop desktop planning or implementation if the scope expands into background sca
 
 | Timestamp | Command | Result | Notes |
 |-----------|---------|--------|-------|
+| 2026-07-04T15:22:04-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; stale desktop-plan path `rg` check; file presence check | passed | Date-first working-document correction passed. Governance reported 0 warnings; whitespace check had only normal Windows line-ending notices; stale `docs/desktop-trust-distribution-plan.md` links were not found; the new dated plan exists and the old undated plan path does not. |
 | 2026-07-04T14:58:04-06:00 | stale desktop handoff `rg` check | passed | Corrected an older handoff sentence that still pointed back to Desktop Chunk D0 after D1 completion. |
 | 2026-07-04T14:56:49-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; stale D0/D1 `rg` check | passed | Final Desktop Chunk D1 close-out validation passed. Governance reported 0 warnings; whitespace check had only normal Windows line-ending notices; stale D0 waiting/D1-not-started wording was not found. |
 | 2026-07-04T14:51:54-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before confirming Desktop Chunk D0 for planning and creating the Desktop Chunk D1 ADR; timestamp captured. |
@@ -2907,6 +2909,6 @@ Stop desktop planning or implementation if the scope expands into background sca
 
 ## Next Handoff
 
-Resume from Desktop Chunk D2 if the owner is continuing the desktop trust track: use [ADR-0001](decisions/adr-0001-desktop-wrapper.md) and [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md) to scaffold only the minimum Tauri desktop shell. D2 may launch the existing UI and verify the browser app still works. D2 must not add native local discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions. Stop and revisit D1 if Tauri cannot launch the existing app cleanly on Windows.
+Resume from Desktop Chunk D2 if the owner is continuing the desktop trust track: use [ADR-0001](decisions/adr-0001-desktop-wrapper.md) and [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md) to scaffold only the minimum Tauri desktop shell. D2 may launch the existing UI and verify the browser app still works. D2 must not add native local discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions. Stop and revisit D1 if Tauri cannot launch the existing app cleanly on Windows.
 
 If the owner returns to the web MVP lane instead, resume Chunk Fifteen: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.

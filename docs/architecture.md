@@ -70,7 +70,7 @@ Excluded from v0.2:
 
 ## Future Desktop Architecture
 
-Desktop packaging is intentionally excluded from v0.2. The future desktop track is documented in [desktop trust and distribution plan](desktop-trust-distribution-plan.md).
+Desktop packaging is intentionally excluded from v0.2. The future desktop track is documented in [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md).
 
 The likely future architecture keeps the React frontend and adds a narrow native layer for desktop-only local discovery. The frontend should not receive broad filesystem access. Native commands should be allowlisted, read-only, timeout-bound, and triggered only after explicit user approval.
 
