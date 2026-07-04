@@ -1,15 +1,15 @@
 # Current Build Pathway
 
 Document ID: PATH-ENG-001
-Version: 0.4.3
+Version: 0.4.4
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-04T16:09:09-06:00
-Status Updated: 2026-07-04T16:09:09-06:00
+Last Updated: 2026-07-04T16:30:17-06:00
+Status Updated: 2026-07-04T16:30:17-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -25,7 +25,7 @@ Reference only as of 2026-07-03T12:01:44-06:00: the likely future public hosting
 
 ## Future Desktop Trust Note
 
-Reference only as of 2026-07-04T16:04:28-06:00: the project should keep two future distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md). Desktop Chunk D0 is confirmed for planning, Desktop Chunk D1 selected Tauri for the first shell spike in [ADR-0001](decisions/adr-0001-desktop-wrapper.md), and Desktop Chunk D2 now has the shell scaffold, Windows prerequisites, a passing no-bundle build, and a verified release executable launch. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script. Desktop implementation is still outside v0.2 and must not add native local discovery until a trust-boundary design is complete. The current local detector remains an explicit terminal command unless a later reviewed desktop workflow is approved.
+Reference only as of 2026-07-04T16:25:09-06:00: the project should keep two future distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md). Desktop Chunk D0 is confirmed for planning, Desktop Chunk D1 selected Tauri for the first shell spike in [ADR-0001](decisions/adr-0001-desktop-wrapper.md), Desktop Chunk D2 has the shell scaffold, Windows prerequisites, a passing no-bundle build, and a previously verified release executable launch, and Desktop Chunk D3 now defines the trust-boundary contract, CSP hardening, and future discovery schemas. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable is also blocked by the same policy family. Desktop implementation is still outside v0.2 and must not add native local discovery until a separate D4 implementation chunk is approved and built against the D3 contract. The current local detector remains an explicit terminal command unless a later reviewed desktop workflow is approved.
 
 ## Future Product Planning Note
 
@@ -110,6 +110,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Desktop Chunk D1 desktop wrapper ADR | complete | 2026-07-04T14:51:54-06:00 | Technical Lead | Added [ADR-0001](decisions/adr-0001-desktop-wrapper.md), selecting Tauri for the first desktop shell spike, keeping PWA as the hosted path and Electron as fallback. |
 | Document control date-first working-doc correction | complete | 2026-07-04T15:22:04-06:00 | Technical Lead | Renamed the desktop trust working plan to [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md), updated repo links, and clarified the date-first working-document convention. |
 | Desktop Chunk D2 Tauri shell spike | draft complete with dev-mode Application Control blocker | 2026-07-04T16:04:28-06:00 | Technical Lead | Installed Rustup/Rust/Cargo and Visual Studio Build Tools with MSVC/SDK, verified `desktop:info`, built the no-bundle release executable, and confirmed the release window title `AI Task Router`. `desktop:dev` is blocked by Windows Application Control for generated debug build scripts. No native discovery, folder inspection, packaging, signing, updater, provider connection, telemetry, or file indexing was added. |
+| Desktop Chunk D3 trust boundary and permission model | task complete with current release-launch App Control blocker | 2026-07-04T16:25:09-06:00 | Technical Lead | Defined the frontend/native trust boundary, future command contracts, user permission flow, local data rules, response/error schemas, and threat controls; added explicit desktop CSP and Zod schema contracts without adding native discovery or machine inspection. The no-bundle build passes, but the current rebuilt unsigned release executable is blocked by Windows Application Control. |
 | Chunk Fifteen E2E tests and fixture suite | queued | 2026-07-04T10:20:07-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add and contextual task-include MVP workflows when the owner returns to the web MVP lane. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
@@ -2775,10 +2776,11 @@ Current decisions:
 
 - D0 is confirmed for planning: first desktop scope is AI tool and local model discovery only; user-selected folder inspection is deferred from the first public desktop release; Windows is first target OS; `Guided AI Labs Ltd` is provisional publisher identity if legally correct.
 - D1 selected Tauri for the first desktop shell spike, keeps the hosted web/PWA track separate, and keeps Electron as a fallback if the Tauri spike blocks.
+- D3 defines the desktop trust-boundary contract: future native commands are limited to `get_desktop_discovery_options` and `run_desktop_discovery`, validated by schemas, summary-first, redacted by default, and user-approved before every run.
 
 Planned next desktop action:
 
-Resolve the Desktop Chunk D2 `desktop:dev` Windows Application Control blocker through an approved lab policy path, or proceed to Desktop Chunk D3 trust-boundary design using the verified release-build shell evidence.
+Resolve the Desktop Chunk D2 `desktop:dev` Windows Application Control blocker through an approved lab policy path, or proceed to Desktop Chunk D4 native local discovery prototype only within the D3 contract.
 
 D2 allowed scope:
 
@@ -2797,6 +2799,15 @@ Current D2 state:
 - the release executable launches and shows the `AI Task Router` window title
 - `npm run desktop:dev` is blocked by Windows Application Control policy when Cargo tries to run the generated debug `build-script-build.exe`
 
+Current D3 state:
+
+- the frontend/native trust-boundary model is documented in [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md)
+- the tool permission matrix separates the current desktop shell from planned D4 discovery commands
+- `src/domain/schemas.ts` defines future desktop discovery option, request, response, summary, result, and error schemas
+- `src-tauri/tauri.conf.json` has explicit release and dev CSP entries
+- no native discovery commands, filesystem permissions, shell/process plugin, folder inspection, telemetry, provider connection, credential storage, packaging, signing, updater, file indexing, or external actions were added
+- `npm run desktop:build` passes after adding `C:\Users\adamg\.cargo\bin` to the current shell PATH, but the rebuilt unsigned release executable launch is blocked by Windows Application Control
+
 Product boundary reminders:
 
 - The web/PWA version must not pretend it can scan the user's computer.
@@ -2811,6 +2822,9 @@ Stop desktop planning or implementation if the scope expands into background sca
 
 | Timestamp | Command | Result | Notes |
 |-----------|---------|--------|-------|
+| 2026-07-04T16:30:17-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final D3 documentation close-out checks passed. Governance reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices. |
+| 2026-07-04T16:25:09-06:00 | `npm run test -- domainSchemas`; `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:info`; `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:build`; `git diff --check` | passed | D3 trust-boundary validation passed. Focused schema suite passed with 1 file and 8 tests; full suite passed with 11 files and 83 tests; web build passed with the existing Vite chunk-size warning; audit found 0 vulnerabilities; governance passed with 0 warnings; Tauri info saw the explicit CSP and all desktop prerequisites after the current shell PATH included `.cargo\bin`; desktop no-bundle build produced the release executable; whitespace check reported only normal Windows LF-to-CRLF notices. |
+| 2026-07-04T16:25:09-06:00 | release executable launch smoke test after D3 rebuild; `Get-AuthenticodeSignature`; Windows Code Integrity log review | blocked | The rebuilt unsigned `src-tauri\target\release\ai-task-router-desktop.exe` was blocked by Windows Application Control. Signature check reports unsigned; SHA-256 `079EF12762D987A877146E6051B32A1E2ED9BC42507B020959F00F2793C7512B`; Code Integrity event IDs `3033` and `3077` cite policy ID `{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}`. |
 | 2026-07-04T16:09:09-06:00 | `npm run desktop:info`; `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `npm run desktop:build`; `git diff --check` | passed | Final D2 prerequisite retry close-out checks passed. Desktop info reported all environment checks green; full unit suite passed with 11 files and 81 tests; web build passed with the existing Vite chunk-size warning; audit found 0 vulnerabilities; governance passed with 0 warnings; desktop no-bundle build produced the release executable; whitespace check reported only normal Windows LF-to-CRLF notices. |
 | 2026-07-04T16:04:28-06:00 | `winget install --id Rustlang.Rustup --exact --source winget --accept-package-agreements --accept-source-agreements --silent`; `winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --source winget --accept-package-agreements --accept-source-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"` | passed | Installed Rustup `1.29.0`, Rust/Cargo `1.96.1`, Visual Studio Build Tools 2022 `17.14.35`, MSVC `14.44.35207`, and Windows SDK `10.0.26100.0`. |
 | 2026-07-04T16:04:28-06:00 | `npm run desktop:info`; `cargo metadata --manifest-path src-tauri/Cargo.toml --format-version 1 --no-deps`; `npm run desktop:build` | passed | Tauri environment checks passed; Cargo metadata passed; no-bundle release build produced `src-tauri\target\release\ai-task-router-desktop.exe`. |
@@ -2929,6 +2943,6 @@ Stop desktop planning or implementation if the scope expands into background sca
 
 ## Next Handoff
 
-Resume from Desktop Chunk D2/D3 if the owner is continuing the desktop trust track: the minimum Tauri scaffold, desktop scripts, branded icon assets, Windows build prerequisites, no-bundle desktop build, and release executable launch are verified. Current blocker: `npm run desktop:dev` fails because Windows Application Control blocks Cargo's generated debug `build-script-build.exe` under `src-tauri\target\debug`; see [docs/runbook.md](runbook.md) for the system tools and troubleshooting note. D2 must not add native local discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions. Proceed to D3 trust-boundary design only as a design/documentation chunk until the owner decides whether to resolve the local Application Control dev-mode blocker first.
+Resume from Desktop Chunk D3/D4 if the owner is continuing the desktop trust track: the minimum Tauri scaffold, desktop scripts, branded icon assets, Windows build prerequisites, no-bundle desktop build, explicit CSP, permission matrix, trust-boundary design, and desktop discovery schema contracts are verified. Current blockers: `npm run desktop:dev` fails because Windows Application Control blocks Cargo's generated debug `build-script-build.exe`, and the current rebuilt unsigned release executable is also blocked by Windows Application Control; see [docs/runbook.md](runbook.md) for the system tools and troubleshooting note. D4 must not add broad filesystem permissions, arbitrary shell/process execution, silent scanning, startup/background inventory, user-supplied paths, provider connections, telemetry, credentials, file indexing, packaging, signing, updater, or external actions.
 
 If the owner returns to the web MVP lane instead, resume Chunk Fifteen: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.

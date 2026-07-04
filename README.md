@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser MVP validation lane, with the Desktop Chunk D2 Tauri shell scaffold built and release-launch verified; dev mode is blocked by Windows Application Control for generated debug build scripts
-Status Updated: 2026-07-04T16:09:09-06:00
+Status: v0.2 browser MVP validation lane, with the Desktop Chunk D3 trust-boundary contract complete; desktop build passes, but dev mode and the current rebuilt unsigned release executable are blocked by Windows Application Control
+Status Updated: 2026-07-04T16:30:17-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -100,6 +100,8 @@ npm run desktop:dev
 
 Current Windows lab note: `npm run desktop:dev` reaches the Vite dev server but the debug Rust build is blocked by Windows Application Control policy when Cargo tries to execute a generated `build-script-build.exe`.
 
+After the D3 rebuild, the unsigned release executable is also blocked by the same Application Control policy family. The no-bundle desktop build still succeeds when the current shell can see `C:\Users\adamg\.cargo\bin`.
+
 Build the desktop shell without packaging:
 
 ```bash
@@ -115,6 +117,8 @@ Desktop prerequisites installed on this Windows machine:
 - WebView2 `149.0.4022.98`
 
 The desktop shell is a spike only. It does not add native discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions.
+
+Desktop Chunk D3 adds only the trust-boundary contract for future native local discovery: explicit CSP, documented command contracts, and TypeScript/Zod schemas. The desktop app still does not inspect the computer from the UI.
 
 Manual local start check used for Chunk One:
 

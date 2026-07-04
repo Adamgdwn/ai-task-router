@@ -46,6 +46,35 @@ export const routeStepKinds = ["model", "research", "artifact", "human review", 
 
 export const policyDefaultIds = ["least-resource", "balanced", "quality-first"] as const;
 
+export const desktopDiscoveryPlatforms = ["windows", "macos", "linux", "unknown"] as const;
+
+export const desktopDiscoveryToolIds = ["ollama", "lm-studio", "jan", "gpt4all"] as const;
+
+export const desktopDiscoveryCheckKinds = ["fixed-cli", "known-folder"] as const;
+
+export const desktopDiscoveryDetailLevels = ["summary", "details"] as const;
+
+export const desktopDiscoveryStatuses = [
+  "not-found",
+  "installed-no-models-found",
+  "folder-found",
+  "models-found",
+  "blocked",
+  "error",
+  "timed-out",
+] as const;
+
+export const desktopDiscoveryErrorCodes = [
+  "invalid-request",
+  "not-approved",
+  "permission-denied",
+  "tool-timeout",
+  "tool-failed",
+  "app-control-blocked",
+  "unsupported-platform",
+  "internal-error",
+] as const;
+
 export const permissionLevelSchema = z.union([
   z.literal(0),
   z.literal(1),
@@ -294,5 +323,132 @@ export const routeLogEntrySchema = z
     outcome: z.enum(["accepted", "edited", "rejected", "deferred"]),
     feedback: routeLogFeedbackSchema.optional(),
     createdAt: isoTimestampSchema,
+  })
+  .strict();
+
+export const desktopDiscoveryOptionSchema = z
+  .object({
+    toolId: z.enum(desktopDiscoveryToolIds),
+    label: nonEmptyTextSchema,
+    summary: nonEmptyTextSchema,
+    checkKinds: z.array(z.enum(desktopDiscoveryCheckKinds)).min(1),
+    defaultSelected: z.boolean(),
+    detailsAvailable: z.boolean(),
+  })
+  .strict();
+
+export const desktopDiscoveryOptionsResponseSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    platform: z.enum(desktopDiscoveryPlatforms),
+    options: z.array(desktopDiscoveryOptionSchema).min(1),
+  })
+  .strict();
+
+export const desktopDiscoveryRequestSchema = z
+  .object({
+    requestId: nonEmptyIdSchema,
+    selectedToolIds: z.array(z.enum(desktopDiscoveryToolIds)).min(1).max(desktopDiscoveryToolIds.length),
+    detailLevel: z.enum(desktopDiscoveryDetailLevels).default("summary"),
+    includePathDetails: z.literal(false).default(false),
+  })
+  .strict()
+  .superRefine((request, context) => {
+    const uniqueToolIds = new Set(request.selectedToolIds);
+    if (uniqueToolIds.size !== request.selectedToolIds.length) {
+      context.addIssue({
+        code: "custom",
+        message: "Selected desktop discovery tools must be unique.",
+        path: ["selectedToolIds"],
+      });
+    }
+  });
+
+export const desktopDiscoveryToolResultSchema = z
+  .object({
+    toolId: z.enum(desktopDiscoveryToolIds),
+    label: nonEmptyTextSchema,
+    status: z.enum(desktopDiscoveryStatuses),
+    detected: z.boolean(),
+    modelCount: z.number().int().min(0).max(500),
+    modelNames: z.array(z.string().trim().min(1).max(160)).max(30).default([]),
+    checkedLocationCount: z.number().int().min(0).max(25),
+    shownPathDetails: z.literal(false).default(false),
+    note: z.string().trim().max(240).optional(),
+  })
+  .strict()
+  .superRefine((result, context) => {
+    if (!result.detected && result.modelCount > 0) {
+      context.addIssue({
+        code: "custom",
+        message: "Undetected tools cannot report local models.",
+        path: ["modelCount"],
+      });
+    }
+
+    if (result.modelNames.length > result.modelCount) {
+      context.addIssue({
+        code: "custom",
+        message: "Model names cannot exceed the reported model count.",
+        path: ["modelNames"],
+      });
+    }
+  });
+
+export const desktopDiscoverySummarySchema = z
+  .object({
+    toolsChecked: z.number().int().min(0).max(desktopDiscoveryToolIds.length),
+    toolsDetected: z.number().int().min(0).max(desktopDiscoveryToolIds.length),
+    modelsFound: z.number().int().min(0).max(500),
+  })
+  .strict();
+
+export const desktopDiscoveryResponseSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    requestId: nonEmptyIdSchema,
+    checkedAt: isoTimestampSchema,
+    platform: z.enum(desktopDiscoveryPlatforms),
+    summary: desktopDiscoverySummarySchema,
+    results: z.array(desktopDiscoveryToolResultSchema).min(1).max(desktopDiscoveryToolIds.length),
+  })
+  .strict()
+  .superRefine((response, context) => {
+    const toolsDetected = response.results.filter((result) => result.detected).length;
+    const modelsFound = response.results.reduce((total, result) => total + result.modelCount, 0);
+
+    if (response.summary.toolsChecked !== response.results.length) {
+      context.addIssue({
+        code: "custom",
+        message: "Desktop discovery summary must match the result count.",
+        path: ["summary", "toolsChecked"],
+      });
+    }
+
+    if (response.summary.toolsDetected !== toolsDetected) {
+      context.addIssue({
+        code: "custom",
+        message: "Desktop discovery summary must match detected tools.",
+        path: ["summary", "toolsDetected"],
+      });
+    }
+
+    if (response.summary.modelsFound !== modelsFound) {
+      context.addIssue({
+        code: "custom",
+        message: "Desktop discovery summary must match found model count.",
+        path: ["summary", "modelsFound"],
+      });
+    }
+  });
+
+export const desktopDiscoveryErrorSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    requestId: nonEmptyIdSchema.optional(),
+    code: z.enum(desktopDiscoveryErrorCodes),
+    message: nonEmptyTextSchema,
+    safeDetail: z.string().trim().max(240).optional(),
+    retryable: z.boolean(),
   })
   .strict();

@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T16:09:09-06:00
+Last Updated: 2026-07-04T16:25:09-06:00
 Status: active
 Owner: Technical Lead
 
@@ -46,10 +46,12 @@ Validation after install:
 
 Current troubleshooting item:
 
+- Some fresh Codex/PowerShell sessions may not inherit the user PATH entry for `C:\Users\adamg\.cargo\bin` even though it is present in the user PATH and the Rust tools are installed. Restart the shell, or temporarily prepend it before desktop checks with `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"`.
 - `npm run desktop:dev` starts Vite on port `5173`, but the debug Rust build fails because Windows Application Control blocks Cargo from running `src-tauri\target\debug\build\ai-task-router-desktop-...\build-script-build.exe`.
 - Reproduced with direct `cargo build --manifest-path src-tauri/Cargo.toml`.
 - Windows Code Integrity logged event IDs `3033` and `3077`; policy ID `{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}` said the generated build script did not meet Enterprise signing level requirements.
 - `citool -lp` could not list policy details in the current non-elevated session (`0x80070005`), and Device Guard reports code integrity enforcement active.
+- After the D3 rebuild, `npm run desktop:build` still succeeds when Rust is on PATH, but launching the rebuilt unsigned release executable is also blocked by Windows Application Control. `Get-AuthenticodeSignature` reports it is not digitally signed, SHA-256 `079EF12762D987A877146E6051B32A1E2ED9BC42507B020959F00F2793C7512B`, and Code Integrity events `3033`/`3077` cite the same policy ID.
 - Do not weaken or bypass Application Control silently. Resolve through the Windows lab security policy, a trusted development folder/policy exception, or an approved elevated admin troubleshooting session.
 
 ## Recovery

@@ -10,5 +10,6 @@
 - Applied the owner-visible date-first naming convention to the desktop trust working document and recorded it in the document-control standard.
 - Added the Desktop Chunk D2 Tauri shell scaffold, brand-aligned desktop icons, desktop npm scripts, and the Windows prerequisite blocker note for Rust/Cargo plus MSVC Build Tools.
 - Installed and verified the Windows desktop build prerequisites, committed the generated Tauri `Cargo.lock`, confirmed the no-bundle release desktop executable launches, and documented the remaining Windows Application Control blocker for `desktop:dev`.
+- Completed Desktop Chunk D3 trust-boundary work: explicit desktop CSP, future local discovery schema contracts, permission matrix updates, command/data handling rules, and D4 entry gates without adding native discovery; the no-bundle build passes, but the rebuilt unsigned release executable is blocked by Windows Application Control.
 
 

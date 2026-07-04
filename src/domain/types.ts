@@ -2,6 +2,13 @@ import type { z } from "zod";
 import type {
   blockedRouteSchema,
   capabilityScoresSchema,
+  desktopDiscoveryErrorSchema,
+  desktopDiscoveryOptionSchema,
+  desktopDiscoveryOptionsResponseSchema,
+  desktopDiscoveryRequestSchema,
+  desktopDiscoveryResponseSchema,
+  desktopDiscoverySummarySchema,
+  desktopDiscoveryToolResultSchema,
   modelInventoryItemSchema,
   permissionLevelSchema,
   policyDefaultSchema,
@@ -34,3 +41,10 @@ export type PromptPackage = z.infer<typeof promptPackageSchema>;
 export type BlockedRoute = z.infer<typeof blockedRouteSchema>;
 export type RouteCard = z.infer<typeof routeCardSchema>;
 export type RouteLogEntry = z.infer<typeof routeLogEntrySchema>;
+export type DesktopDiscoveryOption = z.infer<typeof desktopDiscoveryOptionSchema>;
+export type DesktopDiscoveryOptionsResponse = z.infer<typeof desktopDiscoveryOptionsResponseSchema>;
+export type DesktopDiscoveryRequest = z.infer<typeof desktopDiscoveryRequestSchema>;
+export type DesktopDiscoveryToolResult = z.infer<typeof desktopDiscoveryToolResultSchema>;
+export type DesktopDiscoverySummary = z.infer<typeof desktopDiscoverySummarySchema>;
+export type DesktopDiscoveryResponse = z.infer<typeof desktopDiscoveryResponseSchema>;
+export type DesktopDiscoveryError = z.infer<typeof desktopDiscoveryErrorSchema>;

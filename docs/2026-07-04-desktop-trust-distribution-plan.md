@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.4.1
+Version: 0.5.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before resolving the D2 dev-mode Application Control blocker or starting Desktop Chunk D3
-Last Updated: 2026-07-04T16:09:09-06:00
-Status Updated: 2026-07-04T16:09:09-06:00
+Next Review: Before Desktop Chunk D4 native local discovery implementation
+Last Updated: 2026-07-04T16:30:17-06:00
+Status Updated: 2026-07-04T16:30:17-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 now has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a verified release executable launch. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script. Desktop implementation remains limited to a shell spike until the trust-boundary design is complete.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defines the frontend/native trust boundary, future command contracts, user permission flow, local data handling, response schemas, and CSP hardening without adding native discovery. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable is also blocked by the same Application Control policy family.
 
 ## Purpose
 
@@ -394,7 +394,7 @@ Stop if the first desktop release scope includes broad folder indexing, backgrou
 
 ## Desktop Chunk D0 Decision Packet
 
-Status: task complete
+Status: task complete with current release-launch App Control blocker
 
 Status Updated: 2026-07-04T14:51:54-06:00
 
@@ -557,6 +557,115 @@ npm run desktop:build
 ```
 
 D2 has enough evidence for a release-build shell spike, but dev mode remains blocked until the local Application Control policy allows Cargo's generated debug build scripts in the approved development path.
+
+## Desktop Chunk D3 Trust Boundary And Permission Model
+
+Status: task complete
+
+Status Updated: 2026-07-04T16:25:09-06:00
+
+Completion target: Task complete
+
+Result:
+
+D3 defines the desktop trust boundary before native local discovery enters the app. This chunk added executable TypeScript/Zod schemas for the future desktop discovery IPC contract and hardened the Tauri shell with an explicit CSP. It did not add native commands, filesystem permissions, shell/process plugins, folder inspection, model scanning, packaging, signing, telemetry, provider connections, credentials, or external actions. The current unsigned rebuilt release executable cannot be launch-smoke-tested in this lab session because Windows Application Control blocks it.
+
+Official source basis reviewed on 2026-07-04:
+
+- Tauri security overview: https://v2.tauri.app/security/
+- Tauri capabilities: https://v2.tauri.app/security/capabilities/
+- Tauri permissions: https://v2.tauri.app/security/permissions/
+- Tauri runtime authority: https://v2.tauri.app/security/runtime-authority/
+- Tauri CSP: https://v2.tauri.app/security/csp/
+- Tauri config reference for `csp` and `devCsp`: https://v2.tauri.app/reference/config/
+- Tauri shell plugin permissions: https://v2.tauri.app/plugin/shell/
+
+Current desktop boundary:
+
+- `src-tauri/capabilities/default.json` still grants no permissions.
+- `src-tauri/src/lib.rs` still registers no custom Tauri commands.
+- `src-tauri/Cargo.toml` still has no filesystem, shell, process, upload, updater, provider, credential, telemetry, or database plugin dependency.
+- `src-tauri/tauri.conf.json` keeps bundling inactive and now has a release CSP plus a dev CSP for the Vite server.
+- `npm run desktop:dev` remains blocked by the Windows lab Application Control policy; the current rebuilt release executable is also blocked because it is unsigned. D3 does not weaken or bypass that control.
+
+Trust boundary model:
+
+| Boundary | Trust level | Allowed role | Controls |
+|---|---|---|---|
+| React WebView | Untrusted caller | Render UI, store browser-local IndexedDB data, ask for a named native discovery action only after user approval. | Cannot receive broad filesystem access; all native results must pass schemas before use; no hidden startup checks. |
+| Tauri IPC | Controlled bridge | Carry named requests and structured responses between the WebView and Rust core. | Only approved commands may be exposed; capabilities must remain narrow; command inputs must be runtime-validated. |
+| Rust core | Trusted local authority | Enforce allowlists, timeouts, redaction, and result limits for desktop-only local checks. | Never trust frontend input directly; never accept arbitrary commands, paths, shell text, URLs, or provider credentials. |
+| Local OS, tools, folders, and process output | Untrusted local evidence | Provide installation/model evidence from allowlisted checks only. | Treat output as untrusted text; limit size; redact paths; avoid file-content reads; handle timeouts and blocks safely. |
+| External services | Out of scope | None. | No provider API calls, account login, telemetry, upload, remote sync, or external action execution. |
+
+Approved future command contract for D4:
+
+| Command | Purpose | Input | Output | Error shape | Non-goals |
+|---|---|---|---|---|---|
+| `get_desktop_discovery_options` | Let the desktop UI show which local tool checks are available for the current OS. | None. | `desktopDiscoveryOptionsResponseSchema` from `src/domain/schemas.ts`. | `desktopDiscoveryErrorSchema` if platform or runtime setup is unsupported. | No scanning, no folder listing, no model names, no provider calls. |
+| `run_desktop_discovery` | Run a user-approved local AI tool/model check for selected allowlisted tools. | `desktopDiscoveryRequestSchema` from `src/domain/schemas.ts`; selected tools only; details off by default; `includePathDetails` must remain `false`. | `desktopDiscoveryResponseSchema` from `src/domain/schemas.ts`. | `desktopDiscoveryErrorSchema` with safe error codes such as `invalid-request`, `tool-timeout`, `tool-failed`, `app-control-blocked`, or `unsupported-platform`. | No arbitrary shell text, no user-supplied paths, no recursive home scan, no file content reads, no writes, no credentials, no network calls. |
+
+Implementation notes for D4:
+
+- Prefer custom Rust commands over Tauri's shell plugin for this first discovery path.
+- If a local CLI must be invoked, use fixed executable names and fixed arguments only, with no shell interpolation.
+- Add explicit timeouts per check.
+- Limit each result to known tool IDs: `ollama`, `lm-studio`, `jan`, and `gpt4all` until the allowlist is deliberately expanded.
+- Summary mode must return counts and friendly statuses without model names or paths.
+- Details mode may return model names only after the user chooses to show details; it must still cap results and must not return full paths.
+- Path details are blocked by schema in D3 and require a separate owner-approved chunk if ever needed.
+- Native command implementation must fail closed if schema validation, platform checks, App Control, or allowlist checks fail.
+
+User permission flow for D4:
+
+1. User clicks a plain-language action such as `Check this computer`.
+2. App explains: "We will only check the AI tools you select. We will not read your documents, upload anything, or connect accounts."
+3. User chooses tool checks from the allowlisted list.
+4. User runs the check manually; no check runs at startup or in the background.
+5. App shows a summary first.
+6. User may choose whether to show model names.
+7. User may add a found tool to My AI Tools or clear the result.
+
+Data handling rules:
+
+| Data | Default handling | Allowed persistence | Prohibited handling |
+|---|---|---|---|
+| Tool installed/not found status | Show friendly summary. | Browser-local IndexedDB only if the user adds a tool or saves a result. | Hidden telemetry, upload, provider sync. |
+| Model count | Show summary count. | Browser-local IndexedDB only after user action. | Inferring unrelated folder contents. |
+| Model names | Hidden by default. | May be shown in details mode and saved only after user action. | Printed in support logs by default, sent remotely, or shown without user choice. |
+| Paths | Not returned by D3 schemas. | None in D4. | Full path disclosure, recursive folder indexes, arbitrary user path inspection. |
+| Errors | Safe code and short safe detail. | Validation log or local support note only when user chooses to share. | Raw stdout/stderr dumps, private paths, secrets, or machine inventory. |
+
+Threat notes and controls:
+
+| Threat | Control |
+|---|---|
+| A compromised WebView asks for broader access. | Runtime schema validation, narrow Tauri capabilities, named commands only, no default native permissions. |
+| Command injection through tool names or arguments. | Tool IDs are enum-only; no arbitrary shell text; fixed executable names and args. |
+| Local tool output leaks private data. | Treat output as untrusted, cap result size, redact by default, hide model names unless details mode is chosen. |
+| Discovery feels invasive to non-technical users. | User starts every check, selects tools, sees plain-language copy, can clear results. |
+| The app starts scanning silently after install. | Startup/background checks are prohibited by this plan and the permission matrix. |
+| Dev or release environment blocks local checks. | Return safe `app-control-blocked`, `permission-denied`, or `tool-timeout` errors without bypassing OS security controls. |
+
+D4 entry gates:
+
+- Implement no native discovery until these schemas and user copy are reviewed against the UI.
+- Add Rust command tests or integration checks for allowlists, timeouts, and redaction.
+- Keep `src-tauri/capabilities/default.json` free of broad `fs:*`, `shell:*`, process, upload, updater, provider, credential, or telemetry permissions.
+- Validate `npm run test`, `npm run build`, `npm run desktop:info`, and `npm run desktop:build`.
+- Do not treat D4 as public release readiness; packaging/signing remains later.
+
+D3 validation:
+
+- Final documentation close-out checks passed: `bash scripts/governance-preflight.sh` reported 0 warnings and `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- `npm run test -- domainSchemas` passed with 1 test file and 8 tests after adding the desktop discovery schemas.
+- `npm run test` passed with 11 test files and 83 tests.
+- `npm run build` passed with the existing Vite chunk-size warning.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- `npm run desktop:info` passed after prepending `C:\Users\adamg\.cargo\bin` to the current shell PATH; without that fresh-shell adjustment, Tauri could not see Rust even though the tools are installed and present in the user PATH.
+- `npm run desktop:build` passed after prepending `C:\Users\adamg\.cargo\bin` and built `src-tauri\target\release\ai-task-router-desktop.exe`.
+- Rebuilt release executable launch smoke test was blocked by Windows Application Control. `Get-AuthenticodeSignature` reports the executable is unsigned, SHA-256 `079EF12762D987A877146E6051B32A1E2ED9BC42507B020959F00F2793C7512B`, and Code Integrity events `3033`/`3077` cite policy ID `{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}`.
 
 ### Phase 1: Desktop Tool Decision Spike
 
@@ -831,6 +940,10 @@ Completion target: Task complete
 Outcome:
 
 Native commands, user permissions, local data handling, and response schemas are documented before implementation.
+
+Current state:
+
+D3 is complete as of 2026-07-04T16:25:09-06:00 with the current release-launch smoke test blocked by Windows Application Control. The trust-boundary model, D4 command contract, user permission flow, data-handling rules, response/error schemas, threat notes, and CSP hardening are recorded above. No native discovery command or machine inspection was added.
 
 ### Desktop Chunk D4 - Permissioned Local AI Tool Detection
 
