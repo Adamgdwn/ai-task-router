@@ -3,7 +3,7 @@ import type { SourcePermission } from "../types";
 export const defaultSources = [
   {
     id: "local-files",
-    label: "Local files",
+    label: "Files or folders I choose",
     sourceType: "local files",
     permissionLevel: 2,
     sensitivityAllowed: ["public", "internal", "confidential"],
@@ -13,7 +13,7 @@ export const defaultSources = [
   },
   {
     id: "uploaded-documents",
-    label: "Uploaded documents",
+    label: "Documents I paste in",
     sourceType: "uploaded documents",
     permissionLevel: 2,
     sensitivityAllowed: ["public", "internal", "confidential"],
@@ -23,7 +23,7 @@ export const defaultSources = [
   },
   {
     id: "web",
-    label: "Web",
+    label: "Websites or web search",
     sourceType: "web",
     permissionLevel: 1,
     sensitivityAllowed: ["public", "public-facing risk"],
@@ -33,7 +33,7 @@ export const defaultSources = [
   },
   {
     id: "github",
-    label: "GitHub",
+    label: "GitHub or repo pages",
     sourceType: "github",
     permissionLevel: 1,
     sensitivityAllowed: ["public", "internal"],
@@ -43,7 +43,7 @@ export const defaultSources = [
   },
   {
     id: "m365-sharepoint",
-    label: "Microsoft 365 / SharePoint",
+    label: "Microsoft 365 or SharePoint",
     sourceType: "m365 sharepoint",
     permissionLevel: 1,
     sensitivityAllowed: ["public", "internal"],
@@ -63,7 +63,7 @@ export const defaultSources = [
   },
   {
     id: "personal-memory",
-    label: "Personal memory",
+    label: "What I already know",
     sourceType: "personal memory",
     permissionLevel: 2,
     sensitivityAllowed: ["public", "internal", "confidential"],
@@ -73,7 +73,7 @@ export const defaultSources = [
   },
   {
     id: "other-source",
-    label: "Other source",
+    label: "Something else",
     sourceType: "other",
     permissionLevel: 0,
     sensitivityAllowed: ["public"],

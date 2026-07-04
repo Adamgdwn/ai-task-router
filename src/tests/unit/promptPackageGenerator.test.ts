@@ -121,7 +121,9 @@ describe("prompt package generator", () => {
     );
     expect(promptPackage.steps[0]?.instruction).toContain("Use this prompt package as manual guidance only.");
     expect(promptPackage.steps[0]?.instruction).toContain("Work type: writing. Output type: draft.");
-    expect(promptPackage.steps[0]?.instruction).toContain("Use only these allowed source IDs for this step: web (Web), github (GitHub).");
+    expect(promptPackage.steps[0]?.instruction).toContain(
+      "Use only these allowed source IDs for this step: web (Websites or web search), github (GitHub or repo pages).",
+    );
     expect(promptPackage.steps[0]?.expectedOutput).toContain("draft");
   });
 
@@ -170,8 +172,8 @@ describe("prompt package generator", () => {
     expectValidPromptPackage(promptPackage);
     expect(inputRefs).toContain("local-files");
     expect(inputRefs).not.toContain("web");
-    expect(instructionText).toContain("local-files (Local files)");
-    expect(instructionText).not.toContain("web (Web)");
+    expect(instructionText).toContain("local-files (Files or folders I choose)");
+    expect(instructionText).not.toContain("web (Websites or web search)");
   });
 
   it("marks explicit human approval steps when route or hard gates require approval", () => {

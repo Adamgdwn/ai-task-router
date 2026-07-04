@@ -71,11 +71,11 @@ describe("hard gates", () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: "web",
-          reason: "Web does not allow confidential tasks.",
+          reason: "Websites or web search does not allow confidential tasks.",
         }),
         expect.objectContaining({
           id: "github",
-          reason: "GitHub does not allow confidential tasks.",
+          reason: "GitHub or repo pages does not allow confidential tasks.",
         }),
       ]),
     );

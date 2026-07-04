@@ -165,7 +165,7 @@ describe("route card generator", () => {
       expect.arrayContaining([
         {
           routeId: "blocked-source-web",
-          reason: "Web does not allow confidential tasks.",
+          reason: "Websites or web search does not allow confidential tasks.",
           severity: "blocked",
         },
       ]),

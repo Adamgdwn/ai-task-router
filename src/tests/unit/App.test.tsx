@@ -49,17 +49,17 @@ describe("App", () => {
     const { unmount } = render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "My AI Tools" }));
-    const freeAgentRow = await screen.findByRole("region", { name: "Free or basic AI assistant" });
+    const freeAgentRow = await screen.findByRole("region", { name: "Free/basic AI assistant" });
     const freeAgentLabel = within(freeAgentRow).getByRole("textbox", {
       name: "Tool label for user-free-small-model",
     });
-    const freeAgentUse = within(freeAgentRow).getByRole("combobox", {
-      name: "Use Free or basic AI assistant",
+    const freeAgentUse = within(freeAgentRow).getByRole("checkbox", {
+      name: "Include Free/basic AI assistant",
     });
 
     await user.clear(freeAgentLabel);
     await user.type(freeAgentLabel, "My free assistant");
-    await user.selectOptions(freeAgentUse, "no");
+    await user.click(freeAgentUse);
     await user.click(screen.getByRole("button", { name: "Save my choices" }));
 
     await screen.findByText("Your choices were saved on this device.");
@@ -70,12 +70,12 @@ describe("App", () => {
 
     const savedFreeAgentRow = await screen.findByRole("region", { name: "My free assistant" });
     expect(within(savedFreeAgentRow).getByDisplayValue("My free assistant")).toBeInTheDocument();
-    expect(within(savedFreeAgentRow).getByRole("combobox", { name: "Use My free assistant" })).toHaveValue("no");
+    expect(within(savedFreeAgentRow).getByRole("checkbox", { name: "Include My free assistant" })).not.toBeChecked();
 
     await user.click(screen.getByRole("button", { name: "Restore starter choices" }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue("Free or basic AI assistant")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("Free/basic AI assistant")).toBeInTheDocument();
     });
   });
 
@@ -84,8 +84,8 @@ describe("App", () => {
     const store = buildTestStore();
     const { unmount } = render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "Information Comfort" }));
-    await user.selectOptions(await screen.findByRole("combobox", { name: "Information comfort for web" }), "none");
+    await user.click(screen.getByRole("button", { name: "What To Include" }));
+    await user.click(await screen.findByRole("checkbox", { name: "Include Websites or web search" }));
 
     await user.click(screen.getByRole("button", { name: "Choosing Style" }));
     expect(screen.getByRole("checkbox", { name: /Suggest a full AI toolkit/ })).toBeDisabled();
@@ -98,9 +98,9 @@ describe("App", () => {
     unmount();
     render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "Information Comfort" }));
+    await user.click(screen.getByRole("button", { name: "What To Include" }));
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: "Information comfort for web" })).toHaveValue("none");
+      expect(screen.getByRole("checkbox", { name: "Include Websites or web search" })).not.toBeChecked();
     });
 
     await user.click(screen.getByRole("button", { name: "Choosing Style" }));
@@ -119,8 +119,7 @@ describe("App", () => {
 
     await user.click(screen.getByRole("button", { name: "Show me my best options" }));
 
-    expect(await screen.findByText("Task title is required.")).toBeInTheDocument();
-    expect(screen.getByText("Task description is required.")).toBeInTheDocument();
+    expect(await screen.findByText("Describe what you are trying to do.")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Best Options" }));
 
@@ -134,15 +133,15 @@ describe("App", () => {
     render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "My Task" }));
-    await screen.findByText("Personal memory");
-    await user.selectOptions(screen.getByLabelText("Start with"), "draft-public-facing-copy");
+    await screen.findByText("What I already know");
+    await user.click(screen.getByRole("button", { name: "Use shortcut Draft public-facing copy" }));
     await user.click(screen.getByRole("button", { name: "Show me my best options" }));
 
     expect(await screen.findByRole("heading", { name: "Best Options", level: 2 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Lean route", level: 4 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Balanced route", level: 4 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Premium route", level: 4 })).toBeInTheDocument();
-    expect(screen.getAllByText("Recommended route").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Best fit").length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "Warnings" })).toBeInTheDocument();
     expect(screen.getByText(/Human approval is required before using public-facing/)).toBeInTheDocument();
 
@@ -177,13 +176,13 @@ describe("App", () => {
     render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "My Task" }));
-    await screen.findByText("Web");
-    await user.selectOptions(screen.getByLabelText("Start with"), "research-current-facts");
+    await screen.findByText("Websites or web search");
+    await user.click(screen.getByRole("button", { name: "Use shortcut Research current facts" }));
     await user.click(screen.getByRole("button", { name: "Show me my best options" }));
 
     expect(await screen.findByRole("heading", { name: "Best Options", level: 2 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Left out for safety" })).toBeInTheDocument();
-    expect(screen.getByText("Web is set to no access and cannot be used in a route.")).toBeInTheDocument();
+    expect(screen.getByText("Websites or web search is turned off in What To Include.")).toBeInTheDocument();
     expect(screen.getByText(/Current facts or citations need an allowed research source/)).toBeInTheDocument();
   });
 
@@ -249,7 +248,9 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Open decision card" }));
 
     expect(await screen.findByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Saved decision card" })).toHaveValue("route-card-task-local-route");
+    expect((screen.getByRole("combobox", { name: "Saved decision card" }) as HTMLSelectElement).value).toBe(
+      records.routeCards[0]?.id,
+    );
   });
 
   it("shows saved route cards with local copy and Markdown download preparation", async () => {
@@ -263,7 +264,9 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Decision Card" }));
 
     expect(await screen.findByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Saved decision card" })).toHaveValue("route-card-task-local-route");
+    expect((screen.getByRole("combobox", { name: "Saved decision card" }) as HTMLSelectElement).value).toMatch(
+      /^route-card-/,
+    );
     expect(screen.getByText("Options and tradeoffs")).toBeInTheDocument();
     expect(screen.getByText("Left out for safety")).toBeInTheDocument();
     expect(screen.getByText("Warnings")).toBeInTheDocument();
@@ -330,8 +333,8 @@ function buildTestStore(): LocalStore {
 
 async function generateAndSavePublicFacingRoute(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "My Task" }));
-  await screen.findByText("Personal memory");
-  await user.selectOptions(screen.getByLabelText("Start with"), "draft-public-facing-copy");
+  await screen.findByText("What I already know");
+  await user.click(screen.getByRole("button", { name: "Use shortcut Draft public-facing copy" }));
   await user.click(screen.getByRole("button", { name: "Show me my best options" }));
   await screen.findByRole("heading", { name: "Best Options", level: 2 });
   await user.click(screen.getByRole("button", { name: "Save decision and prompts" }));

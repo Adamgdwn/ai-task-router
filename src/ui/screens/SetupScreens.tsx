@@ -9,7 +9,6 @@ import type {
   SensitivityClass,
   SourcePermission,
 } from "../../domain/types";
-import type { LocalSetupPreferences } from "../../storage/localStore";
 import type { SetupConfigurationController } from "../state/useSetupConfiguration";
 import type { ScreenDefinition } from "./screenDefinitions";
 
@@ -17,6 +16,15 @@ const capabilityKeys = ["reasoning", "writing", "coding", "research", "packaging
 const scoringWeightKeys = ["cost", "energy", "quality", "speed", "sourceFit", "sensitivityFit"] as const;
 const sourceComfortLevels = ["none", "public", "work", "confidential", "restricted"] as const;
 type SourceComfortLevel = (typeof sourceComfortLevels)[number];
+const visibleSourceComfortLevels = sourceComfortLevels.filter((level) => level !== "none");
+const toolTierOptions = [
+  { value: "small", label: "Free or basic" },
+  { value: "mid", label: "Everyday paid" },
+  { value: "frontier", label: "Strongest paid" },
+  { value: "research", label: "Research / current facts" },
+  { value: "artifact", label: "Documents, tables, or slides" },
+  { value: "human", label: "My own review" },
+] satisfies { value: ModelInventoryItem["tier"]; label: string }[];
 const shoppingPathSteps = [
   {
     screenId: "tool-inventory",
@@ -28,9 +36,9 @@ const shoppingPathSteps = [
   {
     screenId: "source-permissions",
     eyebrow: "Aisle 2",
-    title: "What information feels okay?",
+    title: "What should be included?",
     body: "Choose whether public info, pasted documents, work notes, or sensitive material can be considered.",
-    buttonLabel: "Set info comfort",
+    buttonLabel: "Choose what to include",
   },
   {
     screenId: "policy-settings",
@@ -92,37 +100,31 @@ export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
   return (
     <SetupScreenLayout definition={definition} setup={setup}>
       <SetupBoundaryNote>
-        Pick broad shelves, not technical model settings. This only records what you already have available; it does not
-        connect accounts, check subscriptions, call providers, or store credentials.
+        Name the AI tools you already use, choose the subscription level that feels closest, and mark the helper you
+        reach for most. This does not connect accounts, check subscriptions, call providers, or store credentials.
       </SetupBoundaryNote>
 
       <section className="conversationCard" aria-labelledby="tool-quick-check-heading">
         <div>
           <p className="screenKicker">Quick shelf check</p>
-          <h3 id="tool-quick-check-heading">Which helpers can you use today?</h3>
+          <h3 id="tool-quick-check-heading">What models or AI tools do you use?</h3>
         </div>
         <p>
-          Leave a shelf off if you do not have it, do not trust it, or simply do not want it considered for today's
-          recommendations.
+          Use names you recognize, like ChatGPT, Claude, Gemini, Copilot, Perplexity, a local model, or whatever else
+          is already in your working life.
         </p>
       </section>
 
       <InventoryGroup
         models={setup.configuration?.modelInventory ?? []}
         setup={setup}
-        title="Everyday AI helpers"
-        tiers={["small"]}
+        title="General AI helpers"
+        tiers={["small", "mid", "frontier"]}
       />
       <InventoryGroup
         models={setup.configuration?.modelInventory ?? []}
         setup={setup}
-        title="Stronger paid helpers"
-        tiers={["mid", "frontier"]}
-      />
-      <InventoryGroup
-        models={setup.configuration?.modelInventory ?? []}
-        setup={setup}
-        title="Research, making, and final review"
+        title="Specialty helpers and final review"
         tiers={["research", "artifact", "human"]}
       />
     </SetupScreenLayout>
@@ -135,17 +137,18 @@ export function SourcePermissionsScreen({ definition, setup }: SetupScreenProps)
   return (
     <SetupScreenLayout definition={definition} setup={setup}>
       <SetupBoundaryNote>
-        This is about comfort, not automatic access. The app does not scan files, search the web, or connect to GitHub,
-        Microsoft 365, SharePoint, Google Drive, or anything else.
+        Pick the sites, drives, folders, documents, and personal context you may want included in recommendations. The
+        app still does not open, scan, upload, search, or connect to any of them.
       </SetupBoundaryNote>
 
       <section className="conversationCard" aria-labelledby="information-comfort-heading">
         <div>
-          <p className="screenKicker">Information comfort</p>
-          <h3 id="information-comfort-heading">What kind of ingredients can go into a recommendation?</h3>
+          <p className="screenKicker">Information to include</p>
+          <h3 id="information-comfort-heading">What should the app be allowed to consider?</h3>
         </div>
         <p>
-          Choose the highest comfort level for each information shelf. You can still decide task by task what to include.
+          Turn on the places you may consult yourself, then choose the plain privacy level that best describes them.
+          You can still narrow this down for each task.
         </p>
       </section>
 
@@ -319,12 +322,13 @@ function InventoryGroup({
   title: string;
 }) {
   const groupedModels = models.filter((model) => tiers.includes(model.tier));
+  const selectedCount = groupedModels.filter((model) => model.enabled).length;
 
   return (
     <section className="setupGroup" aria-labelledby={domIdFor(title)}>
       <div className="groupHeader">
         <h3 id={domIdFor(title)}>{title}</h3>
-        <span>{groupedModels.length} stored</span>
+        <span>{selectedCount} selected</span>
       </div>
 
       <div className="setupRecordList">
@@ -336,6 +340,13 @@ function InventoryGroup({
               key={model.id}
               model={model}
               onChange={(updatedModel) => setup.updateModelInventory(replaceRecord(models, updatedModel))}
+              onPreferredChange={(preferredModelId) =>
+                setup.updateSetupPreferences({
+                  ...setup.preferences,
+                  preferredModelId,
+                })
+              }
+              preferredModelId={setup.preferences.preferredModelId}
             />
           ))
         )}
@@ -347,11 +358,15 @@ function InventoryGroup({
 function ModelInventoryRow({
   model,
   onChange,
+  onPreferredChange,
+  preferredModelId,
 }: {
   model: ModelInventoryItem;
   onChange: (model: ModelInventoryItem) => void;
+  onPreferredChange: (modelId: ModelInventoryItem["id"]) => void;
+  preferredModelId: ModelInventoryItem["id"] | undefined;
 }) {
-  const useValue = model.enabled ? "yes" : "no";
+  const preferred = preferredModelId === model.id;
 
   return (
     <section className="setupRecord" aria-labelledby={`${model.id}-title`}>
@@ -360,38 +375,63 @@ function ModelInventoryRow({
           <h4 id={`${model.id}-title`}>{model.label}</h4>
           <p>{inventoryDescriptor(model)}</p>
         </div>
-        <span className="recordPill">{model.enabled ? "Available" : "Not in use"}</span>
+        <span className="recordPill">{preferred ? "Used most" : model.enabled ? "Included" : "Left out"}</span>
       </div>
 
-      <div className="quickQuestionGrid">
-        <label>
-          <span>Should this shelf be considered?</span>
-          <select
-            aria-label={`Use ${model.label}`}
-            onChange={(event) => onChange({ ...model, enabled: event.target.value === "yes" })}
-            value={useValue}
-          >
-            <option value="yes">Yes, I can use this</option>
-            <option value="no">No, leave this out</option>
-          </select>
+      <div className="toolChoiceGrid">
+        <label className="toggleField toolUseToggle">
+          <input
+            aria-label={`Include ${model.label}`}
+            checked={model.enabled}
+            onChange={(event) => onChange({ ...model, enabled: event.target.checked })}
+            type="checkbox"
+          />
+          <span>I use this</span>
         </label>
 
         <label>
-          <span>What should we call it?</span>
+          <span>Model or tool name</span>
           <input
             aria-label={`Tool label for ${model.id}`}
             onChange={(event) => onChange({ ...model, label: event.target.value })}
             value={model.label}
           />
         </label>
+
+        <label>
+          <span>Subscription level</span>
+          <select
+            aria-label={`Subscription level for ${model.id}`}
+            onChange={(event) => onChange({ ...model, tier: event.target.value as ModelInventoryItem["tier"] })}
+            value={model.tier}
+          >
+            {toolTierOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="toggleField toolUseMost">
+          <input
+            aria-label={`Use ${model.label} most`}
+            checked={preferred}
+            disabled={!model.enabled}
+            name="preferred-model"
+            onChange={() => onPreferredChange(model.id)}
+            type="radio"
+          />
+          <span>I use this most</span>
+        </label>
       </div>
 
       <details className="advancedDrawer">
-        <summary>Advanced routing details</summary>
+        <summary>Technical routing details</summary>
 
         <div className="formGrid">
           <label>
-            <span>Provider or subscription</span>
+            <span>Provider or place you use it</span>
             <input
               aria-label={`Provider or subscription for ${model.id}`}
               onChange={(event) => onChange({ ...model, provider: event.target.value })}
@@ -399,15 +439,15 @@ function ModelInventoryRow({
             />
           </label>
           <label>
-            <span>Internal shelf</span>
+            <span>Routing category</span>
             <select
               aria-label={`Tier for ${model.id}`}
               onChange={(event) => onChange({ ...model, tier: event.target.value as ModelInventoryItem["tier"] })}
               value={model.tier}
             >
-              {["small", "mid", "frontier", "research", "artifact", "human"].map((tier) => (
-                <option key={tier} value={tier}>
-                  {tier}
+              {toolTierOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -488,6 +528,7 @@ function SourcePermissionRow({
   onChange: (source: SourcePermission) => void;
 }) {
   const comfortValue = comfortLevelForSource(source);
+  const included = comfortValue !== "none";
 
   return (
     <section className="setupRecord" aria-labelledby={`${source.id}-title`}>
@@ -496,18 +537,31 @@ function SourcePermissionRow({
           <h4 id={`${source.id}-title`}>{source.label}</h4>
           <p>{sourceComfortDescription(source)}</p>
         </div>
-        <span className="recordPill">{comfortLabel(comfortValue)}</span>
+        <span className="recordPill">{included ? comfortLabel(comfortValue) : "Left out"}</span>
       </div>
 
-      <div className="quickQuestionGrid">
+      <div className="sourceIncludeGrid">
+        <label className="toggleField sourceIncludeToggle">
+          <input
+            aria-label={`Include ${source.label}`}
+            checked={included}
+            onChange={(event) =>
+              onChange(sourceFromComfortLevel(source, event.target.checked ? "public" : "none"))
+            }
+            type="checkbox"
+          />
+          <span>Include this</span>
+        </label>
+
         <label>
-          <span>How comfortable are you using this?</span>
+          <span>Most of this information is</span>
           <select
-            aria-label={`Information comfort for ${source.id}`}
+            aria-label={`Information type for ${source.id}`}
+            disabled={!included}
             onChange={(event) => onChange(sourceFromComfortLevel(source, event.target.value as SourceComfortLevel))}
-            value={comfortValue}
+            value={included ? comfortValue : "public"}
           >
-            {sourceComfortLevels.map((level) => (
+            {visibleSourceComfortLevels.map((level) => (
               <option key={level} value={level}>
                 {comfortLabel(level)}
               </option>
@@ -515,7 +569,7 @@ function SourcePermissionRow({
           </select>
         </label>
         <label>
-          <span>What should we call it?</span>
+          <span>Name shown in the app</span>
           <input
             aria-label={`Source label for ${source.id}`}
             onChange={(event) => onChange({ ...source, label: event.target.value })}
@@ -525,7 +579,7 @@ function SourcePermissionRow({
       </div>
 
       <details className="advancedDrawer">
-        <summary>Advanced routing details</summary>
+        <summary>Technical routing details</summary>
 
         <div className="formGrid compactFormGrid">
           <label>
@@ -554,7 +608,7 @@ function SourcePermissionRow({
         </div>
 
         <fieldset className="checkboxGrid">
-          <legend>Sensitivity allowances</legend>
+          <legend>Technical privacy classes</legend>
           {sensitivityClasses.map((sensitivityClass) => {
             const checked = source.sensitivityAllowed.includes(sensitivityClass);
             const onlyChecked = checked && source.sensitivityAllowed.length === 1;
@@ -567,7 +621,7 @@ function SourcePermissionRow({
                   onChange={() => onChange(toggleSensitivity(source, sensitivityClass))}
                   type="checkbox"
                 />
-                <span>{sensitivityClass}</span>
+                <span>{sensitivityLabel(sensitivityClass)}</span>
               </label>
             );
           })}
@@ -595,11 +649,11 @@ function PolicyCard({
           <h4 id={`${policy.id}-title`}>{friendlyPolicyLabel(policy)}</h4>
           <p>{friendlyPolicyDescription(policy)}</p>
         </div>
-        <span className="recordPill">{selected ? "Current style" : policy.strategy}</span>
+        <span className="recordPill">{selected ? "Current style" : "Available"}</span>
       </div>
 
       <details className="advancedDrawer">
-        <summary>Advanced routing details</summary>
+        <summary>Technical routing details</summary>
 
         <div className="formGrid compactFormGrid">
           <label>
@@ -708,13 +762,13 @@ function comfortLabel(comfortLevel: SourceComfortLevel) {
     case "none":
       return "Do not use this";
     case "public":
-      return "Public info only";
+      return "Public or shareable";
     case "work":
-      return "Work/internal info is okay";
+      return "Ordinary work info";
     case "confidential":
-      return "Confidential info is okay";
+      return "Confidential info";
     case "restricted":
-      return "Sensitive info is okay";
+      return "Sensitive info";
   }
 }
 
@@ -722,22 +776,22 @@ function sourceComfortDescription(source: SourcePermission) {
   const comfortLevel = comfortLevelForSource(source);
 
   if (comfortLevel === "none") {
-    return "This shelf will be left out of recommendations.";
+    return "This will be left out of recommendations.";
   }
 
   if (comfortLevel === "public") {
-    return "Use this only for public or already-shareable information.";
+    return "Include this when the information is public or already shareable.";
   }
 
   if (comfortLevel === "work") {
-    return "Use this for ordinary work context that is not confidential.";
+    return "Include this for ordinary work context that is not confidential.";
   }
 
   if (comfortLevel === "confidential") {
-    return "Use this when confidential context is acceptable for the task.";
+    return "Include this when confidential context is acceptable for the task.";
   }
 
-  return "Use this only when sensitive context is explicitly okay for the task.";
+  return "Include this only when sensitive context is explicitly okay for the task.";
 }
 
 function friendlyPolicyLabel(policy: PolicyDefault) {
@@ -798,11 +852,11 @@ function boundedNumber(event: ChangeEvent<HTMLInputElement>, min: number, max: n
 
 function inventoryDescriptor(model: ModelInventoryItem) {
   if (model.tier === "small") {
-    return "Good for quick, low-stakes drafts.";
+    return "Good for quick, low-stakes drafts and everyday questions.";
   }
 
   if (model.tier === "mid" || model.tier === "frontier") {
-    return "Useful when quality or reasoning matters more.";
+    return "Useful when quality, reasoning, or a paid subscription matters.";
   }
 
   if (model.tier === "human") {
@@ -810,7 +864,7 @@ function inventoryDescriptor(model: ModelInventoryItem) {
   }
 
   if (model.tier === "research") {
-    return "Useful when the task needs current facts or citations.";
+    return "Useful when the task needs current facts, links, or citations.";
   }
 
   if (model.tier === "artifact") {
@@ -838,6 +892,18 @@ function weightLabel(weightKey: keyof ScoringWeights) {
   }
 
   return capitalize(weightKey);
+}
+
+function sensitivityLabel(sensitivityClass: SensitivityClass) {
+  if (sensitivityClass === "public-facing risk") {
+    return "public-facing";
+  }
+
+  if (sensitivityClass === "highly restricted") {
+    return "very sensitive";
+  }
+
+  return sensitivityClass;
 }
 
 function capitalize(value: string) {

@@ -1,8 +1,6 @@
 import type { FormEvent, ReactNode } from "react";
 import {
-  dmaicPhases,
   knowledgeWorkTypes,
-  lifecycleStages,
   outputTypes,
   qualityBars,
   routeStrategies,
@@ -12,7 +10,6 @@ import type { RouteOption, TaskIntake } from "../../domain/types";
 import type {
   GeneratedRouteResult,
   TaskRoutingController,
-  TaskRoutingDraft,
   TaskRoutingErrorField,
 } from "../state/useTaskRouting";
 import type { SetupConfigurationController } from "../state/useSetupConfiguration";
@@ -33,8 +30,6 @@ type RouteResultsScreenProps = TaskRoutingScreenProps & {
   onOpenTaskIntake: () => void;
 };
 
-const preferenceOptions = ["minimize", "balanced", "quality first"] as const;
-
 export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated }: TaskIntakeScreenProps) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,88 +46,78 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
       <form className="taskIntakeForm" onSubmit={handleSubmit}>
         <RoutingStatus routing={routing} setup={setup} />
 
-        <section className="routingSection" aria-labelledby="task-template-heading">
-          <div className="sectionHeading">
-            <h3 id="task-template-heading">Start with a common job</h3>
-            <p>Choose the closest starting point, then adjust anything that does not fit.</p>
-          </div>
+        <section className="routingSection taskConversationGrid" aria-labelledby="task-basics-heading">
+          <div className="taskQuestionBlock">
+            <div className="sectionHeading">
+              <h3 id="task-basics-heading">Tell me what you are trying to do</h3>
+              <p>Use normal language. A sentence, a paragraph, or rough notes are all fine.</p>
+            </div>
 
-          <label className="wideField">
-            <span>Start with</span>
-            <select
-              aria-label="Start with"
-              onChange={(event) => routing.applyTemplate(event.target.value as TaskRoutingDraft["templateId"])}
-              value={routing.draft.templateId}
-            >
-              <option value="custom">Custom task</option>
-              {routing.templates.map((template) => (
-                <option key={template.id} value={template.id}>
-                  {template.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </section>
-
-        <section className="routingSection" aria-labelledby="task-basics-heading">
-          <div className="sectionHeading">
-            <h3 id="task-basics-heading">What are you trying to get done?</h3>
-            <p>Give the app enough context to choose a useful path without overcomplicating the job.</p>
-          </div>
-
-          <div className="formGrid compactFormGrid">
-            <FieldShell field="id" label="Reference name" routing={routing}>
-              <input
-                aria-label="Reference name"
-                onChange={(event) => routing.updateDraftField("id", event.target.value)}
-                value={routing.draft.id}
+            <FieldShell field="description" label="What do you need help with?" routing={routing}>
+              <textarea
+                aria-label="What do you need help with?"
+                onChange={(event) => routing.updateDraftField("description", event.target.value)}
+                placeholder="Example: I need to turn a messy client update into a clear email with next steps."
+                rows={6}
+                value={routing.draft.description}
               />
             </FieldShell>
-            <FieldShell field="title" label="Task title" routing={routing}>
+
+            <FieldShell field="title" label="Short name (optional)" routing={routing}>
               <input
-                aria-label="Task title"
+                aria-label="Short name optional"
                 onChange={(event) => routing.updateDraftField("title", event.target.value)}
+                placeholder="Example: Client update email"
                 value={routing.draft.title}
               />
             </FieldShell>
           </div>
 
-          <FieldShell field="description" label="Task description" routing={routing}>
-            <textarea
-              aria-label="Task description"
-              onChange={(event) => routing.updateDraftField("description", event.target.value)}
-              rows={4}
-              value={routing.draft.description}
-            />
-          </FieldShell>
+          <TaskStructurePreview routing={routing} setup={setup} />
+        </section>
+
+        <section className="routingSection" aria-labelledby="task-shortcut-heading">
+          <div className="sectionHeading">
+            <h3 id="task-shortcut-heading">Use a shortcut if one fits</h3>
+            <p>These are only starting points. You can ignore them and just describe the job.</p>
+          </div>
+
+          <div className="taskShortcutGrid" aria-label="Common task shortcuts">
+            <button
+              aria-pressed={routing.draft.templateId === "custom"}
+              className={routing.draft.templateId === "custom" ? "selectedShortcut" : undefined}
+              onClick={() => routing.applyTemplate("custom")}
+              type="button"
+            >
+              <strong>I will describe it myself</strong>
+              <span>Keep my current words and choices.</span>
+            </button>
+            {routing.templates.map((template) => (
+              <button
+                aria-label={`Use shortcut ${template.label}`}
+                aria-pressed={routing.draft.templateId === template.id}
+                className={routing.draft.templateId === template.id ? "selectedShortcut" : undefined}
+                key={template.id}
+                onClick={() => routing.applyTemplate(template.id)}
+                type="button"
+              >
+                <strong>{template.label}</strong>
+                <span>{template.description}</span>
+              </button>
+            ))}
+          </div>
         </section>
 
         <section className="routingSection" aria-labelledby="task-context-heading">
           <div className="sectionHeading">
-            <h3 id="task-context-heading">What should the finished thing look like?</h3>
-            <p>These choices help the app avoid using a heavy path for a small job, or a light path for serious work.</p>
+            <h3 id="task-context-heading">A few quick questions</h3>
+            <p>These choices keep the recommendation practical without turning this into a project plan.</p>
           </div>
 
           <div className="formGrid">
             <SelectField
-              field="dmaicPhase"
-              label="Where are you in the work?"
-              onChange={(value) => routing.updateDraftField("dmaicPhase", value as TaskIntake["dmaicPhase"])}
-              options={dmaicPhases}
-              routing={routing}
-              value={routing.draft.dmaicPhase}
-            />
-            <SelectField
-              field="lifecycleStage"
-              label="Stage"
-              onChange={(value) => routing.updateDraftField("lifecycleStage", value as TaskIntake["lifecycleStage"])}
-              options={lifecycleStages}
-              routing={routing}
-              value={routing.draft.lifecycleStage}
-            />
-            <SelectField
               field="knowledgeWorkType"
-              label="Kind of work"
+              label="What kind of help do you need?"
               onChange={(value) =>
                 routing.updateDraftField("knowledgeWorkType", value as TaskIntake["knowledgeWorkType"])
               }
@@ -142,7 +127,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="outputType"
-              label="Finished format"
+              label="What are you making?"
               onChange={(value) => routing.updateDraftField("outputType", value as TaskIntake["outputType"])}
               options={outputTypes}
               routing={routing}
@@ -150,7 +135,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="qualityBar"
-              label="How good does it need to be?"
+              label="How polished should it be?"
               onChange={(value) => routing.updateDraftField("qualityBar", value as TaskIntake["qualityBar"])}
               options={qualityBars}
               routing={routing}
@@ -158,27 +143,11 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="sensitivityClass"
-              label="How private is it?"
+              label="What kind of information is involved?"
               onChange={(value) => routing.updateDraftField("sensitivityClass", value as TaskIntake["sensitivityClass"])}
               options={sensitivityClasses}
               routing={routing}
               value={routing.draft.sensitivityClass}
-            />
-            <SelectField
-              field="costPreference"
-              label="Cost preference"
-              onChange={(value) => routing.updateDraftField("costPreference", value as TaskIntake["costPreference"])}
-              options={preferenceOptions}
-              routing={routing}
-              value={routing.draft.costPreference}
-            />
-            <SelectField
-              field="energyPreference"
-              label="Effort preference"
-              onChange={(value) => routing.updateDraftField("energyPreference", value as TaskIntake["energyPreference"])}
-              options={preferenceOptions}
-              routing={routing}
-              value={routing.draft.energyPreference}
             />
           </div>
         </section>
@@ -220,13 +189,13 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
 
         <section className="routingSection" aria-labelledby="requested-sources-heading">
           <div className="sectionHeading">
-            <h3 id="requested-sources-heading">What information should be considered?</h3>
-            <p>Choose only the ingredients you intend to consult or paste manually outside the app.</p>
+            <h3 id="requested-sources-heading">What should be included?</h3>
+            <p>Choose the sites, drives, folders, documents, or memory you intend to consult yourself.</p>
           </div>
 
           {setup.configuration?.sourcePermissionRegistry.length ? (
             <fieldset className="sourceChoiceGrid">
-              <legend>Information ingredients</legend>
+              <legend>Sites, drives, folders, and context</legend>
               {setup.configuration.sourcePermissionRegistry.map((source) => (
                 <label key={source.id}>
                   <input
@@ -351,7 +320,7 @@ function SelectField<TOption extends string>({
       <select aria-label={label} onChange={(event) => onChange(event.target.value as TOption)} value={value}>
         {options.map((option) => (
           <option key={option} value={option}>
-            {optionLabel(option)}
+            {friendlyTaskOptionLabel(option)}
           </option>
         ))}
       </select>
@@ -389,6 +358,44 @@ function EmptyResultsState({
   );
 }
 
+function TaskStructurePreview({
+  routing,
+  setup,
+}: {
+  routing: TaskRoutingController;
+  setup: SetupConfigurationController;
+}) {
+  const selectedSources =
+    setup.configuration?.sourcePermissionRegistry
+      .filter((source) => routing.draft.requestedSourceIds.includes(source.id))
+      .map((source) => source.label) ?? [];
+
+  return (
+    <section className="taskShapePanel" aria-labelledby="task-shape-heading">
+      <p className="screenKicker">Rough structure</p>
+      <h3 id="task-shape-heading">What I will use to suggest options</h3>
+      <dl>
+        <div>
+          <dt>Goal</dt>
+          <dd>{routing.draft.description.trim() || "Your plain-language task description"}</dd>
+        </div>
+        <div>
+          <dt>Output</dt>
+          <dd>{friendlyTaskOptionLabel(routing.draft.outputType)}</dd>
+        </div>
+        <div>
+          <dt>Information</dt>
+          <dd>{selectedSources.length ? selectedSources.join(", ") : "Nothing selected yet"}</dd>
+        </div>
+        <div>
+          <dt>Extra care</dt>
+          <dd>{extraCareSummary(routing.draft)}</dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
 function GeneratedResults({
   result,
   routing,
@@ -412,16 +419,16 @@ function GeneratedResults({
         <div>
           <p className="screenKicker">Best fit</p>
           <h3 id="result-summary-heading">{recommended?.label ?? "Manual review required"}</h3>
-          <p>{recommended?.summary ?? "Review blocked routes before deciding what to do outside the app."}</p>
+          <p>{plainRouteSummary(recommended?.summary ?? "Review what was left out before deciding what to do outside the app.")}</p>
         </div>
         <dl>
           <div>
-            <dt>Policy</dt>
-            <dd>{setup.activePolicy?.label ?? result.scoringResult.selectedPolicyLabel}</dd>
+            <dt>Style</dt>
+            <dd>{friendlyPolicyName(result.scoringResult.selectedPolicyId, setup.activePolicy?.label ?? result.scoringResult.selectedPolicyLabel)}</dd>
           </div>
           <div>
-            <dt>Score</dt>
-            <dd>{recommended ? recommended.score : 0}</dd>
+            <dt>Fit</dt>
+            <dd>{recommended ? fitLabel(recommended.score) : "Needs review"}</dd>
           </div>
           <div>
             <dt>Prompt steps</dt>
@@ -459,8 +466,8 @@ function GeneratedResults({
         <ListSection
           className="blockedList"
           heading="Left out for safety"
-          items={result.routeCard.blockedRoutes.map((blockedRoute) => blockedRoute.reason)}
-          lead="These ingredients or helpers were removed because they do not fit your comfort choices."
+          items={result.routeCard.blockedRoutes.map((blockedRoute) => userFacingRouteMessage(blockedRoute.reason))}
+          lead="These ingredients or helpers were removed because they do not fit what you chose to include."
         />
       ) : null}
 
@@ -511,7 +518,7 @@ function RouteStrategyCard({
           <h4 id={`${strategy}-route-heading`}>{optionLabel(strategy)} route</h4>
           <span>Blocked</span>
         </div>
-        <p>{unavailable?.reason ?? "No safe route is available for this strategy."}</p>
+        <p>{plainRouteSummary(unavailable?.reason ?? "No safe route is available for this strategy.")}</p>
       </section>
     );
   }
@@ -520,9 +527,9 @@ function RouteStrategyCard({
     <section className={recommended ? "routeResultCard recommendedRouteCard" : "routeResultCard"} aria-labelledby={`${strategy}-route-heading`}>
       <div className="routeCardHeader">
         <h4 id={`${strategy}-route-heading`}>{candidate.label}</h4>
-        <span>{recommended ? "Recommended route" : `${candidate.score} score`}</span>
+        <span>{recommended ? "Best fit" : fitLabel(candidate.score)}</span>
       </div>
-      <p>{candidate.summary}</p>
+      <p>{plainRouteSummary(candidate.summary)}</p>
       <dl>
         <div>
           <dt>Cost</dt>
@@ -541,7 +548,7 @@ function RouteStrategyCard({
         {candidate.steps.map((step) => (
           <li key={step.id}>
             <strong>{step.label}</strong>
-            <span>{step.kind}</span>
+            <span>{routeStepKindLabel(step.kind)}</span>
           </li>
         ))}
       </ol>
@@ -582,6 +589,140 @@ function optionLabel(value: string) {
     .join(" ");
 }
 
+function friendlyPolicyName(policyId: string, fallbackLabel: string) {
+  if (policyId === "least-resource") {
+    return "Save time and cost";
+  }
+
+  if (policyId === "quality-first") {
+    return "Best quality when it matters";
+  }
+
+  if (policyId === "balanced") {
+    return "Balanced for everyday work";
+  }
+
+  return fallbackLabel;
+}
+
+function fitLabel(score: number) {
+  if (score >= 90) {
+    return "Strong fit";
+  }
+
+  if (score >= 80) {
+    return "Good fit";
+  }
+
+  if (score >= 65) {
+    return "Possible fit";
+  }
+
+  return "Needs review";
+}
+
+function plainRouteSummary(summary: string) {
+  return summary
+    .replace(/hard-gate-allowed/g, "allowed by your choices")
+    .replace(/allowed by your choices models and sources/g, "helpers and information allowed by your choices")
+    .replace(/hard gates/g, "safety checks")
+    .replace(/Hard gates/g, "Safety checks")
+    .replace(/model path/g, "helper path")
+    .replace(/route components/g, "helpers")
+    .replace(/mid-tier/g, "everyday paid")
+    .replace(/frontier/g, "strongest paid");
+}
+
+function userFacingRouteMessage(message: string) {
+  const noAccessMatch = message.match(/^(.*) is set to no access and cannot be used in a route\.$/);
+
+  if (noAccessMatch?.[1]) {
+    return `${noAccessMatch[1]} is turned off in What To Include.`;
+  }
+
+  const permissionMatch = message.match(/^(.*) only supports permission level \d+, but this task needs level \d+\.$/);
+
+  if (permissionMatch?.[1]) {
+    return `${permissionMatch[1]} is set for more public information than this task uses.`;
+  }
+
+  const sensitivityMatch = message.match(/^(.*) does not allow (.*) tasks\.$/);
+
+  if (sensitivityMatch?.[1] && sensitivityMatch[2]) {
+    return `${sensitivityMatch[1]} is not turned on for ${sensitivityMatch[2]} information.`;
+  }
+
+  return plainRouteSummary(message);
+}
+
+function routeStepKindLabel(kind: RouteOption["steps"][number]["kind"]) {
+  if (kind === "model") {
+    return "AI helper";
+  }
+
+  if (kind === "human review") {
+    return "human review";
+  }
+
+  if (kind === "artifact") {
+    return "document/table helper";
+  }
+
+  return kind;
+}
+
+function friendlyTaskOptionLabel(value: string) {
+  const labels: Record<string, string> = {
+    research: "Research",
+    synthesis: "Summarize or combine information",
+    analysis: "Analyze or compare",
+    writing: "Write or rewrite",
+    coding: "Code or technical review",
+    planning: "Make a rough plan",
+    review: "Review or critique",
+    packaging: "Package into a usable format",
+    answer: "A direct answer",
+    brief: "A short brief",
+    plan: "A rough structure",
+    draft: "A draft",
+    code: "Code",
+    table: "A table",
+    "slide outline": "A slide outline",
+    "route card": "A decision card",
+    "prompt package": "Copy-ready prompts",
+    quick: "Quick and good enough",
+    standard: "Solid everyday quality",
+    high: "High quality",
+    critical: "Very careful",
+    public: "Public or shareable information",
+    internal: "Ordinary work information",
+    confidential: "Confidential or private information",
+    regulated: "Regulated information",
+    "highly restricted": "Very sensitive information",
+    "public-facing risk": "Something that may be published",
+  };
+
+  return labels[value] ?? optionLabel(value);
+}
+
+function extraCareSummary(draft: TaskRoutingController["draft"]) {
+  const items = [];
+
+  if (draft.requiresCurrentFacts) {
+    items.push("current facts");
+  }
+
+  if (draft.requiresCitations) {
+    items.push("citations");
+  }
+
+  if (draft.publicFacing) {
+    items.push("public-ready review");
+  }
+
+  return items.length ? items.join(", ") : "No extra checks selected";
+}
+
 function formatTimestamp(timestamp: string) {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
@@ -591,7 +732,7 @@ function formatTimestamp(timestamp: string) {
 
 function sourceChoiceHint(permissionLevel: number) {
   if (permissionLevel === 0) {
-    return "Not allowed by your comfort choices";
+    return "Left out by your information choices";
   }
 
   if (permissionLevel === 1) {

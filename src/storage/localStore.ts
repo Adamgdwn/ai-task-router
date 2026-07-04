@@ -36,6 +36,7 @@ export type LocalStoreTableName =
 export type LocalSetupPreferences = {
   id: "setup-preferences";
   activePolicyDefaultId: PolicyDefault["id"];
+  preferredModelId?: ModelInventoryItem["id"];
 };
 
 export type LocalConfiguration = {
@@ -74,12 +75,14 @@ export type RouteLogFeedbackUpdate = {
 export const defaultSetupPreferences = {
   id: "setup-preferences",
   activePolicyDefaultId: "balanced",
+  preferredModelId: "user-mid-synthesis-model",
 } satisfies LocalSetupPreferences;
 
 const setupPreferencesSchema = z
   .object({
     id: z.literal("setup-preferences"),
     activePolicyDefaultId: z.enum(policyDefaultIds),
+    preferredModelId: z.string().trim().min(1).optional(),
   })
   .strict();
 

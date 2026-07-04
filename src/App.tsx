@@ -17,7 +17,7 @@ import { useTaskRouting } from "./ui/state/useTaskRouting";
 
 const boundaryItems = [
   "Your browser only",
-  "You choose what info feels okay",
+  "You choose what to include",
   "We recommend; you decide",
   "No hidden AI calls or telemetry",
 ];

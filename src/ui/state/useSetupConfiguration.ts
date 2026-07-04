@@ -53,7 +53,7 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
 
       setDraft({
         configuration,
-        preferences: normalizeSetupPreferences(preferences, configuration.policySettings),
+        preferences: normalizeSetupPreferences(preferences, configuration.policySettings, configuration.modelInventory),
       });
       setDirty(false);
       setStatus("ready");
@@ -99,7 +99,7 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
           sourcePermissionRegistry,
           policySettings,
         },
-        preferences,
+        preferences: normalizeSetupPreferences(preferences, policySettings, modelInventory),
       });
       setDirty(false);
       setStatus("ready");
@@ -126,7 +126,7 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
 
       setDraft({
         configuration,
-        preferences: normalizeSetupPreferences(preferences, configuration.policySettings),
+        preferences: normalizeSetupPreferences(preferences, configuration.policySettings, configuration.modelInventory),
       });
       setDirty(false);
       setStatus("ready");
@@ -160,6 +160,11 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
           ...currentDraft.configuration,
           modelInventory,
         },
+        preferences: normalizeSetupPreferences(
+          currentDraft.preferences,
+          currentDraft.configuration.policySettings,
+          modelInventory,
+        ),
       }));
     },
     [updateDraft],
@@ -186,7 +191,11 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
           ...currentDraft.configuration,
           policySettings,
         },
-        preferences: normalizeSetupPreferences(currentDraft.preferences, policySettings),
+        preferences: normalizeSetupPreferences(
+          currentDraft.preferences,
+          policySettings,
+          currentDraft.configuration.modelInventory,
+        ),
       }));
     },
     [updateDraft],
@@ -196,7 +205,11 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
     (preferences: LocalSetupPreferences) => {
       updateDraft((currentDraft) => ({
         ...currentDraft,
-        preferences: normalizeSetupPreferences(preferences, currentDraft.configuration.policySettings),
+        preferences: normalizeSetupPreferences(
+          preferences,
+          currentDraft.configuration.policySettings,
+          currentDraft.configuration.modelInventory,
+        ),
       }));
     },
     [updateDraft],
@@ -234,20 +247,29 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
 function normalizeSetupPreferences(
   preferences: LocalSetupPreferences,
   policySettings: readonly PolicyDefault[],
+  modelInventory: readonly ModelInventoryItem[],
 ): LocalSetupPreferences {
   const availablePolicyIds = new Set(policySettings.map((policy) => policy.id));
-
-  if (availablePolicyIds.has(preferences.activePolicyDefaultId)) {
-    return preferences;
-  }
+  const enabledModelIds = new Set(modelInventory.filter((model) => model.enabled).map((model) => model.id));
 
   const fallbackPolicy =
     policySettings.find((policy) => policy.id === defaultSetupPreferences.activePolicyDefaultId) ??
     policySettings[0];
+  const fallbackPreferredModel =
+    modelInventory.find((model) => model.enabled && model.id === defaultSetupPreferences.preferredModelId) ??
+    modelInventory.find((model) => model.enabled && model.tier !== "human") ??
+    modelInventory.find((model) => model.enabled) ??
+    modelInventory[0];
 
   return {
     ...preferences,
-    activePolicyDefaultId: fallbackPolicy?.id ?? defaultSetupPreferences.activePolicyDefaultId,
+    activePolicyDefaultId: availablePolicyIds.has(preferences.activePolicyDefaultId)
+      ? preferences.activePolicyDefaultId
+      : fallbackPolicy?.id ?? defaultSetupPreferences.activePolicyDefaultId,
+    preferredModelId:
+      preferences.preferredModelId && enabledModelIds.has(preferences.preferredModelId)
+        ? preferences.preferredModelId
+        : fallbackPreferredModel?.id,
   };
 }
 

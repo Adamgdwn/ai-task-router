@@ -100,10 +100,10 @@ type BuildTaskResult =
 
 const initialDraft: TaskRoutingDraft = {
   templateId: "custom",
-  id: "task-local-route",
+  id: "",
   title: "",
   description: "",
-  dmaicPhase: "define",
+  dmaicPhase: "not applicable",
   lifecycleStage: "draft",
   knowledgeWorkType: "writing",
   outputType: "draft",
@@ -118,9 +118,9 @@ const initialDraft: TaskRoutingDraft = {
 };
 
 const fieldLabels: Partial<Record<TaskRoutingErrorField, string>> = {
-  id: "Reference name",
-  title: "Task title",
-  description: "Task description",
+  id: "Saved plan ID",
+  title: "Short name",
+  description: "What you need help with",
   dmaicPhase: "Work stage",
   lifecycleStage: "Stage",
   knowledgeWorkType: "Kind of work",
@@ -384,10 +384,22 @@ function buildTaskFromDraft(draft: TaskRoutingDraft, setup: SetupConfigurationCo
     };
   }
 
+  if (!draft.description.trim()) {
+    return {
+      ok: false,
+      errors: {
+        description: ["Describe what you are trying to do."],
+      },
+      message: "The task needs a short description before options can be prepared.",
+    };
+  }
+
   const createdAt = new Date().toISOString();
+  const title = titleFromDraft(draft);
+  const id = idFromDraft(draft, title, createdAt);
   const result = taskIntakeSchema.safeParse({
-    id: draft.id,
-    title: draft.title,
+    id,
+    title,
     description: draft.description,
     dmaicPhase: draft.dmaicPhase,
     lifecycleStage: draft.lifecycleStage,
@@ -477,6 +489,54 @@ function friendlyValidationMessage(field: TaskRoutingErrorField, issue: z.ZodIss
   }
 
   return issue.message;
+}
+
+function titleFromDraft(draft: TaskRoutingDraft) {
+  const explicitTitle = draft.title.trim();
+
+  if (explicitTitle) {
+    return explicitTitle;
+  }
+
+  return firstReadableLine(draft.description);
+}
+
+function idFromDraft(draft: TaskRoutingDraft, title: string, createdAt: string) {
+  const explicitId = draft.id.trim();
+
+  if (explicitId) {
+    return explicitId;
+  }
+
+  const slug = slugify(title) || "task";
+  const timestamp = createdAt.replace(/[^0-9]/g, "").slice(0, 14);
+
+  return `${slug}-${timestamp}`;
+}
+
+function firstReadableLine(value: string) {
+  const firstLine = value
+    .trim()
+    .split(/\r?\n/)
+    .find((line) => line.trim());
+
+  if (!firstLine) {
+    return "";
+  }
+
+  const compactLine = firstLine.replace(/\s+/g, " ").trim();
+
+  return compactLine.length > 88 ? `${compactLine.slice(0, 85).trim()}...` : compactLine;
+}
+
+function slugify(value: string) {
+  const slug = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug.slice(0, 56).replace(/-+$/g, "");
 }
 
 function routingErrorMessage(error: unknown) {

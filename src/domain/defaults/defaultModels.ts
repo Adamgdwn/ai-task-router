@@ -22,7 +22,7 @@ export const defaultModels = [
   },
   {
     id: "user-free-small-model",
-    label: "Free or basic AI assistant",
+    label: "Free/basic AI assistant",
     provider: "Your tools",
     tier: "small",
     enabled: true,
@@ -41,7 +41,7 @@ export const defaultModels = [
   },
   {
     id: "user-mid-synthesis-model",
-    label: "Everyday paid AI assistant",
+    label: "Everyday paid assistant",
     provider: "Your tools",
     tier: "mid",
     enabled: true,
@@ -60,7 +60,7 @@ export const defaultModels = [
   },
   {
     id: "user-frontier-quality-model",
-    label: "Best-quality AI assistant",
+    label: "Strongest paid assistant",
     provider: "Your tools",
     tier: "frontier",
     enabled: true,
@@ -79,7 +79,7 @@ export const defaultModels = [
   },
   {
     id: "user-research-tool",
-    label: "Current-facts research tool",
+    label: "Research or web-answer tool",
     provider: "Your tools",
     tier: "research",
     enabled: true,

@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-04T00:26:37-06:00
+Last Updated: 2026-07-04T00:53:25-06:00
 Status: active
-Status Updated: 2026-07-04T00:26:37-06:00
+Status Updated: 2026-07-04T00:53:25-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -86,7 +86,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Thirteen route card and prompt package UI | complete | 2026-07-03T22:08:42-06:00 | Technical Lead | Route card and prompt package detail screens now load saved local records, show route decisions and prompt steps, and prepare local copy/download Markdown. |
 | Usability path detour | complete | 2026-07-03T23:55:54-06:00 | Technical Lead | Reworked the app front door, setup aisles, task flow, and saved-plan copy into plain-language conversational UX. |
 | Chunk Fourteen route log and feedback UI | complete | 2026-07-04T00:24:26-06:00 | Technical Lead | Past Choices now lists saved route decisions, supports search/filter/sort, saves local feedback, and opens saved decision cards without sending feedback anywhere. |
-| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T00:24:26-06:00 | Technical Lead | Add practical fixtures and E2E coverage for the MVP workflows now that Past Choices feedback exists. |
+| Usability surgery detour | complete | 2026-07-04T00:53:25-06:00 | Technical Lead | Reworked My AI Tools, What To Include, My Task, and Best Options so average users see normal tool/source/task choices instead of internal routing language. |
+| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T00:53:25-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected plain-language MVP workflows. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -1828,10 +1829,124 @@ Handoff note:
 
 Next chunk should add end-to-end tests and fixture coverage for the MVP acceptance scenarios without changing the local-only recommendation boundary.
 
+## Usability Surgery Detour - Plain-Language Intake Reset
+
+Status: complete
+Status Updated: 2026-07-04T00:53:25-06:00
+
+Completion target: Integration complete
+
+Budget class: Medium
+
+Objective:
+
+Rework the setup and task intake surfaces so non-technical users can tell the app what tools they use, what information to include, and what they are trying to do without internal routing language.
+
+User outcome:
+
+The user sees ordinary choices: My AI Tools, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, and Past Choices.
+
+Allowed files or folders:
+
+- `src/ui/screens/*`
+- `src/ui/state/*`
+- `src/storage/localStore.ts`
+- `src/domain/defaults/*`
+- `src/styles.css`
+- UI and domain tests under `src/tests/unit/*`
+- active pathway and status docs
+
+Non-goals:
+
+- Do not add provider account connections.
+- Do not add credential storage.
+- Do not add authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+- Do not change the local-first routing boundary.
+- Do not start Chunk Fifteen E2E implementation in this detour.
+
+Product boundary reminders:
+
+- The app recommends; it does not act.
+- All setup choices remain browser-local.
+- Tool and source labels are user-owned descriptions, not live provider integrations.
+- Advanced routing terms can exist in domain code, but they must be translated before appearing in the primary user flow.
+
+Domain terms to use:
+
+- My AI Tools
+- What To Include
+- Choosing Style
+- My Task
+- Best Options
+- Decision Card
+- Copy-Ready Prompts
+- Past Choices
+- Style
+- Fit
+
+Acceptance criteria:
+
+- [x] My AI Tools asks what models/tools the user uses, what subscription level they have, which one they use most, and whether each one should be included.
+- [x] Information Comfort is renamed to What To Include and presents direct include/not-include selections.
+- [x] What To Include uses plain privacy choices such as public/shareable, ordinary work info, confidential info, and sensitive info.
+- [x] My Task no longer exposes reference IDs, internal route IDs, DMAIC/start-with fields, task-local-route fields, or clinical planning controls in the primary flow.
+- [x] A description-only task can generate a valid local route with a derived title and internal ID.
+- [x] Best Options no longer exposes Policy, raw score badges, permission-level text, or scoring-weight language in the primary UI.
+- [x] Existing route engine, schemas, storage, and recommendation-only boundary remain intact.
+
+Implementation notes:
+
+- Added a browser-local preferred-tool preference so the app can ask which tool the user uses most without forcing technical model ranking language.
+- Replaced model and source starter labels with everyday phrases while preserving stable domain IDs.
+- Rebuilt the source setup screen as a plain include list with privacy dropdowns.
+- Rebuilt task intake around one main natural-language description, optional short name, quick shortcuts, and a rough-structure preview.
+- Translated primary result language from policy/score/gate terminology to Style, Fit, Best fit, safety checks, and allowed-by-your-choices copy.
+- Updated tests to protect the new plain-language flow.
+
+Validation:
+
+- `npm run test -- App` passed with 1 file and 11 tests.
+- `npm run test` passed with 10 files and 76 tests.
+- `npm run build` passed.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the detour.
+- Final close-out validation passed: `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, and `git diff --check`.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5178` passed for My AI Tools, What To Include, My Task, Best Options, desktop/mobile layout, no horizontal overflow, and no primary-result leakage of Policy, permission-level, or raw score wording.
+- Screenshots:
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-ux-surgery-tools-v2-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-ux-surgery-include-v2-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-ux-surgery-results-v2-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-ux-surgery-task-v2-mobile.png`
+
+UX/product finish expectations:
+
+- The app should feel like a guided conversation with clear aisles, not an operations console.
+- Source and privacy setup should ask what to include, not ask users to reason about permissions.
+- Task intake should let users describe what they need and then show a rough structure.
+- Results should explain the fit and practical next action before technical detail.
+
+Security and privacy notes:
+
+- The detour does not add external fetches, provider SDKs, account identifiers, secrets, telemetry, or remote persistence.
+- Users still decide what information categories are included.
+- Generated prompt packages remain manual-use instructions.
+
+Rollback or recovery path:
+
+The UI wording and local preference changes can be reverted independently from the pure routing engine. If the new task ID/title derivation causes issues, revert `useTaskRouting` to require explicit IDs and restore the corresponding tests.
+
+Stop condition:
+
+Reached. The primary setup and task intake flows are now plain-language, tested, and manually verified. Chunk Fifteen remains active next for fixture and E2E coverage.
+
+Handoff note:
+
+Next chunk should add end-to-end tests and fixture coverage for the corrected plain-language MVP workflow. Keep the user-facing route as Start Here, My AI Tools, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, and Past Choices.
+
 ## Chunk Fifteen - E2E Tests And Fixture Suite
 
 Status: active next
-Status Updated: 2026-07-04T00:24:26-06:00
+Status Updated: 2026-07-04T00:53:25-06:00
 
 Completion target: Integration complete
 
@@ -2110,7 +2225,13 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-04T00:23:54-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh` | passed | Full unit suite passed with 10 files and 76 tests; TypeScript and Vite production build passed; audit found 0 vulnerabilities; governance preflight passed with 0 warnings. |
 | 2026-07-04T00:24:26-06:00 | manual Playwright browser check using system Chrome at `http://127.0.0.1:5177` | passed | Browser walkthrough covered saving a plan, Past Choices list, search no-match, outcome filtering, feedback save acknowledgement, opening a decision card, mobile layout screenshots, and no horizontal overflow. |
 | 2026-07-04T00:26:37-06:00 | `git diff --check` | passed | Whitespace check passed; output only included normal Windows LF-to-CRLF notices. |
+| 2026-07-04T00:32:20-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before the plain-language intake reset; work timestamp captured. |
+| 2026-07-04T00:42:00-06:00 | `npm run test -- App` | passed | Focused App suite passed with 1 file and 11 tests after rebuilding My AI Tools, What To Include, My Task, and Best Options language. |
+| 2026-07-04T00:43:07-06:00 | `npm run test` | passed | Full unit suite passed with 10 files and 76 tests after updating default-label expectations. |
+| 2026-07-04T00:46:15-06:00 | `npm run test -- App`; `npm run build`; `npm audit --audit-level=moderate` | passed | Focused App suite, TypeScript/Vite production build, and audit passed after final What To Include and result-copy cleanup; audit found 0 vulnerabilities. |
+| 2026-07-04T00:48:18-06:00 | manual Playwright browser check using system Chrome at `http://127.0.0.1:5178` | passed | Browser walkthrough covered My AI Tools, What To Include, My Task, Best Options, desktop/mobile screenshots, no horizontal overflow, and no primary-result leakage of Policy, permission-level, or raw score wording. |
+| 2026-07-04T00:53:25-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final detour close-out validation passed: 10 files and 76 tests, production build, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Do not reintroduce source-permission, policy-default, model-tier, or scoring-weight terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, DMAIC, internal task ID, reference-name, or task-local-route terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
