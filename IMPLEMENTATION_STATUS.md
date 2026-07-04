@@ -1,57 +1,72 @@
-# 2026-07-04T10:20:07-06:00 - Implementation Status
+# 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T10:20:07-06:00
-Status: contextual-task-include-detour-complete
-Status Updated: 2026-07-04T10:20:07-06:00
+Last Updated: 2026-07-04T15:43:13-06:00
+Status: desktop-d2-scaffold-blocked-on-prerequisites
+Status Updated: 2026-07-04T15:35:38-06:00
 Owner: Technical Lead
 
-## Completed Chunk
+## Completed Work
 
-Contextual Task Include Detour.
+Desktop Chunk D2 scaffold attempt.
 
-Completion target: Integration complete.
+Completion target: Draft complete.
+
+Current state: scaffold present; launch blocked on local Windows prerequisites.
 
 ## Scope
 
-The local app no longer asks users to configure a standalone `What To Include` setup screen. Information selection is now an optional task-context question inside `My Task`.
+This slice added the minimum Tauri v2 desktop shell around the existing Vite/React app while keeping the desktop trust boundary closed.
 
 The completed slice provides:
 
-- Start Here now routes through `My AI Tools`, `Choosing Style`, and `My Task`.
-- The side navigation no longer exposes `What To Include`.
-- `My Task` asks `Do you want to include anything specific?`.
-- `Nothing specific` is the default include choice.
-- Users can choose optional task ingredients such as a website/current search, file or folder, pasted documents, repo/code page, work docs, Google Drive, or notes/background.
-- Shortcut-driven source choices still feed the existing local routing and hard-gate safety model.
-- User-facing blocked-source copy now refers to task information choices instead of a removed setup screen.
+- `@tauri-apps/cli` as a project dev dependency.
+- Desktop npm scripts: `tauri`, `desktop:info`, `desktop:dev`, and `desktop:build`.
+- `src-tauri` with a minimal Rust app shell.
+- Tauri config pointed at the existing Vite dev server and `dist` build output.
+- A D2 no-bundle desktop build script, not a packaging/signing workflow.
+- Empty Tauri capability permissions for the default window.
+- No Tauri plugins beyond the core shell.
+- Brand-aligned desktop icon assets generated from a square Guided AI Labs icon source.
+- Vite watcher ignore for `src-tauri`.
 
 ## Product Boundary
 
-This detour keeps the app local-first and recommendation-only. It does not add account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+This D2 scaffold does not add native discovery, folder inspection, package signing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+
+The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
 ## Evidence
 
-- `bash scripts/governance-preflight.sh` passed with 0 warnings before the detour.
-- `npm run test -- App` passed with 1 test file and 12 tests.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the scaffold.
+- `bash -lc "date -Iseconds"` captured `2026-07-04T15:35:38-06:00`.
+- `npm install --save-dev @tauri-apps/cli@2.11.4` passed and audit reported 0 vulnerabilities.
+- `npx tauri init ...` created the `src-tauri` scaffold.
+- `npx tauri icon src-tauri/icon-source.svg` generated branded desktop icon assets.
+- `npm run desktop:info` parsed the project and found WebView2, but reported missing MSVC Build Tools, Rust, Cargo, rustup, and Rust toolchain.
 - `npm run test` passed with 11 test files and 81 tests.
-- `npm run build` passed with the existing Vite chunk-size warning.
-- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5183` passed for no standalone `What To Include` navigation, Start Here's three-step path, My Task's optional include question, `Nothing specific` default/clear behavior, desktop/mobile layout, and no horizontal overflow.
 - `npm audit --audit-level=moderate` found 0 vulnerabilities.
-- `bash scripts/governance-preflight.sh` passed with 0 warnings at close-out.
-- `git diff --check` passed; output only included normal Windows LF-to-CRLF notices.
-- Screenshots:
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-contextual-include-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-contextual-include-mobile.png`
+- `npm run build` passed with the existing Vite chunk-size warning.
+- `npm run desktop:build` failed before compilation because `cargo` is not installed.
+- `src-tauri/icons/icon.png` was visually checked and shows the Guided AI Labs mark.
+- Final close-out checks passed: `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, and `git diff --check`.
 
 ## Known Gaps
 
-- Playwright is configured but still has no committed e2e specs; Chunk Fifteen is active next for fixtures and E2E coverage.
-- Import/export UI remains a later chunk; pure export/import utilities and artifact download prep already exist.
-- Proposed best stack remains a disabled planning note only.
-- Provider/app wording will need periodic review because AI app names and plan labels change.
-- Local detector results are not imported into the app yet; a future reviewed workflow would need an explicit import or confirmation step.
-- The source registry remains an internal routing/safety input; there is no primary UI for editing those defaults now.
+- The desktop shell has not launched yet on Windows.
+- Rust/Cargo/rustup are not installed or not on PATH on this machine.
+- Visual Studio or Build Tools with MSVC and Windows SDK components are not detected.
+- `npm run desktop:dev` was not run because it cannot compile until the prerequisites are installed.
+- Tauri reports CSP as unset; keep that under D3 trust-boundary review before native commands are added.
+- Tauri Rust crate output shows `tauri` 2.11.3 while the latest reported by `tauri info` is 2.11.5; confirm dependency alignment when Rust is installed and Cargo can resolve the project.
 
 ## Next Chunk
 
-Chunk Fifteen - E2E Tests And Fixture Suite.
+Resume Desktop Chunk D2 as a prerequisite retry:
+
+1. Install or confirm Rust through rustup.
+2. Install or confirm Visual Studio or Build Tools with MSVC and Windows SDK components.
+3. Run `npm run desktop:info`.
+4. Run `npm run desktop:dev` and confirm the existing UI launches.
+5. Run `npm run desktop:build`.
+
+Proceed to Desktop Chunk D3 only after D2 launch is verified or after the owner explicitly accepts the environment blocker and chooses design-only work.

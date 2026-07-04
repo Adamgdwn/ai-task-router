@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser MVP validation lane, with Desktop Chunk D2 queued as a Tauri shell spike
-Status Updated: 2026-07-04T14:56:49-06:00
+Status: v0.2 browser MVP validation lane, with the Desktop Chunk D2 Tauri shell scaffold present and launch blocked on missing Windows build prerequisites
+Status Updated: 2026-07-04T15:43:13-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -49,6 +49,7 @@ Product brief: [docs/PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md)
 - Dexie / IndexedDB
 - Vitest
 - Playwright
+- Tauri, for the desktop shell spike only
 
 ## Local Setup
 
@@ -84,6 +85,31 @@ Build the app:
 ```bash
 npm run build
 ```
+
+Check the desktop shell environment:
+
+```bash
+npm run desktop:info
+```
+
+Run the desktop shell after Tauri prerequisites are installed:
+
+```bash
+npm run desktop:dev
+```
+
+Build the desktop shell without packaging:
+
+```bash
+npm run desktop:build
+```
+
+Desktop prerequisites currently needed on this Windows machine:
+
+- Rust and Cargo through rustup
+- Visual Studio or Build Tools with MSVC and Windows SDK components
+
+The desktop shell is a spike only. It does not add native discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions.
 
 Manual local start check used for Chunk One:
 

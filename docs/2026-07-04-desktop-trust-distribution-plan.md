@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.3.1
+Version: 0.4.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before Desktop Chunk D2
-Last Updated: 2026-07-04T15:22:04-06:00
-Status Updated: 2026-07-04T14:56:49-06:00
+Next Review: Before retrying Desktop Chunk D2 launch or starting Desktop Chunk D3
+Last Updated: 2026-07-04T15:43:13-06:00
+Status Updated: 2026-07-04T15:43:13-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop implementation remains limited to a shell spike until the trust-boundary design is complete.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 now has the repo-local Tauri shell scaffold, branded icon assets, and desktop npm scripts. The actual desktop launch is blocked on the current Windows machine until Rust/Cargo and MSVC Build Tools are installed. Desktop implementation remains limited to a shell spike until the trust-boundary design is complete.
 
 ## Purpose
 
@@ -479,6 +479,66 @@ D1 handoff:
 
 Proceed to Desktop Chunk D2 only as a shell spike. D2 may wrap the current UI in Tauri and prove that the browser app still builds. D2 must not add native discovery or any local machine inspection.
 
+## Desktop Chunk D2 Shell Scaffold Attempt
+
+Status: blocked on local prerequisites after scaffold
+
+Status Updated: 2026-07-04T15:35:38-06:00
+
+Completion target: Draft complete
+
+Result:
+
+The repo-local Tauri shell scaffold was added, but the current Windows machine cannot compile or launch it yet because Tauri reports missing Rust/Cargo/rustup and missing Visual Studio or Build Tools with MSVC and SDK components.
+
+Implemented:
+
+- added `@tauri-apps/cli` as a development dependency
+- added `tauri`, `desktop:info`, `desktop:dev`, and `desktop:build` npm scripts
+- added `src-tauri` with a minimal Rust shell and no custom native commands
+- configured Tauri for the existing Vite app using `devUrl` `http://localhost:5173` and `frontendDist` `../dist`
+- set the product name and version to `AI Task Router` `0.2.0`
+- set the provisional app identifier to `com.guidedailabs.aitaskrouter`
+- generated desktop icon assets from a square Guided AI Labs icon source
+- set the Tauri bundle to inactive for the spike so D2 does not package or sign installers
+- configured the default capability with an empty permission list
+- configured Vite to ignore `src-tauri` in its file watcher
+
+Not added:
+
+- native discovery commands
+- filesystem, shell, process, upload, provider, telemetry, updater, credential, or file-indexing plugins
+- folder inspection
+- packaging
+- signing
+- auto-update
+- provider connections
+- external actions
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the scaffold
+- `npm run desktop:info` parsed the Tauri project and confirmed WebView2 is present
+- `npm run desktop:info` reported missing MSVC Build Tools, Rust, Cargo, rustup, and Rust toolchain
+- `npm run test` passed with 11 test files and 81 tests
+- `npm audit --audit-level=moderate` found 0 vulnerabilities
+- `npm run build` passed with the existing Vite chunk-size warning
+- `npm run desktop:build` failed at `cargo metadata` because `cargo` is not installed
+- generated `src-tauri/icons/icon.png` was visually checked and shows the Guided AI Labs mark
+- final close-out checks passed: `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, and `git diff --check`
+
+Next prerequisite step:
+
+Install the official Tauri Windows prerequisites: Rust through rustup and Visual Studio or Build Tools with MSVC plus Windows SDK components. Then rerun:
+
+```bash
+npm run desktop:info
+npm run desktop:dev
+npm run desktop:build
+```
+
+D2 remains blocked until the desktop shell launches the current UI on Windows.
+
 ### Phase 1: Desktop Tool Decision Spike
 
 Goal:
@@ -741,6 +801,10 @@ Outcome:
 
 The current React app launches in a desktop shell without adding local scanning yet.
 
+Current state:
+
+The Tauri scaffold, desktop scripts, and branded icons exist. The launch outcome is not yet verified because the current Windows machine is missing Rust/Cargo/rustup and MSVC Build Tools with SDK components.
+
 ### Desktop Chunk D3 - Trust Boundary And Permission Model
 
 Completion target: Task complete
@@ -814,6 +878,6 @@ Signed or clearly controlled beta installers are ready for limited users with in
 
 ## Immediate Recommendation
 
-Desktop Chunk D2 can proceed as a Tauri shell spike only. Do not add local discovery, folder inspection, packaging, signing, auto-update, telemetry, provider connections, credentials, or file indexing until the trust-boundary design and permission model are complete.
+Desktop Chunk D2 should resume as a prerequisite retry and shell launch only. Install or confirm the Windows Tauri prerequisites, then rerun the desktop environment, launch, and no-bundle build checks. Do not add local discovery, folder inspection, packaging, signing, auto-update, telemetry, provider connections, credentials, or file indexing until the trust-boundary design and permission model are complete.
 
 This keeps the current app shippable as a safe hosted/PWA experience while giving the trusted desktop app the extra care it deserves.
