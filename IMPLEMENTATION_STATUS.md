@@ -1,33 +1,31 @@
-# 2026-07-04T00:53:25-06:00 - Implementation Status
+# 2026-07-04T08:41:24-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T00:53:25-06:00
-Status: usability-surgery-detour-complete
-Status Updated: 2026-07-04T00:53:25-06:00
+Last Updated: 2026-07-04T08:41:24-06:00
+Status: my-ai-tools-dropdown-cleanup-complete
+Status Updated: 2026-07-04T08:41:24-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-Usability Surgery Detour - Plain-Language Intake Reset.
+My AI Tools Dropdown Cleanup Detour.
 
 Completion target: Integration complete.
 
 ## Scope
 
-The local app now has a much more ordinary setup and task flow for non-technical users.
+The local app now has a more ordinary My AI Tools setup path for non-technical users.
 
 The completed slice provides:
 
-- `My AI Tools` asks which tools/models the user uses, what subscription level they have, which one they use most, and whether each should be included
-- `What To Include` replaces the prior clinical source setup with direct include/not-include selections and plain privacy dropdowns
-- starter tool and source labels use everyday descriptions while preserving stable domain IDs
-- `My Task` now starts with a natural-language description, optional short name, quick shortcuts, and a rough-structure preview
-- description-only tasks can generate a valid local recommendation with derived title and internal ID
-- `Best Options` presents Style, Fit, Best fit, Good fit, and translated safety-check language instead of policy, score, permission-level, and gate terminology
-- App and domain tests now protect the plain-language labels and generated task flow
+- `My AI Tools` now uses dropdowns for AI app, model shown in that app, and thinking setting
+- starter model rows show recognizable choices such as ChatGPT, Claude, Gemini, Perplexity, and Microsoft Copilot while preserving stable internal IDs
+- the primary My AI Tools path no longer shows subscription level, routing category, capability assumptions, model tier, maximum information comfort, or technical routing details
+- the everyday dropdown catalog maps user-facing selections into the existing local route tiers and capability assumptions without changing the model inventory schema
+- the default setup still preserves existing route candidate and scoring behavior
 
 ## Product Boundary
 
-This detour keeps the app local-first and recommendation-only. It does not add provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+This detour keeps the app local-first and recommendation-only. It does not add provider account connections, subscription verification, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
 
 ## Evidence
 
@@ -37,19 +35,17 @@ This detour keeps the app local-first and recommendation-only. It does not add p
 - `npm run build` passed.
 - `npm audit --audit-level=moderate` found 0 vulnerabilities.
 - Final close-out validation passed: `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, and `git diff --check`.
-- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5178` passed for My AI Tools, What To Include, My Task, Best Options, desktop/mobile layout, no horizontal overflow, and no primary-result leakage of Policy, permission-level, or raw score wording.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5179` passed for My AI Tools dropdown behavior, What To Include extra-settings label, desktop/mobile layout, no horizontal overflow, and no old My AI Tools leakage of subscription/tier/details wording.
 - Screenshots:
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-ux-surgery-tools-v2-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-ux-surgery-include-v2-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-ux-surgery-results-v2-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-ux-surgery-task-v2-mobile.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-everyday-tools-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-everyday-tools-mobile.png`
 
 ## Known Gaps
 
 - Playwright is configured but still has no committed e2e specs; Chunk Fifteen is active next for fixtures and E2E coverage.
 - Import/export UI remains a later chunk; pure export/import utilities and artifact download prep already exist.
 - Proposed best stack remains a disabled planning note only.
-- A deeper visual review with the owner is still useful, but the primary clinical wording called out in this detour has been removed from the main flow.
+- A deeper owner visual review is still useful, especially for provider/model wording that may vary by account.
 
 ## Next Chunk
 

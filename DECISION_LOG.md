@@ -1,8 +1,8 @@
-# 2026-07-04T00:53:25-06:00 - Decision Log
+# 2026-07-04T08:38:31-06:00 - Decision Log
 
-Last Updated: 2026-07-04T00:53:25-06:00
+Last Updated: 2026-07-04T08:38:31-06:00
 Status: active
-Status Updated: 2026-07-04T00:53:25-06:00
+Status Updated: 2026-07-04T08:38:31-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -34,3 +34,4 @@ Owner: Technical Lead
 | 2026-07-03T23:55:54-06:00 | Translate primary UX language to conversational user choices while preserving stable domain IDs and routing schemas. | User testing showed the prior UI was accurate for Adam but too clinical for average users. Everyday labels such as information comfort, choosing style, best options, decision card, and copy-ready prompts make the product easier to understand without weakening the safety model. | UI screens and tests now protect the plain-language path. Technical terms such as permission levels, sensitivity allowances, model tiers, capability scores, and policy weights remain available only in advanced drawers or internal code. Future route-log UI should follow this language direction. |
 | 2026-07-04T00:24:26-06:00 | Treat Past Choices feedback as browser-local route-log record metadata, not analytics or automatic learning input. | Chunk Fourteen needs useful user feedback without weakening the no-telemetry, no-execution MVP boundary. Saving feedback to the existing route-log record keeps the interface simple and keeps the data user-owned. | Saving a plan now creates a route-log entry with `deferred` outcome; users can later set accepted, edited, rejected, or deferred and optionally add rating/notes. Feedback validation remains in `routeLogEntrySchema`, exports remain local, and future preference learning or analytics would need a separate reviewed chunk. |
 | 2026-07-04T00:50:35-06:00 | Treat the primary setup and task experience as a layperson conversation, with internal routing fields translated before display. | Owner feedback showed the app was functionally accurate but unusably clinical for average people, especially around tool setup, information choices, and task intake. | Primary labels now use My AI Tools, What To Include, My Task, Best Options, Style, and Fit; task title and internal ID can derive locally from the user's description; results translate permission, gate, policy, and scoring language before display. Future primary flows should not expose source-permission, policy-default, model-tier, raw-score, permission-level, DMAIC, reference-name, or task-local-route wording. |
+| 2026-07-04T08:38:31-06:00 | Map everyday AI app/model/thinking dropdowns into the existing local model inventory instead of exposing model tiers or subscription buckets. | Owner feedback showed that text fields, subscription levels, and technical routing details were still too abstract for normal users. A small catalog keeps the UI aligned to what users see in ChatGPT and similar apps while preserving the existing local schemas and routing behavior. | `My AI Tools` now shows AI app, model shown in that app, and thinking setting dropdowns. The catalog translates those choices into the existing internal tier, capability, local-only, and privacy assumptions; stable model IDs remain unchanged. Future primary flows should not reintroduce subscription-level, model-tier, capability-score, routing-category, or technical-routing-details language. |

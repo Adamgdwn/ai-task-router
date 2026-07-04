@@ -1,7 +1,14 @@
 import type { ChangeEvent, ReactNode } from "react";
 import { permissionLevels, sensitivityClasses } from "../../domain/schemas";
+import {
+  applyEverydayToolSelection,
+  everydayToolProviders,
+  everydayToolSummary,
+  getEverydayToolProvider,
+  inferEverydayToolSelection,
+  type EverydayToolProviderId,
+} from "../../domain/defaults/everydayToolCatalog";
 import type {
-  CapabilityScores,
   ModelInventoryItem,
   PermissionLevel,
   PolicyDefault,
@@ -12,19 +19,10 @@ import type {
 import type { SetupConfigurationController } from "../state/useSetupConfiguration";
 import type { ScreenDefinition } from "./screenDefinitions";
 
-const capabilityKeys = ["reasoning", "writing", "coding", "research", "packaging"] as const;
 const scoringWeightKeys = ["cost", "energy", "quality", "speed", "sourceFit", "sensitivityFit"] as const;
 const sourceComfortLevels = ["none", "public", "work", "confidential", "restricted"] as const;
 type SourceComfortLevel = (typeof sourceComfortLevels)[number];
 const visibleSourceComfortLevels = sourceComfortLevels.filter((level) => level !== "none");
-const toolTierOptions = [
-  { value: "small", label: "Free or basic" },
-  { value: "mid", label: "Everyday paid" },
-  { value: "frontier", label: "Strongest paid" },
-  { value: "research", label: "Research / current facts" },
-  { value: "artifact", label: "Documents, tables, or slides" },
-  { value: "human", label: "My own review" },
-] satisfies { value: ModelInventoryItem["tier"]; label: string }[];
 const shoppingPathSteps = [
   {
     screenId: "tool-inventory",
@@ -100,32 +98,25 @@ export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
   return (
     <SetupScreenLayout definition={definition} setup={setup}>
       <SetupBoundaryNote>
-        Name the AI tools you already use, choose the subscription level that feels closest, and mark the helper you
-        reach for most. This does not connect accounts, check subscriptions, call providers, or store credentials.
+        Choose the AI app, the model or mode you see in that app, and the thinking setting you usually pick. This does
+        not connect accounts, check subscriptions, call providers, or store credentials.
       </SetupBoundaryNote>
 
       <section className="conversationCard" aria-labelledby="tool-quick-check-heading">
         <div>
           <p className="screenKicker">Quick shelf check</p>
-          <h3 id="tool-quick-check-heading">What models or AI tools do you use?</h3>
+          <h3 id="tool-quick-check-heading">What do you actually click when you use AI?</h3>
         </div>
         <p>
-          Use names you recognize, like ChatGPT, Claude, Gemini, Copilot, Perplexity, a local model, or whatever else
-          is already in your working life.
+          If your screen looks a little different, choose the closest match. The app only uses this to suggest where
+          you should manually do the work later.
         </p>
       </section>
 
       <InventoryGroup
         models={setup.configuration?.modelInventory ?? []}
         setup={setup}
-        title="General AI helpers"
-        tiers={["small", "mid", "frontier"]}
-      />
-      <InventoryGroup
-        models={setup.configuration?.modelInventory ?? []}
-        setup={setup}
-        title="Specialty helpers and final review"
-        tiers={["research", "artifact", "human"]}
+        title="AI apps on my screen"
       />
     </SetupScreenLayout>
   );
@@ -313,15 +304,13 @@ function SetupBoundaryNote({ children }: { children: ReactNode }) {
 function InventoryGroup({
   models,
   setup,
-  tiers,
   title,
 }: {
   models: ModelInventoryItem[];
   setup: SetupConfigurationController;
-  tiers: readonly ModelInventoryItem["tier"][];
   title: string;
 }) {
-  const groupedModels = models.filter((model) => tiers.includes(model.tier));
+  const groupedModels = models.filter((model) => model.id !== "manual-human-review");
   const selectedCount = groupedModels.filter((model) => model.enabled).length;
 
   return (
@@ -333,7 +322,7 @@ function InventoryGroup({
 
       <div className="setupRecordList">
         {groupedModels.length === 0 ? (
-          <EmptySetupState label={`No ${title.toLowerCase()} are stored yet.`} />
+          <EmptySetupState label="No AI app choices are stored yet." />
         ) : (
           groupedModels.map((model) => (
             <ModelInventoryRow
@@ -367,13 +356,15 @@ function ModelInventoryRow({
   preferredModelId: ModelInventoryItem["id"] | undefined;
 }) {
   const preferred = preferredModelId === model.id;
+  const selectedTool = inferEverydayToolSelection(model);
+  const provider = getEverydayToolProvider(selectedTool.providerId);
 
   return (
     <section className="setupRecord" aria-labelledby={`${model.id}-title`}>
       <div className="recordHeader">
         <div>
           <h4 id={`${model.id}-title`}>{model.label}</h4>
-          <p>{inventoryDescriptor(model)}</p>
+          <p>{everydayToolSummary(model)}</p>
         </div>
         <span className="recordPill">{preferred ? "Used most" : model.enabled ? "Included" : "Left out"}</span>
       </div>
@@ -390,23 +381,62 @@ function ModelInventoryRow({
         </label>
 
         <label>
-          <span>Model or tool name</span>
-          <input
-            aria-label={`Tool label for ${model.id}`}
-            onChange={(event) => onChange({ ...model, label: event.target.value })}
-            value={model.label}
-          />
+          <span>AI app</span>
+          <select
+            aria-label={`AI app for ${model.id}`}
+            onChange={(event) =>
+              onChange(
+                applyEverydayToolSelection(model, {
+                  providerId: event.target.value as EverydayToolProviderId,
+                }),
+              )
+            }
+            value={selectedTool.providerId}
+          >
+            {everydayToolProviders.map((providerOption) => (
+              <option key={providerOption.id} value={providerOption.id}>
+                {providerOption.label}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label>
-          <span>Subscription level</span>
+          <span>Model shown in that app</span>
           <select
-            aria-label={`Subscription level for ${model.id}`}
-            onChange={(event) => onChange({ ...model, tier: event.target.value as ModelInventoryItem["tier"] })}
-            value={model.tier}
+            aria-label={`Model shown in that app for ${model.id}`}
+            onChange={(event) =>
+              onChange(
+                applyEverydayToolSelection(model, {
+                  modelId: event.target.value,
+                }),
+              )
+            }
+            value={selectedTool.modelId}
           >
-            {toolTierOptions.map((option) => (
-              <option key={option.value} value={option.value}>
+            {provider.modelOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <span>Thinking setting</span>
+          <select
+            aria-label={`Thinking setting for ${model.id}`}
+            onChange={(event) =>
+              onChange(
+                applyEverydayToolSelection(model, {
+                  effortId: event.target.value,
+                }),
+              )
+            }
+            value={selectedTool.effortId}
+          >
+            {provider.effortOptions.map((option) => (
+              <option key={option.id} value={option.id}>
                 {option.label}
               </option>
             ))}
@@ -425,97 +455,6 @@ function ModelInventoryRow({
           <span>I use this most</span>
         </label>
       </div>
-
-      <details className="advancedDrawer">
-        <summary>Technical routing details</summary>
-
-        <div className="formGrid">
-          <label>
-            <span>Provider or place you use it</span>
-            <input
-              aria-label={`Provider or subscription for ${model.id}`}
-              onChange={(event) => onChange({ ...model, provider: event.target.value })}
-              value={model.provider}
-            />
-          </label>
-          <label>
-            <span>Routing category</span>
-            <select
-              aria-label={`Tier for ${model.id}`}
-              onChange={(event) => onChange({ ...model, tier: event.target.value as ModelInventoryItem["tier"] })}
-              value={model.tier}
-            >
-              {toolTierOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Maximum information comfort</span>
-            <select
-              aria-label={`Max permission level for ${model.id}`}
-              onChange={(event) =>
-                onChange({
-                  ...model,
-                  maxPermissionLevel: Number(event.target.value) as PermissionLevel,
-                })
-              }
-              value={model.maxPermissionLevel}
-            >
-              {permissionLevels.map((level) => (
-                <option key={level} value={level}>
-                  Level {level}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="toggleField localOnlyToggle">
-            <input
-              checked={model.localOnly}
-              onChange={(event) => onChange({ ...model, localOnly: event.target.checked })}
-              type="checkbox"
-            />
-            <span>Local-only option</span>
-          </label>
-        </div>
-
-        <div className="capabilityGrid" aria-label={`Capability assumptions for ${model.label}`}>
-          {capabilityKeys.map((capabilityKey) => (
-            <label key={capabilityKey}>
-              <span>{capabilityLabel(capabilityKey)}</span>
-              <input
-                aria-label={`Capability ${capabilityKey} for ${model.id}`}
-                max={5}
-                min={0}
-                onChange={(event) =>
-                  onChange({
-                    ...model,
-                    capabilityScores: {
-                      ...model.capabilityScores,
-                      [capabilityKey]: boundedNumber(event, 0, 5),
-                    },
-                  })
-                }
-                step={1}
-                type="number"
-                value={model.capabilityScores[capabilityKey]}
-              />
-            </label>
-          ))}
-        </div>
-
-        <label>
-          <span>Notes</span>
-          <textarea
-            aria-label={`Notes for ${model.id}`}
-            onChange={(event) => onChange({ ...model, notes: event.target.value })}
-            rows={2}
-            value={model.notes ?? ""}
-          />
-        </label>
-      </details>
     </section>
   );
 }
@@ -579,13 +518,13 @@ function SourcePermissionRow({
       </div>
 
       <details className="advancedDrawer">
-        <summary>Technical routing details</summary>
+        <summary>Show extra settings</summary>
 
         <div className="formGrid compactFormGrid">
           <label>
-            <span>Routing level</span>
+            <span>Privacy guardrail</span>
             <select
-              aria-label={`Permission level for ${source.id}`}
+              aria-label={`Privacy guardrail for ${source.id}`}
               onChange={(event) =>
                 onChange({
                   ...source,
@@ -596,19 +535,19 @@ function SourcePermissionRow({
             >
               {permissionLevels.map((level) => (
                 <option key={level} value={level}>
-                  Level {level}
+                  {permissionLevelLabel(level)}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            <span>Source type</span>
-            <input aria-label={`Source type for ${source.id}`} readOnly value={source.sourceType} />
+            <span>Information shelf type</span>
+            <input aria-label={`Information shelf type for ${source.id}`} readOnly value={source.sourceType} />
           </label>
         </div>
 
         <fieldset className="checkboxGrid">
-          <legend>Technical privacy classes</legend>
+          <legend>Extra privacy categories</legend>
           {sensitivityClasses.map((sensitivityClass) => {
             const checked = source.sensitivityAllowed.includes(sensitivityClass);
             const onlyChecked = checked && source.sensitivityAllowed.length === 1;
@@ -653,11 +592,11 @@ function PolicyCard({
       </div>
 
       <details className="advancedDrawer">
-        <summary>Technical routing details</summary>
+        <summary>Show extra settings</summary>
 
         <div className="formGrid compactFormGrid">
           <label>
-            <span>Internal style label</span>
+            <span>Saved style name</span>
             <input
               aria-label={`Policy label for ${policy.id}`}
               onChange={(event) => onChange({ ...policy, label: event.target.value })}
@@ -665,7 +604,7 @@ function PolicyCard({
             />
           </label>
           <label>
-            <span>Internal description</span>
+            <span>Saved explanation</span>
             <input
               aria-label={`Policy description for ${policy.id}`}
               onChange={(event) => onChange({ ...policy, description: event.target.value })}
@@ -674,7 +613,7 @@ function PolicyCard({
           </label>
         </div>
 
-        <div className="weightGrid" aria-label={`Scoring weights for ${policy.label}`}>
+        <div className="weightGrid" aria-label={`Preference balance for ${policy.label}`}>
           {scoringWeightKeys.map((weightKey) => (
             <label key={weightKey}>
               <span>{weightLabel(weightKey)}</span>
@@ -772,6 +711,21 @@ function comfortLabel(comfortLevel: SourceComfortLevel) {
   }
 }
 
+function permissionLevelLabel(permissionLevel: PermissionLevel) {
+  switch (permissionLevel) {
+    case 0:
+      return "Do not use this";
+    case 1:
+      return "Public or shareable only";
+    case 2:
+      return "Ordinary work info";
+    case 3:
+      return "Confidential info";
+    case 4:
+      return "Sensitive info";
+  }
+}
+
 function sourceComfortDescription(source: SourcePermission) {
   const comfortLevel = comfortLevelForSource(source);
 
@@ -850,36 +804,8 @@ function boundedNumber(event: ChangeEvent<HTMLInputElement>, min: number, max: n
   return Math.min(max, Math.max(min, parsedValue));
 }
 
-function inventoryDescriptor(model: ModelInventoryItem) {
-  if (model.tier === "small") {
-    return "Good for quick, low-stakes drafts and everyday questions.";
-  }
-
-  if (model.tier === "mid" || model.tier === "frontier") {
-    return "Useful when quality, reasoning, or a paid subscription matters.";
-  }
-
-  if (model.tier === "human") {
-    return "The final human check before anything important is used.";
-  }
-
-  if (model.tier === "research") {
-    return "Useful when the task needs current facts, links, or citations.";
-  }
-
-  if (model.tier === "artifact") {
-    return "Useful for turning work into a document, table, or slide outline.";
-  }
-
-  return "A helper you control outside this app.";
-}
-
 function domIdFor(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-}
-
-function capabilityLabel(capabilityKey: keyof CapabilityScores) {
-  return capabilityKey === "packaging" ? "Packaging" : capitalize(capabilityKey);
 }
 
 function weightLabel(weightKey: keyof ScoringWeights) {

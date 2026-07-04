@@ -23,9 +23,9 @@ export const screenDefinitions: ScreenDefinition[] = [
     label: "My AI Tools",
     title: "My AI Tools",
     stage: "Setup",
-    summary: "Name the AI tools you use, choose their subscription level, and mark the helper you use most.",
-    purpose: "Prepare an editable local tool list without connecting accounts, checking subscriptions, or storing credentials.",
-    placeholderState: "The screen keeps tool names, subscription level, and usual-helper selection up front.",
+    summary: "Choose the AI app, visible model setting, and thinking level you already use.",
+    purpose: "Prepare an editable local tool list without connecting accounts, calling providers, or storing credentials.",
+    placeholderState: "The screen keeps provider, model, thinking setting, and usual-helper selection up front.",
   },
   {
     id: "source-permissions",

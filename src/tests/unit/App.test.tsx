@@ -43,23 +43,27 @@ describe("App", () => {
     }
   });
 
-  it("lets users answer the AI tools shelf check and keeps changes after refresh", async () => {
+  it("lets users answer the AI tools shelf check with dropdowns and keeps changes after refresh", async () => {
     const user = userEvent.setup();
     const store = buildTestStore();
     const { unmount } = render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "My AI Tools" }));
-    const freeAgentRow = await screen.findByRole("region", { name: "Free/basic AI assistant" });
-    const freeAgentLabel = within(freeAgentRow).getByRole("textbox", {
-      name: "Tool label for user-free-small-model",
+    const chatGptRow = await screen.findByRole("region", { name: "ChatGPT: GPT-5.5 - Medium" });
+    const chatGptModel = within(chatGptRow).getByRole("combobox", {
+      name: "Model shown in that app for user-mid-synthesis-model",
     });
-    const freeAgentUse = within(freeAgentRow).getByRole("checkbox", {
-      name: "Include Free/basic AI assistant",
+    const chatGptThinking = within(chatGptRow).getByRole("combobox", {
+      name: "Thinking setting for user-mid-synthesis-model",
+    });
+    const geminiRow = await screen.findByRole("region", { name: "Gemini: Flash - Quick" });
+    const geminiUse = within(geminiRow).getByRole("checkbox", {
+      name: "Include Gemini: Flash - Quick",
     });
 
-    await user.clear(freeAgentLabel);
-    await user.type(freeAgentLabel, "My free assistant");
-    await user.click(freeAgentUse);
+    await user.selectOptions(chatGptModel, "gpt-5-3");
+    await user.selectOptions(chatGptThinking, "high");
+    await user.click(geminiUse);
     await user.click(screen.getByRole("button", { name: "Save my choices" }));
 
     await screen.findByText("Your choices were saved on this device.");
@@ -68,14 +72,26 @@ describe("App", () => {
     render(<App store={store} />);
     await user.click(screen.getByRole("button", { name: "My AI Tools" }));
 
-    const savedFreeAgentRow = await screen.findByRole("region", { name: "My free assistant" });
-    expect(within(savedFreeAgentRow).getByDisplayValue("My free assistant")).toBeInTheDocument();
-    expect(within(savedFreeAgentRow).getByRole("checkbox", { name: "Include My free assistant" })).not.toBeChecked();
+    const savedChatGptRow = await screen.findByRole("region", { name: "ChatGPT: GPT-5.3 - High" });
+    expect(
+      within(savedChatGptRow).getByRole("combobox", { name: "AI app for user-mid-synthesis-model" }),
+    ).toHaveDisplayValue("ChatGPT");
+    expect(
+      within(savedChatGptRow).getByRole("combobox", { name: "Model shown in that app for user-mid-synthesis-model" }),
+    ).toHaveDisplayValue("GPT-5.3");
+    expect(
+      within(savedChatGptRow).getByRole("combobox", { name: "Thinking setting for user-mid-synthesis-model" }),
+    ).toHaveDisplayValue("High");
+    expect(
+      within(screen.getByRole("region", { name: "Gemini: Flash - Quick" })).getByRole("checkbox", {
+        name: "Include Gemini: Flash - Quick",
+      }),
+    ).not.toBeChecked();
 
     await user.click(screen.getByRole("button", { name: "Restore starter choices" }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue("Free/basic AI assistant")).toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "ChatGPT: GPT-5.5 - Medium" })).toBeInTheDocument();
     });
   });
 
