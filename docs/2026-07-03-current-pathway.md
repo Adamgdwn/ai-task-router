@@ -1,9 +1,15 @@
-# 2026-07-03-current-pathway
+# Current Build Pathway
 
-Last Updated: 2026-07-04T11:17:43-06:00
+Document ID: PATH-ENG-001
+Version: 0.3.0
 Status: active
-Status Updated: 2026-07-04T11:17:43-06:00
 Owner: Technical Lead
+Approver: Project Owner
+Effective Date: 2026-07-03
+Last Reviewed: 2026-07-04
+Next Review: During the next substantial build session
+Last Updated: 2026-07-04T11:35:38-06:00
+Status Updated: 2026-07-04T11:35:38-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -19,7 +25,7 @@ Reference only as of 2026-07-03T12:01:44-06:00: the likely future public hosting
 
 ## Future Desktop Trust Note
 
-Reference only as of 2026-07-04T11:17:43-06:00: the project should keep two future distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md). Desktop implementation is not part of v0.2 and should begin only after a separate owner decision, governance review, tool decision ADR, and trust-boundary design. The current local detector remains an explicit terminal command unless a later reviewed desktop workflow is approved.
+Reference only as of 2026-07-04T11:28:22-06:00: the project should keep two future distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md). Desktop Chunk D0 is now opened as a decision/risk-control packet, but desktop implementation is still outside v0.2 and should begin only after owner confirmation, a tool decision ADR, and a trust-boundary design. The current local detector remains an explicit terminal command unless a later reviewed desktop workflow is approved.
 
 ## Future Product Planning Note
 
@@ -40,10 +46,11 @@ For material or risk-triggering work:
 1. Start from `START_HERE.md`.
 2. Run `bash scripts/governance-preflight.sh`.
 3. Review the standards named in `START_HERE.md`.
-4. Review `project-control.yaml` and open exceptions.
-5. Capture a timestamp.
-6. Work one detailed chunk only.
-7. Update this pathway with status, validation, known gaps, and next action.
+4. Review `docs/standards/document-control-standard.md` when creating or materially updating controlled docs, pathway notes, ADRs, registers, validation logs, or handoffs.
+5. Review `project-control.yaml` and open exceptions.
+6. Capture a timestamp.
+7. Work one detailed chunk only.
+8. Update this pathway with status, validation, known gaps, and next action.
 
 ## Detailed Chunk Rule
 
@@ -98,7 +105,9 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | My AI Tools tailored account levels detour | complete | 2026-07-04T10:00:43-06:00 | Technical Lead | Researched and expanded provider-specific account dropdowns, added remove buttons, and fixed selected-chip/dropdown wrapping. |
 | Contextual task include detour | complete | 2026-07-04T10:20:07-06:00 | Technical Lead | Removed standalone What To Include onboarding and moved optional include choices into My Task. |
 | Desktop trust and distribution planning detour | complete | 2026-07-04T11:17:43-06:00 | Technical Lead | Added the future hosted/PWA plus signed desktop distribution plan, trust principles, phases, and governance review prompt without changing v0.2 scope. |
-| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T10:20:07-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add and contextual task-include MVP workflows. |
+| Document control standard adoption | complete | 2026-07-04T11:28:22-06:00 | Technical Lead | Added the local document-control standard and routed governed docs, validation logs, ADRs, registers, and handoffs through it. |
+| Desktop Chunk D0 owner decision and governance review | active | 2026-07-04T11:28:22-06:00 | Technical Lead | Opened the proposed D0 decision packet in the desktop plan. No desktop implementation is approved yet; owner confirmation is required before D1. |
+| Chunk Fifteen E2E tests and fixture suite | queued | 2026-07-04T10:20:07-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add and contextual task-include MVP workflows when the owner returns to the web MVP lane. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -2735,14 +2744,14 @@ Stop when docs, UI polish, validation evidence, and known limits support a v0.2 
 
 Handoff note:
 
-After this chunk, decide whether to run a release-readiness review, plan future hosting on `oldskoolai.com`, open Desktop Chunk D0 from [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md), or open a v0.3 pathway for best-stack recommendation mode.
+After this chunk, decide whether to run a release-readiness review, plan future hosting on `oldskoolai.com`, return to Desktop Chunk D0 owner decisions in [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md), or open a v0.3 pathway for best-stack recommendation mode.
 
 ## Future Desktop Track - Trusted Installable App
 
-Status: planned reference
-Status Updated: 2026-07-04T11:17:43-06:00
+Status: active planning
+Status Updated: 2026-07-04T11:28:22-06:00
 
-Completion target: Not part of v0.2
+Completion target: D0 draft complete; desktop implementation remains outside v0.2
 
 Budget class: Strategic
 
@@ -2760,11 +2769,20 @@ Users eventually have both options: use the hosted/PWA version immediately, or d
 
 Current decision:
 
-Do not add desktop code during Chunk Fifteen or Chunk Sixteen. Finish the web MVP validation and documentation first.
+Do not add desktop code yet. Desktop Chunk D0 is opened only to confirm scope, risk, target OS order, publisher/signing identity, and governance posture before implementation.
 
 Planned first desktop action:
 
-Open Desktop Chunk D0 after v0.2 release-readiness work. D0 should confirm first desktop scope, target OS order, publisher/signing identity, local discovery boundaries, and whether governance level changes are needed before implementation.
+Review the proposed Desktop Chunk D0 decision packet in [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md). The owner should confirm, change, or defer the recommended defaults before Desktop Chunk D1 starts.
+
+D0 recommended defaults awaiting owner confirmation:
+
+- first desktop scope: AI tool and local model discovery only
+- user-selected folder inspection: defer from first public desktop release
+- first target OS: Windows first, then macOS, then Linux
+- publisher identity: use `Guided AI Labs Ltd` if that is the correct legal signing entity
+- Windows distribution: evaluate Microsoft Store MSIX first
+- governance: keep level 1 for docs-only planning, then review a stronger control posture before native local discovery implementation
 
 Product boundary reminders:
 
@@ -2780,6 +2798,8 @@ Stop desktop planning or implementation if the scope expands into background sca
 
 | Timestamp | Command | Result | Notes |
 |-----------|---------|--------|-------|
+| 2026-07-04T11:35:38-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; D0/doc-control `rg` check | passed | Final document-control and Desktop Chunk D0 validation passed; governance found the new required standard, whitespace check had only normal Windows line-ending notices, and D0 references no longer point to opening D0 later. |
+| 2026-07-04T11:28:22-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before adopting the document-control standard and opening Desktop Chunk D0; timestamp captured. |
 | 2026-07-04T11:17:43-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before adding the desktop trust/distribution planning baseline; timestamp captured. |
 | 2026-07-04T11:17:43-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; placeholder `rg` search | passed | Final planning validation passed with 0 governance warnings and no whitespace errors; placeholder search returned no matches. |
 | 2026-07-03T11:16:47-06:00 | `git status --short` | failed | Folder was not a Git repository at session start. |
@@ -2881,4 +2901,6 @@ Stop desktop planning or implementation if the scope expands into background sca
 
 ## Next Handoff
 
-Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Desktop Chunk D0 if the owner is continuing the desktop trust track: review the proposed decisions in [docs/desktop-trust-distribution-plan.md](desktop-trust-distribution-plan.md), then confirm, change, or defer first desktop scope, user-selected folder inspection, target OS order, publisher/signing identity, Windows distribution path, macOS notarization expectation, Linux artifact path, and governance posture. Do not start Desktop Chunk D1 or add desktop code until those D0 decisions are confirmed.
+
+If the owner returns to the web MVP lane instead, resume Chunk Fifteen: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.

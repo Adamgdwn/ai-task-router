@@ -2,7 +2,7 @@
 
 Document type: project context routing map
 Status: draft
-Status Updated: 2026-07-03T11:49:34-06:00
+Status Updated: 2026-07-04T11:28:22-06:00
 Owner: Technical Lead
 Audience: coding agents, human coders, reviewers, and project owners
 
@@ -32,6 +32,7 @@ Keep these files compact. They should route to durable docs, not duplicate them.
 | Durable implementation, design quality, testing discipline, or AI coding fundamentals | `docs/policy/durable-development-engineering-policy.md` |
 | Use-case controls, risk tier, governance level, or owner decisions | `docs/standards/engineering-governance-by-use-case.md` |
 | Completion labels, Definition of Shipped, release evidence, or finish reports | `docs/standards/ship-ready-engineering-standard.md` |
+| Controlled docs, pathway notes, ADRs, registers, validation logs, audits, or handoffs | `docs/standards/document-control-standard.md` |
 | Architecture decisions or system shape | `docs/architecture.md` and relevant ADRs |
 | Domain terms or naming | `docs/domain-language.md` |
 | Deployment, release, rollback, or environment changes | `docs/deployment-guide.md`, `docs/runbook.md`, and release standards |

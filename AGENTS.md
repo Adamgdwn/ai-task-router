@@ -1,4 +1,4 @@
-# 2026-07-03T11:49:34-06:00 - Agent Instructions
+# 2026-07-04T11:28:22-06:00 - Agent Instructions
 
 ## Normal Startup
 
@@ -22,11 +22,12 @@ Before making material or risk-triggering code or configuration changes in this 
 4. review `docs/standards/engineering-governance-by-use-case.md`
 5. review `docs/policy/durable-development-engineering-policy.md`
 6. review `docs/standards/ship-ready-engineering-standard.md`
-7. run the governance preflight check
-8. review `project-control.yaml`
-9. note any open exceptions relevant to the work
-10. capture a timestamp with `date -Iseconds`
-11. proceed only after the project passes preflight or any gaps are explicitly accepted
+7. review `docs/standards/document-control-standard.md` when creating or materially updating controlled docs, pathway notes, ADRs, runbooks, registers, validation logs, or handoffs
+8. run the governance preflight check
+9. review `project-control.yaml`
+10. note any open exceptions relevant to the work
+11. capture a timestamp with `date -Iseconds`
+12. proceed only after the project passes preflight or any gaps are explicitly accepted
 
 Risk-triggering work includes production, deployment, authentication, authorization, payments, secrets, sensitive data, database migrations, customer communications, external side effects, infrastructure or provider settings, destructive actions, autonomous tool use, risk classification, governance policy changes, or release readiness.
 
@@ -43,6 +44,7 @@ bash scripts/governance-preflight.sh
 - Confirm the requested work matches the project's `use_case.primary` classification.
 - Apply the durable development standard: build the smallest useful thing in the safest durable way.
 - Treat Definition of Shipped as a separate evidence gate before declaring meaningful work complete.
+- Apply the document-control standard to durable docs, pathway notes, ADRs, registers, validation logs, and handoffs.
 - Use `docs/standards/context-hygiene-standard.md` for long sessions, scoped repository reads, compaction, and handoffs.
 - Apply lean startup: keep always-on checks short, and trigger heavy governance, Graphify, plugin, MCP, and release checks by task risk or scope.
 - Use `docs/context-map.md` to route task-specific context before loading broad docs or source trees.

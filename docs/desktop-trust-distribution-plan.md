@@ -1,9 +1,17 @@
-# 2026-07-04T11:17:43-06:00 - Desktop Trust And Distribution Plan
+# Desktop Trust And Distribution Plan
 
-Document status: draft planning baseline
-Status: proposed
-Status Updated: 2026-07-04T11:17:43-06:00
+Document ID: PATH-ENG-002
+Version: 0.2.0
+Status: active
 Owner: Technical Lead
+Approver: Project Owner
+Effective Date: 2026-07-04
+Last Reviewed: 2026-07-04
+Next Review: Before Desktop Chunk D1
+Last Updated: 2026-07-04T11:35:38-06:00
+Status Updated: 2026-07-04T11:35:38-06:00
+
+Planning state: Desktop Chunk D0 opened; owner confirmation required before desktop implementation.
 
 ## Purpose
 
@@ -384,6 +392,58 @@ Stop condition:
 
 Stop if the first desktop release scope includes broad folder indexing, background scanning, telemetry, credentials, or provider API calls without a separate security review.
 
+## Desktop Chunk D0 Decision Packet
+
+Status: draft complete
+
+Status Updated: 2026-07-04T11:28:22-06:00
+
+Completion target: Task complete after owner confirmation
+
+Goal:
+
+Confirm the first desktop product boundary, target release order, publisher identity, and governance posture before any desktop code is added.
+
+Recommended owner decisions:
+
+| Decision | Recommended default | Reason | Owner status |
+|---|---|---|---|
+| First desktop scope | Limit the first desktop track to AI tool and local model discovery. | This matches the user's trust goal while avoiding broad file inspection too early. | Pending confirmation |
+| User-selected folders | Defer folder inspection from the first public desktop release; allow only a separately reviewed prototype later. | Folder inspection changes the privacy surface and should wait for the trust-boundary design. | Pending confirmation |
+| First target OS | Windows first, then macOS, then Linux packaging. | The current development lab is Windows-led, and Windows signing/install friction is the most urgent ordinary-user trust problem. | Pending confirmation |
+| Publisher identity | Use `Guided AI Labs Ltd` for signing and publisher identity if it is the correct legal entity. | Signing should match a real legal publisher users can recognize. | Pending confirmation |
+| Product naming | Keep the product as `AI Task Router` for the repo and app, with Guided AI Labs/OldSkoolAI branding decided before packaging. | This avoids changing code identity before the brand/distribution route is final. | Pending confirmation |
+| Windows distribution | Evaluate Microsoft Store MSIX first; use direct signed installers only after signing and SmartScreen implications are reviewed. | Store packaging may reduce trust friction for non-technical users. | Pending confirmation |
+| macOS distribution | Require Developer ID signing and notarization before external beta. | Unsigned macOS apps are not trustworthy enough for ordinary users. | Pending confirmation |
+| Linux distribution | Start with AppImage and checksums; add `.deb` after install/uninstall testing. | This gives broad Linux reach without overbuilding package infrastructure. | Pending confirmation |
+| Governance level | Keep governance level 1 for docs-only planning; review raising to at least a medium-control track before native local discovery implementation. | Local machine inspection is a higher-trust surface than the current browser MVP. | Pending confirmation |
+
+First desktop non-goals until separately approved:
+
+- broad folder indexing
+- startup or background scanning
+- telemetry
+- provider account connections
+- provider API calls
+- OAuth
+- credential storage
+- remote sync
+- reading file contents by default
+- arbitrary shell command execution
+- changing, deleting, publishing, sending, deploying, purchasing, or modifying anything
+
+Risk review:
+
+The current v0.2 browser MVP remains low risk and governance level 1. The desktop track introduces a higher-trust local machine surface. The recommended control posture is to keep planning lightweight for D0 and D1, then require a trust-boundary design, tool permission update, and governance review before any native local discovery code is added.
+
+D0 stop condition:
+
+Do not start Desktop Chunk D1 or any desktop implementation if the owner chooses broad folder inspection, background scanning, telemetry, credentials, provider API calls, or file-content indexing for the first desktop release without a separate security review.
+
+D0 handoff:
+
+Ask the owner to confirm, change, or defer the recommended defaults above. After confirmation, create Desktop Chunk D1 as a tool decision ADR comparing Tauri, Electron, and the option to stay web/PWA-only for longer.
+
 ### Phase 1: Desktop Tool Decision Spike
 
 Goal:
@@ -621,6 +681,10 @@ Outcome:
 
 The owner confirms the first desktop scope, target OS order, publisher identity, and whether governance changes are needed before desktop implementation.
 
+Current state:
+
+D0 is opened as of 2026-07-04T11:28:22-06:00 with a proposed decision packet above. It is not complete until the owner confirms, changes, or defers those decisions.
+
 ### Desktop Chunk D1 - Desktop Tool Decision ADR
 
 Completion target: Task complete
@@ -710,6 +774,6 @@ Signed or clearly controlled beta installers are ready for limited users with in
 
 ## Immediate Recommendation
 
-Finish the v0.2 web MVP testing and documentation first. Then open Desktop Chunk D0 as a planning and governance review before any desktop code is added.
+Desktop Chunk D0 is now open as a planning and governance review. Confirm, change, or defer the D0 owner decisions before any desktop code is added.
 
 This keeps the current app shippable as a safe hosted/PWA experience while giving the trusted desktop app the extra care it deserves.

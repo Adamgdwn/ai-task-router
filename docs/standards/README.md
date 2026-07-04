@@ -2,7 +2,7 @@
 
 Document type: standards index
 Status: active
-Status Updated: 2026-07-03T11:49:34-06:00
+Status Updated: 2026-07-04T11:28:22-06:00
 Owner: Project owner or human technical lead
 Audience: coding agents, human coders, reviewers, project owners, and release reviewers
 
@@ -36,7 +36,7 @@ Use these when the work touches the matching area. Some governed projects may st
 | AI Agent Governance Standard | Building or changing agents, tools, autonomy, prompt registries, model registries, or agent permissions. |
 | Context Hygiene Standard | Managing long agent sessions, context windows, token budgets, compaction, scoped repo reads, or handoffs. |
 | Deployment And Release Standard | Changing deployment, release, rollback, environments, external providers, or production promotion. |
-| Document Control Standard | Creating or maintaining durable docs, handoffs, records, standards, pathway logs, ADRs, audits, or runbooks. |
+| [Document Control Standard](document-control-standard.md) | Creating or maintaining durable docs, handoffs, records, standards, pathway logs, ADRs, audits, or runbooks. |
 | Documentation Standard | Writing user, operator, architecture, setup, process, or support documentation. |
 | Monorepo Standard | Structuring or changing a monorepo, package boundaries, shared libraries, or workspace layout. |
 | Repository And Naming Standard | Naming repositories, files, modules, directories, and common project structure. |

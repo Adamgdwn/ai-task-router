@@ -1,8 +1,8 @@
 # 2026-07-03T11:49:34-06:00 - Start Here
 
-Last Updated: 2026-07-03T11:16:47-06:00
+Last Updated: 2026-07-04T11:28:22-06:00
 Status: draft
-Status Updated: 2026-07-03T11:49:34-06:00
+Status Updated: 2026-07-04T11:28:22-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -15,6 +15,7 @@ Current priorities:
 - confirm use-case classification in `project-control.yaml`
 - apply `docs/policy/durable-development-engineering-policy.md` during implementation
 - apply `docs/standards/ship-ready-engineering-standard.md` before declaring meaningful work complete
+- apply `docs/standards/document-control-standard.md` when creating or materially updating controlled docs, pathway notes, ADRs, runbooks, registers, validation logs, or handoffs
 - use `docs/context-map.md` as the short routing map for task-specific context loads
 - keep startup lean: use short repo orientation first, then trigger governance, Graphify, plugins, MCP tools, and release checks by task risk or scope
 - use Graphify before broad source exploration or architecture analysis, using workspace routing plus repo-local semantic graphs for heavy active repos
@@ -44,11 +45,12 @@ For material or risk-triggering changes:
 3. Review `docs/standards/engineering-governance-by-use-case.md`.
 4. Review `docs/policy/durable-development-engineering-policy.md`.
 5. Review `docs/standards/ship-ready-engineering-standard.md`.
-6. Review `project-control.yaml`.
-7. Check `exceptions` in `project-control.yaml` and any exception records.
-8. For broad source exploration, architecture analysis, dependency tracing, or cross-repo planning, use the Graphify policy at `local Graphify governance file, when available` before reading raw source broadly. Reference `local Graphify workspace graph, when available` for cross-repo routing, set up repo-local Graphify when a new repo becomes active, run `/graphify /path/to/repo` from Claude Code for full semantic repo graphs on heavy active repos, and update the relevant graph after code changes.
-9. Capture the work timestamp with `date -Iseconds`.
-10. Work in the smallest complete chunk that can be reviewed safely.
+6. Review `docs/standards/document-control-standard.md` when the work creates or materially updates controlled documentation, validation records, ADRs, pathway logs, or handoffs.
+7. Review `project-control.yaml`.
+8. Check `exceptions` in `project-control.yaml` and any exception records.
+9. For broad source exploration, architecture analysis, dependency tracing, or cross-repo planning, use the Graphify policy at `local Graphify governance file, when available` before reading raw source broadly. Reference `local Graphify workspace graph, when available` for cross-repo routing, set up repo-local Graphify when a new repo becomes active, run `/graphify /path/to/repo` from Claude Code for full semantic repo graphs on heavy active repos, and update the relevant graph after code changes.
+10. Capture the work timestamp with `date -Iseconds`.
+11. Work in the smallest complete chunk that can be reviewed safely.
 
 Risk-triggering work includes production, deployment, authentication, authorization, payments, secrets, sensitive data, database migrations, customer communications, external side effects, infrastructure or provider settings, destructive actions, autonomous tool use, risk classification, governance policy changes, or release readiness.
 
