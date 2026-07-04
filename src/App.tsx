@@ -6,8 +6,10 @@ import {
   SourcePermissionsScreen,
   ToolInventoryScreen,
 } from "./ui/screens/SetupScreens";
+import { RouteResultsScreen, TaskIntakeScreen } from "./ui/screens/TaskRoutingScreens";
 import { screenDefinitions } from "./ui/screens/screenDefinitions";
 import { useSetupConfiguration } from "./ui/state/useSetupConfiguration";
+import { useTaskRouting } from "./ui/state/useTaskRouting";
 
 const boundaryItems = [
   "Recommends routes only",
@@ -26,6 +28,7 @@ type AppProps = {
 export function App({ store = browserLocalStore }: AppProps) {
   const [activeScreenId, setActiveScreenId] = useState(screenDefinitions[0].id);
   const setup = useSetupConfiguration(store);
+  const taskRouting = useTaskRouting({ setup, store });
   const activeScreen = useMemo(
     () => screenDefinitions.find((screen) => screen.id === activeScreenId) ?? screenDefinitions[0],
     [activeScreenId],
@@ -75,7 +78,23 @@ export function App({ store = browserLocalStore }: AppProps) {
         {activeScreen.id === "policy-settings" ? (
           <PolicySettingsScreen definition={activeScreen} setup={setup} />
         ) : null}
-        {!["tool-inventory", "source-permissions", "policy-settings"].includes(activeScreen.id) ? (
+        {activeScreen.id === "task-intake" ? (
+          <TaskIntakeScreen
+            definition={activeScreen}
+            onRouteGenerated={() => setActiveScreenId("route-results")}
+            routing={taskRouting}
+            setup={setup}
+          />
+        ) : null}
+        {activeScreen.id === "route-results" ? (
+          <RouteResultsScreen
+            definition={activeScreen}
+            onOpenTaskIntake={() => setActiveScreenId("task-intake")}
+            routing={taskRouting}
+            setup={setup}
+          />
+        ) : null}
+        {!["tool-inventory", "source-permissions", "policy-settings", "task-intake", "route-results"].includes(activeScreen.id) ? (
           <PlaceholderScreen definition={activeScreen} />
         ) : null}
       </section>

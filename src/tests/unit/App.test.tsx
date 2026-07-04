@@ -104,6 +104,78 @@ describe("App", () => {
       expect(screen.getByRole("radio", { name: "Quality first" })).toBeChecked();
     });
   });
+
+  it("shows task intake validation near required fields", async () => {
+    const user = userEvent.setup();
+
+    render(<App store={buildTestStore()} />);
+
+    await user.click(screen.getByRole("button", { name: "Task Intake" }));
+    await screen.findByText(/Routing runs in this browser from the local setup, task intake, and policy default/);
+
+    await user.click(screen.getByRole("button", { name: "Generate local routes" }));
+
+    expect(await screen.findByText("Task title is required.")).toBeInTheDocument();
+    expect(screen.getByText("Task description is required.")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Route Results" }));
+
+    expect(screen.getByRole("heading", { name: "Task intake needs correction" })).toBeInTheDocument();
+  });
+
+  it("generates route results from a template and saves route artifacts locally", async () => {
+    const user = userEvent.setup();
+    const store = buildTestStore();
+
+    render(<App store={store} />);
+
+    await user.click(screen.getByRole("button", { name: "Task Intake" }));
+    await screen.findByText("Personal memory");
+    await user.selectOptions(screen.getByLabelText("Start from template"), "draft-public-facing-copy");
+    await user.click(screen.getByRole("button", { name: "Generate local routes" }));
+
+    expect(await screen.findByRole("heading", { name: "Route Results", level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Lean route", level: 4 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Balanced route", level: 4 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Premium route", level: 4 })).toBeInTheDocument();
+    expect(screen.getAllByText("Recommended route").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Warnings" })).toBeInTheDocument();
+    expect(screen.getByText(/Human approval is required before using public-facing/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save route card and prompt package" }));
+
+    expect(await screen.findByText("Route card and prompt package saved locally.")).toBeInTheDocument();
+
+    const records = await store.loadRouteRecords();
+    expect(records.routeCards).toHaveLength(1);
+    expect(records.promptPackages).toHaveLength(1);
+    expect(records.routeCards[0]?.promptPackage.id).toBe(records.promptPackages[0]?.id);
+  });
+
+  it("shows blocked routes when requested sources fail local gates", async () => {
+    const user = userEvent.setup();
+    const store = buildTestStore();
+
+    await store.seedDefaultConfigurationIfEmpty();
+    const configuration = await store.loadConfiguration();
+    await store.saveSourcePermissionRegistry(
+      configuration.sourcePermissionRegistry.map((sourcePermission) =>
+        sourcePermission.id === "web" ? { ...sourcePermission, permissionLevel: 0 } : sourcePermission,
+      ),
+    );
+
+    render(<App store={store} />);
+
+    await user.click(screen.getByRole("button", { name: "Task Intake" }));
+    await screen.findByText("Web");
+    await user.selectOptions(screen.getByLabelText("Start from template"), "research-current-facts");
+    await user.click(screen.getByRole("button", { name: "Generate local routes" }));
+
+    expect(await screen.findByRole("heading", { name: "Route Results", level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Blocked routes" })).toBeInTheDocument();
+    expect(screen.getByText("Web is set to no access and cannot be used in a route.")).toBeInTheDocument();
+    expect(screen.getByText(/Current facts or citations need an allowed research source/)).toBeInTheDocument();
+  });
 });
 
 function buildTestStore(): LocalStore {

@@ -1,49 +1,52 @@
-# 2026-07-03T19:58:35-06:00 - Implementation Status
+# 2026-07-03T21:05:56-06:00 - Implementation Status
 
-Last Updated: 2026-07-03T19:58:35-06:00
-Status: brand-polish-detour-complete
-Status Updated: 2026-07-03T19:58:35-06:00
+Last Updated: 2026-07-03T21:05:56-06:00
+Status: chunk-twelve-complete
+Status Updated: 2026-07-03T21:05:56-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-Brand Polish Detour - Guided AI Labs Identity.
+Chunk Twelve - Task Intake And Results UI.
 
-Completion target: Task complete.
+Completion target: Integration complete.
 
 ## Scope
 
-Apply Guided AI Labs branding to the local app shell before continuing Chunk Twelve.
+The local app now replaces the task-intake and route-results placeholders with a usable browser-local routing workflow.
 
-The completed brand slice provides:
+The completed slice provides:
 
-- local Guided AI Labs logo assets under `public/brand`
-- visible Guided AI Labs identity in the app rail
-- AI Task Router browser title, description, theme color, and local SVG favicon metadata
-- CSS variables and surfaces aligned to the brand navy, AI teal, bright teal, cloud-light, and white palette
-- compact responsive navigation and cleaner setup screen polish
-- App test coverage for the visible brand asset and identity
+- structured task intake for the required `taskIntakeSchema` fields
+- default task templates that populate the form without hiding advanced fields
+- inline validation errors near task fields
+- browser-local hard gates, candidate generation, scoring, route-card generation, and prompt-package generation
+- lean, balanced, premium, recommended, warning, blocked-route, no-safe-route, empty, invalid, and success states
+- explicit local save for generated route card and prompt package records through IndexedDB
+- focused App tests for validation, routing, blocked routes, warnings, and save behavior
 
 ## Product Boundary
 
-The detour is static UI polish only. It does not change setup persistence, routing, scoring, prompt packages, exports/imports, provider connections, credentials, authentication, telemetry, remote sync, external asset fetching, or execution workflows.
+Chunk Twelve remains recommendation-only and local-first. It does not add provider calls, account connections, credentials, authentication, telemetry, remote sync, automatic uploads, execution workflows, export/import buttons, route-log feedback UI, or best-stack recommendation logic.
 
 ## Evidence
 
 - `bash scripts/governance-preflight.sh` passed with 0 warnings.
-- `npm run test -- App` passed with 1 test file and 3 tests.
-- `npm run test` passed with 10 test files and 68 tests.
+- `npm run test -- App` passed with 1 test file and 6 tests.
+- `npm run test` passed with 10 test files and 71 tests.
 - `npm run build` passed.
 - `npm audit --audit-level=moderate` found 0 vulnerabilities.
-- Manual browser check at `http://127.0.0.1:5173` using system Chrome through Playwright passed for desktop and mobile brand logo load, branded title metadata, setup navigation, and horizontal overflow.
 - `git diff --check` passed with only normal Windows LF-to-CRLF notices.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5174` passed for public writing, current-facts research, public-facing copy, highly restricted fallback, explicit local save, desktop/mobile screenshots, and horizontal overflow.
 
 ## Known Gaps
 
-- Task intake/results UI, route-card view, prompt-package view, route-log feedback UI, import/export UI, and end-to-end workflow tests remain future chunks.
+- Route-card detail view and prompt-package viewing/copy/export-prep UI remain Chunk Thirteen.
+- Route-log feedback UI remains a later chunk.
+- Import/export UI remains a later chunk; pure export/import utilities already exist.
 - Proposed best stack remains a disabled planning note only.
-- Playwright is configured but still has no committed e2e specs; browser validation for this detour was run through an inline manual check.
+- Playwright is configured but still has no committed e2e specs; this chunk used inline browser validation.
 
 ## Next Chunk
 
-Chunk Twelve - Task Intake And Results UI, using the branded shell now in place.
+Chunk Thirteen - Route Card And Prompt Package UI.

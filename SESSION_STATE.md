@@ -1,21 +1,22 @@
-# 2026-07-03T19:58:35-06:00 - Session State
+# 2026-07-03T21:05:56-06:00 - Session State
 
-Last Updated: 2026-07-03T19:58:35-06:00
-Status: brand-polish-detour-complete
-Status Updated: 2026-07-03T19:58:35-06:00
+Last Updated: 2026-07-03T21:05:56-06:00
+Status: chunk-twelve-complete
+Status Updated: 2026-07-03T21:05:56-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Complete a mini detour before Chunk Twelve by applying Guided AI Labs branding, logo assets, metadata, and palette polish to the local app shell.
+Complete Chunk Twelve by replacing the task-intake and route-results placeholders with a local browser routing workflow.
 
 ## Files Changed In This Session
 
-- `public/brand/guided-ai-labs-logo-dark-safe.svg`
-- `public/brand/guided-ai-labs-mark.svg`
 - `src/App.tsx`
+- `src/domain/routing/routeCardGenerator.ts`
+- `src/ui/screens/SetupScreens.tsx`
+- `src/ui/screens/TaskRoutingScreens.tsx`
+- `src/ui/state/useTaskRouting.ts`
 - `src/styles.css`
-- `index.html`
 - `src/tests/unit/App.test.tsx`
 - `docs/2026-07-03-current-pathway.md`
 - `IMPLEMENTATION_STATUS.md`
@@ -25,23 +26,35 @@ Complete a mini detour before Chunk Twelve by applying Guided AI Labs branding, 
 ## Commands Run
 
 - `git status --short`
-- `Get-Content ...`, `Select-String ...`, `Get-ChildItem ...`, and `rg --files ...` for targeted agent, pathway, governance, project-control, UI, test, status, decision, and brand asset files
+- targeted `Get-Content`, `rg`, and `Select-String` reads for agent instructions, pathway, governance, project-control, UI, domain, storage, and test files
 - `bash scripts/governance-preflight.sh`
 - `bash -lc "date -Iseconds"`
+- `npm run build`
 - `npm run test -- App`
 - `npm run test`
-- `npm run build`
 - `npm audit --audit-level=moderate`
-- manual Playwright browser check through system Chrome at `http://127.0.0.1:5173` for desktop/mobile logo load, title metadata, setup navigation, and horizontal overflow
 - `git diff --check`
+- manual Playwright browser checks through system Chrome
+  - stale long-running dev server observed at `http://127.0.0.1:5173`
+  - fresh validation server started at `http://127.0.0.1:5174`
+
+## Validation Notes
+
+- Focused App suite passed: 1 file, 6 tests.
+- Full unit suite passed: 10 files, 71 tests.
+- Production build passed.
+- Audit found 0 vulnerabilities.
+- Governance preflight passed with 0 warnings.
+- Whitespace check passed with only normal Windows LF-to-CRLF notices.
+- Manual browser check on `5174` passed for public writing, current-facts research, public-facing copy, highly restricted fallback, explicit save, desktop/mobile screenshots, and no horizontal overflow.
 
 ## Known Gaps
 
-- Task intake/results UI, route-card view, prompt-package view, route-log feedback UI, import/export UI, and end-to-end workflow tests remain future implementation chunks.
+- Chunk Thirteen should build route-card and prompt-package detail viewing/copy/export-prep UI.
+- Route-log feedback UI, import/export UI, committed E2E specs, and MVP polish/docs remain later chunks.
 - Proposed best stack remains nonfunctional and disabled by design.
-- The manual browser check used an inline Playwright script and system Chrome because Playwright's bundled Chromium executable is not installed.
-- The Vite dev server is responding at `http://127.0.0.1:5173`.
+- The old dev server at `5173` responded with stale CSS during manual validation; use the fresh `5174` server or restart the server before future visual checks.
 
 ## Next Handoff
 
-Resume from Chunk Twelve only with the Guided AI Labs branded shell in place: replace the task intake and route-results placeholders using the existing local routing modules. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Thirteen only: build the route card and prompt package viewing/copy/export-prep UI from generated local route records. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, best-stack recommendation logic, or execution workflows.

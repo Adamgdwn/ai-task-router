@@ -42,7 +42,7 @@ export function generateRouteCard({
   let options = scoredOptions;
 
   if (!recommendedOptionId) {
-    fallbackOption = buildManualReviewFallbackOption(task, hardGateResult);
+    fallbackOption = buildManualReviewFallbackRouteOption(task, hardGateResult);
     options = [fallbackOption, ...scoredOptions];
     recommendedOptionId = fallbackOption.id;
   }
@@ -77,7 +77,7 @@ function routeOptionFromScoredCandidate(candidate: ScoredRouteCandidate): RouteO
   };
 }
 
-function buildManualReviewFallbackOption(task: TaskIntake, hardGateResult: HardGateResult): RouteOption {
+export function buildManualReviewFallbackRouteOption(task: TaskIntake, hardGateResult: HardGateResult): RouteOption {
   const optionId = `route-${task.id}-manual-review-fallback`;
 
   return {

@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T19:58:35-06:00
+Last Updated: 2026-07-03T21:05:56-06:00
 Status: active
-Status Updated: 2026-07-03T19:58:35-06:00
+Status Updated: 2026-07-03T21:05:56-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -82,7 +82,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Ten export/import functions | complete | 2026-07-03T17:44:01-06:00 | Technical Lead | Schema-versioned local JSON import/export utilities, route-card and prompt-package Markdown, route-log CSV, and recoverable import validation are implemented and tested. |
 | Chunk Eleven setup UI screens | complete | 2026-07-03T19:34:35-06:00 | Technical Lead | Setup screens now edit tool inventory, source permissions, policy defaults, and local setup preferences through IndexedDB-backed storage. |
 | Brand polish detour | complete | 2026-07-03T19:54:49-06:00 | Technical Lead | Guided AI Labs logo assets, official navy/teal palette, branded app chrome, favicon/title metadata, and responsive setup polish are in place. |
-| Chunk Twelve task intake and results UI | active next | 2026-07-03T19:54:49-06:00 | Technical Lead | Replace task intake and route-results placeholders using the existing local routing modules. |
+| Chunk Twelve task intake and results UI | complete | 2026-07-03T21:03:52-06:00 | Technical Lead | Task intake and route results now run local validation, hard gates, candidate generation, scoring, route-card generation, prompt-package generation, warnings, blocked routes, and explicit local save. |
+| Chunk Thirteen route card and prompt package UI | active next | 2026-07-03T21:03:52-06:00 | Technical Lead | Build detailed route-card and prompt-package viewing/copy/export-prep UI from generated local records. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -1385,8 +1386,8 @@ Resume Chunk Twelve with the branded shell in place. Do not rework the brand unl
 
 ## Chunk Twelve - Task Intake And Results UI
 
-Status: active next
-Status Updated: 2026-07-03T19:54:49-06:00
+Status: complete
+Status Updated: 2026-07-03T21:03:52-06:00
 
 Completion target: Integration complete
 
@@ -1439,14 +1440,14 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Task intake form captures all required `taskIntakeSchema` fields.
-- [ ] Form uses default task templates where helpful without hiding advanced fields.
-- [ ] Validation errors are displayed near the relevant fields.
-- [ ] Results screen shows lean, balanced, premium, and recommended route states.
-- [ ] Results screen shows warnings and blocked routes clearly.
-- [ ] Routing runs entirely in the browser from local inputs and stored configuration.
-- [ ] User can save a generated route card/prompt package locally if storage is ready.
-- [ ] Empty, invalid, no-safe-route, and success states are handled.
+- [x] Task intake form captures all required `taskIntakeSchema` fields.
+- [x] Form uses default task templates where helpful without hiding advanced fields.
+- [x] Validation errors are displayed near the relevant fields.
+- [x] Results screen shows lean, balanced, premium, and recommended route states.
+- [x] Results screen shows warnings and blocked routes clearly.
+- [x] Routing runs entirely in the browser from local inputs and stored configuration.
+- [x] User can save a generated route card/prompt package locally if storage is ready.
+- [x] Empty, invalid, no-safe-route, and success states are handled.
 
 Test expectations:
 
@@ -1468,6 +1469,22 @@ Security and privacy notes:
 - Do not send task data over the network.
 - Do not expose blocked source details beyond user-provided local configuration.
 
+Implementation notes:
+
+- Added `useTaskRouting` as the browser-local orchestration hook for task draft state, schema validation, routing pipeline execution, generated route state, and explicit save state.
+- Added task intake and route results screens while leaving route-card and prompt-package detail screens as placeholders for Chunk Thirteen.
+- The route results screen compares lean, balanced, and premium states, marks the recommended route, shows warnings and blocked routes, handles invalid/empty/no-safe-route/success states, and saves the generated route card plus prompt package only when the user presses the save button.
+- Exported the existing manual review fallback route-option builder from the route-card generator so UI no-safe-route prompt-package generation uses the same fallback shape as route cards.
+- Manual browser validation used a fresh Vite dev server at `http://127.0.0.1:5174` because the long-running server at `5173` served stale CSS while updated JS was hot-loaded. Source/build validation remained clean.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before Chunk Twelve work.
+- `npm run test -- App` passed with 1 test file and 6 tests.
+- `npm run test` passed with 10 test files and 71 tests.
+- `npm run build` passed.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5174` passed for public writing, current-facts research, public-facing copy, highly restricted fallback, local save, desktop/mobile screenshots, and horizontal overflow checks.
+
 Rollback or recovery path:
 
 The UI can fall back to placeholder screens while domain modules remain intact. Keep UI orchestration separate enough to debug routing without React.
@@ -1482,8 +1499,8 @@ Next chunk should build the route card and prompt package viewing/copy/export-pr
 
 ## Chunk Thirteen - Route Card And Prompt Package UI
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: active next
+Status Updated: 2026-07-03T21:03:52-06:00
 
 Completion target: Integration complete
 
@@ -1930,7 +1947,10 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T19:48:36-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Guided AI Labs brand polish detour; work timestamp captured. |
 | 2026-07-03T19:54:49-06:00 | `npm run test -- App`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5173` | passed | App test passed: 1 file, 3 tests; TypeScript and Vite production build passed; desktop and mobile browser checks confirmed local logo load, branded title, setup navigation, and no horizontal overflow. |
 | 2026-07-03T19:58:35-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Full unit suite passed: 10 files, 68 tests; TypeScript and Vite production build passed; audit found 0 vulnerabilities; governance check passed with 0 warnings; whitespace check passed with normal Windows LF-to-CRLF notices. |
+| 2026-07-03T20:50:51-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Chunk Twelve task intake/results UI work; work timestamp captured. |
+| 2026-07-03T21:03:52-06:00 | `npm run test -- App`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5174` | passed | App test passed: 1 file, 6 tests; full unit suite passed: 10 files, 71 tests; TypeScript and Vite production build passed; browser check covered public writing, current-facts research, public-facing copy, highly restricted fallback, local save, desktop/mobile layout, and no horizontal overflow. |
+| 2026-07-03T21:05:56-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final Chunk Twelve close-out validation passed: 10 files and 71 tests, production build, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Twelve only with the Guided AI Labs branded shell in place: replace the task intake and route-results placeholders using the existing local domain modules for validation, hard gates, candidate generation, scoring, route-card generation, and prompt-package generation. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Thirteen only: build the route card and prompt package viewing/copy/export-prep UI from generated local route records. Keep the existing Chunk Twelve task intake/results pipeline intact. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, best-stack recommendation logic, or execution workflows.

@@ -1,8 +1,8 @@
-# 2026-07-03T19:54:49-06:00 - Decision Log
+# 2026-07-03T21:03:52-06:00 - Decision Log
 
-Last Updated: 2026-07-03T19:54:49-06:00
+Last Updated: 2026-07-03T21:03:52-06:00
 Status: active
-Status Updated: 2026-07-03T19:54:49-06:00
+Status Updated: 2026-07-03T21:03:52-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -29,3 +29,4 @@ Owner: Technical Lead
 | 2026-07-03T17:44:01-06:00 | Keep export/import as a pure schema-versioned local utility boundary. | Chunk Ten needs reusable artifacts before UI exists, while imports must not mutate IndexedDB or bypass future user confirmation. A centralized schema version and strict envelopes make later migrations explicit. | Future UI can call JSON, Markdown, and CSV serializers, then separately decide when to apply validated imports to local storage. Rollback is removing `src/domain/export/exportImport.ts` and its tests before UI depends on them. |
 | 2026-07-03T19:34:35-06:00 | Store the selected setup policy default in a dedicated local setup preferences table. | `PolicyDefault` records define the three editable policy presets but do not represent which one the user has chosen. A small validated `setupPreferences` table preserves that choice without bending the policy schema or duplicating routing rules in UI state. | Local store schema version advances to 2 with an upgrade-safe table addition. Future routing UI can read the active policy default from storage, while rollback is removing the setup UI/state and `setupPreferences` table before later chunks depend on it. |
 | 2026-07-03T19:54:49-06:00 | Package selected Guided AI Labs SVG brand assets under `public/brand` and theme the app shell from those asset colors. | The owner requested branded, professional app screens before continuing functional work. Static local assets keep branding available in downloaded builds without external fetches, while the official navy, AI teal, bright teal, and cloud-light colors keep the UI aligned to the provided materials. | The local app now has visible Guided AI Labs identity, favicon/title metadata, and branded CSS variables. Rollback is removing the two public brand assets and reverting `src/App.tsx`, `src/styles.css`, `index.html`, and the related App test changes. |
+| 2026-07-03T21:03:52-06:00 | Keep task routing orchestration in a UI state hook and reuse the domain fallback route option for no-safe-route UI. | Chunk Twelve needed a browser-local workflow that connects existing pure domain modules without duplicating routing rules inside React components. Exporting the existing manual-review fallback builder keeps route-card and prompt-package fallback behavior aligned. | `useTaskRouting` owns form draft state, schema validation, pipeline execution, generated route state, and explicit save state, while domain modules remain pure and testable. Future route-card and prompt-package screens should consume generated local records instead of recreating routing logic. |

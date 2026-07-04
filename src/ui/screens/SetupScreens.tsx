@@ -202,7 +202,7 @@ function SetupScreenLayout({ children, definition, setup }: SetupScreenProps & {
   );
 }
 
-function ScreenHeader({ definition }: { definition: ScreenDefinition }) {
+export function ScreenHeader({ definition }: { definition: ScreenDefinition }) {
   return (
     <>
       <p className="screenKicker">{definition.stage}</p>
