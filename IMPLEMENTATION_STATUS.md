@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T15:43:13-06:00
-Status: desktop-d2-scaffold-blocked-on-prerequisites
-Status Updated: 2026-07-04T15:35:38-06:00
+Last Updated: 2026-07-04T16:09:09-06:00
+Status: desktop-d2-release-shell-verified-dev-mode-blocked
+Status Updated: 2026-07-04T16:04:28-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D2 scaffold attempt.
+Desktop Chunk D2 shell spike.
 
 Completion target: Draft complete.
 
-Current state: scaffold present; launch blocked on local Windows prerequisites.
+Current state: scaffold present; Windows prerequisites installed; no-bundle release build and release executable launch verified; dev mode blocked by Windows Application Control.
 
 ## Scope
 
@@ -28,6 +28,7 @@ The completed slice provides:
 - No Tauri plugins beyond the core shell.
 - Brand-aligned desktop icon assets generated from a square Guided AI Labs icon source.
 - Vite watcher ignore for `src-tauri`.
+- `src-tauri/Cargo.lock` generated and retained after successful Cargo dependency resolution.
 
 ## Product Boundary
 
@@ -37,36 +38,35 @@ The existing `npm run detect:local-models` command remains explicit and terminal
 
 ## Evidence
 
-- `bash scripts/governance-preflight.sh` passed with 0 warnings before the scaffold.
-- `bash -lc "date -Iseconds"` captured `2026-07-04T15:35:38-06:00`.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the scaffold and before the prerequisite retry.
+- `bash -lc "date -Iseconds"` captured `2026-07-04T15:35:38-06:00` and `2026-07-04T16:04:28-06:00`.
 - `npm install --save-dev @tauri-apps/cli@2.11.4` passed and audit reported 0 vulnerabilities.
 - `npx tauri init ...` created the `src-tauri` scaffold.
 - `npx tauri icon src-tauri/icon-source.svg` generated branded desktop icon assets.
-- `npm run desktop:info` parsed the project and found WebView2, but reported missing MSVC Build Tools, Rust, Cargo, rustup, and Rust toolchain.
-- `npm run test` passed with 11 test files and 81 tests.
-- `npm audit --audit-level=moderate` found 0 vulnerabilities.
-- `npm run build` passed with the existing Vite chunk-size warning.
-- `npm run desktop:build` failed before compilation because `cargo` is not installed.
+- Initial `npm run desktop:info` found WebView2 but reported missing MSVC Build Tools, Rust, Cargo, rustup, and Rust toolchain.
+- Deep machine audit found no Rust/rustup/Cargo, no Visual Studio Installer/vswhere, no Visual Studio Build Tools folders, and no Windows SDK folders before install.
+- Installed Rustup through winget: Rustup `1.29.0`, Rust/Cargo `1.96.1`, default `stable-x86_64-pc-windows-msvc`.
+- Installed Visual Studio Build Tools 2022 through winget: Build Tools `17.14.35`, MSVC `14.44.35207`, Windows SDK `10.0.26100.0`.
+- Post-install `npm run desktop:info` passed all environment checks and reported WebView2 `149.0.4022.98`.
+- `cargo metadata --manifest-path src-tauri/Cargo.toml --format-version 1 --no-deps` passed.
+- `npm run desktop:build` passed and built `src-tauri\target\release\ai-task-router-desktop.exe`.
+- Release executable launch smoke test confirmed a running desktop process with main window title `AI Task Router`, then stopped it cleanly.
+- `npm run desktop:dev` and direct `cargo build --manifest-path src-tauri/Cargo.toml` are blocked by Windows Application Control when Cargo tries to run the generated debug `build-script-build.exe`.
+- Windows Code Integrity logs show event IDs `3033` and `3077`, policy ID `{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}`, Enterprise signing level requirement.
+- `npm run test` passed with 11 test files and 81 tests before the prerequisite retry.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities before the prerequisite retry.
+- `npm run build` passed with the existing Vite chunk-size warning before the prerequisite retry.
 - `src-tauri/icons/icon.png` was visually checked and shows the Guided AI Labs mark.
-- Final close-out checks passed: `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, and `git diff --check`.
+- Final close-out checks passed: `npm run desktop:info`, `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, `npm run desktop:build`, and `git diff --check`.
 
 ## Known Gaps
 
-- The desktop shell has not launched yet on Windows.
-- Rust/Cargo/rustup are not installed or not on PATH on this machine.
-- Visual Studio or Build Tools with MSVC and Windows SDK components are not detected.
-- `npm run desktop:dev` was not run because it cannot compile until the prerequisites are installed.
+- `npm run desktop:dev` does not launch yet because local Windows Application Control blocks generated debug build scripts.
 - Tauri reports CSP as unset; keep that under D3 trust-boundary review before native commands are added.
-- Tauri Rust crate output shows `tauri` 2.11.3 while the latest reported by `tauri info` is 2.11.5; confirm dependency alignment when Rust is installed and Cargo can resolve the project.
+- Public desktop packaging, signing, updater, installer, and local discovery remain out of scope.
 
 ## Next Chunk
 
-Resume Desktop Chunk D2 as a prerequisite retry:
+Either resolve the local Windows Application Control dev-mode blocker through an approved lab policy path, or proceed to Desktop Chunk D3 as design-only trust-boundary work using the verified release-build shell evidence.
 
-1. Install or confirm Rust through rustup.
-2. Install or confirm Visual Studio or Build Tools with MSVC and Windows SDK components.
-3. Run `npm run desktop:info`.
-4. Run `npm run desktop:dev` and confirm the existing UI launches.
-5. Run `npm run desktop:build`.
-
-Proceed to Desktop Chunk D3 only after D2 launch is verified or after the owner explicitly accepts the environment blocker and chooses design-only work.
+Proceeding to implementation beyond shell/trust-boundary design still requires owner approval and must not add native local discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions.

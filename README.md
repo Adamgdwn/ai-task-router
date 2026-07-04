@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser MVP validation lane, with the Desktop Chunk D2 Tauri shell scaffold present and launch blocked on missing Windows build prerequisites
-Status Updated: 2026-07-04T15:43:13-06:00
+Status: v0.2 browser MVP validation lane, with the Desktop Chunk D2 Tauri shell scaffold built and release-launch verified; dev mode is blocked by Windows Application Control for generated debug build scripts
+Status Updated: 2026-07-04T16:09:09-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -92,11 +92,13 @@ Check the desktop shell environment:
 npm run desktop:info
 ```
 
-Run the desktop shell after Tauri prerequisites are installed:
+Run the desktop shell in dev mode after Tauri prerequisites are installed:
 
 ```bash
 npm run desktop:dev
 ```
+
+Current Windows lab note: `npm run desktop:dev` reaches the Vite dev server but the debug Rust build is blocked by Windows Application Control policy when Cargo tries to execute a generated `build-script-build.exe`.
 
 Build the desktop shell without packaging:
 
@@ -104,10 +106,13 @@ Build the desktop shell without packaging:
 npm run desktop:build
 ```
 
-Desktop prerequisites currently needed on this Windows machine:
+Desktop prerequisites installed on this Windows machine:
 
-- Rust and Cargo through rustup
-- Visual Studio or Build Tools with MSVC and Windows SDK components
+- Rustup `1.29.0` with Rust/Cargo `1.96.1`, default `stable-x86_64-pc-windows-msvc`
+- Visual Studio Build Tools 2022 `17.14.35`
+- MSVC `14.44.35207`
+- Windows SDK `10.0.26100.0`
+- WebView2 `149.0.4022.98`
 
 The desktop shell is a spike only. It does not add native discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions.
 

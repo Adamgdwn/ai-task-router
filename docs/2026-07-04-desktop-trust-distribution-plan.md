@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.4.0
+Version: 0.4.1
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before retrying Desktop Chunk D2 launch or starting Desktop Chunk D3
-Last Updated: 2026-07-04T15:43:13-06:00
-Status Updated: 2026-07-04T15:43:13-06:00
+Next Review: Before resolving the D2 dev-mode Application Control blocker or starting Desktop Chunk D3
+Last Updated: 2026-07-04T16:09:09-06:00
+Status Updated: 2026-07-04T16:09:09-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 now has the repo-local Tauri shell scaffold, branded icon assets, and desktop npm scripts. The actual desktop launch is blocked on the current Windows machine until Rust/Cargo and MSVC Build Tools are installed. Desktop implementation remains limited to a shell spike until the trust-boundary design is complete.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 now has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a verified release executable launch. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script. Desktop implementation remains limited to a shell spike until the trust-boundary design is complete.
 
 ## Purpose
 
@@ -481,15 +481,15 @@ Proceed to Desktop Chunk D2 only as a shell spike. D2 may wrap the current UI in
 
 ## Desktop Chunk D2 Shell Scaffold Attempt
 
-Status: blocked on local prerequisites after scaffold
+Status: draft complete with dev-mode Application Control blocker
 
-Status Updated: 2026-07-04T15:35:38-06:00
+Status Updated: 2026-07-04T16:04:28-06:00
 
 Completion target: Draft complete
 
 Result:
 
-The repo-local Tauri shell scaffold was added, but the current Windows machine cannot compile or launch it yet because Tauri reports missing Rust/Cargo/rustup and missing Visual Studio or Build Tools with MSVC and SDK components.
+The repo-local Tauri shell scaffold was added, the missing Windows build prerequisites were installed, the no-bundle release build passed, and the release executable launched the `AI Task Router` desktop window. The remaining D2 blocker is specific to `npm run desktop:dev`: Windows Application Control blocks Cargo from executing the generated debug build-script binary.
 
 Implemented:
 
@@ -503,6 +503,16 @@ Implemented:
 - set the Tauri bundle to inactive for the spike so D2 does not package or sign installers
 - configured the default capability with an empty permission list
 - configured Vite to ignore `src-tauri` in its file watcher
+- committed Cargo's generated `src-tauri/Cargo.lock` after the first successful dependency resolution
+
+System tools installed and verified:
+
+- Rustup `1.29.0`
+- Rust/Cargo `1.96.1` with default `stable-x86_64-pc-windows-msvc`
+- Visual Studio Build Tools 2022 `17.14.35`
+- MSVC `14.44.35207`
+- Windows SDK `10.0.26100.0`
+- WebView2 `149.0.4022.98`
 
 Not added:
 
@@ -526,10 +536,19 @@ Validation:
 - `npm run desktop:build` failed at `cargo metadata` because `cargo` is not installed
 - generated `src-tauri/icons/icon.png` was visually checked and shows the Guided AI Labs mark
 - final close-out checks passed: `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, and `git diff --check`
+- `winget install --id Rustlang.Rustup --exact --source winget --accept-package-agreements --accept-source-agreements --silent` installed Rustup and the default stable MSVC Rust toolchain
+- `winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --source winget --accept-package-agreements --accept-source-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"` installed the Visual Studio 2022 C++ build tools
+- `npm run desktop:info` passed all Tauri environment checks after install
+- `cargo metadata --manifest-path src-tauri/Cargo.toml --format-version 1 --no-deps` passed
+- `npm run desktop:build` passed and built `src-tauri\target\release\ai-task-router-desktop.exe`
+- release executable launch smoke test confirmed a running desktop process with main window title `AI Task Router`, then stopped it cleanly
+- `npm run desktop:dev` and direct `cargo build --manifest-path src-tauri/Cargo.toml` both failed because Windows Application Control blocked the generated debug `build-script-build.exe`
+- Windows Code Integrity logged event IDs `3033` and `3077` for policy ID `{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}`
+- final close-out checks passed: `npm run desktop:info`, `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, `npm run desktop:build`, and `git diff --check`
 
-Next prerequisite step:
+Remaining troubleshooting step:
 
-Install the official Tauri Windows prerequisites: Rust through rustup and Visual Studio or Build Tools with MSVC plus Windows SDK components. Then rerun:
+Resolve the Windows Application Control debug-build blocker through the lab's approved policy path, then rerun:
 
 ```bash
 npm run desktop:info
@@ -537,7 +556,7 @@ npm run desktop:dev
 npm run desktop:build
 ```
 
-D2 remains blocked until the desktop shell launches the current UI on Windows.
+D2 has enough evidence for a release-build shell spike, but dev mode remains blocked until the local Application Control policy allows Cargo's generated debug build scripts in the approved development path.
 
 ### Phase 1: Desktop Tool Decision Spike
 
@@ -803,7 +822,7 @@ The current React app launches in a desktop shell without adding local scanning 
 
 Current state:
 
-The Tauri scaffold, desktop scripts, and branded icons exist. The launch outcome is not yet verified because the current Windows machine is missing Rust/Cargo/rustup and MSVC Build Tools with SDK components.
+The Tauri scaffold, desktop scripts, branded icons, installed prerequisites, no-bundle build, and release executable launch are verified. `npm run desktop:dev` remains blocked by Windows Application Control policy against generated debug build scripts.
 
 ### Desktop Chunk D3 - Trust Boundary And Permission Model
 
