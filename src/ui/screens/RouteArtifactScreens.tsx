@@ -86,21 +86,21 @@ function RouteArtifactToolbar({ artifacts }: { artifacts: RouteArtifactsControll
   return (
     <section className="artifactToolbar" aria-labelledby="saved-route-selector-heading">
       <div>
-        <h3 id="saved-route-selector-heading">Saved route artifact</h3>
+        <h3 id="saved-route-selector-heading">Saved plan</h3>
         <p aria-live="polite" role="status">
           {artifacts.statusMessage}
         </p>
       </div>
 
       <label>
-        <span>Saved route card</span>
+        <span>Saved decision card</span>
         <select
-          aria-label="Saved route card"
+          aria-label="Saved decision card"
           disabled={artifacts.routeCards.length === 0}
           onChange={(event) => artifacts.selectRouteCard(event.target.value)}
           value={artifacts.selectedRouteCard ? artifacts.selectedRouteCard.id : ""}
         >
-          <option value="">Choose saved route card</option>
+          <option value="">Choose saved decision card</option>
           {artifacts.routeCards.map((routeCard) => (
             <option key={routeCard.id} value={routeCard.id}>
               {routeCard.title} - {formatTimestamp(routeCard.createdAt)}
@@ -110,7 +110,7 @@ function RouteArtifactToolbar({ artifacts }: { artifacts: RouteArtifactsControll
       </label>
 
       <button disabled={artifacts.status === "loading"} onClick={() => void artifacts.refresh()} type="button">
-        Refresh local records
+        Refresh saved plans
       </button>
     </section>
   );
@@ -124,7 +124,7 @@ function RouteArtifactStatus({
   onOpenTaskIntake: () => void;
 }) {
   if (artifacts.status === "loading" && !artifacts.routeRecords) {
-    return <div className="loadingPanel">Loading saved local route records.</div>;
+    return <div className="loadingPanel">Loading saved plans from this browser.</div>;
   }
 
   if (artifacts.status === "error") {
@@ -138,10 +138,10 @@ function RouteArtifactStatus({
   if (artifacts.status === "empty" || artifacts.routeCards.length === 0) {
     return (
       <section className="emptyResultsState" aria-labelledby="empty-artifacts-heading">
-        <h3 id="empty-artifacts-heading">No saved route artifacts yet</h3>
-        <p>Generate a local route, then save its route card and prompt package before viewing final artifacts here.</p>
+        <h3 id="empty-artifacts-heading">No saved plans yet</h3>
+        <p>Describe a task, choose an option, then save its decision card and prompts before viewing them here.</p>
         <button onClick={onOpenTaskIntake} type="button">
-          Open Task Intake
+          Describe my task
         </button>
       </section>
     );
@@ -150,8 +150,7 @@ function RouteArtifactStatus({
   if (artifacts.selectedRouteCardMissing) {
     return (
       <div className="setupAlert" role="alert">
-        The selected route card is no longer available in local storage. Choose another saved route card or refresh local
-        records.
+        The selected decision card is no longer available in this browser. Choose another saved plan or refresh the list.
       </div>
     );
   }
@@ -166,9 +165,9 @@ function RouteCardSummary({ routeCard }: { routeCard: RouteCard }) {
   return (
     <section className="artifactSummaryBand" aria-labelledby="route-card-summary-heading">
       <div>
-        <p className="screenKicker">Route card</p>
+        <p className="screenKicker">Decision card</p>
         <h3 id="route-card-summary-heading">{routeCard.title}</h3>
-        <p>{recommendedRoute?.summary ?? "Review this route card before using any prompt package outside the app."}</p>
+        <p>{recommendedRoute?.summary ?? "Review this decision card before using any prompts outside the app."}</p>
       </div>
       <dl>
         <div>
@@ -176,11 +175,11 @@ function RouteCardSummary({ routeCard }: { routeCard: RouteCard }) {
           <dd>{formatTimestamp(routeCard.createdAt)}</dd>
         </div>
         <div>
-          <dt>Sensitivity</dt>
+          <dt>Privacy</dt>
           <dd>{routeCard.sensitivityClass}</dd>
         </div>
         <div>
-          <dt>Recommended</dt>
+          <dt>Best fit</dt>
           <dd>{recommendedRoute?.label ?? routeCard.recommendedOptionId}</dd>
         </div>
         <div>
@@ -188,7 +187,7 @@ function RouteCardSummary({ routeCard }: { routeCard: RouteCard }) {
           <dd>{recommendedRoute?.score ?? 0}</dd>
         </div>
         <div>
-          <dt>Route options</dt>
+          <dt>Options</dt>
           <dd>{routeCard.options.length}</dd>
         </div>
         <div>
@@ -212,13 +211,13 @@ function PromptPackageSummary({
   return (
     <section className="artifactSummaryBand" aria-labelledby="prompt-package-summary-heading">
       <div>
-        <p className="screenKicker">Prompt package</p>
+        <p className="screenKicker">Copy-ready prompts</p>
         <h3 id="prompt-package-summary-heading">{promptPackage.title}</h3>
-        <p>Ordered prompt steps for the saved route card. The app prepares text only; the user runs each step manually.</p>
+        <p>Ordered prompt steps for the saved decision card. The app prepares text only; you run each step manually.</p>
       </div>
       <dl>
         <div>
-          <dt>Route card</dt>
+          <dt>Decision card</dt>
           <dd>{routeCard.title}</dd>
         </div>
         <div>
@@ -254,8 +253,8 @@ function MarkdownExportPanel({
   return (
     <section className="localExportPanel" aria-labelledby={domIdFor(copyLabel)}>
       <div>
-        <h3 id={domIdFor(copyLabel)}>Local export</h3>
-        <p>Markdown is prepared in this browser from saved local records.</p>
+        <h3 id={domIdFor(copyLabel)}>Copy or download</h3>
+        <p>Markdown is prepared in this browser from saved plans.</p>
       </div>
       <div className="artifactActions">
         <button
@@ -286,15 +285,15 @@ function RouteCardWarnings({ routeCard }: { routeCard: RouteCard }) {
       <section className="routingSection warningList" aria-labelledby="route-card-warnings-heading">
         <div className="sectionHeading">
           <h3 id="route-card-warnings-heading">Warnings</h3>
-          <p>Review these before manually using the route card.</p>
+          <p>Review these before manually using the saved plan.</p>
         </div>
         <ArtifactList emptyLabel="No route card warnings." items={routeCard.warnings} />
       </section>
 
       <section className="routingSection blockedList" aria-labelledby="route-card-blocked-routes-heading">
         <div className="sectionHeading">
-          <h3 id="route-card-blocked-routes-heading">Blocked routes</h3>
-          <p>Blocked items stay visible so the final decision artifact explains what was excluded.</p>
+          <h3 id="route-card-blocked-routes-heading">Left out for safety</h3>
+          <p>Items left out stay visible so the decision card explains what was excluded.</p>
         </div>
         {routeCard.blockedRoutes.length ? (
           <ul>
@@ -321,8 +320,8 @@ function RouteOptionList({ routeCard }: { routeCard: RouteCard }) {
   return (
     <section className="routingSection" aria-labelledby="route-card-options-heading">
       <div className="sectionHeading">
-        <h3 id="route-card-options-heading">Route options and tradeoffs</h3>
-        <p>Scores, cost, effort, warnings, and steps are retained for the recommended route and alternatives.</p>
+        <h3 id="route-card-options-heading">Options and tradeoffs</h3>
+        <p>Scores, cost, effort, warnings, and steps are retained for the best fit and alternatives.</p>
       </div>
       <div className="artifactRouteOptionList">
         {routeCard.options.map((option) => (

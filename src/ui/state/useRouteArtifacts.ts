@@ -33,7 +33,7 @@ const emptyRouteRecords: LocalRouteRecords = {
 
 export function useRouteArtifacts({ store }: UseRouteArtifactsInput): RouteArtifactsController {
   const [status, setStatus] = useState<RouteArtifactsStatus>("idle");
-  const [statusMessage, setStatusMessage] = useState("Saved route cards and prompt packages have not been loaded yet.");
+  const [statusMessage, setStatusMessage] = useState("Saved plans have not been loaded yet.");
   const [copyStatus, setCopyStatus] = useState<RouteArtifactCopyStatus>("idle");
   const [copyMessage, setCopyMessage] = useState("Nothing has been copied in this session.");
   const [routeRecords, setRouteRecords] = useState<LocalRouteRecords | null>(null);
@@ -58,7 +58,7 @@ export function useRouteArtifacts({ store }: UseRouteArtifactsInput): RouteArtif
 
   const refresh = useCallback(async () => {
     setStatus("loading");
-    setStatusMessage("Loading saved route cards and prompt packages from local storage.");
+    setStatusMessage("Loading saved decision cards and prompts from this browser.");
 
     try {
       const loadedRouteRecords = await store.loadRouteRecords();
@@ -73,10 +73,10 @@ export function useRouteArtifacts({ store }: UseRouteArtifactsInput): RouteArtif
 
       if (loadedRouteRecords.routeCards.length === 0) {
         setStatus("empty");
-        setStatusMessage("No saved route cards are stored on this device yet.");
+        setStatusMessage("No saved plans are stored on this device yet.");
       } else {
         setStatus("ready");
-        setStatusMessage(`${loadedRouteRecords.routeCards.length} saved route card record(s) loaded locally.`);
+        setStatusMessage(`${loadedRouteRecords.routeCards.length} saved plan(s) loaded on this device.`);
       }
     } catch (error) {
       setRouteRecords(null);
@@ -104,7 +104,7 @@ export function useRouteArtifacts({ store }: UseRouteArtifactsInput): RouteArtif
     try {
       await navigator.clipboard.writeText(text);
       setCopyStatus("copied");
-      setCopyMessage(`${label} copied locally.`);
+      setCopyMessage(`${label} copied on this device.`);
       return true;
     } catch (error) {
       setCopyStatus("error");
@@ -135,5 +135,5 @@ function routeArtifactErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return "Saved local route records could not be loaded or copied. Refresh local records and try again.";
+  return "Saved plans could not be loaded or copied. Refresh saved plans and try again.";
 }

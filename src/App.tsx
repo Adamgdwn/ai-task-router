@@ -5,6 +5,7 @@ import {
   PlaceholderScreen,
   PolicySettingsScreen,
   SourcePermissionsScreen,
+  StartHereScreen,
   ToolInventoryScreen,
 } from "./ui/screens/SetupScreens";
 import { RouteResultsScreen, TaskIntakeScreen } from "./ui/screens/TaskRoutingScreens";
@@ -14,10 +15,10 @@ import { useSetupConfiguration } from "./ui/state/useSetupConfiguration";
 import { useTaskRouting } from "./ui/state/useTaskRouting";
 
 const boundaryItems = [
-  "Recommends routes only",
-  "No external AI API calls",
-  "No connectors or execution mode",
-  "No credentials or hidden telemetry",
+  "Your browser only",
+  "You choose what info feels okay",
+  "We recommend; you decide",
+  "No hidden AI calls or telemetry",
 ];
 
 const browserLocalStore = createLocalStore();
@@ -53,7 +54,7 @@ export function App({ store = browserLocalStore }: AppProps) {
             <span className="versionTag">v0.2 local MVP</span>
           </div>
           <h1>AI Task Router</h1>
-          <p>Professional local-first route planning before any model, tool, or source is used.</p>
+          <p>A guided aisle map for choosing the right AI path before you paste anything anywhere.</p>
         </div>
 
         <nav className="screenTabs" aria-label="AI Task Router screens">
@@ -78,6 +79,9 @@ export function App({ store = browserLocalStore }: AppProps) {
           ))}
         </div>
 
+        {activeScreen.id === "welcome" ? (
+          <StartHereScreen definition={activeScreen} onNavigate={setActiveScreenId} />
+        ) : null}
         {activeScreen.id === "tool-inventory" ? (
           <ToolInventoryScreen definition={activeScreen} setup={setup} />
         ) : null}
@@ -118,6 +122,7 @@ export function App({ store = browserLocalStore }: AppProps) {
           />
         ) : null}
         {![
+          "welcome",
           "tool-inventory",
           "source-permissions",
           "policy-settings",

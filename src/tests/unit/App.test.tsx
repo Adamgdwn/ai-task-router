@@ -31,8 +31,9 @@ describe("App", () => {
     );
     expect(screen.getByText("Guided AI Labs")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AI Task Router", level: 1 })).toBeInTheDocument();
-    expect(screen.getByText("No external AI API calls")).toBeInTheDocument();
-    expect(screen.getByText("No connectors or execution mode")).toBeInTheDocument();
+    expect(screen.getByText("Your browser only")).toBeInTheDocument();
+    expect(screen.getByText("No hidden AI calls or telemetry")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Choose my tools" })).toBeInTheDocument();
 
     for (const definition of screenDefinitions) {
       await user.click(screen.getByRole("button", { name: definition.label }));
@@ -42,66 +43,69 @@ describe("App", () => {
     }
   });
 
-  it("lets users edit tool inventory and keeps changes after refresh", async () => {
+  it("lets users answer the AI tools shelf check and keeps changes after refresh", async () => {
     const user = userEvent.setup();
     const store = buildTestStore();
     const { unmount } = render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "Tool Inventory" }));
-    const freeAgentRow = await screen.findByRole("region", { name: "User-configured free/small model" });
+    await user.click(screen.getByRole("button", { name: "My AI Tools" }));
+    const freeAgentRow = await screen.findByRole("region", { name: "Free or basic AI assistant" });
     const freeAgentLabel = within(freeAgentRow).getByRole("textbox", {
       name: "Tool label for user-free-small-model",
+    });
+    const freeAgentUse = within(freeAgentRow).getByRole("combobox", {
+      name: "Use Free or basic AI assistant",
     });
 
     await user.clear(freeAgentLabel);
     await user.type(freeAgentLabel, "My free assistant");
-    await user.click(within(freeAgentRow).getByRole("checkbox", { name: "Enabled" }));
-    await user.click(screen.getByRole("button", { name: "Save setup" }));
+    await user.selectOptions(freeAgentUse, "no");
+    await user.click(screen.getByRole("button", { name: "Save my choices" }));
 
-    await screen.findByText("Local setup saved.");
+    await screen.findByText("Your choices were saved on this device.");
 
     unmount();
     render(<App store={store} />);
-    await user.click(screen.getByRole("button", { name: "Tool Inventory" }));
+    await user.click(screen.getByRole("button", { name: "My AI Tools" }));
 
     const savedFreeAgentRow = await screen.findByRole("region", { name: "My free assistant" });
     expect(within(savedFreeAgentRow).getByDisplayValue("My free assistant")).toBeInTheDocument();
-    expect(within(savedFreeAgentRow).getByRole("checkbox", { name: "Disabled" })).not.toBeChecked();
+    expect(within(savedFreeAgentRow).getByRole("combobox", { name: "Use My free assistant" })).toHaveValue("no");
 
-    await user.click(screen.getByRole("button", { name: "Restore defaults" }));
+    await user.click(screen.getByRole("button", { name: "Restore starter choices" }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue("User-configured free/small model")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("Free or basic AI assistant")).toBeInTheDocument();
     });
   });
 
-  it("lets users save source permissions, policy default choice, and the disabled best-stack note", async () => {
+  it("lets users save information comfort, choosing style, and the disabled toolkit note", async () => {
     const user = userEvent.setup();
     const store = buildTestStore();
     const { unmount } = render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "Source Permissions" }));
-    await user.selectOptions(await screen.findByRole("combobox", { name: "Permission level for web" }), "0");
+    await user.click(screen.getByRole("button", { name: "Information Comfort" }));
+    await user.selectOptions(await screen.findByRole("combobox", { name: "Information comfort for web" }), "none");
 
-    await user.click(screen.getByRole("button", { name: "Policy Settings" }));
-    expect(screen.getByRole("checkbox", { name: /Proposed best stack recommendations/ })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Choosing Style" }));
+    expect(screen.getByRole("checkbox", { name: /Suggest a full AI toolkit/ })).toBeDisabled();
 
-    await user.click(await screen.findByRole("radio", { name: "Quality first" }));
-    await user.click(screen.getByRole("button", { name: "Save setup" }));
+    await user.click(await screen.findByRole("radio", { name: /Best quality when it matters/ }));
+    await user.click(screen.getByRole("button", { name: "Save my choices" }));
 
-    await screen.findByText("Local setup saved.");
+    await screen.findByText("Your choices were saved on this device.");
 
     unmount();
     render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "Source Permissions" }));
+    await user.click(screen.getByRole("button", { name: "Information Comfort" }));
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: "Permission level for web" })).toHaveValue("0");
+      expect(screen.getByRole("combobox", { name: "Information comfort for web" })).toHaveValue("none");
     });
 
-    await user.click(screen.getByRole("button", { name: "Policy Settings" }));
+    await user.click(screen.getByRole("button", { name: "Choosing Style" }));
     await waitFor(() => {
-      expect(screen.getByRole("radio", { name: "Quality first" })).toBeChecked();
+      expect(screen.getByRole("radio", { name: /Best quality when it matters/ })).toBeChecked();
     });
   });
 
@@ -110,17 +114,17 @@ describe("App", () => {
 
     render(<App store={buildTestStore()} />);
 
-    await user.click(screen.getByRole("button", { name: "Task Intake" }));
-    await screen.findByText(/Routing runs in this browser from the local setup, task intake, and policy default/);
+    await user.click(screen.getByRole("button", { name: "My Task" }));
+    await screen.findByText(/Recommendations are prepared in this browser/);
 
-    await user.click(screen.getByRole("button", { name: "Generate local routes" }));
+    await user.click(screen.getByRole("button", { name: "Show me my best options" }));
 
     expect(await screen.findByText("Task title is required.")).toBeInTheDocument();
     expect(screen.getByText("Task description is required.")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Route Results" }));
+    await user.click(screen.getByRole("button", { name: "Best Options" }));
 
-    expect(screen.getByRole("heading", { name: "Task intake needs correction" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "This needs a bit more detail" })).toBeInTheDocument();
   });
 
   it("generates route results from a template and saves route artifacts locally", async () => {
@@ -129,12 +133,12 @@ describe("App", () => {
 
     render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "Task Intake" }));
+    await user.click(screen.getByRole("button", { name: "My Task" }));
     await screen.findByText("Personal memory");
-    await user.selectOptions(screen.getByLabelText("Start from template"), "draft-public-facing-copy");
-    await user.click(screen.getByRole("button", { name: "Generate local routes" }));
+    await user.selectOptions(screen.getByLabelText("Start with"), "draft-public-facing-copy");
+    await user.click(screen.getByRole("button", { name: "Show me my best options" }));
 
-    expect(await screen.findByRole("heading", { name: "Route Results", level: 2 })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Best Options", level: 2 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Lean route", level: 4 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Balanced route", level: 4 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Premium route", level: 4 })).toBeInTheDocument();
@@ -142,9 +146,9 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Warnings" })).toBeInTheDocument();
     expect(screen.getByText(/Human approval is required before using public-facing/)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Save route card and prompt package" }));
+    await user.click(screen.getByRole("button", { name: "Save decision and prompts" }));
 
-    expect(await screen.findByText("Route card and prompt package saved locally.")).toBeInTheDocument();
+    expect(await screen.findByText("Decision card and prompts saved on this device.")).toBeInTheDocument();
 
     const records = await store.loadRouteRecords();
     expect(records.routeCards).toHaveLength(1);
@@ -166,13 +170,13 @@ describe("App", () => {
 
     render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "Task Intake" }));
+    await user.click(screen.getByRole("button", { name: "My Task" }));
     await screen.findByText("Web");
-    await user.selectOptions(screen.getByLabelText("Start from template"), "research-current-facts");
-    await user.click(screen.getByRole("button", { name: "Generate local routes" }));
+    await user.selectOptions(screen.getByLabelText("Start with"), "research-current-facts");
+    await user.click(screen.getByRole("button", { name: "Show me my best options" }));
 
-    expect(await screen.findByRole("heading", { name: "Route Results", level: 2 })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Blocked routes" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Best Options", level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Left out for safety" })).toBeInTheDocument();
     expect(screen.getByText("Web is set to no access and cannot be used in a route.")).toBeInTheDocument();
     expect(screen.getByText(/Current facts or citations need an allowed research source/)).toBeInTheDocument();
   });
@@ -182,10 +186,10 @@ describe("App", () => {
 
     render(<App store={buildTestStore()} />);
 
-    await user.click(screen.getByRole("button", { name: "Route Card" }));
+    await user.click(screen.getByRole("button", { name: "Decision Card" }));
 
-    expect(await screen.findByRole("heading", { name: "No saved route artifacts yet" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open Task Intake" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No saved plans yet" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Describe my task" })).toBeInTheDocument();
   });
 
   it("shows saved route cards with local copy and Markdown download preparation", async () => {
@@ -196,12 +200,12 @@ describe("App", () => {
     render(<App store={buildTestStore()} />);
 
     await generateAndSavePublicFacingRoute(user);
-    await user.click(screen.getByRole("button", { name: "Route Card" }));
+    await user.click(screen.getByRole("button", { name: "Decision Card" }));
 
     expect(await screen.findByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Saved route card" })).toHaveValue("route-card-task-local-route");
-    expect(screen.getByText("Route options and tradeoffs")).toBeInTheDocument();
-    expect(screen.getByText("Blocked routes")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Saved decision card" })).toHaveValue("route-card-task-local-route");
+    expect(screen.getByText("Options and tradeoffs")).toBeInTheDocument();
+    expect(screen.getByText("Left out for safety")).toBeInTheDocument();
     expect(screen.getByText("Warnings")).toBeInTheDocument();
 
     const markdownPreview = screen.getByLabelText("Prepared route card Markdown") as HTMLTextAreaElement;
@@ -217,7 +221,7 @@ describe("App", () => {
     await waitFor(() => {
       expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("# Route card: Draft public-facing copy"));
     });
-    expect(screen.getByText("Route card Markdown copied locally.")).toBeInTheDocument();
+    expect(screen.getByText("Route card Markdown copied on this device.")).toBeInTheDocument();
   });
 
   it("shows saved prompt packages with ordered steps and step-level approval copy", async () => {
@@ -228,7 +232,7 @@ describe("App", () => {
     render(<App store={buildTestStore()} />);
 
     await generateAndSavePublicFacingRoute(user);
-    await user.click(screen.getByRole("button", { name: "Prompt Package" }));
+    await user.click(screen.getByRole("button", { name: "Copy-Ready Prompts" }));
 
     expect(await screen.findByRole("heading", { name: "Prompt package: Draft public-facing copy" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Prompt steps" })).toBeInTheDocument();
@@ -249,7 +253,7 @@ describe("App", () => {
     await waitFor(() => {
       expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("Expected output:"));
     });
-    expect(screen.getByText("Prompt step 1 copied locally.")).toBeInTheDocument();
+    expect(screen.getByText("Prompt step 1 copied on this device.")).toBeInTheDocument();
   });
 });
 
@@ -265,13 +269,13 @@ function buildTestStore(): LocalStore {
 }
 
 async function generateAndSavePublicFacingRoute(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole("button", { name: "Task Intake" }));
+  await user.click(screen.getByRole("button", { name: "My Task" }));
   await screen.findByText("Personal memory");
-  await user.selectOptions(screen.getByLabelText("Start from template"), "draft-public-facing-copy");
-  await user.click(screen.getByRole("button", { name: "Generate local routes" }));
-  await screen.findByRole("heading", { name: "Route Results", level: 2 });
-  await user.click(screen.getByRole("button", { name: "Save route card and prompt package" }));
-  await screen.findByText("Route card and prompt package saved locally.");
+  await user.selectOptions(screen.getByLabelText("Start with"), "draft-public-facing-copy");
+  await user.click(screen.getByRole("button", { name: "Show me my best options" }));
+  await screen.findByRole("heading", { name: "Best Options", level: 2 });
+  await user.click(screen.getByRole("button", { name: "Save decision and prompts" }));
+  await screen.findByText("Decision card and prompts saved on this device.");
 }
 
 function installClipboardMock(writeText: ReturnType<typeof vi.fn>) {

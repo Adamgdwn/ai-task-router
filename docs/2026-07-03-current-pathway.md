@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T22:10:56-06:00
+Last Updated: 2026-07-03T23:58:41-06:00
 Status: active
-Status Updated: 2026-07-03T22:10:56-06:00
+Status Updated: 2026-07-03T23:58:41-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -84,7 +84,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Brand polish detour | complete | 2026-07-03T19:54:49-06:00 | Technical Lead | Guided AI Labs logo assets, official navy/teal palette, branded app chrome, favicon/title metadata, and responsive setup polish are in place. |
 | Chunk Twelve task intake and results UI | complete | 2026-07-03T21:03:52-06:00 | Technical Lead | Task intake and route results now run local validation, hard gates, candidate generation, scoring, route-card generation, prompt-package generation, warnings, blocked routes, and explicit local save. |
 | Chunk Thirteen route card and prompt package UI | complete | 2026-07-03T22:08:42-06:00 | Technical Lead | Route card and prompt package detail screens now load saved local records, show route decisions and prompt steps, and prepare local copy/download Markdown. |
-| Chunk Fourteen route log and feedback UI | active next | 2026-07-03T22:08:42-06:00 | Technical Lead | Build route log and feedback workflows for saved recommendations. |
+| Usability path detour | complete | 2026-07-03T23:55:54-06:00 | Technical Lead | Reworked the app front door, setup aisles, task flow, and saved-plan copy into plain-language conversational UX. |
+| Chunk Fourteen route log and feedback UI | active next | 2026-07-03T23:55:54-06:00 | Technical Lead | Build route log and feedback workflows for saved recommendations after preserving the conversational UX direction. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -1608,10 +1609,114 @@ Handoff note:
 
 Next chunk should build route log and feedback workflows for saved recommendations.
 
+## Usability Detour - Conversational Path And Plain-Language UX
+
+Status: complete
+Status Updated: 2026-07-03T23:55:54-06:00
+
+Completion target: Integration complete
+
+Budget class: Medium
+
+Objective:
+
+Turn the technically accurate MVP interface into a more natural guided path for everyday users before adding more route-log surface area.
+
+User outcome:
+
+The user can walk through the app like clear aisles: choose available AI tools, choose information comfort, choose decision style, describe the task, review best options, and inspect saved decision cards and copy-ready prompts.
+
+Allowed files or folders:
+
+- `src/App.tsx`
+- `src/ui/screens/*`
+- `src/ui/state/*`
+- `src/domain/defaults/defaultModels.ts`
+- `src/styles.css`
+- `src/tests/unit/App.test.tsx`
+- active pathway and status docs
+
+Non-goals:
+
+- Do not change the routing engine, hard gates, scoring rules, persistence schema, export formats, or prompt-package generation.
+- Do not add provider account connections, credential storage, telemetry, external calls, prompt execution, route-log feedback UI, best-stack recommendation logic, or import/export UI.
+
+Product boundary reminders:
+
+- The app remains local-first and recommendation-only.
+- Plain-language labels are a presentation layer over the same safety model.
+- Advanced routing details can remain available, but they should not be the default user path.
+
+Domain terms to use in the user-facing path:
+
+- start here
+- AI tools
+- information comfort
+- choosing style
+- my task
+- best options
+- decision card
+- copy-ready prompts
+- saved plans
+
+Acceptance criteria:
+
+- [x] Navigation labels and first-screen path use plain-language aisle-style wording.
+- [x] Tool inventory reads as quick shelf choices with dropdowns and editable names, with technical details moved behind advanced drawers.
+- [x] Source permissions are replaced in the UI by information comfort choices that map back to existing permission/sensitivity controls.
+- [x] Policy settings are replaced in the UI by choosing-style options focused on cost/time, balance, and quality.
+- [x] Task intake and route results copy speaks to everyday actions and decisions.
+- [x] Saved route-card and prompt-package screens use decision-card, saved-plan, and copy-ready prompt language where appropriate.
+- [x] Default model labels are everyday shelf names while IDs and routing assumptions remain unchanged.
+
+Implementation notes:
+
+- Added `StartHereScreen` with a four-step guided path: tools, information comfort, choosing style, and task description.
+- Renamed screen labels in `screenDefinitions` while preserving stable screen IDs and route orchestration.
+- Reworked `SetupScreens` so the primary setup path uses dropdowns and cards; capability scores, permission levels, sensitivity allowances, and policy weights are still available through advanced drawers.
+- Added source comfort translation helpers that map `none`, `public`, `work`, `confidential`, and `restricted` choices back to existing source permission and sensitivity shapes.
+- Updated task-routing and route-artifact UI copy/state messages to use best options, saved plans, decision cards, and copy-ready prompts.
+- Updated default model seed labels to everyday tool shelves without changing IDs, tiers, capability scores, permissions, or external-call flags.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before implementation.
+- `npm run test -- App` passed with 1 file and 9 tests.
+- `npm run test` passed with 10 files and 74 tests.
+- `npm run build` passed.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5176` passed for Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, desktop/mobile layout, and no horizontal overflow.
+- Screenshots:
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-usability-start-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-usability-tools-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-usability-prompts-mobile.png`
+
+UX/product finish expectations:
+
+- Keep the supermarket/aisle mental model: clear choices first, advanced controls later.
+- Avoid exposing source permissions, policy defaults, model tiers, or scoring weights as the primary product language.
+- Existing users with older browser-local seed labels may need to use `Restore starter choices` to see the new default shelf names.
+
+Security and privacy notes:
+
+- No safety boundary changed. The app still does not connect accounts, call providers, inspect files, execute prompts, store credentials, or send telemetry.
+- Local saved choices and saved plans remain browser-owned IndexedDB records.
+
+Rollback or recovery path:
+
+Revert this detour's UI/default-label changes to restore the prior clinical setup screens. Stored records remain compatible because schema IDs and persisted shapes were unchanged.
+
+Stop condition:
+
+Reached. The conversational usability path is implemented, tested, and manually verified. Route-log feedback UI was not added in this detour.
+
+Handoff note:
+
+Next chunk should build route-log and feedback workflows using the new language direction. Keep route-log UI plain-language and avoid reintroducing source-permission or policy-default terminology in primary user flows.
+
 ## Chunk Fourteen - Route Log And Feedback UI
 
 Status: active next
-Status Updated: 2026-07-03T22:08:42-06:00
+Status Updated: 2026-07-03T23:55:54-06:00
 
 Completion target: Integration complete
 
@@ -1973,7 +2078,12 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T21:59:53-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Chunk Thirteen route-card/prompt-package UI work; work timestamp captured. |
 | 2026-07-03T22:08:42-06:00 | `npm run test -- App`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5175` | passed | App test passed: 1 file and 9 tests; full unit suite passed: 10 files and 74 tests; TypeScript and Vite production build passed; browser check covered saved route card viewing, saved prompt package viewing, local Markdown download links, desktop/mobile layout, screenshots, and no horizontal overflow. |
 | 2026-07-03T22:10:56-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final Chunk Thirteen close-out validation passed: 10 files and 74 tests, production build, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-03T23:40:53-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before the conversational usability detour; work timestamp captured. |
+| 2026-07-03T23:51:11-06:00 | `npm run test -- App` | passed | Focused App suite passed with 1 file and 9 tests after translating setup, task, result, and artifact UI labels. |
+| 2026-07-03T23:54:46-06:00 | `npm run test`; `npm run build` | passed | Full unit suite passed with 10 files and 74 tests; TypeScript and Vite production build passed after plain-language default model labels. |
+| 2026-07-03T23:55:54-06:00 | manual Playwright browser check using system Chrome at `http://127.0.0.1:5176` | passed | Browser walkthrough covered Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, desktop/mobile screenshots, and no horizontal overflow. |
+| 2026-07-03T23:58:41-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final usability detour close-out validation passed: 10 files and 74 tests, production build, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Fourteen only: build the route log and feedback workflows for saved recommendations. Keep the existing task intake, route results, route-card detail, and prompt-package detail workflows intact. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fourteen only: build the route log and feedback workflows for saved recommendations. Keep the new conversational UX direction intact: Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, and saved-plan language. Do not reintroduce source-permission, policy-default, model-tier, or scoring-weight terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.

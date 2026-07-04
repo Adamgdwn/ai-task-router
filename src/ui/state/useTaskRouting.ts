@@ -117,17 +117,17 @@ const initialDraft: TaskRoutingDraft = {
 };
 
 const fieldLabels: Partial<Record<TaskRoutingErrorField, string>> = {
-  id: "Task reference",
+  id: "Reference name",
   title: "Task title",
   description: "Task description",
-  dmaicPhase: "DMAIC phase",
-  lifecycleStage: "Lifecycle stage",
-  knowledgeWorkType: "Work type",
-  outputType: "Output type",
-  qualityBar: "Quality bar",
-  sensitivityClass: "Sensitivity class",
-  requestedSourceIds: "Requested sources",
-  form: "Task intake",
+  dmaicPhase: "Work stage",
+  lifecycleStage: "Stage",
+  knowledgeWorkType: "Kind of work",
+  outputType: "Finished format",
+  qualityBar: "Quality need",
+  sensitivityClass: "Privacy level",
+  requestedSourceIds: "Information ingredients",
+  form: "Task details",
 };
 
 export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRoutingController {
@@ -135,17 +135,17 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
   const [routeResult, setRouteResult] = useState<GeneratedRouteResult | null>(null);
   const [validationErrors, setValidationErrors] = useState<TaskRoutingValidationErrors>({});
   const [routingStatus, setRoutingStatus] = useState<TaskRoutingStatus>("idle");
-  const [routingMessage, setRoutingMessage] = useState("No local route has been generated yet.");
+  const [routingMessage, setRoutingMessage] = useState("No options have been prepared yet.");
   const [saveStatus, setSaveStatus] = useState<GeneratedRouteSaveStatus>("idle");
-  const [saveMessage, setSaveMessage] = useState("Generated route card and prompt package are not saved yet.");
+  const [saveMessage, setSaveMessage] = useState("The decision card and prompts are not saved yet.");
 
   const resetGeneratedRoute = useCallback((nextDraft: TaskRoutingDraft) => {
     setValidationErrors({});
     setRouteResult(null);
     setRoutingStatus("idle");
-    setRoutingMessage("Task intake changed. Generate local routes to refresh results.");
+    setRoutingMessage("Task details changed. Ask for options again to refresh results.");
     setSaveStatus("idle");
-    setSaveMessage("Generated route card and prompt package are not saved yet.");
+    setSaveMessage("The decision card and prompts are not saved yet.");
 
     return nextDraft;
   }, []);
@@ -231,7 +231,7 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
       setRoutingStatus("invalid");
       setRoutingMessage(taskResult.message);
       setSaveStatus("idle");
-      setSaveMessage("Generated route card and prompt package are not saved yet.");
+      setSaveMessage("The decision card and prompts are not saved yet.");
       return false;
     }
 
@@ -241,7 +241,7 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
       const activePolicy = setup.activePolicy;
 
       if (!configuration || !activePolicy) {
-        throw new Error("Local setup is not available for routing.");
+        throw new Error("Your saved choices are not available for recommendations.");
       }
 
       const hardGateResult = evaluateHardGates({
@@ -288,18 +288,18 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
         noSafeGeneratedRoute: scoringResult.recommendedCandidate === null,
       });
       setRoutingStatus("success");
-      setRoutingMessage("Local route recommendations generated.");
+      setRoutingMessage("Your options are ready.");
       setSaveStatus("idle");
-      setSaveMessage("Generated route card and prompt package are not saved yet.");
+      setSaveMessage("The decision card and prompts are not saved yet.");
 
       return true;
     } catch (error) {
       setValidationErrors({ form: [routingErrorMessage(error)] });
       setRouteResult(null);
       setRoutingStatus("error");
-      setRoutingMessage("Local routing could not finish.");
+      setRoutingMessage("Your options could not be prepared.");
       setSaveStatus("idle");
-      setSaveMessage("Generated route card and prompt package are not saved yet.");
+      setSaveMessage("The decision card and prompts are not saved yet.");
 
       return false;
     }
@@ -308,17 +308,17 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
   const saveGeneratedRoute = useCallback(async () => {
     if (!routeResult) {
       setSaveStatus("error");
-      setSaveMessage("Generate a route before saving local records.");
+      setSaveMessage("Prepare options before saving a decision card.");
       return false;
     }
 
     setSaveStatus("saving");
-    setSaveMessage("Saving route card and prompt package locally.");
+    setSaveMessage("Saving the decision card and prompts on this device.");
 
     try {
       await store.saveRouteCard(routeResult.routeCard);
       setSaveStatus("saved");
-      setSaveMessage("Route card and prompt package saved locally.");
+      setSaveMessage("Decision card and prompts saved on this device.");
       return true;
     } catch (error) {
       setSaveStatus("error");
@@ -350,9 +350,9 @@ function buildTaskFromDraft(draft: TaskRoutingDraft, setup: SetupConfigurationCo
     return {
       ok: false,
       errors: {
-        form: ["Local setup must finish loading before routes can be generated."],
+        form: ["Your choices must finish loading before options can be prepared."],
       },
-      message: "Local setup is not ready.",
+      message: "Your choices are not ready.",
     };
   }
 
@@ -360,9 +360,9 @@ function buildTaskFromDraft(draft: TaskRoutingDraft, setup: SetupConfigurationCo
     return {
       ok: false,
       errors: {
-        form: ["Choose an available policy default before generating routes."],
+        form: ["Choose an available deciding style before preparing options."],
       },
-      message: "Policy setup is not ready.",
+      message: "Deciding style is not ready.",
     };
   }
 
@@ -391,7 +391,7 @@ function buildTaskFromDraft(draft: TaskRoutingDraft, setup: SetupConfigurationCo
     return {
       ok: false,
       errors: validationErrorsFromIssues(result.error.issues),
-      message: "Task intake needs correction before local routing can run.",
+      message: "Task details need correction before options can be prepared.",
     };
   }
 
@@ -455,7 +455,7 @@ function friendlyValidationMessage(field: TaskRoutingErrorField, issue: z.ZodIss
   }
 
   if (field === "requestedSourceIds") {
-    return issue.message.replace("sourcePermissions", "local source permissions");
+    return issue.message.replace("sourcePermissions", "information comfort choices");
   }
 
   return issue.message;
@@ -466,5 +466,5 @@ function routingErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return "The local route could not be generated or saved. Refresh setup and try again.";
+  return "Your options could not be prepared or saved. Refresh your choices and try again.";
 }

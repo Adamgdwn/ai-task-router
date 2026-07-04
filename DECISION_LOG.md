@@ -1,8 +1,8 @@
-# 2026-07-03T22:10:56-06:00 - Decision Log
+# 2026-07-03T23:58:41-06:00 - Decision Log
 
-Last Updated: 2026-07-03T22:10:56-06:00
+Last Updated: 2026-07-03T23:58:41-06:00
 Status: active
-Status Updated: 2026-07-03T22:10:56-06:00
+Status Updated: 2026-07-03T23:58:41-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -31,3 +31,4 @@ Owner: Technical Lead
 | 2026-07-03T19:54:49-06:00 | Package selected Guided AI Labs SVG brand assets under `public/brand` and theme the app shell from those asset colors. | The owner requested branded, professional app screens before continuing functional work. Static local assets keep branding available in downloaded builds without external fetches, while the official navy, AI teal, bright teal, and cloud-light colors keep the UI aligned to the provided materials. | The local app now has visible Guided AI Labs identity, favicon/title metadata, and branded CSS variables. Rollback is removing the two public brand assets and reverting `src/App.tsx`, `src/styles.css`, `index.html`, and the related App test changes. |
 | 2026-07-03T21:03:52-06:00 | Keep task routing orchestration in a UI state hook and reuse the domain fallback route option for no-safe-route UI. | Chunk Twelve needed a browser-local workflow that connects existing pure domain modules without duplicating routing rules inside React components. Exporting the existing manual-review fallback builder keeps route-card and prompt-package fallback behavior aligned. | `useTaskRouting` owns form draft state, schema validation, pipeline execution, generated route state, and explicit save state, while domain modules remain pure and testable. Future route-card and prompt-package screens should consume generated local records instead of recreating routing logic. |
 | 2026-07-03T22:08:42-06:00 | Keep saved route artifact viewing in a UI state hook and reuse Chunk Ten serializers for prepared Markdown. | Chunk Thirteen needs UI state for loading, selecting, refreshing, and copying saved local artifacts, but it should not duplicate export formatting or routing decisions. Using the existing serializers keeps local export preparation aligned with tested domain utilities. | `useRouteArtifacts` owns saved artifact loading and clipboard status, while `RouteArtifactScreens` render route-card and prompt-package details from saved records. Future route-log UI should open or select saved route-card records rather than rebuilding route decisions. |
+| 2026-07-03T23:55:54-06:00 | Translate primary UX language to conversational user choices while preserving stable domain IDs and routing schemas. | User testing showed the prior UI was accurate for Adam but too clinical for average users. Everyday labels such as information comfort, choosing style, best options, decision card, and copy-ready prompts make the product easier to understand without weakening the safety model. | UI screens and tests now protect the plain-language path. Technical terms such as permission levels, sensitivity allowances, model tiers, capability scores, and policy weights remain available only in advanced drawers or internal code. Future route-log UI should follow this language direction. |

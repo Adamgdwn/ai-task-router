@@ -53,14 +53,14 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
 
         <section className="routingSection" aria-labelledby="task-template-heading">
           <div className="sectionHeading">
-            <h3 id="task-template-heading">Task template</h3>
-            <p>Templates set sensible defaults while keeping every field editable.</p>
+            <h3 id="task-template-heading">Start with a common job</h3>
+            <p>Choose the closest starting point, then adjust anything that does not fit.</p>
           </div>
 
           <label className="wideField">
-            <span>Start from template</span>
+            <span>Start with</span>
             <select
-              aria-label="Start from template"
+              aria-label="Start with"
               onChange={(event) => routing.applyTemplate(event.target.value as TaskRoutingDraft["templateId"])}
               value={routing.draft.templateId}
             >
@@ -76,14 +76,14 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
 
         <section className="routingSection" aria-labelledby="task-basics-heading">
           <div className="sectionHeading">
-            <h3 id="task-basics-heading">Task intake</h3>
-            <p>These fields become the local task record used by hard gates and scoring.</p>
+            <h3 id="task-basics-heading">What are you trying to get done?</h3>
+            <p>Give the app enough context to choose a useful path without overcomplicating the job.</p>
           </div>
 
           <div className="formGrid compactFormGrid">
-            <FieldShell field="id" label="Task reference" routing={routing}>
+            <FieldShell field="id" label="Reference name" routing={routing}>
               <input
-                aria-label="Task reference"
+                aria-label="Reference name"
                 onChange={(event) => routing.updateDraftField("id", event.target.value)}
                 value={routing.draft.id}
               />
@@ -109,14 +109,14 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
 
         <section className="routingSection" aria-labelledby="task-context-heading">
           <div className="sectionHeading">
-            <h3 id="task-context-heading">Context and output</h3>
-            <p>Route scoring uses work type, output type, quality, cost, energy, and lifecycle context.</p>
+            <h3 id="task-context-heading">What should the finished thing look like?</h3>
+            <p>These choices help the app avoid using a heavy path for a small job, or a light path for serious work.</p>
           </div>
 
           <div className="formGrid">
             <SelectField
               field="dmaicPhase"
-              label="DMAIC phase"
+              label="Where are you in the work?"
               onChange={(value) => routing.updateDraftField("dmaicPhase", value as TaskIntake["dmaicPhase"])}
               options={dmaicPhases}
               routing={routing}
@@ -124,7 +124,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="lifecycleStage"
-              label="Lifecycle stage"
+              label="Stage"
               onChange={(value) => routing.updateDraftField("lifecycleStage", value as TaskIntake["lifecycleStage"])}
               options={lifecycleStages}
               routing={routing}
@@ -132,7 +132,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="knowledgeWorkType"
-              label="Work type"
+              label="Kind of work"
               onChange={(value) =>
                 routing.updateDraftField("knowledgeWorkType", value as TaskIntake["knowledgeWorkType"])
               }
@@ -142,7 +142,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="outputType"
-              label="Output type"
+              label="Finished format"
               onChange={(value) => routing.updateDraftField("outputType", value as TaskIntake["outputType"])}
               options={outputTypes}
               routing={routing}
@@ -150,7 +150,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="qualityBar"
-              label="Quality bar"
+              label="How good does it need to be?"
               onChange={(value) => routing.updateDraftField("qualityBar", value as TaskIntake["qualityBar"])}
               options={qualityBars}
               routing={routing}
@@ -158,7 +158,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="sensitivityClass"
-              label="Sensitivity class"
+              label="How private is it?"
               onChange={(value) => routing.updateDraftField("sensitivityClass", value as TaskIntake["sensitivityClass"])}
               options={sensitivityClasses}
               routing={routing}
@@ -174,7 +174,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
             />
             <SelectField
               field="energyPreference"
-              label="Energy preference"
+              label="Effort preference"
               onChange={(value) => routing.updateDraftField("energyPreference", value as TaskIntake["energyPreference"])}
               options={preferenceOptions}
               routing={routing}
@@ -185,19 +185,19 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
 
         <section className="routingSection" aria-labelledby="task-needs-heading">
           <div className="sectionHeading">
-            <h3 id="task-needs-heading">Output needs</h3>
-            <p>These switches trigger warnings and human approval when the task needs extra care.</p>
+            <h3 id="task-needs-heading">Anything that needs extra care?</h3>
+            <p>Turn these on when the answer needs checking, current information, or public-ready care.</p>
           </div>
 
           <fieldset className="checkboxGrid routeToggleGrid">
-            <legend>Needs and approval flags</legend>
+            <legend>Extra care</legend>
             <label>
               <input
                 checked={routing.draft.requiresCurrentFacts}
                 onChange={(event) => routing.updateDraftField("requiresCurrentFacts", event.target.checked)}
                 type="checkbox"
               />
-              <span>Current facts</span>
+              <span>Needs current facts</span>
             </label>
             <label>
               <input
@@ -205,7 +205,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
                 onChange={(event) => routing.updateDraftField("requiresCitations", event.target.checked)}
                 type="checkbox"
               />
-              <span>Citations</span>
+              <span>Needs citations</span>
             </label>
             <label>
               <input
@@ -213,20 +213,20 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
                 onChange={(event) => routing.updateDraftField("publicFacing", event.target.checked)}
                 type="checkbox"
               />
-              <span>Public-facing</span>
+              <span>Will be public</span>
             </label>
           </fieldset>
         </section>
 
         <section className="routingSection" aria-labelledby="requested-sources-heading">
           <div className="sectionHeading">
-            <h3 id="requested-sources-heading">Requested sources</h3>
-            <p>Choose only source classes the user intends to consult manually outside the app.</p>
+            <h3 id="requested-sources-heading">What information should be considered?</h3>
+            <p>Choose only the ingredients you intend to consult or paste manually outside the app.</p>
           </div>
 
           {setup.configuration?.sourcePermissionRegistry.length ? (
             <fieldset className="sourceChoiceGrid">
-              <legend>Requested source IDs</legend>
+              <legend>Information ingredients</legend>
               {setup.configuration.sourcePermissionRegistry.map((source) => (
                 <label key={source.id}>
                   <input
@@ -236,22 +236,20 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
                   />
                   <span>
                     <strong>{source.label}</strong>
-                    <small>
-                      {source.id} | level {source.permissionLevel}
-                    </small>
+                    <small>{sourceChoiceHint(source.permissionLevel)}</small>
                   </span>
                 </label>
               ))}
             </fieldset>
           ) : (
-            <p className="emptySetupState">Local source permissions are not loaded yet.</p>
+            <p className="emptySetupState">Information comfort choices are not loaded yet.</p>
           )}
           <FieldError field="requestedSourceIds" routing={routing} />
         </section>
 
         <div className="routingActions">
           <button disabled={!routing.canRoute} type="submit">
-            Generate local routes
+            Show me my best options
           </button>
           <span aria-live="polite" role="status">
             {routing.routingMessage}
@@ -294,21 +292,21 @@ function RoutingStatus({ routing, setup }: { routing: TaskRoutingController; set
   }
 
   if (setup.status === "loading") {
-    return <div className="loadingPanel">Loading local setup before route planning.</div>;
+    return <div className="loadingPanel">Loading your saved choices before choosing options.</div>;
   }
 
   if (setup.dirty) {
     return (
       <p className="setupBoundaryNote">
-        Local setup has unsaved changes. Save setup first if these route assumptions should persist after refresh.
+        You have unsaved choices. Save them first if these assumptions should stay after refresh.
       </p>
     );
   }
 
   return (
     <p className="setupBoundaryNote">
-      Routing runs in this browser from the local setup, task intake, and policy default. The app does not search,
-      connect accounts, call providers, or execute the route.
+      Recommendations are prepared in this browser from your choices and task details. The app does not search, connect
+      accounts, call providers, or run the work for you.
     </p>
   );
 }
@@ -378,14 +376,14 @@ function EmptyResultsState({
 
   return (
     <section className="emptyResultsState" aria-labelledby="empty-results-heading">
-      <h3 id="empty-results-heading">{invalid ? "Task intake needs correction" : "No route results yet"}</h3>
+      <h3 id="empty-results-heading">{invalid ? "This needs a bit more detail" : "No options yet"}</h3>
       <p>
         {invalid
-          ? "Fix the task intake fields with inline errors, then generate local routes again."
-          : "Enter a task and generate local routes to compare lean, balanced, and premium options."}
+          ? "Fix the highlighted task details, then ask for options again."
+          : "Describe a task to compare quick, balanced, and higher-quality ways to handle it."}
       </p>
       <button onClick={onOpenTaskIntake} type="button">
-        Open Task Intake
+        Describe my task
       </button>
     </section>
   );
@@ -406,13 +404,13 @@ function GeneratedResults({
     <div className="resultsStack">
       {result.noSafeGeneratedRoute ? (
         <div className="setupAlert" role="alert">
-          No safe generated route is available. Use manual review only until setup or task constraints are corrected.
+          No safe option is available yet. Use manual review only until the task details or comfort choices are corrected.
         </div>
       ) : null}
 
       <section className="resultSummaryBand" aria-labelledby="result-summary-heading">
         <div>
-          <p className="screenKicker">Recommended route</p>
+          <p className="screenKicker">Best fit</p>
           <h3 id="result-summary-heading">{recommended?.label ?? "Manual review required"}</h3>
           <p>{recommended?.summary ?? "Review blocked routes before deciding what to do outside the app."}</p>
         </div>
@@ -438,8 +436,8 @@ function GeneratedResults({
 
       <section className="routingSection" aria-labelledby="route-comparison-heading">
         <div className="sectionHeading">
-          <h3 id="route-comparison-heading">Route comparison</h3>
-          <p>Each route remains recommendation-only and must be run manually outside the app.</p>
+          <h3 id="route-comparison-heading">Your options</h3>
+          <p>Each option is a recommendation only. You choose what to copy, paste, or ignore.</p>
         </div>
         <div className="routeComparisonGrid">
           {routeStrategies.map((strategy) => (
@@ -460,9 +458,9 @@ function GeneratedResults({
       {result.routeCard.blockedRoutes.length ? (
         <ListSection
           className="blockedList"
-          heading="Blocked routes"
+          heading="Left out for safety"
           items={result.routeCard.blockedRoutes.map((blockedRoute) => blockedRoute.reason)}
-          lead="These sources, models, or route states were removed by local gates."
+          lead="These ingredients or helpers were removed because they do not fit your comfort choices."
         />
       ) : null}
 
@@ -477,15 +475,15 @@ function GeneratedResults({
 
       <section className="saveRoutePanel" aria-labelledby="save-route-heading">
         <div>
-          <h3 id="save-route-heading">Save local records</h3>
-          <p>Stores this route card and prompt package in IndexedDB on this device.</p>
+          <h3 id="save-route-heading">Keep this plan</h3>
+          <p>Save the decision card and copy-ready prompts on this device.</p>
         </div>
         <button
           disabled={routing.saveStatus === "saving" || routing.saveStatus === "saved"}
           onClick={() => void routing.saveGeneratedRoute()}
           type="button"
         >
-          {routing.saveStatus === "saved" ? "Saved locally" : "Save route card and prompt package"}
+          {routing.saveStatus === "saved" ? "Saved on this device" : "Save decision and prompts"}
         </button>
         <span aria-live="polite" role="status">
           {routing.saveMessage}
@@ -589,6 +587,26 @@ function formatTimestamp(timestamp: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(timestamp));
+}
+
+function sourceChoiceHint(permissionLevel: number) {
+  if (permissionLevel === 0) {
+    return "Not allowed by your comfort choices";
+  }
+
+  if (permissionLevel === 1) {
+    return "Public or shareable information";
+  }
+
+  if (permissionLevel === 2) {
+    return "Ordinary work information";
+  }
+
+  if (permissionLevel === 3) {
+    return "Confidential information when appropriate";
+  }
+
+  return "Sensitive information only when you explicitly choose it";
 }
 
 function domIdFor(value: string) {

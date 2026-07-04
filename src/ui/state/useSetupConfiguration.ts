@@ -35,13 +35,13 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
   const [draft, setDraft] = useState<SetupConfigurationDraft | null>(null);
   const [status, setStatus] = useState<SetupConfigurationStatus>("loading");
   const [dirty, setDirty] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("Loading local setup.");
+  const [statusMessage, setStatusMessage] = useState("Loading your saved choices.");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setStatus("loading");
     setErrorMessage(null);
-    setStatusMessage("Loading local setup.");
+    setStatusMessage("Loading your saved choices.");
 
     try {
       await store.seedDefaultConfigurationIfEmpty();
@@ -57,11 +57,11 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
       });
       setDirty(false);
       setStatus("ready");
-      setStatusMessage("Local setup loaded.");
+      setStatusMessage("Your choices are ready.");
     } catch (error) {
       setStatus("error");
       setErrorMessage(setupErrorMessage(error));
-      setStatusMessage("Local setup is unavailable.");
+      setStatusMessage("Your saved choices are unavailable.");
     }
   }, [store]);
 
@@ -76,14 +76,14 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
 
     if (!draft.configuration.policySettings.some((policy) => policy.id === draft.preferences.activePolicyDefaultId)) {
       setStatus("error");
-      setErrorMessage("Choose an available policy default before saving setup.");
-      setStatusMessage("Local setup was not saved.");
+      setErrorMessage("Choose an available deciding style before saving your choices.");
+      setStatusMessage("Your choices were not saved.");
       return;
     }
 
     setStatus("saving");
     setErrorMessage(null);
-    setStatusMessage("Saving local setup.");
+    setStatusMessage("Saving your choices.");
 
     try {
       const [modelInventory, sourcePermissionRegistry, policySettings, preferences] = await Promise.all([
@@ -103,18 +103,18 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
       });
       setDirty(false);
       setStatus("ready");
-      setStatusMessage("Local setup saved.");
+      setStatusMessage("Your choices were saved on this device.");
     } catch (error) {
       setStatus("error");
       setErrorMessage(setupErrorMessage(error));
-      setStatusMessage("Local setup was not saved.");
+      setStatusMessage("Your choices were not saved.");
     }
   }, [draft, store]);
 
   const restoreDefaults = useCallback(async () => {
     setStatus("saving");
     setErrorMessage(null);
-    setStatusMessage("Restoring setup defaults.");
+    setStatusMessage("Restoring starter choices.");
 
     try {
       await store.reseedDefaultConfiguration();
@@ -130,11 +130,11 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
       });
       setDirty(false);
       setStatus("ready");
-      setStatusMessage("Setup defaults restored.");
+      setStatusMessage("Starter choices restored.");
     } catch (error) {
       setStatus("error");
       setErrorMessage(setupErrorMessage(error));
-      setStatusMessage("Setup defaults were not restored.");
+      setStatusMessage("Starter choices were not restored.");
     }
   }, [store]);
 
@@ -142,7 +142,7 @@ export function useSetupConfiguration(store: LocalStore): SetupConfigurationCont
     setDirty(true);
     setErrorMessage(null);
     setStatus((currentStatus) => (currentStatus === "loading" ? currentStatus : "ready"));
-    setStatusMessage("Local setup has unsaved changes.");
+    setStatusMessage("You have unsaved choices.");
     setDraft((currentDraft) => {
       if (!currentDraft) {
         return currentDraft;
@@ -256,5 +256,5 @@ function setupErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return "The local setup could not be loaded or saved. Refresh and try again.";
+  return "Your saved choices could not be loaded or saved. Refresh and try again.";
 }
