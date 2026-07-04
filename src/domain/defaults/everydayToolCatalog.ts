@@ -28,34 +28,7 @@ export type EverydayToolProviderId =
   | "local"
   | "other";
 
-export type EverydayToolAccountId =
-  | "not-selected"
-  | "basic"
-  | "go"
-  | "paid"
-  | "plus"
-  | "pro"
-  | "business"
-  | "team"
-  | "max-5x"
-  | "max-20x"
-  | "google-ai-pro"
-  | "google-ai-ultra"
-  | "m365-personal"
-  | "m365-copilot"
-  | "enterprise-pro"
-  | "enterprise-max"
-  | "pro-plus"
-  | "max"
-  | "hobby"
-  | "ultra"
-  | "local-ollama"
-  | "local-lm-studio"
-  | "local-jan"
-  | "local-llama-cpp"
-  | "local-gpt4all"
-  | "local-open-webui"
-  | "local-other";
+export type EverydayToolAccountId = string;
 
 export type EverydayToolFrequencyId =
   | "not-selected"
@@ -68,6 +41,7 @@ export type EverydayToolFrequencyId =
 export type EverydayToolAccountOption = {
   id: EverydayToolAccountId;
   label: string;
+  legacyLabels?: string[];
   tier: ModelInventoryItem["tier"];
   capabilityScores: CapabilityScores;
   maxPermissionLevel: PermissionLevel;
@@ -253,11 +227,20 @@ const chatGptAccountOptions = [
   },
   {
     id: "business",
-    label: "Business or Enterprise",
+    label: "Business",
+    legacyLabels: ["Business or Enterprise"],
     tier: "frontier",
     capabilityScores: strongGeneralScores,
     maxPermissionLevel: 3,
     note: "Use only for work information your organization allows in that workspace.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved information in that ChatGPT workspace.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -296,11 +279,20 @@ const claudeAccountOptions = [
   },
   {
     id: "team",
-    label: "Team or Enterprise",
+    label: "Team",
+    legacyLabels: ["Team or Enterprise"],
     tier: "frontier",
     capabilityScores: strongGeneralScores,
     maxPermissionLevel: 3,
     note: "Use only for work information your organization allows in that Claude organization.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved information in that Claude organization.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -312,6 +304,14 @@ const geminiAccountOptions = [
     capabilityScores: fastGeneralScores,
     maxPermissionLevel: 1,
     note: "Useful for quick, low-stakes Gemini help.",
+  },
+  {
+    id: "google-ai-plus",
+    label: "Google AI Plus",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when your Google AI plan is the lighter paid Gemini tier.",
   },
   {
     id: "google-ai-pro",
@@ -331,11 +331,20 @@ const geminiAccountOptions = [
   },
   {
     id: "team",
-    label: "Google Workspace or enterprise",
+    label: "Google Workspace",
+    legacyLabels: ["Google Workspace or enterprise"],
     tier: "frontier",
     capabilityScores: strongGeneralScores,
     maxPermissionLevel: 3,
     note: "Use only for work information your organization allows in Google Workspace.",
+  },
+  {
+    id: "enterprise",
+    label: "Google Workspace Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved information in Google Workspace.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -350,11 +359,20 @@ const copilotAccountOptions = [
   },
   {
     id: "m365-personal",
-    label: "Microsoft 365 Personal, Family, or Premium",
+    label: "Microsoft 365 Personal or Family",
     tier: "artifact",
     capabilityScores: artifactScores,
     maxPermissionLevel: 2,
     note: "Good when Copilot is part of your personal Microsoft 365 apps.",
+  },
+  {
+    id: "m365-premium",
+    label: "Microsoft 365 Premium",
+    legacyLabels: ["Microsoft 365 Personal, Family, or Premium"],
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 2,
+    note: "Use when your Microsoft 365 plan includes expanded personal Copilot features.",
   },
   {
     id: "pro",
@@ -363,6 +381,14 @@ const copilotAccountOptions = [
     capabilityScores: artifactScores,
     maxPermissionLevel: 2,
     note: "Use when you have paid personal Copilot access.",
+  },
+  {
+    id: "m365-work-chat",
+    label: "Copilot Chat at work",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 2,
+    note: "Use for work chat access included with an eligible Microsoft 365 work account.",
   },
   {
     id: "m365-copilot",
@@ -425,6 +451,14 @@ const perplexityAccountOptions = [
     capabilityScores: strongResearchScores,
     maxPermissionLevel: 2,
     note: "Use for regular current-facts checks, research, and citation-heavy work.",
+  },
+  {
+    id: "max",
+    label: "Max",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 2,
+    note: "Use for the heaviest personal Perplexity plan.",
   },
   {
     id: "enterprise-pro",
@@ -608,11 +642,20 @@ const githubCopilotAccountOptions = [
   },
   {
     id: "team",
-    label: "Business or Enterprise",
+    label: "Business",
+    legacyLabels: ["Business or Enterprise"],
     tier: "frontier",
     capabilityScores: codingScores,
     maxPermissionLevel: 3,
     note: "Use only for code your organization allows in GitHub Copilot.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved code in GitHub Copilot.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -663,11 +706,639 @@ const cursorAccountOptions = [
   },
   {
     id: "team",
-    label: "Team or Enterprise",
+    label: "Teams Standard",
+    legacyLabels: ["Team or Enterprise"],
     tier: "frontier",
     capabilityScores: codingScores,
     maxPermissionLevel: 3,
     note: "Use only for code your organization allows in Cursor.",
+  },
+  {
+    id: "cursor-teams-premium",
+    label: "Teams Premium",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 3,
+    note: "Use only for team-approved code in Cursor.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved code in Cursor.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const gensparkAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "research",
+    capabilityScores: researchScores,
+    maxPermissionLevel: 1,
+    note: "Useful for trying Genspark with public or low-stakes work.",
+  },
+  {
+    id: "genspark-plus",
+    label: "Plus",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 2,
+    note: "Use when you have the regular paid Genspark membership.",
+  },
+  {
+    id: "genspark-pro",
+    label: "Pro",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for heavier Genspark workspace, agent, and content work.",
+  },
+  {
+    id: "team",
+    label: "Team",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work information your organization allows in Genspark Team.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved information in Genspark.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const grokAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Useful for trying Grok with low-stakes questions.",
+  },
+  {
+    id: "supergrok",
+    label: "SuperGrok",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when your Grok account has higher limits and frontier model access.",
+  },
+  {
+    id: "x-premium-plus",
+    label: "X Premium+",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when Grok access comes through your X Premium+ subscription.",
+  },
+  {
+    id: "xai-api",
+    label: "xAI API or business",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for business information approved for your xAI account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const metaAiAccountOptions = [
+  {
+    id: "meta-ai-free",
+    label: "Free Meta AI",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when you use Meta AI in the Meta AI app, Facebook, Instagram, WhatsApp, or Messenger.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const poeAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Useful for trying Poe with limited messages.",
+  },
+  {
+    id: "poe-starter-points",
+    label: "10k points/day",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for the smallest Poe subscription tier.",
+  },
+  {
+    id: "poe-660k",
+    label: "660k points/month",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for regular Poe multi-model access.",
+  },
+  {
+    id: "poe-1m65",
+    label: "1.65M points/month",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for heavier Poe model usage.",
+  },
+  {
+    id: "poe-3m3",
+    label: "3.3M points/month",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for heavy Poe usage across premium models.",
+  },
+  {
+    id: "poe-8m25",
+    label: "8.25M points/month",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for the largest published Poe subscription tier.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const youComAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "research",
+    capabilityScores: researchScores,
+    maxPermissionLevel: 1,
+    note: "Useful for public search and light AI-agent use.",
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 2,
+    note: "Use for regular You.com agent and research work.",
+  },
+  {
+    id: "team",
+    label: "Team",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work research your team allows in You.com.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved You.com work.",
+  },
+  {
+    id: "api-paygo",
+    label: "API pay-as-you-go",
+    tier: "research",
+    capabilityScores: researchScores,
+    maxPermissionLevel: 3,
+    note: "Use when your You.com access is through API billing rather than the chat app.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const notebookLmAccountOptions = [
+  {
+    id: "notebooklm-standard",
+    label: "Standard",
+    tier: "research",
+    capabilityScores: researchScores,
+    maxPermissionLevel: 1,
+    note: "Use for the regular free NotebookLM experience.",
+  },
+  {
+    id: "notebooklm-plus",
+    label: "NotebookLM in Plus",
+    tier: "research",
+    capabilityScores: researchScores,
+    maxPermissionLevel: 2,
+    note: "Use when NotebookLM limits are upgraded through Google AI Plus.",
+  },
+  {
+    id: "notebooklm-pro",
+    label: "NotebookLM in Pro",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 2,
+    note: "Use when NotebookLM limits are upgraded through Google AI Pro.",
+  },
+  {
+    id: "notebooklm-ultra",
+    label: "NotebookLM in Ultra",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 2,
+    note: "Use when NotebookLM has the highest personal Google AI limits.",
+  },
+  {
+    id: "notebooklm-workspace",
+    label: "Workspace or school account",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work or school sources your organization allows in NotebookLM.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const replitAccountOptions = [
+  {
+    id: "replit-starter",
+    label: "Starter",
+    tier: "mid",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 1,
+    note: "Useful for exploring Replit with limited agent credits.",
+  },
+  {
+    id: "replit-core",
+    label: "Core",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Use for personal projects, simple apps, and regular Replit Agent work.",
+  },
+  {
+    id: "replit-pro",
+    label: "Pro",
+    tier: "frontier",
+    capabilityScores: scores({
+      reasoning: 5,
+      writing: 3,
+      coding: 5,
+      research: 3,
+      packaging: 4,
+    }),
+    maxPermissionLevel: 2,
+    note: "Use for commercial or professional Replit builds.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved code and app work in Replit.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const deepSeekAccountOptions = [
+  {
+    id: "deepseek-free",
+    label: "Free app",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when you use the free DeepSeek chat app.",
+  },
+  {
+    id: "api-paygo",
+    label: "API pay-as-you-go",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when you access DeepSeek through API billing.",
+  },
+  {
+    id: "api-capacity",
+    label: "API with higher capacity",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work approved for a higher-capacity DeepSeek API account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const qwenAccountOptions = [
+  {
+    id: "qwen-studio-free",
+    label: "Qwen Studio free",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when you use the free Qwen Studio chat experience.",
+  },
+  {
+    id: "qwen-code-oauth",
+    label: "Qwen Code sign-in",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Use when Qwen Code sign-in gives you included model calls.",
+  },
+  {
+    id: "api-paygo",
+    label: "Model Studio pay-as-you-go",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when Qwen access is billed by Model Studio usage.",
+  },
+  {
+    id: "qwen-coding-plan",
+    label: "Coding Plan",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Use when Qwen access comes through the fixed monthly coding plan.",
+  },
+  {
+    id: "qwen-token-plan-team",
+    label: "Token Plan Team",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for team-approved work in Alibaba Cloud Model Studio.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const kimiAccountOptions = [
+  {
+    id: "kimi-free",
+    label: "Free Kimi app",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when you use the Kimi chat app directly.",
+  },
+  {
+    id: "api-paygo",
+    label: "Kimi API pay-as-you-go",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when Kimi access is billed by API usage.",
+  },
+  {
+    id: "api-recharged",
+    label: "Kimi API recharged account",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when your Kimi API account has prepaid balance or voucher access.",
+  },
+  {
+    id: "enterprise",
+    label: "Sales or enterprise account",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for organization-approved Kimi work.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const doubaoAccountOptions = [
+  {
+    id: "doubao-free",
+    label: "Free Doubao app",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when you use the Doubao app directly.",
+  },
+  {
+    id: "volcengine-paygo",
+    label: "Volcano Engine pay-as-you-go",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when Doubao model access is billed through Volcano Engine.",
+  },
+  {
+    id: "ark-coding-plan",
+    label: "Ark Coding Plan",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Use when Doubao access comes through an Ark coding subscription.",
+  },
+  {
+    id: "ark-savings-plan",
+    label: "Ark savings plan",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work approved for your Volcano Engine savings-plan account.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved Doubao or Seed model work.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const minimaxAccountOptions = [
+  {
+    id: "minimax-free",
+    label: "Free or trial",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when you are trying MiniMax without a paid token plan.",
+  },
+  {
+    id: "minimax-token-plus",
+    label: "Token Plan Plus",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for personal projects and prototyping with MiniMax Token Plan.",
+  },
+  {
+    id: "minimax-token-max",
+    label: "Token Plan Max",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for daily coding, agent, and multimodal work in MiniMax.",
+  },
+  {
+    id: "minimax-token-ultra",
+    label: "Token Plan Ultra",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for heavy MiniMax agent workflows and extended sessions.",
+  },
+  {
+    id: "api-paygo",
+    label: "API pay-as-you-go",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work approved for your MiniMax API account.",
+  },
+  {
+    id: "team",
+    label: "Token Plan Team",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for team-approved MiniMax work.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const zhipuAccountOptions = [
+  {
+    id: "zai-free",
+    label: "Free chat",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when you use Z.ai or GLM chat directly.",
+  },
+  {
+    id: "api-paygo",
+    label: "API pay-as-you-go",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when GLM access is billed by API usage.",
+  },
+  {
+    id: "glm-coding-lite",
+    label: "GLM Coding Lite",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Use for the entry GLM coding subscription.",
+  },
+  {
+    id: "glm-coding-pro",
+    label: "GLM Coding Pro",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Use for frequent GLM coding work.",
+  },
+  {
+    id: "glm-coding-max",
+    label: "GLM Coding Max",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Use for the heaviest GLM coding subscription.",
+  },
+  {
+    id: "team",
+    label: "GLM Coding Team",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 3,
+    note: "Use only for team-approved GLM coding work.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved Zhipu or GLM work.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const hunyuanAccountOptions = [
+  {
+    id: "hunyuan-free",
+    label: "Free app or trial quota",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Use when you use Hunyuan directly or have a trial quota.",
+  },
+  {
+    id: "tokenhub-paygo",
+    label: "TokenHub pay-as-you-go",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when Hunyuan access is billed through Tencent Cloud TokenHub.",
+  },
+  {
+    id: "hunyuan-3d-credits",
+    label: "Hunyuan 3D credits",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 2,
+    note: "Use when Hunyuan is mainly for 3D generation credits.",
+  },
+  {
+    id: "workbuddy-tokenhub",
+    label: "WorkBuddy or TokenHub package",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work approved for Tencent Cloud AI packages.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved Hunyuan work.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const mistralAccountOptions = [
+  {
+    id: "basic",
+    label: "Free",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Useful for quick Mistral Vibe or Le Chat use.",
+  },
+  {
+    id: "pro",
+    label: "Pro",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use for higher Mistral chat, research, and coding limits.",
+  },
+  {
+    id: "team",
+    label: "Team",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work your team allows in Mistral.",
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for enterprise-approved Mistral work.",
+  },
+  {
+    id: "mistral-studio-api",
+    label: "Studio or API pay-as-you-go",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use when Mistral access is through Studio or API billing.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -794,24 +1465,144 @@ export const everydayToolProviders = [
   geminiProvider(),
   copilotProvider(),
   perplexityProvider(),
-  researchProvider("genspark", "Genspark"),
-  generalProvider("grok", "Grok"),
-  generalProvider("meta-ai", "Meta AI"),
-  generalProvider("poe", "Poe"),
-  researchProvider("you-com", "You.com"),
-  researchProvider("notebooklm", "NotebookLM"),
+  provider({
+    id: "genspark",
+    label: "Genspark",
+    summary: "Use this when Genspark helps you research, create files, or work across an AI workspace.",
+    defaultAccountId: "genspark-plus",
+    defaultFrequencyId: "weekly",
+    accountOptions: gensparkAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "grok",
+    label: "Grok",
+    summary: "Use this if Grok is one of the AI apps you already know.",
+    defaultAccountId: "supergrok",
+    defaultFrequencyId: "daily",
+    accountOptions: grokAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "meta-ai",
+    label: "Meta AI",
+    summary: "Use this if Meta AI is one of the AI apps you already know.",
+    defaultAccountId: "meta-ai-free",
+    defaultFrequencyId: "weekly",
+    accountOptions: metaAiAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "poe",
+    label: "Poe",
+    summary: "Use this if Poe is where you access several AI models through one account.",
+    defaultAccountId: "poe-660k",
+    defaultFrequencyId: "weekly",
+    accountOptions: poeAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "you-com",
+    label: "You.com",
+    summary: "Use this when You.com helps you check current facts, sources, agents, or research.",
+    defaultAccountId: "pro",
+    defaultFrequencyId: "weekly",
+    accountOptions: youComAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "notebooklm",
+    label: "NotebookLM",
+    summary: "Use this when NotebookLM helps you work from uploaded or saved source material.",
+    defaultAccountId: "notebooklm-standard",
+    defaultFrequencyId: "weekly",
+    accountOptions: notebookLmAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
   canvaProvider(),
   githubCopilotProvider(),
   cursorProvider(),
-  codingProvider("replit", "Replit AI"),
-  generalProvider("deepseek", "DeepSeek"),
-  generalProvider("qwen", "Qwen"),
-  generalProvider("kimi", "Kimi"),
-  generalProvider("doubao", "Doubao"),
-  generalProvider("minimax", "MiniMax"),
-  generalProvider("zhipu", "Zhipu"),
-  generalProvider("hunyuan", "Tencent Hunyuan"),
-  generalProvider("mistral", "Mistral Le Chat"),
+  provider({
+    id: "replit",
+    label: "Replit AI",
+    summary: "Use this when Replit helps you build apps, code, or work with agents.",
+    defaultAccountId: "replit-core",
+    defaultFrequencyId: "weekly",
+    accountOptions: replitAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "deepseek",
+    label: "DeepSeek",
+    summary: "Use this if DeepSeek is one of the AI apps or APIs you already know.",
+    defaultAccountId: "deepseek-free",
+    defaultFrequencyId: "weekly",
+    accountOptions: deepSeekAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "qwen",
+    label: "Qwen",
+    summary: "Use this if Qwen Studio, Qwen Code, or Alibaba Model Studio is part of your AI setup.",
+    defaultAccountId: "qwen-studio-free",
+    defaultFrequencyId: "weekly",
+    accountOptions: qwenAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "kimi",
+    label: "Kimi",
+    summary: "Use this if Kimi or Moonshot AI is one of the AI tools you already know.",
+    defaultAccountId: "kimi-free",
+    defaultFrequencyId: "weekly",
+    accountOptions: kimiAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "doubao",
+    label: "Doubao",
+    summary: "Use this if Doubao, ByteDance Seed, or Volcano Engine is part of your AI setup.",
+    defaultAccountId: "doubao-free",
+    defaultFrequencyId: "weekly",
+    accountOptions: doubaoAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "minimax",
+    label: "MiniMax",
+    summary: "Use this if MiniMax, MiniMax Code, or MiniMax Token Plan is part of your AI setup.",
+    defaultAccountId: "minimax-token-plus",
+    defaultFrequencyId: "weekly",
+    accountOptions: minimaxAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "zhipu",
+    label: "Zhipu",
+    summary: "Use this if Z.ai, Zhipu, or GLM is one of the AI tools you already know.",
+    defaultAccountId: "zai-free",
+    defaultFrequencyId: "weekly",
+    accountOptions: zhipuAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "hunyuan",
+    label: "Tencent Hunyuan",
+    summary: "Use this if Tencent Hunyuan or Tencent Cloud TokenHub is part of your AI setup.",
+    defaultAccountId: "hunyuan-free",
+    defaultFrequencyId: "weekly",
+    accountOptions: hunyuanAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  provider({
+    id: "mistral",
+    label: "Mistral Le Chat",
+    summary: "Use this if Mistral Vibe or Le Chat is one of the AI apps you already know.",
+    defaultAccountId: "pro",
+    defaultFrequencyId: "weekly",
+    accountOptions: mistralAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
   provider({
     id: "local",
     label: "Local or private AI",
@@ -1174,7 +1965,10 @@ function inferProvider(model: ModelInventoryItem): EverydayToolProvider {
 function inferAccountOption(provider: EverydayToolProvider, model: ModelInventoryItem): EverydayToolAccountOption {
   const labelPrefix = `${provider.label}: `;
   const matchingOption = provider.accountOptions.find(
-    (option) => model.label.startsWith(`${labelPrefix}${option.label} -`) || model.label === option.label,
+    (option) =>
+      model.label.startsWith(`${labelPrefix}${option.label} -`) ||
+      model.label === option.label ||
+      option.legacyLabels?.some((legacyLabel) => model.label.startsWith(`${labelPrefix}${legacyLabel} -`)),
   );
 
   if (matchingOption) {

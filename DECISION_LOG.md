@@ -1,8 +1,8 @@
-# 2026-07-04T09:40:46-06:00 - Decision Log
+# 2026-07-04T10:00:43-06:00 - Decision Log
 
-Last Updated: 2026-07-04T09:40:46-06:00
+Last Updated: 2026-07-04T10:00:43-06:00
 Status: active
-Status Updated: 2026-07-04T09:40:46-06:00
+Status Updated: 2026-07-04T10:00:43-06:00
 Owner: Technical Lead
 
 ## Decisions
@@ -38,3 +38,4 @@ Owner: Technical Lead
 | 2026-07-04T09:00:27-06:00 | Treat first-run My AI Tools setup as progressive app rows, not a prefilled tool inventory. | Owner feedback clarified that users should only choose tools they recognize; a screen full of prefilled boxes implies homework and pushes unfamiliar apps onto them. Account level and frequency are closer to how normal users understand their AI tools than visible model and thinking controls. | `My AI Tools` now starts with one empty app row. Selecting an app enables that row and reveals the next empty row. The local catalog maps app, account level, and frequency into the same model inventory schema, while route tests use explicit route-ready fixtures instead of first-run defaults. Future primary flows should not reintroduce app/model/thinking, subscription-level, model-tier, capability-score, routing-category, or technical-routing-details language. |
 | 2026-07-04T09:18:42-06:00 | Treat the previous five prefilled My AI Tools rows as legacy starter data, not user-selected tools. | Owner testing showed that stale local storage still made the screen appear preloaded with ChatGPT, Gemini, Claude, Perplexity, and Copilot, which contradicted the sparse selector intent. | Local store load/seed now migrates those exact legacy starter rows back to blank tool slots, row headings say `Tool selection`, provider names stay inside the dropdown, and Chunk Fifteen should protect this stale-data migration with E2E coverage. |
 | 2026-07-04T09:40:46-06:00 | Make adding more My AI Tools rows an explicit user action and keep local model detection outside the browser app. | Owner feedback clarified that even automatic blank rows felt like the app was pushing work onto the user. Browser apps also cannot safely scan a user's machine for local models without a reviewed local workflow. | Selecting a tool no longer reveals another row; users press `Add another tool` when they want one. Local shows recognizable local model choices, and `npm run detect:local-models` is a separate explicit terminal command that summarizes local tooling without mutating app state. |
+| 2026-07-04T10:00:43-06:00 | Treat AI app account levels as researched provider catalog data and keep account IDs flexible. | Owner feedback showed generic account buckets were still too much work for normal users. Provider plan names change quickly and differ by app, so a giant TypeScript union would become stale faster than the product data. | The catalog now has provider-specific account labels for common and broader AI apps, `legacyLabels` preserve older saved choices, selected/added rows can be removed, and Chunk Fifteen should protect the researched dropdowns plus remove/no-wrap behavior with E2E coverage. |

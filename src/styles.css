@@ -61,8 +61,15 @@ textarea {
   border-radius: 6px;
   color: var(--app-ink);
   min-height: 40px;
+  min-width: 0;
   padding: 9px 10px;
   width: 100%;
+}
+
+select {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 textarea {
@@ -396,9 +403,10 @@ button:focus-visible {
   border: 1px solid #d2dde5;
   border-radius: 999px;
   color: #30414f;
+  flex: 0 0 auto;
   font-size: 0.78rem;
-  overflow-wrap: anywhere;
   padding: 4px 8px;
+  white-space: nowrap;
 }
 
 .setupActions {
@@ -478,6 +486,14 @@ button:focus-visible {
   justify-content: space-between;
 }
 
+.recordActions {
+  align-items: flex-end;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .groupHeader h3 {
   color: var(--brand-navy);
   font-size: 1.02rem;
@@ -529,6 +545,22 @@ button:focus-visible {
 .addToolButton:focus-visible:not(:disabled) {
   background: #096f8e;
   border-color: #096f8e;
+}
+
+.removeToolButton {
+  background: #ffffff;
+  border-color: var(--line-strong);
+  color: #334b5a;
+  font-size: 0.82rem;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.removeToolButton:hover,
+.removeToolButton:focus-visible {
+  background: #eef8fb;
+  border-color: var(--brand-teal);
+  color: var(--brand-navy);
 }
 
 .selectedRecord {
@@ -1809,6 +1841,11 @@ button:focus-visible {
   .promptStepHeader,
   .routeLogEntryHeader {
     align-items: flex-start;
+  }
+
+  .recordActions {
+    align-items: flex-start;
+    width: 100%;
   }
 
   .setupActions {

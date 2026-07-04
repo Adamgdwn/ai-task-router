@@ -134,6 +134,14 @@ describe("App", () => {
     ).toHaveDisplayValue("LM Studio");
     expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(2);
 
+    await user.click(within(savedLocalRow).getByRole("button", { name: "Remove Local or private AI" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("1 selected")).toBeInTheDocument();
+    });
+    expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(1);
+    expect(screen.queryByDisplayValue("Local or private AI")).not.toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Restore starter choices" }));
 
     await waitFor(() => {

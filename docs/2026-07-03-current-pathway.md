@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-04T09:40:46-06:00
+Last Updated: 2026-07-04T10:00:43-06:00
 Status: active
-Status Updated: 2026-07-04T09:40:46-06:00
+Status Updated: 2026-07-04T10:00:43-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -91,7 +91,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | My AI Tools progressive app setup detour | complete | 2026-07-04T09:00:27-06:00 | Technical Lead | Replaced the prefilled tool grid with progressive AI app, account-level, and frequency rows backed by a broader app catalog. |
 | My AI Tools sparse selector correction | complete | 2026-07-04T09:18:42-06:00 | Technical Lead | Corrected stale local data and row headings so My AI Tools starts as one generic Tool selection row, not five named provider cards. |
 | My AI Tools manual add and local models detour | complete | 2026-07-04T09:40:46-06:00 | Technical Lead | Replaced automatic row reveal with an explicit branded add button, provider-specific plan labels, local model choices, and a local detector script. |
-| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T09:40:46-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected manual-add plain-language MVP workflows. |
+| My AI Tools tailored account levels detour | complete | 2026-07-04T10:00:43-06:00 | Technical Lead | Researched and expanded provider-specific account dropdowns, added remove buttons, and fixed selected-chip/dropdown wrapping. |
+| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T10:00:43-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add plain-language MVP workflows. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -2327,10 +2328,121 @@ Handoff note:
 
 Chunk Fifteen should add E2E coverage for the manual-add My AI Tools flow: one blank starter row, selecting an app does not add a second row, `Add another tool` reveals the next selector, provider-specific account labels are available, Local shows local model choices, stale five-row migration still lands on one blank row, and the detector remains a separate local command rather than browser execution.
 
+## My AI Tools Tailored Account Levels Detour
+
+Status: complete
+Status Updated: 2026-07-04T10:00:43-06:00
+
+Completion target: Integration complete
+
+Budget class: Small
+
+Objective:
+
+Finish the owner-requested My AI Tools cleanup by making account-level dropdowns genuinely tailored to the selected AI app, adding a remove-tool control, and fixing wrapping around the selected state.
+
+User outcome:
+
+The user chooses an AI app and sees account choices that look like that provider's real plan or access language, rather than generic `paid or premium` buckets. If they add the wrong tool, they can remove it. The selected state and long account choices remain tidy on desktop and mobile.
+
+Allowed files or folders:
+
+- `src/domain/defaults/everydayToolCatalog.ts`
+- `src/ui/screens/SetupScreens.tsx`
+- `src/styles.css`
+- `src/tests/unit/*`
+- status/pathway/decision docs
+
+Non-goals:
+
+- Do not connect provider accounts or verify whether a user really has a paid plan.
+- Do not add provider API calls, billing checks, OAuth, credentials, telemetry, remote sync, uploads, file indexing, or execution workflows.
+- Do not start Chunk Fifteen E2E implementation in this detour.
+
+Acceptance criteria:
+
+- [x] ChatGPT separates Free, Go, Plus, Pro, Business, and Enterprise.
+- [x] Claude separates Free, Pro, Max 5x, Max 20x, Team, and Enterprise.
+- [x] Gemini includes Google AI Plus, Google AI Pro, Google AI Ultra, and Workspace variants.
+- [x] Microsoft Copilot distinguishes free/personal/work Microsoft 365 paths.
+- [x] Perplexity includes Free, Pro, Max, Enterprise Pro, and Enterprise Max.
+- [x] Broader tools such as Genspark, Grok, Meta AI, Poe, You.com, NotebookLM, Replit, DeepSeek, Qwen, Kimi, Doubao, MiniMax, Zhipu, Tencent Hunyuan, and Mistral now have provider-specific choices instead of the generic consumer buckets.
+- [x] Selected and added tool rows expose a `Remove tool` button.
+- [x] The `Selected` chip and long dropdown values do not wrap awkwardly or create horizontal overflow.
+- [x] Existing model inventory records remain schema-compatible.
+
+Implementation notes:
+
+- `EverydayToolAccountId` is now a flexible string key because account plans change frequently and many providers use provider-specific labels.
+- Added `legacyLabels` on account options so older saved labels such as `Business or Enterprise` still infer to the intended provider option after the split.
+- Kept provider display names stable where possible to avoid stranding previously saved rows.
+- Added researched account options for both major Western providers and the broader app list requested for users who recognize less common or Chinese AI tools.
+- Added row-level removal in `InventoryGroup`; selected tools reset to an empty slot and accidental empty rows are hidden.
+- Added CSS to keep selected pills and native select values on one line with ellipsis instead of wrapping.
+
+Research sources checked:
+
+- OpenAI ChatGPT pricing: `https://openai.com/chatgpt/pricing/`
+- Anthropic Claude plan help: `https://support.anthropic.com/en/articles/11049762-choosing-a-claude-ai-plan`
+- Google AI Pro/Ultra and NotebookLM help: `https://gemini.google.com/advanced`, `https://support.google.com/notebooklm/answer/16213268`
+- Microsoft Copilot/Microsoft 365 pricing and support: `https://www.microsoft.com/en-us/microsoft-365-copilot/pricing`, `https://support.microsoft.com/en-us/microsoft-365-copilot/what-s-the-difference-between-microsoft-copilot-free-and-copilot-in-microsoft-365`
+- Perplexity pricing/help: `https://www.perplexity.ai/enterprise/pricing`, `https://www.perplexity.ai/help-center/en/articles/11680686-perplexity-max.html`
+- Genspark membership/team pages: `https://www.genspark.ai/helpcenter/membership-plans`, `https://www.genspark.ai/team_pricing`
+- xAI/Grok pricing/docs: `https://x.ai/pricing`, `https://docs.x.ai/grok/faq`
+- Poe subscription plans: `https://poe.com/subscription_plans`
+- You.com pricing/upgrade: `https://you.com/pricing`, `https://you.com/upgrade`
+- Canva pricing/help: `https://www.canva.com/ff_sn/pricing/`, `https://www.canva.com/help/upgrade-to-canva-pro-or-business/`
+- GitHub Copilot plans: `https://github.com/features/copilot/plans`
+- Cursor pricing: `https://cursor.com/pricing`
+- Replit pricing: `https://replit.com/pricing`
+- DeepSeek app/API docs: `https://www.deepseek.com/en/`, `https://api-docs.deepseek.com/quick_start/pricing`
+- Qwen/Alibaba Model Studio docs: `https://qwen.ai/`, `https://www.alibabacloud.com/help/en/model-studio/qwen-code`
+- Kimi/Moonshot API docs: `https://platform.moonshot.ai/docs/pricing/chat`, `https://platform.moonshot.ai/docs/pricing/limits`
+- Doubao/Volcano Engine sources: `https://www.volcengine.com/product/doubao`, `https://research.doubao.com/en/seed2`
+- MiniMax API/token plan docs: `https://platform.minimax.io/docs/pricing/overview`, `https://platform.minimax.io/docs/guides/pricing-token-plan`
+- Z.ai/Zhipu GLM docs: `https://z.ai/subscribe`, `https://docs.z.ai/devpack/overview`
+- Tencent Hunyuan/Tencent Cloud docs: `https://hunyuan.tencent.com/`, `https://intl.cloud.tencent.com/document/product/1284/77186`
+- Mistral pricing/Vibe notes: `https://mistral.ai/pricing/`, `https://mistral.ai/products/vibe/`
+
+Validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings before the detour.
+- `npm run test -- App everydayToolCatalog` passed with 2 files and 15 tests.
+- `npm run test` passed with 11 files and 81 tests.
+- `npm run build` passed with the existing Vite chunk-size warning.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5182` passed for long provider-specific account labels, three selected tool rows, remove button behavior, selected-count update, desktop/mobile layout, no selected-chip wrapping, and no horizontal overflow.
+- Screenshots:
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tailored-tools-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tailored-tools-mobile.png`
+
+UX/product finish expectations:
+
+- Account-level choices should look like the user’s actual provider account, not internal routing assumptions.
+- The screen should stay user-controlled: add and remove are explicit.
+- Provider plan labels need periodic review because the market changes quickly.
+
+Security and privacy notes:
+
+- The app still only stores local user choices.
+- The app still does not verify plans or connect to providers.
+- No external calls are made by the app; research was done during development only.
+
+Rollback or recovery path:
+
+Revert the catalog label expansion, row removal UI, wrapping CSS, and related tests. Existing local data remains compatible because the model inventory shape is unchanged.
+
+Stop condition:
+
+Reached. Provider-specific account choices were researched and expanded, remove behavior works, wrapping was fixed, and tests/build/browser validation passed.
+
+Handoff note:
+
+Chunk Fifteen should now cover the researched account-level list, remove-tool behavior, no selected-chip wrapping, no horizontal overflow, explicit add behavior, stale five-row migration, Local model choices, and the existing no-provider/no-execution boundary.
+
 ## Chunk Fifteen - E2E Tests And Fixture Suite
 
 Status: active next
-Status Updated: 2026-07-04T09:40:46-06:00
+Status Updated: 2026-07-04T10:00:43-06:00
 
 Completion target: Integration complete
 
@@ -2381,6 +2493,7 @@ Acceptance criteria:
 
 - [ ] Adds at least 20 fixture tasks covering public, internal, confidential, regulated, highly restricted, public-facing risk, current-facts, citation, coding, writing, planning, packaging, and review scenarios.
 - [ ] Adds E2E coverage for first-run setup or seeded defaults.
+- [ ] Adds E2E coverage for My AI Tools: one blank starter row, explicit `Add another tool`, researched provider-specific account dropdowns, Local model choices, `Remove tool`, selected-count updates, stale five-row migration, no selected-chip wrapping, and no horizontal overflow.
 - [ ] Adds E2E coverage for task intake to route results.
 - [ ] Adds E2E coverage for route card and prompt package viewing.
 - [ ] Adds E2E coverage for saving a route log entry and adding feedback.
@@ -2623,7 +2736,8 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-04T09:03:11-06:00 | `npm run test -- App`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5180`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Progressive My AI Tools app setup close-out validation passed: focused App suite 1 file and 11 tests, full unit suite 10 files and 76 tests, production build, browser checks for app/account/frequency rows and desktop/mobile overflow, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 | 2026-07-04T09:18:42-06:00 | `npm run test -- App`; `npm run test -- storageLocalStore`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5180`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Sparse selector correction passed: App suite 1 file and 12 tests, storage suite 1 file and 9 tests, full unit suite 10 files and 78 tests, production build, deliberate stale five-row IndexedDB browser migration to one `Tool selection`, Genspark selection, automatic next row, mobile overflow check, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 | 2026-07-04T09:40:46-06:00 | `npm run test -- App everydayToolCatalog`; `npm run detect:local-models`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5181`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Manual-add/local-model detour passed: focused suite 2 files and 14 tests, local detector summary with no model-name details, full unit suite 11 files and 80 tests, production build, browser checks for one starter row, no automatic second row after ChatGPT selection, branded add button, provider-specific account options, Local model dropdown, desktop/mobile overflow, screenshots, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-04T10:00:43-06:00 | `npm run test -- App everydayToolCatalog`; `npm run test`; `npm run build`; manual Playwright browser check using system Chrome at `http://127.0.0.1:5182`; `npm run detect:local-models`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Tailored account-level detour passed: focused suite 2 files and 15 tests, full unit suite 11 files and 81 tests, production build with existing Vite chunk-size warning, browser checks for researched account labels, long dropdown values, three selected rows, remove button behavior, selected-count update, desktop/mobile layout, no selected-chip wrapping, no horizontal overflow, detector summary only, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, provider-specific account dropdowns, Local model choices, stale five-row local-store migration, Genspark and broader app options, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, stale five-row local-store migration, Genspark and broader app options, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command unless a later reviewed import workflow is approved. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.

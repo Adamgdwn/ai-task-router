@@ -348,6 +348,26 @@ function InventoryGroup({
     setExtraEmptyRows((currentRows) => currentRows + 1);
   }
 
+  function removeToolRow(model: ModelInventoryItem) {
+    if (!isEverydayToolSelected(model)) {
+      setExtraEmptyRows((currentRows) => Math.max(0, currentRows - 1));
+      return;
+    }
+
+    const nextModels = replaceRecord(
+      models,
+      applyEverydayToolSelection(model, {
+        providerId: "none",
+      }),
+    );
+
+    setup.updateModelInventory(nextModels);
+    setup.updateSetupPreferences({
+      ...setup.preferences,
+      preferredModelId: preferredToolIdFromFrequency(nextModels),
+    });
+  }
+
   return (
     <section className="setupGroup" aria-labelledby={domIdFor(title)}>
       <div className="groupHeader">
@@ -362,8 +382,10 @@ function InventoryGroup({
           visibleModels.map((model) => (
             <ModelInventoryRow
               key={model.id}
+              canRemove={isEverydayToolSelected(model) || selectedCount > 0}
               model={model}
               onChange={updateToolSlot}
+              onRemove={removeToolRow}
             />
           ))
         )}
@@ -383,11 +405,15 @@ function InventoryGroup({
 }
 
 function ModelInventoryRow({
+  canRemove,
   model,
   onChange,
+  onRemove,
 }: {
+  canRemove: boolean;
   model: ModelInventoryItem;
   onChange: (model: ModelInventoryItem) => void;
+  onRemove: (model: ModelInventoryItem) => void;
 }) {
   const selectedTool = inferEverydayToolSelection(model);
   const provider = getEverydayToolProvider(selectedTool.providerId);
@@ -402,7 +428,19 @@ function ModelInventoryRow({
           <h4 id={`${model.id}-title`}>{rowTitle}</h4>
           <p>{everydayToolSummary(model)}</p>
         </div>
-        <span className="recordPill">{selected ? "Selected" : "Optional"}</span>
+        <div className="recordActions">
+          <span className="recordPill">{selected ? "Selected" : "Optional"}</span>
+          {canRemove ? (
+            <button
+              aria-label={selected ? `Remove ${provider.label}` : "Remove empty tool row"}
+              className="removeToolButton"
+              onClick={() => onRemove(model)}
+              type="button"
+            >
+              Remove tool
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="toolChoiceGrid">

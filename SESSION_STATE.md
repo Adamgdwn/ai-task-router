@@ -1,13 +1,13 @@
-# 2026-07-04T09:40:46-06:00 - Session State
+# 2026-07-04T10:00:43-06:00 - Session State
 
-Last Updated: 2026-07-04T09:40:46-06:00
-Status: my-ai-tools-manual-add-local-models-complete
-Status Updated: 2026-07-04T09:40:46-06:00
+Last Updated: 2026-07-04T10:00:43-06:00
+Status: my-ai-tools-tailored-account-levels-complete
+Status Updated: 2026-07-04T10:00:43-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Completed the owner-requested My AI Tools correction: selecting one tool no longer creates another row automatically, a branded `Add another tool` button reveals extra rows by user choice, account options are provider-specific, and Local now exposes recognizable local model choices.
+Completed the owner-requested My AI Tools account-level cleanup: account options are now researched and tailored to each selected AI app, selected/added rows can be removed, and selected chips/dropdown values stay tidy without wrapping.
 
 ## Files Changed In This Session
 
@@ -37,32 +37,32 @@ Completed the owner-requested My AI Tools correction: selecting one tool no long
 - `npm run detect:local-models`
 - `npm run test`
 - `npm run build`
-- fresh validation server started at `http://127.0.0.1:5181`
+- fresh validation server started at `http://127.0.0.1:5182`
 - manual Playwright browser check through system Chrome
 
 ## Validation Notes
 
-- Focused App/catalog suite passed: 2 files, 14 tests.
+- Focused App/catalog suite passed: 2 files, 15 tests.
 - Local detector passed and produced a summary without printing model names.
-- Full unit suite passed: 11 files, 80 tests.
-- Production build passed.
+- Full unit suite passed: 11 files, 81 tests.
+- Production build passed with the existing Vite chunk-size warning.
 - Audit found 0 vulnerabilities.
 - Governance preflight passed with 0 warnings at close-out.
 - Whitespace check passed; `git diff --check` only printed normal Windows LF-to-CRLF notices.
-- Manual browser check on `5181` passed for one starter row, no automatic second row after ChatGPT selection, provider-specific account labels, branded add button, Local model choices, desktop/mobile screenshots, and no horizontal overflow.
+- Manual browser check on `5182` passed for researched account labels, long dropdown values, three selected rows, remove button behavior, selected-count update, desktop/mobile layout, no selected-chip wrapping, and no horizontal overflow.
 - Screenshots:
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-manual-add-tools-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-manual-add-tools-mobile.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tailored-tools-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-tailored-tools-mobile.png`
 
 ## Known Gaps
 
 - Chunk Fifteen should add committed fixtures and Playwright E2E coverage for the corrected plain-language workflow.
 - Import/export UI and MVP polish/docs remain later chunks.
 - Proposed best stack remains nonfunctional and disabled by design.
-- Provider/app wording may need periodic owner review because AI app names and plan labels change.
+- Provider/app wording will need periodic owner review because AI app names and plan labels change quickly.
 - Local detector results are not imported into the app yet; keep that as a future explicit workflow if desired.
 - Use a fresh dev server, or restart the server, before future visual checks if CSS or route behavior looks stale.
 
 ## Next Handoff
 
-Resume from Chunk Fifteen only: add practical fixtures and Playwright E2E coverage for Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool`, provider-specific account dropdowns, Local model choices, stale five-row local-store migration, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, saved-plan behavior, and the no-execution boundary. Keep `npm run detect:local-models` as an explicit local command unless a later reviewed import workflow is approved. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not add provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fifteen only: add practical fixtures and Playwright E2E coverage for Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool`, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, stale five-row local-store migration, What To Include, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, saved-plan behavior, and the no-execution boundary. Keep `npm run detect:local-models` as an explicit local command unless a later reviewed import workflow is approved. Do not reintroduce source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not add provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
