@@ -1,7 +1,7 @@
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
-import { defaultModels } from "../../domain/defaults/defaultModels";
 import { defaultSources } from "../../domain/defaults/defaultSources";
 import type { ModelInventoryItem, SourcePermission, TaskIntake } from "../../domain/types";
+import { routeReadyModels } from "../fixtures/routeReadyModels";
 
 const createdAt = "2026-07-03T12:43:29-06:00";
 
@@ -43,7 +43,7 @@ describe("hard gates", () => {
       requestedSourceIds: ["local-files", "uploaded-documents", "other-source"],
     });
 
-    const result = evaluateHardGates({ task, models: defaultModels });
+    const result = evaluateHardGates({ task, models: routeReadyModels });
 
     expect(result.allowedSourceIds).toEqual(["local-files", "uploaded-documents"]);
     expect(getBlockedIds(result, "source", "source-no-access")).toEqual(["other-source"]);
@@ -52,6 +52,8 @@ describe("hard gates", () => {
       "manual-human-review",
       "user-mid-synthesis-model",
       "user-frontier-quality-model",
+      "user-research-tool",
+      "user-artifact-tool",
     ]);
     expect(result.requiresHumanApproval).toBe(false);
     expect(result.warnings).toEqual([]);
@@ -63,7 +65,7 @@ describe("hard gates", () => {
       requestedSourceIds: ["web", "github", "local-files"],
     });
 
-    const result = evaluateHardGates({ task, models: defaultModels });
+    const result = evaluateHardGates({ task, models: routeReadyModels });
 
     expect(result.allowedSourceIds).toEqual(["local-files"]);
     expect(getBlockedIds(result, "source", "source-sensitivity-blocked")).toEqual(["web", "github"]);
@@ -116,7 +118,7 @@ describe("hard gates", () => {
       requestedSourceIds: [highlyRestrictedSource.id],
     });
 
-    const result = evaluateHardGates({ task, models: [...defaultModels, localModel] });
+    const result = evaluateHardGates({ task, models: [...routeReadyModels, localModel] });
 
     expect(result.allowedModelIds).toEqual(["manual-human-review", "local-confidential-model"]);
     expect(getBlockedIds(result, "model", "highly-restricted-non-local")).toEqual([
@@ -141,7 +143,7 @@ describe("hard gates", () => {
       requestedSourceIds: ["local-files"],
     });
 
-    const result = evaluateHardGates({ task, models: defaultModels });
+    const result = evaluateHardGates({ task, models: routeReadyModels });
 
     expect(result.warnings).toContainEqual(
       expect.objectContaining({
@@ -158,7 +160,7 @@ describe("hard gates", () => {
       requestedSourceIds: ["web"],
     });
 
-    const result = evaluateHardGates({ task, models: defaultModels });
+    const result = evaluateHardGates({ task, models: routeReadyModels });
 
     expect(result.allowedSourceIds).toEqual(["web"]);
     expect(result.allowedModelIds).toContain("user-research-tool");
@@ -190,7 +192,7 @@ describe("hard gates", () => {
         ...overrides,
       });
 
-      const result = evaluateHardGates({ task, models: defaultModels });
+      const result = evaluateHardGates({ task, models: routeReadyModels });
 
       expect(result.requiresHumanApproval).toBe(true);
       expect(result.warnings).toContainEqual(
@@ -208,8 +210,8 @@ describe("hard gates", () => {
       requestedSourceIds: ["web", "local-files", "other-source"],
     });
 
-    const firstResult = evaluateHardGates({ task, models: defaultModels });
-    const secondResult = evaluateHardGates({ task, models: defaultModels });
+    const firstResult = evaluateHardGates({ task, models: routeReadyModels });
+    const secondResult = evaluateHardGates({ task, models: routeReadyModels });
 
     expect(secondResult).toEqual(firstResult);
   });

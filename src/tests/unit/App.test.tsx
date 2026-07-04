@@ -8,6 +8,7 @@ import {
   type LocalStoreDatabase,
 } from "../../storage/localStore";
 import { screenDefinitions } from "../../ui/screens/screenDefinitions";
+import { routeReadyModels } from "../fixtures/routeReadyModels";
 
 let databaseCounter = 0;
 const storesToDelete: LocalStore[] = [];
@@ -43,27 +44,51 @@ describe("App", () => {
     }
   });
 
-  it("lets users answer the AI tools shelf check with dropdowns and keeps changes after refresh", async () => {
+  it("lets users add familiar AI apps one at a time and keeps changes after refresh", async () => {
     const user = userEvent.setup();
     const store = buildTestStore();
     const { unmount } = render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "My AI Tools" }));
-    const chatGptRow = await screen.findByRole("region", { name: "ChatGPT: GPT-5.5 - Medium" });
-    const chatGptModel = within(chatGptRow).getByRole("combobox", {
-      name: "Model shown in that app for user-mid-synthesis-model",
+    const firstToolRow = await screen.findByRole("region", { name: "Add an AI app" });
+    const firstApp = within(firstToolRow).getByRole("combobox", {
+      name: "AI app for user-mid-synthesis-model",
     });
-    const chatGptThinking = within(chatGptRow).getByRole("combobox", {
-      name: "Thinking setting for user-mid-synthesis-model",
+    const firstAccount = within(firstToolRow).getByRole("combobox", {
+      name: "Account level for user-mid-synthesis-model",
     });
-    const geminiRow = await screen.findByRole("region", { name: "Gemini: Flash - Quick" });
-    const geminiUse = within(geminiRow).getByRole("checkbox", {
-      name: "Include Gemini: Flash - Quick",
+    const firstFrequency = within(firstToolRow).getByRole("combobox", {
+      name: "How often for user-mid-synthesis-model",
     });
 
-    await user.selectOptions(chatGptModel, "gpt-5-3");
-    await user.selectOptions(chatGptThinking, "high");
-    await user.click(geminiUse);
+    expect(firstAccount).toBeDisabled();
+    expect(firstFrequency).toBeDisabled();
+
+    await user.selectOptions(firstApp, "chatgpt");
+    const chatGptRow = await screen.findByRole("region", { name: "ChatGPT" });
+    await user.selectOptions(
+      within(chatGptRow).getByRole("combobox", { name: "Account level for user-mid-synthesis-model" }),
+      "pro",
+    );
+    await user.selectOptions(
+      within(chatGptRow).getByRole("combobox", { name: "How often for user-mid-synthesis-model" }),
+      "hourly",
+    );
+
+    const secondToolRow = screen.getByRole("region", { name: "Add an AI app" });
+    await user.selectOptions(
+      within(secondToolRow).getByRole("combobox", { name: "AI app for user-free-small-model" }),
+      "deepseek",
+    );
+    const deepSeekRow = await screen.findByRole("region", { name: "DeepSeek" });
+    await user.selectOptions(
+      within(deepSeekRow).getByRole("combobox", { name: "Account level for user-free-small-model" }),
+      "basic",
+    );
+    await user.selectOptions(
+      within(deepSeekRow).getByRole("combobox", { name: "How often for user-free-small-model" }),
+      "weekly",
+    );
     await user.click(screen.getByRole("button", { name: "Save my choices" }));
 
     await screen.findByText("Your choices were saved on this device.");
@@ -72,32 +97,33 @@ describe("App", () => {
     render(<App store={store} />);
     await user.click(screen.getByRole("button", { name: "My AI Tools" }));
 
-    const savedChatGptRow = await screen.findByRole("region", { name: "ChatGPT: GPT-5.3 - High" });
+    const savedChatGptRow = await screen.findByRole("region", { name: "ChatGPT" });
     expect(
       within(savedChatGptRow).getByRole("combobox", { name: "AI app for user-mid-synthesis-model" }),
     ).toHaveDisplayValue("ChatGPT");
     expect(
-      within(savedChatGptRow).getByRole("combobox", { name: "Model shown in that app for user-mid-synthesis-model" }),
-    ).toHaveDisplayValue("GPT-5.3");
+      within(savedChatGptRow).getByRole("combobox", { name: "Account level for user-mid-synthesis-model" }),
+    ).toHaveDisplayValue("Pro or strongest");
     expect(
-      within(savedChatGptRow).getByRole("combobox", { name: "Thinking setting for user-mid-synthesis-model" }),
-    ).toHaveDisplayValue("High");
+      within(savedChatGptRow).getByRole("combobox", { name: "How often for user-mid-synthesis-model" }),
+    ).toHaveDisplayValue("Many times a day");
+
+    const savedDeepSeekRow = await screen.findByRole("region", { name: "DeepSeek" });
     expect(
-      within(screen.getByRole("region", { name: "Gemini: Flash - Quick" })).getByRole("checkbox", {
-        name: "Include Gemini: Flash - Quick",
-      }),
-    ).not.toBeChecked();
+      within(savedDeepSeekRow).getByRole("combobox", { name: "Account level for user-free-small-model" }),
+    ).toHaveDisplayValue("Free or basic");
+    expect(screen.getAllByRole("region", { name: "Add an AI app" })).toHaveLength(1);
 
     await user.click(screen.getByRole("button", { name: "Restore starter choices" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("region", { name: "ChatGPT: GPT-5.5 - Medium" })).toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "Add an AI app" })).toBeInTheDocument();
     });
   });
 
   it("lets users save information comfort, choosing style, and the disabled toolkit note", async () => {
     const user = userEvent.setup();
-    const store = buildTestStore();
+    const store = await buildRouteReadyTestStore();
     const { unmount } = render(<App store={store} />);
 
     await user.click(screen.getByRole("button", { name: "What To Include" }));
@@ -144,7 +170,7 @@ describe("App", () => {
 
   it("generates route results from a template and saves route artifacts locally", async () => {
     const user = userEvent.setup();
-    const store = buildTestStore();
+    const store = await buildRouteReadyTestStore();
 
     render(<App store={store} />);
 
@@ -179,9 +205,7 @@ describe("App", () => {
 
   it("shows blocked routes when requested sources fail local gates", async () => {
     const user = userEvent.setup();
-    const store = buildTestStore();
-
-    await store.seedDefaultConfigurationIfEmpty();
+    const store = await buildRouteReadyTestStore();
     const configuration = await store.loadConfiguration();
     await store.saveSourcePermissionRegistry(
       configuration.sourcePermissionRegistry.map((sourcePermission) =>
@@ -205,7 +229,7 @@ describe("App", () => {
   it("shows an empty local artifact state before route cards are saved", async () => {
     const user = userEvent.setup();
 
-    render(<App store={buildTestStore()} />);
+    render(<App store={await buildRouteReadyTestStore()} />);
 
     await user.click(screen.getByRole("button", { name: "Decision Card" }));
 
@@ -216,7 +240,7 @@ describe("App", () => {
   it("shows an empty Past Choices state before route decisions are saved", async () => {
     const user = userEvent.setup();
 
-    render(<App store={buildTestStore()} />);
+    render(<App store={await buildRouteReadyTestStore()} />);
 
     await user.click(screen.getByRole("button", { name: "Past Choices" }));
 
@@ -274,7 +298,7 @@ describe("App", () => {
     const clipboardWriteText = vi.fn().mockResolvedValue(undefined);
     installClipboardMock(clipboardWriteText);
 
-    render(<App store={buildTestStore()} />);
+    render(<App store={await buildRouteReadyTestStore()} />);
 
     await generateAndSavePublicFacingRoute(user);
     await user.click(screen.getByRole("button", { name: "Decision Card" }));
@@ -343,6 +367,15 @@ function buildTestStore(): LocalStore {
   const store = createLocalStore({ database });
 
   storesToDelete.push(store);
+
+  return store;
+}
+
+async function buildRouteReadyTestStore(): Promise<LocalStore> {
+  const store = buildTestStore();
+
+  await store.seedDefaultConfigurationIfEmpty();
+  await store.saveModelInventory(routeReadyModels);
 
   return store;
 }

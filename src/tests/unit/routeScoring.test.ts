@@ -1,4 +1,3 @@
-import { defaultModels } from "../../domain/defaults/defaultModels";
 import { defaultFinalApprovalRouteStep, defaultPolicies } from "../../domain/defaults/defaultPolicies";
 import { defaultSources } from "../../domain/defaults/defaultSources";
 import {
@@ -14,6 +13,7 @@ import {
   type ScoredRouteCandidate,
 } from "../../domain/routing/scoring";
 import type { PolicyDefault, RouteStep, SourcePermission, TaskIntake } from "../../domain/types";
+import { routeReadyModels } from "../fixtures/routeReadyModels";
 
 const createdAt = "2026-07-03T14:37:52-06:00";
 
@@ -45,10 +45,10 @@ function buildTask(overrides: Partial<TaskIntake> = {}): TaskIntake {
 function generateForTask(
   task: TaskIntake,
 ): { hardGateResult: HardGateResult; candidateResult: RouteCandidateGenerationResult } {
-  const hardGateResult = evaluateHardGates({ task, models: defaultModels });
+  const hardGateResult = evaluateHardGates({ task, models: routeReadyModels });
   const candidateResult = generateRouteCandidates({
     task,
-    models: defaultModels,
+    models: routeReadyModels,
     policies: defaultPolicies,
     hardGateResult,
     finalApprovalRouteStep: defaultFinalApprovalRouteStep,
@@ -99,7 +99,7 @@ describe("route scoring", () => {
     const result = scoreRouteCandidates({
       task,
       candidateResult,
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("least-resource"),
     });
 
@@ -141,13 +141,13 @@ describe("route scoring", () => {
     const leastResourceResult = scoreRouteCandidates({
       task: everydayTask,
       candidateResult: everydayCandidates,
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("least-resource"),
     });
     const balancedResult = scoreRouteCandidates({
       task: everydayTask,
       candidateResult: everydayCandidates,
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("balanced"),
     });
 
@@ -163,7 +163,7 @@ describe("route scoring", () => {
     const qualityFirstResult = scoreRouteCandidates({
       task: criticalTask,
       candidateResult: criticalCandidates,
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("quality-first"),
     });
 
@@ -185,7 +185,7 @@ describe("route scoring", () => {
     const result = scoreRouteCandidates({
       task,
       candidateResult,
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("balanced"),
     });
     const lean = requireScoredCandidate(result, "lean");
@@ -223,7 +223,7 @@ describe("route scoring", () => {
     const result = scoreRouteCandidates({
       task,
       candidateResult: { candidates, unavailable: [] },
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("balanced"),
     });
     const uniqueScores = new Set(result.scoredCandidates.map((candidate) => candidate.score));
@@ -251,7 +251,7 @@ describe("route scoring", () => {
     const result = scoreRouteCandidates({
       task,
       candidateResult: { candidates: [], unavailable: [unavailable] },
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("balanced"),
     });
 
@@ -284,7 +284,7 @@ describe("route scoring", () => {
     const result = scoreRouteCandidates({
       task,
       candidateResult,
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("quality-first"),
     });
 
@@ -305,7 +305,7 @@ describe("route scoring", () => {
     const result = scoreRouteCandidates({
       task,
       candidateResult,
-      models: defaultModels,
+      models: routeReadyModels,
       policy: policyById("balanced"),
     });
     const balanced = requireScoredCandidate(result, "balanced");

@@ -1,31 +1,32 @@
-# 2026-07-04T08:41:24-06:00 - Implementation Status
+# 2026-07-04T09:03:11-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T08:41:24-06:00
-Status: my-ai-tools-dropdown-cleanup-complete
-Status Updated: 2026-07-04T08:41:24-06:00
+Last Updated: 2026-07-04T09:03:11-06:00
+Status: my-ai-tools-progressive-app-setup-complete
+Status Updated: 2026-07-04T09:03:11-06:00
 Owner: Technical Lead
 
 ## Completed Chunk
 
-My AI Tools Dropdown Cleanup Detour.
+My AI Tools Progressive App Setup Detour.
 
 Completion target: Integration complete.
 
 ## Scope
 
-The local app now has a more ordinary My AI Tools setup path for non-technical users.
+The local app now has a sparse My AI Tools setup path for non-technical users.
 
 The completed slice provides:
 
-- `My AI Tools` now uses dropdowns for AI app, model shown in that app, and thinking setting
-- starter model rows show recognizable choices such as ChatGPT, Claude, Gemini, Perplexity, and Microsoft Copilot while preserving stable internal IDs
-- the primary My AI Tools path no longer shows subscription level, routing category, capability assumptions, model tier, maximum information comfort, or technical routing details
-- the everyday dropdown catalog maps user-facing selections into the existing local route tiers and capability assumptions without changing the model inventory schema
-- the default setup still preserves existing route candidate and scoring behavior
+- `My AI Tools` starts with one empty `Add an AI app` row instead of a prefilled grid.
+- selecting an app enables that row and automatically reveals one new empty row.
+- primary tool setup uses only AI app, account level, and frequency dropdowns.
+- the AI app catalog includes mainstream apps plus broader options such as DeepSeek, Qwen, Kimi, Doubao, MiniMax, Tencent Hunyuan, and `Something else`.
+- first-run setup records remain schema-compatible and stable-ID-compatible while no longer claiming the user has five tools selected.
+- routing/domain tests now use explicit `routeReadyModels` fixtures instead of first-run UI defaults.
 
 ## Product Boundary
 
-This detour keeps the app local-first and recommendation-only. It does not add provider account connections, subscription verification, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+This detour keeps the app local-first and recommendation-only. It does not add provider account connections, paid-plan verification, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
 
 ## Evidence
 
@@ -34,18 +35,19 @@ This detour keeps the app local-first and recommendation-only. It does not add p
 - `npm run test` passed with 10 test files and 76 tests.
 - `npm run build` passed.
 - `npm audit --audit-level=moderate` found 0 vulnerabilities.
-- Final close-out validation passed: `npm run test`, `npm run build`, `npm audit --audit-level=moderate`, `bash scripts/governance-preflight.sh`, and `git diff --check`.
-- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5179` passed for My AI Tools dropdown behavior, What To Include extra-settings label, desktop/mobile layout, no horizontal overflow, and no old My AI Tools leakage of subscription/tier/details wording.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings at close-out.
+- `git diff --check` passed; output only included normal Windows LF-to-CRLF notices.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5180` passed for progressive My AI Tools behavior, broad provider options, save persistence, desktop/mobile layout, no horizontal overflow, and no old model/thinking/subscription/details wording in the primary My AI Tools path.
 - Screenshots:
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-everyday-tools-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-everyday-tools-mobile.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-progressive-tools-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-progressive-tools-mobile.png`
 
 ## Known Gaps
 
 - Playwright is configured but still has no committed e2e specs; Chunk Fifteen is active next for fixtures and E2E coverage.
 - Import/export UI remains a later chunk; pure export/import utilities and artifact download prep already exist.
 - Proposed best stack remains a disabled planning note only.
-- A deeper owner visual review is still useful, especially for provider/model wording that may vary by account.
+- Provider/app wording will need periodic review because AI app names and plan labels change.
 
 ## Next Chunk
 

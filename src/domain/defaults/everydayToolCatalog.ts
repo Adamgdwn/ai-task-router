@@ -1,16 +1,51 @@
 import type { CapabilityScores, ModelInventoryItem, PermissionLevel } from "../types";
 
 export type EverydayToolProviderId =
+  | "none"
   | "chatgpt"
   | "claude"
   | "gemini"
   | "copilot"
   | "perplexity"
+  | "grok"
+  | "meta-ai"
+  | "poe"
+  | "you-com"
+  | "notebooklm"
+  | "canva"
+  | "github-copilot"
+  | "cursor"
+  | "replit"
+  | "deepseek"
+  | "qwen"
+  | "kimi"
+  | "doubao"
+  | "minimax"
+  | "zhipu"
+  | "hunyuan"
+  | "mistral"
   | "local"
   | "other";
 
-export type EverydayToolModelOption = {
-  id: string;
+export type EverydayToolAccountId =
+  | "not-selected"
+  | "basic"
+  | "paid"
+  | "pro"
+  | "team"
+  | "local-basic"
+  | "local-strong";
+
+export type EverydayToolFrequencyId =
+  | "not-selected"
+  | "hourly"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "rarely";
+
+export type EverydayToolAccountOption = {
+  id: EverydayToolAccountId;
   label: string;
   tier: ModelInventoryItem["tier"];
   capabilityScores: CapabilityScores;
@@ -19,12 +54,10 @@ export type EverydayToolModelOption = {
   note: string;
 };
 
-export type EverydayToolEffortOption = {
-  id: string;
+export type EverydayToolFrequencyOption = {
+  id: EverydayToolFrequencyId;
   label: string;
-  tier?: ModelInventoryItem["tier"];
-  capabilityBoost?: Partial<Record<keyof CapabilityScores, number>>;
-  maxPermissionLevel?: PermissionLevel;
+  rank: number;
   note: string;
 };
 
@@ -32,19 +65,27 @@ export type EverydayToolProvider = {
   id: EverydayToolProviderId;
   label: string;
   summary: string;
-  defaultModelId: string;
-  defaultEffortId: string;
-  modelOptions: EverydayToolModelOption[];
-  effortOptions: EverydayToolEffortOption[];
+  defaultAccountId: EverydayToolAccountId;
+  defaultFrequencyId: EverydayToolFrequencyId;
+  accountOptions: EverydayToolAccountOption[];
+  frequencyOptions: EverydayToolFrequencyOption[];
 };
 
 export type EverydayToolSelection = {
   providerId: EverydayToolProviderId;
-  modelId: string;
-  effortId: string;
+  accountId: EverydayToolAccountId;
+  frequencyId: EverydayToolFrequencyId;
 };
 
 const capabilityKeys = ["reasoning", "writing", "coding", "research", "packaging"] as const;
+
+const emptyScores = scores({
+  reasoning: 0,
+  writing: 0,
+  coding: 0,
+  research: 0,
+  packaging: 0,
+});
 
 const fastGeneralScores = scores({
   reasoning: 3,
@@ -78,6 +119,14 @@ const researchScores = scores({
   packaging: 2,
 });
 
+const strongResearchScores = scores({
+  reasoning: 5,
+  writing: 4,
+  coding: 1,
+  research: 5,
+  packaging: 3,
+});
+
 const artifactScores = scores({
   reasoning: 3,
   writing: 4,
@@ -86,497 +135,288 @@ const artifactScores = scores({
   packaging: 5,
 });
 
+const codingScores = scores({
+  reasoning: 4,
+  writing: 2,
+  coding: 5,
+  research: 2,
+  packaging: 3,
+});
+
+const placeholderAccountOptions = [
+  {
+    id: "not-selected",
+    label: "Pick an app first",
+    tier: "small",
+    capabilityScores: emptyScores,
+    maxPermissionLevel: 0,
+    localOnly: true,
+    note: "No AI app has been selected for this row.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const generalAccountOptions = [
+  {
+    id: "basic",
+    label: "Free or basic",
+    tier: "small",
+    capabilityScores: fastGeneralScores,
+    maxPermissionLevel: 1,
+    note: "Useful for quick, low-stakes help.",
+  },
+  {
+    id: "paid",
+    label: "Paid everyday",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Good for normal writing, planning, and analysis.",
+  },
+  {
+    id: "pro",
+    label: "Pro or strongest",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 2,
+    note: "Use when quality matters more than speed.",
+  },
+  {
+    id: "team",
+    label: "Work, team, or enterprise",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work information your organization allows in that account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const researchAccountOptions = [
+  {
+    id: "basic",
+    label: "Free or basic",
+    tier: "research",
+    capabilityScores: researchScores,
+    maxPermissionLevel: 1,
+    note: "Good for public questions and source-backed answers.",
+  },
+  {
+    id: "paid",
+    label: "Paid everyday",
+    tier: "research",
+    capabilityScores: researchScores,
+    maxPermissionLevel: 1,
+    note: "Use for regular current-facts checks.",
+  },
+  {
+    id: "pro",
+    label: "Pro or strongest",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 2,
+    note: "Use for careful research or citation-heavy work.",
+  },
+  {
+    id: "team",
+    label: "Work, team, or enterprise",
+    tier: "research",
+    capabilityScores: strongResearchScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work research your organization allows in that account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const artifactAccountOptions = [
+  {
+    id: "basic",
+    label: "Free or basic",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 1,
+    note: "Useful when the tool helps shape a document, table, image, or slide.",
+  },
+  {
+    id: "paid",
+    label: "Paid everyday",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 2,
+    note: "Good for regular finished-file or structured-output help.",
+  },
+  {
+    id: "pro",
+    label: "Pro or strongest",
+    tier: "artifact",
+    capabilityScores: scores({
+      reasoning: 4,
+      writing: 5,
+      coding: 2,
+      research: 2,
+      packaging: 5,
+    }),
+    maxPermissionLevel: 2,
+    note: "Use when the final package needs more polish.",
+  },
+  {
+    id: "team",
+    label: "Work, team, or enterprise",
+    tier: "artifact",
+    capabilityScores: artifactScores,
+    maxPermissionLevel: 3,
+    note: "Use only for work artifacts your organization allows in that account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const codingAccountOptions = [
+  {
+    id: "basic",
+    label: "Free or basic",
+    tier: "mid",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 1,
+    note: "Useful for simple coding help.",
+  },
+  {
+    id: "paid",
+    label: "Paid everyday",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 2,
+    note: "Good for regular coding, debugging, and repo assistance.",
+  },
+  {
+    id: "pro",
+    label: "Pro or strongest",
+    tier: "frontier",
+    capabilityScores: scores({
+      reasoning: 5,
+      writing: 3,
+      coding: 5,
+      research: 3,
+      packaging: 4,
+    }),
+    maxPermissionLevel: 2,
+    note: "Use for harder code or architecture work.",
+  },
+  {
+    id: "team",
+    label: "Work, team, or enterprise",
+    tier: "frontier",
+    capabilityScores: codingScores,
+    maxPermissionLevel: 3,
+    note: "Use only for code your organization allows in that account.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+const localAccountOptions = [
+  {
+    id: "local-basic",
+    label: "Local or private basic",
+    tier: "mid",
+    capabilityScores: balancedGeneralScores,
+    maxPermissionLevel: 4,
+    localOnly: true,
+    note: "Useful when the work should stay private.",
+  },
+  {
+    id: "local-strong",
+    label: "Local or private strongest",
+    tier: "frontier",
+    capabilityScores: strongGeneralScores,
+    maxPermissionLevel: 4,
+    localOnly: true,
+    note: "Private help for harder work.",
+  },
+] satisfies EverydayToolAccountOption[];
+
+export const everydayToolFrequencyOptions = [
+  {
+    id: "not-selected",
+    label: "Pick an app first",
+    rank: 0,
+    note: "No usage frequency has been selected.",
+  },
+  {
+    id: "hourly",
+    label: "Many times a day",
+    rank: 5,
+    note: "This is one of the user's most familiar tools.",
+  },
+  {
+    id: "daily",
+    label: "Daily",
+    rank: 4,
+    note: "The user reaches for this tool most days.",
+  },
+  {
+    id: "weekly",
+    label: "A few times a week",
+    rank: 3,
+    note: "The user uses this tool regularly.",
+  },
+  {
+    id: "monthly",
+    label: "Now and then",
+    rank: 2,
+    note: "The user knows this tool but does not rely on it daily.",
+  },
+  {
+    id: "rarely",
+    label: "Rarely",
+    rank: 1,
+    note: "The user only occasionally uses this tool.",
+  },
+] satisfies EverydayToolFrequencyOption[];
+
+const realFrequencyOptions = everydayToolFrequencyOptions.filter((option) => option.id !== "not-selected");
+const placeholderFrequencyOptions = everydayToolFrequencyOptions.filter((option) => option.id === "not-selected");
+
 export const everydayToolProviders = [
-  {
-    id: "chatgpt",
-    label: "ChatGPT",
-    summary: "Use the model picker and thinking setting you already choose inside ChatGPT.",
-    defaultModelId: "gpt-5-5",
-    defaultEffortId: "medium",
-    modelOptions: [
-      {
-        id: "gpt-5-5",
-        label: "GPT-5.5",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Best fit when ChatGPT is your main general assistant.",
-      },
-      {
-        id: "gpt-5-4",
-        label: "GPT-5.4",
-        tier: "frontier",
-        capabilityScores: strongGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Choose this if it is what your ChatGPT picker shows.",
-      },
-      {
-        id: "gpt-5-3",
-        label: "GPT-5.3",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Good for normal writing, analysis, and planning work.",
-      },
-      {
-        id: "o3-legacy",
-        label: "o3 or legacy model",
-        tier: "frontier",
-        capabilityScores: scores({
-          reasoning: 5,
-          writing: 3,
-          coding: 4,
-          research: 2,
-          packaging: 3,
-        }),
-        maxPermissionLevel: 1,
-        note: "Only choose this if it still appears in your account.",
-      },
-      {
-        id: "chatgpt-auto",
-        label: "Auto / I am not sure",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 1,
-        note: "A safe choice when you normally leave ChatGPT on its default setting.",
-      },
-    ],
-    effortOptions: [
-      {
-        id: "instant",
-        label: "Instant",
-        tier: "mid",
-        capabilityBoost: { reasoning: -1, research: -1 },
-        maxPermissionLevel: 1,
-        note: "Fast everyday answers.",
-      },
-      {
-        id: "medium",
-        label: "Medium",
-        tier: "mid",
-        note: "Standard reasoning for normal work.",
-      },
-      {
-        id: "high",
-        label: "High",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1, research: 1 },
-        note: "More thinking for harder tasks.",
-      },
-      {
-        id: "extra-high",
-        label: "Extra High",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1, coding: 1, research: 1 },
-        note: "Use when mistakes would be expensive.",
-      },
-      {
-        id: "pro-standard",
-        label: "Pro Standard",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1, writing: 1, coding: 1 },
-        note: "Stronger paid-plan work mode.",
-      },
-      {
-        id: "pro-extended",
-        label: "Pro Extended",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1, writing: 1, coding: 1, research: 1, packaging: 1 },
-        note: "Most careful paid-plan work mode.",
-      },
-    ],
-  },
-  {
-    id: "claude",
-    label: "Claude",
-    summary: "Pick the Claude model family and thinking depth that matches what you use.",
-    defaultModelId: "claude-best",
-    defaultEffortId: "balanced",
-    modelOptions: [
-      {
-        id: "claude-best",
-        label: "Best available",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Good when you let Claude choose the best available model.",
-      },
-      {
-        id: "claude-opus",
-        label: "Opus",
-        tier: "frontier",
-        capabilityScores: strongGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Use for careful writing, reasoning, and review.",
-      },
-      {
-        id: "claude-sonnet",
-        label: "Sonnet",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Useful for everyday writing and analysis.",
-      },
-      {
-        id: "claude-haiku",
-        label: "Haiku",
-        tier: "small",
-        capabilityScores: fastGeneralScores,
-        maxPermissionLevel: 1,
-        note: "Use for quick, low-stakes help.",
-      },
-      {
-        id: "claude-auto",
-        label: "Auto / I am not sure",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 1,
-        note: "A safe choice when you are not sure which Claude model is selected.",
-      },
-    ],
-    effortOptions: [
-      {
-        id: "quick",
-        label: "Quick",
-        tier: "small",
-        capabilityBoost: { reasoning: -1 },
-        maxPermissionLevel: 1,
-        note: "Fast responses.",
-      },
-      {
-        id: "balanced",
-        label: "Balanced",
-        note: "Normal effort for everyday work.",
-      },
-      {
-        id: "extended-thinking",
-        label: "Extended thinking",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1, writing: 1 },
-        note: "More thinking for harder decisions.",
-      },
-    ],
-  },
-  {
-    id: "gemini",
-    label: "Gemini",
-    summary: "Use the Gemini option that matches your model picker.",
-    defaultModelId: "gemini-pro",
-    defaultEffortId: "balanced",
-    modelOptions: [
-      {
-        id: "gemini-pro",
-        label: "Pro",
-        tier: "frontier",
-        capabilityScores: strongGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Strong general-purpose help.",
-      },
-      {
-        id: "gemini-flash",
-        label: "Flash",
-        tier: "small",
-        capabilityScores: fastGeneralScores,
-        maxPermissionLevel: 1,
-        note: "Fast answers for simple tasks.",
-      },
-      {
-        id: "gemini-deep-research",
-        label: "Deep Research",
-        tier: "research",
-        capabilityScores: researchScores,
-        maxPermissionLevel: 1,
-        note: "Use when the job needs current facts and source checking.",
-      },
-      {
-        id: "gemini-auto",
-        label: "Auto / I am not sure",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 1,
-        note: "A safe choice when Gemini is on its default setting.",
-      },
-    ],
-    effortOptions: [
-      {
-        id: "quick",
-        label: "Quick",
-        tier: "small",
-        maxPermissionLevel: 1,
-        capabilityBoost: { reasoning: -1 },
-        note: "Fast everyday answers.",
-      },
-      {
-        id: "balanced",
-        label: "Balanced",
-        note: "Normal effort for everyday work.",
-      },
-      {
-        id: "deep",
-        label: "Deep thinking",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1, research: 1 },
-        note: "More effort for harder work.",
-      },
-    ],
-  },
-  {
-    id: "copilot",
-    label: "Microsoft Copilot",
-    summary: "Pick the Copilot mode you would choose in Microsoft 365 or Windows.",
-    defaultModelId: "copilot-chat",
-    defaultEffortId: "balanced",
-    modelOptions: [
-      {
-        id: "copilot-chat",
-        label: "Copilot Chat",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Useful for everyday work questions and drafting.",
-      },
-      {
-        id: "copilot-think-deeper",
-        label: "Think Deeper",
-        tier: "frontier",
-        capabilityScores: strongGeneralScores,
-        maxPermissionLevel: 2,
-        note: "Use when you would choose a more careful Copilot answer.",
-      },
-      {
-        id: "copilot-researcher",
-        label: "Researcher",
-        tier: "research",
-        capabilityScores: researchScores,
-        maxPermissionLevel: 1,
-        note: "Use when Copilot is helping you check current information.",
-      },
-      {
-        id: "copilot-office-artifact",
-        label: "Create documents, tables, or slides",
-        tier: "artifact",
-        capabilityScores: artifactScores,
-        maxPermissionLevel: 1,
-        note: "Use when the job ends as a document, table, or slide outline.",
-      },
-    ],
-    effortOptions: [
-      {
-        id: "quick",
-        label: "Quick",
-        tier: "small",
-        maxPermissionLevel: 1,
-        capabilityBoost: { reasoning: -1 },
-        note: "Fast everyday answers.",
-      },
-      {
-        id: "balanced",
-        label: "Balanced",
-        note: "Normal effort for everyday work.",
-      },
-      {
-        id: "more-careful",
-        label: "More careful",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1, writing: 1 },
-        note: "More review before you use the result.",
-      },
-    ],
-  },
-  {
-    id: "perplexity",
-    label: "Perplexity",
-    summary: "Use this for current facts, web answers, and citation-heavy tasks.",
-    defaultModelId: "sonar",
-    defaultEffortId: "pro-search",
-    modelOptions: [
-      {
-        id: "sonar",
-        label: "Sonar",
-        tier: "research",
-        capabilityScores: researchScores,
-        maxPermissionLevel: 1,
-        note: "Good for current web-backed answers.",
-      },
-      {
-        id: "perplexity-pro",
-        label: "Pro search",
-        tier: "research",
-        capabilityScores: researchScores,
-        maxPermissionLevel: 1,
-        note: "Use when citations or source checking matter.",
-      },
-      {
-        id: "perplexity-deep-research",
-        label: "Deep research",
-        tier: "research",
-        capabilityScores: scores({
-          reasoning: 4,
-          writing: 4,
-          coding: 1,
-          research: 5,
-          packaging: 3,
-        }),
-        maxPermissionLevel: 1,
-        note: "Use for longer current-facts research.",
-      },
-    ],
-    effortOptions: [
-      {
-        id: "quick-answer",
-        label: "Quick answer",
-        tier: "research",
-        capabilityBoost: { reasoning: -1 },
-        note: "Fast source-backed answer.",
-      },
-      {
-        id: "pro-search",
-        label: "Pro search",
-        tier: "research",
-        note: "More source checking.",
-      },
-      {
-        id: "deep-research",
-        label: "Deep research",
-        tier: "research",
-        capabilityBoost: { reasoning: 1, writing: 1 },
-        note: "Use for careful source review.",
-      },
-    ],
-  },
-  {
+  provider({
+    id: "none",
+    label: "Choose an AI app",
+    summary: "Start by picking one AI app you already recognize.",
+    defaultAccountId: "not-selected",
+    defaultFrequencyId: "not-selected",
+    accountOptions: placeholderAccountOptions,
+    frequencyOptions: placeholderFrequencyOptions,
+  }),
+  generalProvider("chatgpt", "ChatGPT"),
+  generalProvider("claude", "Claude"),
+  generalProvider("gemini", "Gemini"),
+  artifactProvider("copilot", "Microsoft Copilot"),
+  researchProvider("perplexity", "Perplexity"),
+  generalProvider("grok", "Grok"),
+  generalProvider("meta-ai", "Meta AI"),
+  generalProvider("poe", "Poe"),
+  researchProvider("you-com", "You.com"),
+  researchProvider("notebooklm", "NotebookLM"),
+  artifactProvider("canva", "Canva Magic Studio"),
+  codingProvider("github-copilot", "GitHub Copilot"),
+  codingProvider("cursor", "Cursor"),
+  codingProvider("replit", "Replit AI"),
+  generalProvider("deepseek", "DeepSeek"),
+  generalProvider("qwen", "Qwen"),
+  generalProvider("kimi", "Kimi"),
+  generalProvider("doubao", "Doubao"),
+  generalProvider("minimax", "MiniMax"),
+  generalProvider("zhipu", "Zhipu"),
+  generalProvider("hunyuan", "Tencent Hunyuan"),
+  generalProvider("mistral", "Mistral Le Chat"),
+  provider({
     id: "local",
     label: "Local or private AI",
     summary: "Use this when your tool runs locally or stays inside a private workplace environment.",
-    defaultModelId: "private-general",
-    defaultEffortId: "balanced",
-    modelOptions: [
-      {
-        id: "private-general",
-        label: "Private general model",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 4,
-        localOnly: true,
-        note: "Useful when the work should stay private.",
-      },
-      {
-        id: "local-small",
-        label: "Local fast model",
-        tier: "small",
-        capabilityScores: fastGeneralScores,
-        maxPermissionLevel: 4,
-        localOnly: true,
-        note: "Quick private help for low-stakes work.",
-      },
-      {
-        id: "local-strong",
-        label: "Local strongest model",
-        tier: "frontier",
-        capabilityScores: strongGeneralScores,
-        maxPermissionLevel: 4,
-        localOnly: true,
-        note: "Private help for harder work.",
-      },
-    ],
-    effortOptions: [
-      {
-        id: "quick",
-        label: "Quick",
-        tier: "small",
-        capabilityBoost: { reasoning: -1 },
-        note: "Fast private answer.",
-      },
-      {
-        id: "balanced",
-        label: "Balanced",
-        note: "Normal private work mode.",
-      },
-      {
-        id: "deep",
-        label: "Deep thinking",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1, writing: 1 },
-        note: "More local effort for hard tasks.",
-      },
-    ],
-  },
-  {
-    id: "other",
-    label: "Something else",
-    summary: "Choose the closest match when your AI app is not listed.",
-    defaultModelId: "other-default",
-    defaultEffortId: "balanced",
-    modelOptions: [
-      {
-        id: "other-default",
-        label: "Default model",
-        tier: "mid",
-        capabilityScores: balancedGeneralScores,
-        maxPermissionLevel: 1,
-        note: "A general assistant not listed here.",
-      },
-      {
-        id: "other-fast",
-        label: "Fast model",
-        tier: "small",
-        capabilityScores: fastGeneralScores,
-        maxPermissionLevel: 1,
-        note: "A quick, low-stakes model.",
-      },
-      {
-        id: "other-strong",
-        label: "Strongest model",
-        tier: "frontier",
-        capabilityScores: strongGeneralScores,
-        maxPermissionLevel: 2,
-        note: "A stronger model for harder work.",
-      },
-      {
-        id: "other-research",
-        label: "Research mode",
-        tier: "research",
-        capabilityScores: researchScores,
-        maxPermissionLevel: 1,
-        note: "A tool you use for current facts.",
-      },
-      {
-        id: "other-artifact",
-        label: "Document, table, or slide mode",
-        tier: "artifact",
-        capabilityScores: artifactScores,
-        maxPermissionLevel: 1,
-        note: "A tool you use for finished files or structured outputs.",
-      },
-    ],
-    effortOptions: [
-      {
-        id: "quick",
-        label: "Quick",
-        tier: "small",
-        maxPermissionLevel: 1,
-        capabilityBoost: { reasoning: -1 },
-        note: "Fast answer.",
-      },
-      {
-        id: "balanced",
-        label: "Balanced",
-        note: "Normal effort.",
-      },
-      {
-        id: "deep",
-        label: "Deep thinking",
-        tier: "frontier",
-        capabilityBoost: { reasoning: 1 },
-        note: "More effort for harder work.",
-      },
-    ],
-  },
+    defaultAccountId: "local-basic",
+    defaultFrequencyId: "weekly",
+    accountOptions: localAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  }),
+  generalProvider("other", "Something else"),
 ] satisfies EverydayToolProvider[];
 
-const fallbackProvider = everydayToolProviders.find((provider) => provider.id === "other") ?? everydayToolProviders[0];
+const fallbackProvider = everydayToolProviders.find((candidateProvider) => candidateProvider.id === "other") ?? everydayToolProviders[0];
 
-const defaultProviderByModelId: Record<string, EverydayToolProviderId> = {
+const defaultProviderByModelId: Partial<Record<ModelInventoryItem["id"], EverydayToolProviderId>> = {
   "user-free-small-model": "gemini",
   "user-mid-synthesis-model": "chatgpt",
   "user-frontier-quality-model": "claude",
@@ -585,14 +425,14 @@ const defaultProviderByModelId: Record<string, EverydayToolProviderId> = {
 };
 
 export function getEverydayToolProvider(providerId: EverydayToolProviderId): EverydayToolProvider {
-  return everydayToolProviders.find((provider) => provider.id === providerId) ?? fallbackProvider;
+  return everydayToolProviders.find((candidateProvider) => candidateProvider.id === providerId) ?? fallbackProvider;
 }
 
 export function createEverydayToolModel(input: {
   id: string;
   providerId: EverydayToolProviderId;
-  modelId?: string;
-  effortId?: string;
+  accountId?: EverydayToolAccountId;
+  frequencyId?: EverydayToolFrequencyId;
   enabled?: boolean;
 }): ModelInventoryItem {
   return applyEverydayToolSelection(
@@ -600,32 +440,32 @@ export function createEverydayToolModel(input: {
       id: input.id,
       label: "",
       provider: "",
-      tier: "mid",
-      enabled: input.enabled ?? true,
+      tier: "small",
+      enabled: input.enabled ?? input.providerId !== "none",
       localOnly: false,
-      capabilityScores: balancedGeneralScores,
-      maxPermissionLevel: 1,
+      capabilityScores: emptyScores,
+      maxPermissionLevel: 0,
       requiresCredentials: false,
       requiresExternalCall: false,
       notes: "",
     },
     {
       providerId: input.providerId,
-      modelId: input.modelId,
-      effortId: input.effortId,
+      accountId: input.accountId,
+      frequencyId: input.frequencyId,
     },
   );
 }
 
 export function inferEverydayToolSelection(model: ModelInventoryItem): EverydayToolSelection {
   const provider = inferProvider(model);
-  const modelOption = inferModelOption(provider, model);
-  const effortOption = inferEffortOption(provider, model);
+  const accountOption = inferAccountOption(provider, model);
+  const frequencyOption = inferFrequencyOption(provider, model);
 
   return {
     providerId: provider.id,
-    modelId: modelOption.id,
-    effortId: effortOption.id,
+    accountId: accountOption.id,
+    frequencyId: frequencyOption.id,
   };
 }
 
@@ -636,64 +476,158 @@ export function applyEverydayToolSelection(
   const currentSelection = inferEverydayToolSelection(model);
   const providerChanged = selection.providerId !== undefined && selection.providerId !== currentSelection.providerId;
   const provider = getEverydayToolProvider(selection.providerId ?? currentSelection.providerId);
-  const selectedModelId = providerChanged
-    ? provider.defaultModelId
-    : selection.modelId ?? currentSelection.modelId;
-  const selectedEffortId = providerChanged
-    ? provider.defaultEffortId
-    : selection.effortId ?? currentSelection.effortId;
-  const modelOption = provider.modelOptions.find((option) => option.id === selectedModelId) ?? provider.modelOptions[0];
-  const effortOption =
-    provider.effortOptions.find((option) => option.id === selectedEffortId) ?? provider.effortOptions[0];
-  const tier = effortOption.tier ?? modelOption.tier;
-  const maxPermissionLevel = effortOption.maxPermissionLevel ?? modelOption.maxPermissionLevel;
+  const selectedAccountId = providerChanged
+    ? provider.defaultAccountId
+    : selection.accountId ?? currentSelection.accountId;
+  const selectedFrequencyId = providerChanged
+    ? provider.defaultFrequencyId
+    : selection.frequencyId ?? currentSelection.frequencyId;
+  const accountOption =
+    provider.accountOptions.find((option) => option.id === selectedAccountId) ?? provider.accountOptions[0];
+  const frequencyOption =
+    provider.frequencyOptions.find((option) => option.id === selectedFrequencyId) ?? provider.frequencyOptions[0];
+  const selected = provider.id !== "none";
+
+  if (!selected) {
+    return {
+      ...model,
+      label: "Add an AI app",
+      provider: provider.label,
+      tier: "small",
+      enabled: false,
+      localOnly: true,
+      capabilityScores: emptyScores,
+      maxPermissionLevel: 0,
+      requiresCredentials: false,
+      requiresExternalCall: false,
+      notes: "No AI app has been selected for this slot.",
+    };
+  }
 
   return {
     ...model,
-    label: everydayToolLabel(provider, modelOption, effortOption),
+    label: everydayToolLabel(provider, accountOption, frequencyOption),
     provider: provider.label,
-    tier,
-    localOnly: modelOption.localOnly ?? provider.id === "local",
-    capabilityScores: applyCapabilityBoost(modelOption.capabilityScores, effortOption.capabilityBoost),
-    maxPermissionLevel,
+    tier: accountOption.tier,
+    enabled: true,
+    localOnly: accountOption.localOnly ?? provider.id === "local",
+    capabilityScores: accountOption.capabilityScores,
+    maxPermissionLevel: accountOption.maxPermissionLevel,
     requiresCredentials: false,
     requiresExternalCall: false,
-    notes: `${modelOption.note} ${effortOption.note} The app only remembers this choice; it does not connect to ${provider.label}.`,
+    notes: `${accountOption.note} ${frequencyOption.note} The app only remembers this choice; it does not connect to ${provider.label}.`,
   };
+}
+
+export function isEverydayToolSelected(model: ModelInventoryItem): boolean {
+  return inferEverydayToolSelection(model).providerId !== "none" && model.enabled;
+}
+
+export function everydayToolFrequencyRank(model: ModelInventoryItem): number {
+  const selection = inferEverydayToolSelection(model);
+  const provider = getEverydayToolProvider(selection.providerId);
+  const frequencyOption =
+    provider.frequencyOptions.find((option) => option.id === selection.frequencyId) ??
+    everydayToolFrequencyOptions.find((option) => option.id === selection.frequencyId) ??
+    everydayToolFrequencyOptions[0];
+
+  return isEverydayToolSelected(model) ? frequencyOption.rank : 0;
 }
 
 export function everydayToolSummary(model: ModelInventoryItem): string {
   const selection = inferEverydayToolSelection(model);
   const provider = getEverydayToolProvider(selection.providerId);
-  const modelOption =
-    provider.modelOptions.find((option) => option.id === selection.modelId) ?? provider.modelOptions[0];
-  const effortOption =
-    provider.effortOptions.find((option) => option.id === selection.effortId) ?? provider.effortOptions[0];
+  const accountOption =
+    provider.accountOptions.find((option) => option.id === selection.accountId) ?? provider.accountOptions[0];
+  const frequencyOption =
+    provider.frequencyOptions.find((option) => option.id === selection.frequencyId) ?? provider.frequencyOptions[0];
 
-  return `${provider.summary} Model: ${modelOption.label}. Setting: ${effortOption.label}.`;
+  if (provider.id === "none") {
+    return "Choose one AI app you already know. A new blank line appears after each selection.";
+  }
+
+  return `${provider.summary} Account: ${accountOption.label}. Use: ${frequencyOption.label}.`;
+}
+
+function provider(providerConfig: EverydayToolProvider): EverydayToolProvider {
+  return providerConfig;
+}
+
+function generalProvider(id: EverydayToolProviderId, label: string): EverydayToolProvider {
+  return provider({
+    id,
+    label,
+    summary: `Use this if ${label} is one of the AI apps you already know.`,
+    defaultAccountId: "paid",
+    defaultFrequencyId: "daily",
+    accountOptions: generalAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function researchProvider(id: EverydayToolProviderId, label: string): EverydayToolProvider {
+  return provider({
+    id,
+    label,
+    summary: `Use this when ${label} helps you check current facts, sources, or research.`,
+    defaultAccountId: "paid",
+    defaultFrequencyId: "weekly",
+    accountOptions: researchAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function artifactProvider(id: EverydayToolProviderId, label: string): EverydayToolProvider {
+  return provider({
+    id,
+    label,
+    summary: `Use this when ${label} helps create documents, tables, slides, images, or polished outputs.`,
+    defaultAccountId: "paid",
+    defaultFrequencyId: "weekly",
+    accountOptions: artifactAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
+}
+
+function codingProvider(id: EverydayToolProviderId, label: string): EverydayToolProvider {
+  return provider({
+    id,
+    label,
+    summary: `Use this when ${label} helps you write, review, or understand code.`,
+    defaultAccountId: "paid",
+    defaultFrequencyId: "weekly",
+    accountOptions: codingAccountOptions,
+    frequencyOptions: realFrequencyOptions,
+  });
 }
 
 function inferProvider(model: ModelInventoryItem): EverydayToolProvider {
   const providerByStoredValue = everydayToolProviders.find(
-    (provider) => provider.id === model.provider || provider.label === model.provider,
+    (candidateProvider) => candidateProvider.id === model.provider || candidateProvider.label === model.provider,
   );
 
   if (providerByStoredValue) {
     return providerByStoredValue;
   }
 
-  const providerByLabel = everydayToolProviders.find((provider) => model.label.startsWith(`${provider.label}:`));
+  const providerByLabel = everydayToolProviders.find((candidateProvider) =>
+    model.label.startsWith(`${candidateProvider.label}:`),
+  );
 
   if (providerByLabel) {
     return providerByLabel;
   }
 
+  if (model.label === "Add an AI app") {
+    return getEverydayToolProvider("none");
+  }
+
   return getEverydayToolProvider(defaultProviderByModelId[model.id] ?? "other");
 }
 
-function inferModelOption(provider: EverydayToolProvider, model: ModelInventoryItem): EverydayToolModelOption {
+function inferAccountOption(provider: EverydayToolProvider, model: ModelInventoryItem): EverydayToolAccountOption {
   const labelPrefix = `${provider.label}: `;
-  const matchingOption = provider.modelOptions.find(
+  const matchingOption = provider.accountOptions.find(
     (option) => model.label.startsWith(`${labelPrefix}${option.label} -`) || model.label === option.label,
   );
 
@@ -701,11 +635,16 @@ function inferModelOption(provider: EverydayToolProvider, model: ModelInventoryI
     return matchingOption;
   }
 
-  return provider.modelOptions.find((option) => option.tier === model.tier) ?? provider.modelOptions[0];
+  const legacyOption = provider.accountOptions.find((option) => option.tier === model.tier);
+  if (legacyOption) {
+    return legacyOption;
+  }
+
+  return provider.accountOptions[0];
 }
 
-function inferEffortOption(provider: EverydayToolProvider, model: ModelInventoryItem): EverydayToolEffortOption {
-  const matchingOptions = provider.effortOptions
+function inferFrequencyOption(provider: EverydayToolProvider, model: ModelInventoryItem): EverydayToolFrequencyOption {
+  const matchingOptions = provider.frequencyOptions
     .filter((option) => model.label.endsWith(` - ${option.label}`))
     .sort((left, right) => right.label.length - left.label.length);
 
@@ -713,32 +652,29 @@ function inferEffortOption(provider: EverydayToolProvider, model: ModelInventory
     return matchingOptions[0];
   }
 
-  return provider.effortOptions.find((option) => option.tier === model.tier) ?? provider.effortOptions[0];
+  if (provider.id === "none") {
+    return provider.frequencyOptions[0];
+  }
+
+  return provider.frequencyOptions.find((option) => option.id === provider.defaultFrequencyId) ?? provider.frequencyOptions[0];
 }
 
 function everydayToolLabel(
   provider: EverydayToolProvider,
-  modelOption: EverydayToolModelOption,
-  effortOption: EverydayToolEffortOption,
+  accountOption: EverydayToolAccountOption,
+  frequencyOption: EverydayToolFrequencyOption,
 ) {
-  return `${provider.label}: ${modelOption.label} - ${effortOption.label}`;
-}
-
-function applyCapabilityBoost(
-  baseScores: CapabilityScores,
-  capabilityBoost: EverydayToolEffortOption["capabilityBoost"] = {},
-): CapabilityScores {
-  return capabilityKeys.reduce(
-    (nextScores, capabilityKey) => ({
-      ...nextScores,
-      [capabilityKey]: clampScore(baseScores[capabilityKey] + (capabilityBoost[capabilityKey] ?? 0)),
-    }),
-    {} as CapabilityScores,
-  );
+  return `${provider.label}: ${accountOption.label} - ${frequencyOption.label}`;
 }
 
 function scores(capabilityScores: CapabilityScores): CapabilityScores {
-  return capabilityScores;
+  return capabilityKeys.reduce(
+    (nextScores, capabilityKey) => ({
+      ...nextScores,
+      [capabilityKey]: clampScore(capabilityScores[capabilityKey]),
+    }),
+    {} as CapabilityScores,
+  );
 }
 
 function clampScore(score: number) {

@@ -23,9 +23,9 @@ export const screenDefinitions: ScreenDefinition[] = [
     label: "My AI Tools",
     title: "My AI Tools",
     stage: "Setup",
-    summary: "Choose the AI app, visible model setting, and thinking level you already use.",
+    summary: "Add the AI apps you recognize, then choose account level and how often you use each one.",
     purpose: "Prepare an editable local tool list without connecting accounts, calling providers, or storing credentials.",
-    placeholderState: "The screen keeps provider, model, thinking setting, and usual-helper selection up front.",
+    placeholderState: "The screen adds one app row at a time and keeps account level plus frequency up front.",
   },
   {
     id: "source-permissions",

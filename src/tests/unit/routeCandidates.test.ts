@@ -1,10 +1,10 @@
-import { defaultModels } from "../../domain/defaults/defaultModels";
 import { defaultFinalApprovalRouteStep, defaultPolicies } from "../../domain/defaults/defaultPolicies";
 import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generateRouteCandidates, type RouteCandidate, type RouteCandidateGenerationResult } from "../../domain/routing/candidateGeneration";
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
 import { routeStepSchema } from "../../domain/schemas";
 import type { ModelInventoryItem, SourcePermission, TaskIntake } from "../../domain/types";
+import { routeReadyModels } from "../fixtures/routeReadyModels";
 
 const createdAt = "2026-07-03T14:00:37-06:00";
 
@@ -35,7 +35,7 @@ function buildTask(overrides: Partial<TaskIntake> = {}): TaskIntake {
 
 function generateForTask(
   task: TaskIntake,
-  models: ModelInventoryItem[] = defaultModels,
+  models: ModelInventoryItem[] = routeReadyModels,
 ): { hardGateResult: HardGateResult; candidateResult: RouteCandidateGenerationResult } {
   const hardGateResult = evaluateHardGates({ task, models });
   const candidateResult = generateRouteCandidates({

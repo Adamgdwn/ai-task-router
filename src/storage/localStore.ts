@@ -72,11 +72,10 @@ export type RouteLogFeedbackUpdate = {
   feedback?: RouteLogEntry["feedback"];
 };
 
-export const defaultSetupPreferences = {
+export const defaultSetupPreferences: LocalSetupPreferences = {
   id: "setup-preferences",
   activePolicyDefaultId: "balanced",
-  preferredModelId: "user-mid-synthesis-model",
-} satisfies LocalSetupPreferences;
+};
 
 const setupPreferencesSchema = z
   .object({

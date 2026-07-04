@@ -1,4 +1,3 @@
-import { defaultModels } from "../../domain/defaults/defaultModels";
 import { defaultFinalApprovalRouteStep, defaultPolicies } from "../../domain/defaults/defaultPolicies";
 import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generatePromptPackage } from "../../domain/prompting/promptPackageGenerator";
@@ -8,6 +7,7 @@ import { generateRouteCard } from "../../domain/routing/routeCardGenerator";
 import { scoreRouteCandidates, type RouteScoringResult, type ScoredRouteCandidate } from "../../domain/routing/scoring";
 import { promptPackageSchema, routeCardSchema } from "../../domain/schemas";
 import type { PolicyDefault, SourcePermission, TaskIntake } from "../../domain/types";
+import { routeReadyModels } from "../fixtures/routeReadyModels";
 
 const taskCreatedAt = "2026-07-03T15:13:17-06:00";
 const cardCreatedAt = "2026-07-03T15:32:44-06:00";
@@ -45,10 +45,10 @@ function generatePipeline(
   candidateResult: RouteCandidateGenerationResult;
   scoringResult: RouteScoringResult;
 } {
-  const hardGateResult = evaluateHardGates({ task, models: defaultModels });
+  const hardGateResult = evaluateHardGates({ task, models: routeReadyModels });
   const candidateResult = generateRouteCandidates({
     task,
-    models: defaultModels,
+    models: routeReadyModels,
     policies: defaultPolicies,
     hardGateResult,
     finalApprovalRouteStep: defaultFinalApprovalRouteStep,
@@ -56,7 +56,7 @@ function generatePipeline(
   const scoringResult = scoreRouteCandidates({
     task,
     candidateResult,
-    models: defaultModels,
+    models: routeReadyModels,
     policy: policyById(policyId),
   });
 

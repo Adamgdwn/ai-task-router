@@ -2,10 +2,14 @@ import type { ChangeEvent, ReactNode } from "react";
 import { permissionLevels, sensitivityClasses } from "../../domain/schemas";
 import {
   applyEverydayToolSelection,
+  everydayToolFrequencyRank,
   everydayToolProviders,
   everydayToolSummary,
   getEverydayToolProvider,
   inferEverydayToolSelection,
+  isEverydayToolSelected,
+  type EverydayToolAccountId,
+  type EverydayToolFrequencyId,
   type EverydayToolProviderId,
 } from "../../domain/defaults/everydayToolCatalog";
 import type {
@@ -98,8 +102,8 @@ export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
   return (
     <SetupScreenLayout definition={definition} setup={setup}>
       <SetupBoundaryNote>
-        Choose the AI app, the model or mode you see in that app, and the thinking setting you usually pick. This does
-        not connect accounts, check subscriptions, call providers, or store credentials.
+        Add one AI app at a time. Pick the app, the account level you use, and how often you reach for it. The app does
+        not sign in, verify paid plans, call providers, or store credentials.
       </SetupBoundaryNote>
 
       <section className="conversationCard" aria-labelledby="tool-quick-check-heading">
@@ -108,8 +112,8 @@ export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
           <h3 id="tool-quick-check-heading">What do you actually click when you use AI?</h3>
         </div>
         <p>
-          If your screen looks a little different, choose the closest match. The app only uses this to suggest where
-          you should manually do the work later.
+          Start with the first app you recognize. After you choose one, another blank line appears for the next tool you
+          know.
         </p>
       </section>
 
@@ -310,8 +314,18 @@ function InventoryGroup({
   setup: SetupConfigurationController;
   title: string;
 }) {
-  const groupedModels = models.filter((model) => model.id !== "manual-human-review");
-  const selectedCount = groupedModels.filter((model) => model.enabled).length;
+  const toolSlots = models.filter((model) => model.id !== "manual-human-review");
+  const visibleModels = visibleToolRows(toolSlots);
+  const selectedCount = toolSlots.filter(isEverydayToolSelected).length;
+
+  function updateToolSlot(updatedModel: ModelInventoryItem) {
+    const nextModels = replaceRecord(models, updatedModel);
+    setup.updateModelInventory(nextModels);
+    setup.updateSetupPreferences({
+      ...setup.preferences,
+      preferredModelId: preferredToolIdFromFrequency(nextModels),
+    });
+  }
 
   return (
     <section className="setupGroup" aria-labelledby={domIdFor(title)}>
@@ -321,21 +335,14 @@ function InventoryGroup({
       </div>
 
       <div className="setupRecordList">
-        {groupedModels.length === 0 ? (
+        {visibleModels.length === 0 ? (
           <EmptySetupState label="No AI app choices are stored yet." />
         ) : (
-          groupedModels.map((model) => (
+          visibleModels.map((model) => (
             <ModelInventoryRow
               key={model.id}
               model={model}
-              onChange={(updatedModel) => setup.updateModelInventory(replaceRecord(models, updatedModel))}
-              onPreferredChange={(preferredModelId) =>
-                setup.updateSetupPreferences({
-                  ...setup.preferences,
-                  preferredModelId,
-                })
-              }
-              preferredModelId={setup.preferences.preferredModelId}
+              onChange={updateToolSlot}
             />
           ))
         )}
@@ -347,39 +354,28 @@ function InventoryGroup({
 function ModelInventoryRow({
   model,
   onChange,
-  onPreferredChange,
-  preferredModelId,
 }: {
   model: ModelInventoryItem;
   onChange: (model: ModelInventoryItem) => void;
-  onPreferredChange: (modelId: ModelInventoryItem["id"]) => void;
-  preferredModelId: ModelInventoryItem["id"] | undefined;
 }) {
-  const preferred = preferredModelId === model.id;
   const selectedTool = inferEverydayToolSelection(model);
   const provider = getEverydayToolProvider(selectedTool.providerId);
+  const selected = isEverydayToolSelected(model);
+  const frequencyOption =
+    provider.frequencyOptions.find((option) => option.id === selectedTool.frequencyId) ?? provider.frequencyOptions[0];
+  const rowTitle = selected ? provider.label : "Add an AI app";
 
   return (
     <section className="setupRecord" aria-labelledby={`${model.id}-title`}>
       <div className="recordHeader">
         <div>
-          <h4 id={`${model.id}-title`}>{model.label}</h4>
+          <h4 id={`${model.id}-title`}>{rowTitle}</h4>
           <p>{everydayToolSummary(model)}</p>
         </div>
-        <span className="recordPill">{preferred ? "Used most" : model.enabled ? "Included" : "Left out"}</span>
+        <span className="recordPill">{selected ? frequencyOption.label : "Optional"}</span>
       </div>
 
       <div className="toolChoiceGrid">
-        <label className="toggleField toolUseToggle">
-          <input
-            aria-label={`Include ${model.label}`}
-            checked={model.enabled}
-            onChange={(event) => onChange({ ...model, enabled: event.target.checked })}
-            type="checkbox"
-          />
-          <span>I use this</span>
-        </label>
-
         <label>
           <span>AI app</span>
           <select
@@ -402,19 +398,20 @@ function ModelInventoryRow({
         </label>
 
         <label>
-          <span>Model shown in that app</span>
+          <span>Account level</span>
           <select
-            aria-label={`Model shown in that app for ${model.id}`}
+            aria-label={`Account level for ${model.id}`}
+            disabled={!selected}
             onChange={(event) =>
               onChange(
                 applyEverydayToolSelection(model, {
-                  modelId: event.target.value,
+                  accountId: event.target.value as EverydayToolAccountId,
                 }),
               )
             }
-            value={selectedTool.modelId}
+            value={selectedTool.accountId}
           >
-            {provider.modelOptions.map((option) => (
+            {provider.accountOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.label}
               </option>
@@ -423,36 +420,25 @@ function ModelInventoryRow({
         </label>
 
         <label>
-          <span>Thinking setting</span>
+          <span>How often</span>
           <select
-            aria-label={`Thinking setting for ${model.id}`}
+            aria-label={`How often for ${model.id}`}
+            disabled={!selected}
             onChange={(event) =>
               onChange(
                 applyEverydayToolSelection(model, {
-                  effortId: event.target.value,
+                  frequencyId: event.target.value as EverydayToolFrequencyId,
                 }),
               )
             }
-            value={selectedTool.effortId}
+            value={selectedTool.frequencyId}
           >
-            {provider.effortOptions.map((option) => (
+            {provider.frequencyOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.label}
               </option>
             ))}
           </select>
-        </label>
-
-        <label className="toggleField toolUseMost">
-          <input
-            aria-label={`Use ${model.label} most`}
-            checked={preferred}
-            disabled={!model.enabled}
-            name="preferred-model"
-            onChange={() => onPreferredChange(model.id)}
-            type="radio"
-          />
-          <span>I use this most</span>
         </label>
       </div>
     </section>
@@ -770,6 +756,26 @@ function friendlyPolicyDescription(policy: PolicyDefault) {
   }
 
   return "Balance quality, speed, caution, and effort for normal work.";
+}
+
+function visibleToolRows(models: ModelInventoryItem[]): ModelInventoryItem[] {
+  const firstEmptyIndex = models.findIndex((model) => !isEverydayToolSelected(model));
+
+  return models.filter((model, index) => isEverydayToolSelected(model) || index === firstEmptyIndex);
+}
+
+function preferredToolIdFromFrequency(models: ModelInventoryItem[]): ModelInventoryItem["id"] | undefined {
+  const selectedModels = models.filter((model) => model.id !== "manual-human-review" && isEverydayToolSelected(model));
+
+  if (selectedModels.length === 0) {
+    return undefined;
+  }
+
+  return [...selectedModels].sort((left, right) => {
+    const frequencyComparison = everydayToolFrequencyRank(right) - everydayToolFrequencyRank(left);
+
+    return frequencyComparison || left.id.localeCompare(right.id);
+  })[0]?.id;
 }
 
 function replaceRecord<T extends { id: string }>(records: readonly T[], updatedRecord: T): T[] {
