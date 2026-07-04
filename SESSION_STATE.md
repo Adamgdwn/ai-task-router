@@ -1,27 +1,25 @@
-# 2026-07-03T23:58:41-06:00 - Session State
+# 2026-07-04T00:26:37-06:00 - Session State
 
-Last Updated: 2026-07-03T23:58:41-06:00
-Status: usability-detour-complete
-Status Updated: 2026-07-03T23:58:41-06:00
+Last Updated: 2026-07-04T00:26:37-06:00
+Status: chunk-fourteen-complete
+Status Updated: 2026-07-04T00:26:37-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Complete the usability detour requested after Chunk Thirteen: make the app feel like a natural guided path for everyday users instead of a clinical admin console.
+Complete Chunk Fourteen: build the local route log and feedback UI for saved route decisions while preserving the conversational `Past Choices` language.
 
 ## Files Changed In This Session
 
 - `src/App.tsx`
-- `src/domain/defaults/defaultModels.ts`
-- `src/ui/screens/screenDefinitions.ts`
-- `src/ui/screens/SetupScreens.tsx`
-- `src/ui/screens/TaskRoutingScreens.tsx`
-- `src/ui/screens/RouteArtifactScreens.tsx`
-- `src/ui/state/useSetupConfiguration.ts`
-- `src/ui/state/useTaskRouting.ts`
-- `src/ui/state/useRouteArtifacts.ts`
-- `src/styles.css`
+- `src/domain/export/exportImport.ts`
+- `src/domain/schemas.ts`
 - `src/tests/unit/App.test.tsx`
+- `src/tests/unit/domainSchemas.test.ts`
+- `src/ui/screens/RouteLogScreen.tsx`
+- `src/ui/screens/screenDefinitions.ts`
+- `src/ui/state/useTaskRouting.ts`
+- `src/styles.css`
 - `docs/2026-07-03-current-pathway.md`
 - `IMPLEMENTATION_STATUS.md`
 - `SESSION_STATE.md`
@@ -30,7 +28,7 @@ Complete the usability detour requested after Chunk Thirteen: make the app feel 
 ## Commands Run
 
 - `git status --short`
-- targeted `Get-Content` and `rg` reads for agent instructions, pathway, governance, project control, UI, state, defaults, styles, and tests
+- targeted `Get-Content` and `rg` reads for agent instructions, pathway, governance, project control, storage, schemas, task routing, artifact screens, styles, and tests
 - `bash scripts/governance-preflight.sh`
 - `bash -lc "date -Iseconds"`
 - `npm run test -- App`
@@ -38,32 +36,31 @@ Complete the usability detour requested after Chunk Thirteen: make the app feel 
 - `npm run build`
 - `npm audit --audit-level=moderate`
 - `git diff --check`
+- fresh validation server started at `http://127.0.0.1:5177`
 - manual Playwright browser checks through system Chrome
-  - fresh validation server started at `http://127.0.0.1:5176`
 
 ## Validation Notes
 
-- Focused App suite passed: 1 file, 9 tests.
-- Full unit suite passed: 10 files, 74 tests.
+- Focused App suite passed: 1 file, 11 tests.
+- Full unit suite passed: 10 files, 76 tests.
 - Production build passed.
 - Audit found 0 vulnerabilities.
 - Governance preflight passed with 0 warnings.
 - Whitespace check passed with only normal Windows LF-to-CRLF notices.
-- Manual browser check on `5176` passed for Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, desktop/mobile screenshots, and no horizontal overflow.
+- Manual browser check on `5177` passed for creating a saved plan, viewing Past Choices, search no-match, outcome filtering, edited feedback save, saved acknowledgement, opening a decision card, desktop/mobile screenshots, and no horizontal overflow.
 - Screenshots:
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-usability-start-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-usability-tools-desktop.png`
-  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-usability-prompts-mobile.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-chunk14-past-choices-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-chunk14-feedback-saved-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-chunk14-past-choices-mobile.png`
 
 ## Known Gaps
 
-- Chunk Fourteen should build route-log and feedback workflows for saved recommendations.
-- Route-log UI should follow the new plain-language direction and avoid primary-surface terms like source permissions, policy defaults, model tiers, or scoring weights.
-- Existing browser-local seed labels may need `Restore starter choices` before the user sees the new default shelf names.
-- Import/export UI, committed E2E specs, and MVP polish/docs remain later chunks.
+- Saved decision cards created before Chunk Fourteen may not appear in Past Choices until a plan is saved again.
+- Chunk Fifteen should add fixtures and committed Playwright E2E coverage.
+- Import/export UI and MVP polish/docs remain later chunks.
 - Proposed best stack remains nonfunctional and disabled by design.
-- Use fresh dev server `5176` or restart the server before future visual checks; earlier sessions saw stale CSS on long-running servers.
+- Use a fresh dev server, or restart the server, before future visual checks if CSS or route behavior looks stale.
 
 ## Next Handoff
 
-Resume from Chunk Fourteen only: build the route log and feedback workflows for saved recommendations. Keep the conversational UX direction intact: Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, and saved-plan language. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fifteen only: add practical fixtures and Playwright E2E coverage for setup, task routing, saved decision cards, copy-ready prompts, Past Choices feedback, export-preparation behavior where UI exists, and the no-execution boundary. Keep the conversational UX direction intact and do not add provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.

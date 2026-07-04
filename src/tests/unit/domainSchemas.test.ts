@@ -165,6 +165,25 @@ describe("domain schemas", () => {
       selectedStrategy: "balanced",
       outcome: "accepted",
     });
+
+    expect(
+      routeLogEntrySchema.parse({
+        id: "route-log-note-only",
+        taskId: "task-001",
+        routeCardId: "route-card-001",
+        selectedOptionId: "route-balanced",
+        selectedStrategy: "balanced",
+        outcome: "edited",
+        feedback: {
+          notes: "Useful after edits.",
+        },
+        createdAt,
+      }),
+    ).toMatchObject({
+      feedback: {
+        notes: "Useful after edits.",
+      },
+    });
   });
 
   it("rejects route cards whose recommendation does not reference an available option", () => {

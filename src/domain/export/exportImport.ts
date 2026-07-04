@@ -530,7 +530,7 @@ function routeLogCsvValue(routeLogEntry: RouteLogEntry, header: (typeof routeLog
     case "outcome":
       return routeLogEntry.outcome;
     case "feedbackRating":
-      return routeLogEntry.feedback?.rating.toString() ?? "";
+      return routeLogEntry.feedback?.rating?.toString() ?? "";
     case "feedbackNotes":
       return routeLogEntry.feedback?.notes ?? "";
     case "createdAt":

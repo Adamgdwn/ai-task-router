@@ -13,6 +13,7 @@ import { taskIntakeSchema } from "../../domain/schemas";
 import type {
   PromptPackage,
   RouteCard,
+  RouteLogEntry,
   RouteOption,
   SensitivityClass,
   TaskIntake,
@@ -317,8 +318,9 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
 
     try {
       await store.saveRouteCard(routeResult.routeCard);
+      await store.saveRouteLogEntry(buildRouteLogEntry(routeResult));
       setSaveStatus("saved");
-      setSaveMessage("Decision card and prompts saved on this device.");
+      setSaveMessage("Decision card, prompts, and Past Choices record saved on this device.");
       return true;
     } catch (error) {
       setSaveStatus("error");
@@ -342,6 +344,22 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
     toggleRequestedSource,
     generateRoute,
     saveGeneratedRoute,
+  };
+}
+
+function buildRouteLogEntry(routeResult: GeneratedRouteResult): RouteLogEntry {
+  const selectedRoute =
+    routeResult.routeCard.options.find((option) => option.id === routeResult.routeCard.recommendedOptionId) ??
+    routeResult.selectedRoute;
+
+  return {
+    id: `route-log-${routeResult.task.id}`,
+    taskId: routeResult.task.id,
+    routeCardId: routeResult.routeCard.id,
+    selectedOptionId: selectedRoute.id,
+    selectedStrategy: selectedRoute.strategy,
+    outcome: "deferred",
+    createdAt: routeResult.generatedAt,
   };
 }
 

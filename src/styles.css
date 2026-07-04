@@ -1382,6 +1382,187 @@ button:focus-visible {
   justify-self: start;
 }
 
+.routeLogPanel {
+  gap: 16px;
+}
+
+.routeLogToolbar {
+  align-items: end;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 26px rgba(15, 23, 32, 0.06);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 1.1fr) auto;
+  padding: 14px;
+}
+
+.routeLogToolbar h3,
+.routeLogEntry h3,
+.feedbackPanel h3 {
+  color: var(--brand-navy);
+  margin: 0;
+}
+
+.routeLogToolbar h3,
+.feedbackPanel h3 {
+  font-size: 1rem;
+}
+
+.routeLogToolbar p,
+.feedbackPanel p {
+  color: var(--muted-ink);
+  line-height: 1.48;
+  margin: 0;
+}
+
+.routeLogControls,
+.feedbackFormGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.routeLogControls {
+  grid-template-columns: minmax(180px, 1fr) repeat(2, minmax(140px, 0.72fr));
+}
+
+.routeLogControls label,
+.feedbackPanel label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.routeLogControls span,
+.feedbackPanel label > span {
+  color: #334b5a;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.routeLogToolbar button,
+.routeLogEntryActions button,
+.feedbackPanel button {
+  background: #ffffff;
+  border-color: var(--line-strong);
+  color: var(--brand-navy);
+  min-height: 40px;
+  padding: 9px 12px;
+}
+
+.routeLogToolbar button:hover:not(:disabled),
+.routeLogToolbar button:focus-visible:not(:disabled),
+.routeLogEntryActions button:hover:not(:disabled),
+.routeLogEntryActions button:focus-visible:not(:disabled),
+.feedbackPanel button:hover:not(:disabled),
+.feedbackPanel button:focus-visible:not(:disabled) {
+  border-color: var(--brand-teal);
+}
+
+.routeLogWorkspace {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+  min-width: 0;
+}
+
+.routeLogList {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.routeLogEntry,
+.feedbackPanel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 32, 0.05);
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.selectedRouteLogEntry {
+  border-color: var(--brand-teal);
+  box-shadow:
+    inset 4px 0 0 var(--brand-teal),
+    0 10px 24px rgba(15, 23, 32, 0.05);
+}
+
+.routeLogEntryHeader {
+  align-items: start;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.routeLogEntryHeader h3 {
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.routeLogEntryHeader > span {
+  background: #eef8fb;
+  border: 1px solid #cdeaf2;
+  border-radius: 999px;
+  color: #244a5a;
+  flex: 0 0 auto;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 4px 8px;
+}
+
+.routeLogMetaGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.routeLogMetaGrid dt {
+  color: var(--muted-ink);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.routeLogMetaGrid dd {
+  color: var(--brand-navy);
+  font-weight: 800;
+  line-height: 1.35;
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.routeLogEntryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedbackPanel {
+  position: sticky;
+  top: 20px;
+}
+
+.feedbackFormGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.feedbackPanel button {
+  justify-self: start;
+}
+
+.feedbackPanel > span {
+  color: var(--muted-ink);
+  line-height: 1.4;
+}
+
 @media (max-width: 1080px) {
   .boundaryStrip,
   .marketPath,
@@ -1394,11 +1575,16 @@ button:focus-visible {
   .sourceChoiceGrid,
   .routeComparisonGrid,
   .artifactToolbar,
-  .artifactTwoColumn {
+  .artifactTwoColumn,
+  .routeLogToolbar,
+  .routeLogControls,
+  .routeLogWorkspace,
+  .routeLogMetaGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .artifactToolbar > div:first-child {
+  .artifactToolbar > div:first-child,
+  .routeLogToolbar > div:first-child {
     grid-column: 1 / -1;
   }
 }
@@ -1447,7 +1633,12 @@ button:focus-visible {
   .artifactSummaryBand,
   .artifactTwoColumn,
   .artifactMetricGrid,
-  .promptStepMeta {
+  .promptStepMeta,
+  .routeLogToolbar,
+  .routeLogControls,
+  .routeLogWorkspace,
+  .routeLogMetaGrid,
+  .feedbackFormGrid {
     grid-template-columns: 1fr;
   }
 
@@ -1455,13 +1646,15 @@ button:focus-visible {
   .groupHeader,
   .recordHeader,
   .routeCardHeader,
-  .promptStepHeader {
+  .promptStepHeader,
+  .routeLogEntryHeader {
     align-items: stretch;
     flex-direction: column;
   }
 
   .routeCardHeader,
-  .promptStepHeader {
+  .promptStepHeader,
+  .routeLogEntryHeader {
     align-items: flex-start;
   }
 
@@ -1478,8 +1671,15 @@ button:focus-visible {
   .saveRoutePanel button,
   .artifactToolbar button,
   .artifactActions button,
-  .artifactActions a {
+  .artifactActions a,
+  .routeLogToolbar button,
+  .routeLogEntryActions button,
+  .feedbackPanel button {
     width: 100%;
+  }
+
+  .feedbackPanel {
+    position: static;
   }
 }
 

@@ -87,8 +87,8 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "Past Choices",
     stage: "Local Record",
     summary: "Look back at saved decisions and note whether the recommendation helped.",
-    purpose: "Preserve decisions locally so policy and recommendations can improve over time.",
-    placeholderState: "Future logs will use IndexedDB and export Markdown, JSON, and CSV.",
+    purpose: "Preserve local decisions and lightweight feedback without sending notes anywhere.",
+    placeholderState: "Past Choices now use browser-local saved records and quick feedback.",
   },
   {
     id: "reference",

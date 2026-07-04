@@ -1,8 +1,8 @@
 # 2026-07-03-current-pathway
 
-Last Updated: 2026-07-03T23:58:41-06:00
+Last Updated: 2026-07-04T00:26:37-06:00
 Status: active
-Status Updated: 2026-07-03T23:58:41-06:00
+Status Updated: 2026-07-04T00:26:37-06:00
 Owner: Technical Lead
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
@@ -85,7 +85,8 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Chunk Twelve task intake and results UI | complete | 2026-07-03T21:03:52-06:00 | Technical Lead | Task intake and route results now run local validation, hard gates, candidate generation, scoring, route-card generation, prompt-package generation, warnings, blocked routes, and explicit local save. |
 | Chunk Thirteen route card and prompt package UI | complete | 2026-07-03T22:08:42-06:00 | Technical Lead | Route card and prompt package detail screens now load saved local records, show route decisions and prompt steps, and prepare local copy/download Markdown. |
 | Usability path detour | complete | 2026-07-03T23:55:54-06:00 | Technical Lead | Reworked the app front door, setup aisles, task flow, and saved-plan copy into plain-language conversational UX. |
-| Chunk Fourteen route log and feedback UI | active next | 2026-07-03T23:55:54-06:00 | Technical Lead | Build route log and feedback workflows for saved recommendations after preserving the conversational UX direction. |
+| Chunk Fourteen route log and feedback UI | complete | 2026-07-04T00:24:26-06:00 | Technical Lead | Past Choices now lists saved route decisions, supports search/filter/sort, saves local feedback, and opens saved decision cards without sending feedback anywhere. |
+| Chunk Fifteen E2E tests and fixture suite | active next | 2026-07-04T00:24:26-06:00 | Technical Lead | Add practical fixtures and E2E coverage for the MVP workflows now that Past Choices feedback exists. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -1715,8 +1716,8 @@ Next chunk should build route-log and feedback workflows using the new language 
 
 ## Chunk Fourteen - Route Log And Feedback UI
 
-Status: active next
-Status Updated: 2026-07-03T23:55:54-06:00
+Status: complete
+Status Updated: 2026-07-04T00:24:26-06:00
 
 Completion target: Integration complete
 
@@ -1767,13 +1768,13 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Route log screen lists saved route decisions with task title, selected strategy, outcome, and timestamp.
-- [ ] User can filter or sort enough to find recent decisions.
-- [ ] User can add or edit feedback outcome and optional rating/notes.
-- [ ] Feedback validates against `routeLogEntrySchema` or a clearly documented schema extension.
-- [ ] User can open a saved route card from the log.
-- [ ] Empty log and local storage error states are handled.
-- [ ] No feedback leaves the browser.
+- [x] Route log screen lists saved route decisions with task title, selected strategy, outcome, and timestamp.
+- [x] User can filter or sort enough to find recent decisions.
+- [x] User can add or edit feedback outcome and optional rating/notes.
+- [x] Feedback validates against `routeLogEntrySchema` through a backward-compatible optional rating/notes extension.
+- [x] User can open a saved route card from the log.
+- [x] Empty log and local storage error states are handled.
+- [x] No feedback leaves the browser.
 
 Test expectations:
 
@@ -1781,6 +1782,27 @@ Test expectations:
 - `npm run test`
 - `npm run build`
 - Manual local app check for creating, editing, filtering, and reopening route log entries.
+
+Implementation notes:
+
+- Added `RouteLogScreen` as the `Past Choices` workflow with local loading, empty/error states, search, outcome filter, recent/title sorting, a selected-record list, and quick feedback editing.
+- Saving generated route results now also creates a route-log entry with an initial `deferred` outcome so feedback has a local record to attach to.
+- Extended route-log feedback validation so users can save an outcome with no note, a note without a rating, a rating without a note, or both.
+- Opening a saved decision from Past Choices selects the existing decision-card record and reuses the Chunk Thirteen saved artifact screen.
+- Real-browser validation caught and fixed the case where changing a filtered `deferred` record to `edited` made the saved acknowledgement disappear.
+
+Validation:
+
+- `npm run test -- App` passed with 1 file and 11 tests.
+- `npm run test` passed with 10 files and 76 tests.
+- `npm run build` passed.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- Manual Playwright browser check using system Chrome at `http://127.0.0.1:5177` passed for creating a saved plan, viewing Past Choices, filtering no-match and deferred views, saving edited feedback with rating and note, opening the saved decision card, mobile layout, screenshots, and no horizontal overflow.
+- Screenshots:
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-chunk14-past-choices-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-chunk14-feedback-saved-desktop.png`
+  - `C:\Users\adamg\AppData\Local\Temp\agent-picker-chunk14-past-choices-mobile.png`
 
 UX/product finish expectations:
 
@@ -1800,16 +1822,16 @@ Route log UI can be reverted while leaving stored records intact. If schema chan
 
 Stop condition:
 
-Stop when route log and feedback flows are usable and verified. Do not move into E2E coverage expansion in this chunk.
+Reached. Route log and feedback flows are usable and verified. E2E coverage expansion remains Chunk Fifteen.
 
 Handoff note:
 
-Next chunk should add end-to-end tests and fixture coverage for the MVP acceptance scenarios.
+Next chunk should add end-to-end tests and fixture coverage for the MVP acceptance scenarios without changing the local-only recommendation boundary.
 
 ## Chunk Fifteen - E2E Tests And Fixture Suite
 
-Status: planned
-Status Updated: 2026-07-03T12:28:19-06:00
+Status: active next
+Status Updated: 2026-07-04T00:24:26-06:00
 
 Completion target: Integration complete
 
@@ -2083,7 +2105,12 @@ After this chunk, decide whether to run a release-readiness review, plan future 
 | 2026-07-03T23:54:46-06:00 | `npm run test`; `npm run build` | passed | Full unit suite passed with 10 files and 74 tests; TypeScript and Vite production build passed after plain-language default model labels. |
 | 2026-07-03T23:55:54-06:00 | manual Playwright browser check using system Chrome at `http://127.0.0.1:5176` | passed | Browser walkthrough covered Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, desktop/mobile screenshots, and no horizontal overflow. |
 | 2026-07-03T23:58:41-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Final usability detour close-out validation passed: 10 files and 74 tests, production build, 0 audit vulnerabilities, 0 governance warnings, and no whitespace errors; `git diff --check` only printed normal Windows LF-to-CRLF notices. |
+| 2026-07-04T00:12:28-06:00 | `bash scripts/governance-preflight.sh`; `bash -lc "date -Iseconds"` | passed | Governance check passed with 0 warnings before Chunk Fourteen route-log and feedback UI work; work timestamp captured. |
+| 2026-07-04T00:19:28-06:00 | `npm run test -- App` | passed | Focused App suite passed with 1 file and 11 tests after adding Past Choices, local feedback editing, route-log save creation, and saved-card reopening. |
+| 2026-07-04T00:23:54-06:00 | `npm run test`; `npm run build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh` | passed | Full unit suite passed with 10 files and 76 tests; TypeScript and Vite production build passed; audit found 0 vulnerabilities; governance preflight passed with 0 warnings. |
+| 2026-07-04T00:24:26-06:00 | manual Playwright browser check using system Chrome at `http://127.0.0.1:5177` | passed | Browser walkthrough covered saving a plan, Past Choices list, search no-match, outcome filtering, feedback save acknowledgement, opening a decision card, mobile layout screenshots, and no horizontal overflow. |
+| 2026-07-04T00:26:37-06:00 | `git diff --check` | passed | Whitespace check passed; output only included normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Resume from Chunk Fourteen only: build the route log and feedback workflows for saved recommendations. Keep the new conversational UX direction intact: Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, and saved-plan language. Do not reintroduce source-permission, policy-default, model-tier, or scoring-weight terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.
+Resume from Chunk Fifteen only: add the fixture suite and Playwright end-to-end coverage for the MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools, Information Comfort, Choosing Style, My Task, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Do not reintroduce source-permission, policy-default, model-tier, or scoring-weight terminology in primary user flows. Do not implement provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, feedback analytics, best-stack recommendation logic, or execution workflows.

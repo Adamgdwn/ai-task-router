@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createLocalStore, type LocalStore } from "./storage/localStore";
 import { SavedPromptPackageScreen, SavedRouteCardScreen } from "./ui/screens/RouteArtifactScreens";
+import { RouteLogScreen } from "./ui/screens/RouteLogScreen";
 import {
   PlaceholderScreen,
   PolicySettingsScreen,
@@ -121,6 +122,17 @@ export function App({ store = browserLocalStore }: AppProps) {
             onOpenTaskIntake={() => setActiveScreenId("task-intake")}
           />
         ) : null}
+        {activeScreen.id === "route-log" ? (
+          <RouteLogScreen
+            definition={activeScreen}
+            onOpenRouteCard={(routeCardId) => {
+              routeArtifacts.selectRouteCard(routeCardId);
+              setActiveScreenId("route-card");
+            }}
+            onOpenTaskIntake={() => setActiveScreenId("task-intake")}
+            store={store}
+          />
+        ) : null}
         {![
           "welcome",
           "tool-inventory",
@@ -130,6 +142,7 @@ export function App({ store = browserLocalStore }: AppProps) {
           "route-results",
           "route-card",
           "prompt-package",
+          "route-log",
         ].includes(activeScreen.id) ? (
           <PlaceholderScreen definition={activeScreen} />
         ) : null}

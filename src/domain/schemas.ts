@@ -268,6 +268,22 @@ export const routeCardSchema = z
     }
   });
 
+const routeLogFeedbackSchema = z
+  .object({
+    rating: z.number().int().min(1).max(5).optional(),
+    notes: z.string().trim().optional(),
+  })
+  .strict()
+  .superRefine((feedback, context) => {
+    if (feedback.rating === undefined && !feedback.notes?.trim()) {
+      context.addIssue({
+        code: "custom",
+        message: "Feedback needs a rating or note when feedback is present.",
+        path: [],
+      });
+    }
+  });
+
 export const routeLogEntrySchema = z
   .object({
     id: nonEmptyIdSchema,
@@ -276,13 +292,7 @@ export const routeLogEntrySchema = z
     selectedOptionId: nonEmptyIdSchema,
     selectedStrategy: z.enum(routeStrategies),
     outcome: z.enum(["accepted", "edited", "rejected", "deferred"]),
-    feedback: z
-      .object({
-        rating: z.number().int().min(1).max(5),
-        notes: z.string().trim().optional(),
-      })
-      .strict()
-      .optional(),
+    feedback: routeLogFeedbackSchema.optional(),
     createdAt: isoTimestampSchema,
   })
   .strict();

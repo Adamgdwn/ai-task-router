@@ -148,12 +148,18 @@ describe("App", () => {
 
     await user.click(screen.getByRole("button", { name: "Save decision and prompts" }));
 
-    expect(await screen.findByText("Decision card and prompts saved on this device.")).toBeInTheDocument();
+    expect(await screen.findByText("Decision card, prompts, and Past Choices record saved on this device.")).toBeInTheDocument();
 
     const records = await store.loadRouteRecords();
     expect(records.routeCards).toHaveLength(1);
     expect(records.promptPackages).toHaveLength(1);
+    expect(records.routeLogEntries).toHaveLength(1);
     expect(records.routeCards[0]?.promptPackage.id).toBe(records.promptPackages[0]?.id);
+    expect(records.routeLogEntries[0]).toMatchObject({
+      routeCardId: records.routeCards[0]?.id,
+      selectedOptionId: records.routeCards[0]?.recommendedOptionId,
+      outcome: "deferred",
+    });
   });
 
   it("shows blocked routes when requested sources fail local gates", async () => {
@@ -190,6 +196,60 @@ describe("App", () => {
 
     expect(await screen.findByRole("heading", { name: "No saved plans yet" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Describe my task" })).toBeInTheDocument();
+  });
+
+  it("shows an empty Past Choices state before route decisions are saved", async () => {
+    const user = userEvent.setup();
+
+    render(<App store={buildTestStore()} />);
+
+    await user.click(screen.getByRole("button", { name: "Past Choices" }));
+
+    expect(await screen.findByRole("heading", { name: "No Past Choices yet" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Describe my task" })).toBeInTheDocument();
+  });
+
+  it("lets users filter Past Choices, save feedback, and open the saved decision card", async () => {
+    const user = userEvent.setup();
+    const store = buildTestStore();
+
+    render(<App store={store} />);
+
+    await generateAndSavePublicFacingRoute(user);
+    await user.click(screen.getByRole("button", { name: "Past Choices" }));
+
+    expect(await screen.findByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Show only" })).toHaveValue("all");
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("recent");
+    expect(screen.getAllByText("Deferred - still deciding").length).toBeGreaterThan(0);
+
+    await user.type(screen.getByRole("textbox", { name: "Search past choices" }), "nothing matches this");
+    expect(await screen.findByRole("heading", { name: "No choices match that view" })).toBeInTheDocument();
+
+    await user.clear(screen.getByRole("textbox", { name: "Search past choices" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Show only" }), "deferred");
+    expect(await screen.findByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "What happened?" }), "edited");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Usefulness rating" }), "5");
+    await user.type(screen.getByRole("textbox", { name: "Private note" }), "Useful after a tiny wording change.");
+    await user.click(screen.getByRole("button", { name: "Save feedback" }));
+
+    expect(await screen.findByText("Feedback saved in this browser.")).toBeInTheDocument();
+
+    const records = await store.loadRouteRecords();
+    expect(records.routeLogEntries[0]).toMatchObject({
+      outcome: "edited",
+      feedback: {
+        rating: 5,
+        notes: "Useful after a tiny wording change.",
+      },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Open decision card" }));
+
+    expect(await screen.findByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Saved decision card" })).toHaveValue("route-card-task-local-route");
   });
 
   it("shows saved route cards with local copy and Markdown download preparation", async () => {
@@ -275,7 +335,7 @@ async function generateAndSavePublicFacingRoute(user: ReturnType<typeof userEven
   await user.click(screen.getByRole("button", { name: "Show me my best options" }));
   await screen.findByRole("heading", { name: "Best Options", level: 2 });
   await user.click(screen.getByRole("button", { name: "Save decision and prompts" }));
-  await screen.findByText("Decision card and prompts saved on this device.");
+  await screen.findByText("Decision card, prompts, and Past Choices record saved on this device.");
 }
 
 function installClipboardMock(writeText: ReturnType<typeof vi.fn>) {
