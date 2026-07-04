@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser MVP validation lane, with Desktop Chunk D0 opened for planning
-Status Updated: 2026-07-04T11:28:22-06:00
+Status: v0.2 browser MVP validation lane, with Desktop Chunk D2 queued as a Tauri shell spike
+Status Updated: 2026-07-04T14:56:49-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -114,6 +114,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Manual](docs/manual.md)
 - [Roadmap](docs/roadmap.md)
 - [Desktop trust and distribution plan](docs/desktop-trust-distribution-plan.md)
+- [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)
 - [Durable development policy](docs/policy/durable-development-engineering-policy.md)
 - [Engineering standards](docs/standards/README.md)
 - [Document control standard](docs/standards/document-control-standard.md)

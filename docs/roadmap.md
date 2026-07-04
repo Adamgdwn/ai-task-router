@@ -1,7 +1,7 @@
 # 2026-07-03T11:49:34-06:00 - Roadmap
 
 Document status: draft baseline
-Status Updated: 2026-07-04T11:28:22-06:00
+Status Updated: 2026-07-04T14:56:49-06:00
 
 ## Now
 
@@ -36,7 +36,8 @@ Status Updated: 2026-07-04T11:28:22-06:00
 - Add a PWA install path for the hosted app where supported.
 - Plan a separate signed desktop app for Windows, macOS, and Linux when local machine discovery is ready.
 - Use [desktop trust and distribution plan](desktop-trust-distribution-plan.md) as the baseline for desktop trust, signing, and release work.
-- Desktop Chunk D0 is open as a decision and governance review only; no desktop code is approved yet.
+- Desktop Chunk D0 is confirmed for planning, and Desktop Chunk D1 selected Tauri for the first desktop shell spike.
+- Desktop Chunk D2 may scaffold only the minimum Tauri shell. No native local discovery, packaging, signing, telemetry, provider connections, credentials, or file indexing is approved yet.
 - Run an owner governance review before desktop implementation because local machine inspection is a higher-trust surface than the v0.2 browser app.
 
 ## Explicitly Deferred

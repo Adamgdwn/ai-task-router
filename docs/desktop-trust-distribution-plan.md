@@ -1,17 +1,17 @@
 # Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.2.0
+Version: 0.3.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before Desktop Chunk D1
-Last Updated: 2026-07-04T11:35:38-06:00
-Status Updated: 2026-07-04T11:35:38-06:00
+Next Review: Before Desktop Chunk D2
+Last Updated: 2026-07-04T14:56:49-06:00
+Status Updated: 2026-07-04T14:56:49-06:00
 
-Planning state: Desktop Chunk D0 opened; owner confirmation required before desktop implementation.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop implementation remains limited to a shell spike until the trust-boundary design is complete.
 
 ## Purpose
 
@@ -119,7 +119,7 @@ Trust promise:
 
 ## Technology Recommendation
 
-The current best candidate is Tauri.
+The selected spike candidate is Tauri.
 
 Why it fits:
 
@@ -138,7 +138,7 @@ Current official references:
 - Microsoft Windows app code signing options: https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options
 - Apple notarization docs: https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution
 
-This plan does not yet make Tauri a final architecture decision. The first desktop chunk should produce an ADR comparing at least Tauri and Electron, then recommend one.
+Desktop Chunk D1 selected Tauri for the first desktop shell spike. See [ADR-0001: Desktop Wrapper Choice For Trusted Local Discovery](decisions/adr-0001-desktop-wrapper.md). Tauri is accepted for the D2 spike only; the project can still fall back to Electron if D2 produces evidence that Tauri is a poor fit.
 
 ## Trust Principles
 
@@ -394,29 +394,33 @@ Stop if the first desktop release scope includes broad folder indexing, backgrou
 
 ## Desktop Chunk D0 Decision Packet
 
-Status: draft complete
+Status: task complete
 
-Status Updated: 2026-07-04T11:28:22-06:00
+Status Updated: 2026-07-04T14:51:54-06:00
 
-Completion target: Task complete after owner confirmation
+Completion target: Task complete
 
 Goal:
 
 Confirm the first desktop product boundary, target release order, publisher identity, and governance posture before any desktop code is added.
 
+Owner confirmation:
+
+The owner's 2026-07-04 request to carry on with the next chunk was treated as confirmation to use the recommended D0 defaults and proceed to D1. No desktop implementation was approved by D0.
+
 Recommended owner decisions:
 
 | Decision | Recommended default | Reason | Owner status |
 |---|---|---|---|
-| First desktop scope | Limit the first desktop track to AI tool and local model discovery. | This matches the user's trust goal while avoiding broad file inspection too early. | Pending confirmation |
-| User-selected folders | Defer folder inspection from the first public desktop release; allow only a separately reviewed prototype later. | Folder inspection changes the privacy surface and should wait for the trust-boundary design. | Pending confirmation |
-| First target OS | Windows first, then macOS, then Linux packaging. | The current development lab is Windows-led, and Windows signing/install friction is the most urgent ordinary-user trust problem. | Pending confirmation |
-| Publisher identity | Use `Guided AI Labs Ltd` for signing and publisher identity if it is the correct legal entity. | Signing should match a real legal publisher users can recognize. | Pending confirmation |
-| Product naming | Keep the product as `AI Task Router` for the repo and app, with Guided AI Labs/OldSkoolAI branding decided before packaging. | This avoids changing code identity before the brand/distribution route is final. | Pending confirmation |
-| Windows distribution | Evaluate Microsoft Store MSIX first; use direct signed installers only after signing and SmartScreen implications are reviewed. | Store packaging may reduce trust friction for non-technical users. | Pending confirmation |
-| macOS distribution | Require Developer ID signing and notarization before external beta. | Unsigned macOS apps are not trustworthy enough for ordinary users. | Pending confirmation |
-| Linux distribution | Start with AppImage and checksums; add `.deb` after install/uninstall testing. | This gives broad Linux reach without overbuilding package infrastructure. | Pending confirmation |
-| Governance level | Keep governance level 1 for docs-only planning; review raising to at least a medium-control track before native local discovery implementation. | Local machine inspection is a higher-trust surface than the current browser MVP. | Pending confirmation |
+| First desktop scope | Limit the first desktop track to AI tool and local model discovery. | This matches the user's trust goal while avoiding broad file inspection too early. | Confirmed for planning |
+| User-selected folders | Defer folder inspection from the first public desktop release; allow only a separately reviewed prototype later. | Folder inspection changes the privacy surface and should wait for the trust-boundary design. | Confirmed for planning |
+| First target OS | Windows first, then macOS, then Linux packaging. | The current development lab is Windows-led, and Windows signing/install friction is the most urgent ordinary-user trust problem. | Confirmed for planning |
+| Publisher identity | Use `Guided AI Labs Ltd` for signing and publisher identity if it is the correct legal entity. | Signing should match a real legal publisher users can recognize. | Confirmed as provisional |
+| Product naming | Keep the product as `AI Task Router` for the repo and app, with Guided AI Labs/OldSkoolAI branding decided before packaging. | This avoids changing code identity before the brand/distribution route is final. | Confirmed for planning |
+| Windows distribution | Evaluate Microsoft Store MSIX first; use direct signed installers only after signing and SmartScreen implications are reviewed. | Store packaging may reduce trust friction for non-technical users. | Confirmed for planning |
+| macOS distribution | Require Developer ID signing and notarization before external beta. | Unsigned macOS apps are not trustworthy enough for ordinary users. | Confirmed for planning |
+| Linux distribution | Start with AppImage and checksums; add `.deb` after install/uninstall testing. | This gives broad Linux reach without overbuilding package infrastructure. | Confirmed for planning |
+| Governance level | Keep governance level 1 for docs-only planning; review raising to at least a medium-control track before native local discovery implementation. | Local machine inspection is a higher-trust surface than the current browser MVP. | Confirmed for planning |
 
 First desktop non-goals until separately approved:
 
@@ -438,11 +442,42 @@ The current v0.2 browser MVP remains low risk and governance level 1. The deskto
 
 D0 stop condition:
 
-Do not start Desktop Chunk D1 or any desktop implementation if the owner chooses broad folder inspection, background scanning, telemetry, credentials, provider API calls, or file-content indexing for the first desktop release without a separate security review.
+Do not start Desktop Chunk D2 or any desktop implementation if the scope expands into broad folder inspection, background scanning, telemetry, credentials, provider API calls, or file-content indexing without a separate security review.
 
-D0 handoff:
+D0 result:
 
-Ask the owner to confirm, change, or defer the recommended defaults above. After confirmation, create Desktop Chunk D1 as a tool decision ADR comparing Tauri, Electron, and the option to stay web/PWA-only for longer.
+Confirmed defaults are recorded above. Desktop Chunk D1 created the tool decision ADR comparing Tauri, Electron, and the option to stay web/PWA-only for longer.
+
+## Desktop Chunk D1 Tool Decision ADR
+
+Status: task complete
+
+Status Updated: 2026-07-04T14:51:54-06:00
+
+Completion target: Task complete
+
+Goal:
+
+Record the desktop wrapper decision before adding desktop code.
+
+Decision:
+
+Use Tauri for Desktop Chunk D2, the first desktop shell spike. Keep the hosted web/PWA track as the low-friction public path, and keep Electron as a fallback if the Tauri spike proves unsuitable.
+
+Decision record:
+
+- [ADR-0001: Desktop Wrapper Choice For Trusted Local Discovery](decisions/adr-0001-desktop-wrapper.md)
+
+D1 non-goals:
+
+- no Tauri scaffold added
+- no Electron scaffold added
+- no native local discovery commands
+- no packaging, signing, auto-update, telemetry, provider connections, OAuth, credentials, folder inspection, or file indexing
+
+D1 handoff:
+
+Proceed to Desktop Chunk D2 only as a shell spike. D2 may wrap the current UI in Tauri and prove that the browser app still builds. D2 must not add native discovery or any local machine inspection.
 
 ### Phase 1: Desktop Tool Decision Spike
 
@@ -452,8 +487,8 @@ Prove whether the current Vite app can be wrapped cleanly for desktop.
 
 Expected work:
 
-- create an ADR comparing Tauri and Electron
-- scaffold Tauri in a branch or bounded chunk if selected
+- use [ADR-0001](decisions/adr-0001-desktop-wrapper.md) as the wrapper decision record
+- scaffold Tauri in a bounded chunk
 - run existing React app inside the desktop shell
 - build a local dev desktop app on Windows
 - confirm current browser build still works
@@ -467,6 +502,7 @@ Acceptance criteria:
 - desktop shell launches the current UI
 - no native permissions beyond the shell are exposed
 - ADR records tradeoffs, risks, exit plan, and selected candidate
+- D2 does not add native discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, or file indexing
 
 Validation:
 
@@ -683,7 +719,7 @@ The owner confirms the first desktop scope, target OS order, publisher identity,
 
 Current state:
 
-D0 is opened as of 2026-07-04T11:28:22-06:00 with a proposed decision packet above. It is not complete until the owner confirms, changes, or defers those decisions.
+D0 was confirmed for planning on 2026-07-04T14:51:54-06:00. The decision packet above records the accepted defaults and keeps desktop implementation outside D0.
 
 ### Desktop Chunk D1 - Desktop Tool Decision ADR
 
@@ -692,6 +728,10 @@ Completion target: Task complete
 Outcome:
 
 The repo records whether Tauri, Electron, or another wrapper is selected, with rationale, risks, costs, and exit plan.
+
+Current state:
+
+D1 is complete. [ADR-0001](decisions/adr-0001-desktop-wrapper.md) selects Tauri for the D2 shell spike and keeps Electron as fallback.
 
 ### Desktop Chunk D2 - Desktop Shell Spike
 
@@ -748,7 +788,7 @@ Signed or clearly controlled beta installers are ready for limited users with in
 - Windows distribution path: Microsoft Store, direct signed installer, or both.
 - macOS distribution path and Apple Developer account ownership.
 - Linux artifact set: AppImage only first, or AppImage plus `.deb`.
-- Whether local folder inspection is in first desktop release or deferred.
+- Whether a later separately reviewed prototype should include user-selected folder inspection.
 - Whether model names are hidden by default, shown with consent, or never stored.
 - Whether auto-update is required for the first desktop release.
 - Whether a public privacy page is needed before beta.
@@ -774,6 +814,6 @@ Signed or clearly controlled beta installers are ready for limited users with in
 
 ## Immediate Recommendation
 
-Desktop Chunk D0 is now open as a planning and governance review. Confirm, change, or defer the D0 owner decisions before any desktop code is added.
+Desktop Chunk D2 can proceed as a Tauri shell spike only. Do not add local discovery, folder inspection, packaging, signing, auto-update, telemetry, provider connections, credentials, or file indexing until the trust-boundary design and permission model are complete.
 
 This keeps the current app shippable as a safe hosted/PWA experience while giving the trusted desktop app the extra care it deserves.
