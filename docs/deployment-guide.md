@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-04T21:52:19-06:00
+Status Updated: 2026-07-04T22:10:36-06:00
 
 ## Current Release State
 
 AI Task Router is not publicly launched yet.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Public release remains on hold until the Old Skool AI hub/canonical URL decision, custom-domain smoke if used, GitHub integration or direct-upload release process decision, owner launch decision, and desktop signing/trust gates pass where applicable.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Public release remains on hold until the Old Skool AI hub handoff, canonical URL decision, custom-domain smoke if used, GitHub integration or direct-upload release process decision, owner launch decision, and desktop signing/trust gates pass where applicable.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -45,7 +45,7 @@ Future public hosting decision:
 - planned link sources: `oldskoolai.com` as the main hub, with `guidedailabs.com` and `guidedaijourney.com` linking there
 - planned social link sources after release gate: YouTube, Facebook, and LinkedIn
 
-The canonical public URL still needs owner confirmation before public launch. Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies.
+The canonical public URL still needs owner confirmation before public launch. Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies. Use the [public launch master plan](2026-07-04-public-launch-master-plan.md) as the controlling release map before adding public links.
 
 ## Deployment Steps
 
@@ -53,17 +53,19 @@ D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds 
 
 Future hosted web/PWA release should use this shape:
 
-1. Use the D8 evidence packet as the local release-candidate baseline.
-2. Use the D9 hosted preview packet as the first Cloudflare Pages smoke baseline.
-3. Decide whether production uses Cloudflare Pages GitHub integration or a documented Wrangler direct-upload release process.
-4. Use build command `npm ci && npm run build`.
-5. Use output directory `dist`.
-6. Confirm the manifest, 192px and 512px icons, service worker, and install copy are present over HTTPS.
-7. Confirm no provider calls, credentials, telemetry, hidden uploads, or browser-based desktop-discovery claims are present in the hosted web build.
-8. Confirm HTTPS and canonical URL behavior.
-9. Smoke test primary flows on desktop and mobile browsers.
-10. Confirm rollback to a previous Pages production deployment before public launch.
-11. Add public website and social links only after the preview and custom-domain smoke pass.
+1. Use the D11 public launch master plan as the release map.
+2. Prepare the D12 Old Skool AI hub handoff before adding public links.
+3. Use the D8 evidence packet as the local release-candidate baseline.
+4. Use the D9 hosted preview packet as the first Cloudflare Pages smoke baseline.
+5. Decide whether production uses Cloudflare Pages GitHub integration or a documented Wrangler direct-upload release process.
+6. Use build command `npm ci && npm run build`.
+7. Use output directory `dist`.
+8. Confirm the manifest, 192px and 512px icons, service worker, and install copy are present over HTTPS.
+9. Confirm no provider calls, credentials, telemetry, hidden uploads, or browser-based desktop-discovery claims are present in the hosted web build.
+10. Confirm HTTPS and canonical URL behavior.
+11. Smoke test primary flows on desktop and mobile browsers.
+12. Confirm rollback to a previous Pages production deployment before public launch.
+13. Add public website and social links only after the preview and custom-domain smoke pass.
 
 Local production preview command:
 
@@ -83,7 +85,7 @@ npx playwright test
 
 D9 caveat: Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node HTTPS/fetch and Chromium succeeded. Retest normal browsers and the final custom domain before public launch.
 
-Future desktop distribution is separate from web hosting. Desktop Chunk D6 added an internal unsigned Windows NSIS package path for evidence only. Desktop Chunk D10 adds a manual GitHub Actions technical-preview lane for Windows/macOS/Linux artifacts, documented in [desktop technical preview artifacts](2026-07-04-desktop-technical-preview-artifacts.md). Use [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md) and [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) before any public signing, notarization, public installers, or public download links.
+Future desktop distribution is separate from web hosting. Desktop Chunk D6 added an internal unsigned Windows NSIS package path for evidence only. Desktop Chunk D10 adds a manual GitHub Actions technical-preview lane for Windows/macOS/Linux artifacts, documented in [desktop technical preview artifacts](2026-07-04-desktop-technical-preview-artifacts.md). Use [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md), [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md), and [public launch master plan](2026-07-04-public-launch-master-plan.md) before any public signing, notarization, public installers, or public download links.
 
 Internal Windows packaging evidence command:
 

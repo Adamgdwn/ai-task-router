@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T21:52:19-06:00
+Last Updated: 2026-07-04T22:10:36-06:00
 Status: active
 Owner: Technical Lead
 
@@ -46,7 +46,7 @@ Troubleshooting:
 
 ### Public Web Release Readiness
 
-As of 2026-07-04T21:05:03-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, and D9 created the first Cloudflare Pages hosted preview:
+As of 2026-07-04T22:10:36-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, and D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md):
 
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
@@ -55,6 +55,7 @@ As of 2026-07-04T21:05:03-06:00, D7 selected the intended free distribution path
 - YouTube, Facebook, and LinkedIn links should wait until the web/PWA release gate passes.
 - D8 added `npm run scan:web-rc` for production artifact checks.
 - D9 added hosted Playwright support through `PLAYWRIGHT_BASE_URL`.
+- D11 recommends D12 as the Old Skool AI hub handoff package before public site links, DNS, GitHub Releases, social launch, or desktop download buttons.
 
 Minimum pre-public checks:
 
@@ -85,6 +86,7 @@ Release troubleshooting:
 - Confirm public copy says the browser/PWA app cannot check the computer.
 - Use [release and security readiness packet](2026-07-04-release-security-readiness-packet.md) as the D7 gate.
 - Use [web release candidate security pass](2026-07-04-web-release-candidate-security-pass.md) as the D8 local evidence packet.
+- Use [public launch master plan](2026-07-04-public-launch-master-plan.md) as the controlling release map.
 
 ### Desktop Technical-Preview Artifacts
 

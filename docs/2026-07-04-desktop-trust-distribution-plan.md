@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.11.0
+Version: 0.12.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before public website download links, signing work, or controlled desktop beta work
-Last Updated: 2026-07-04T21:52:19-06:00
-Status Updated: 2026-07-04T21:52:19-06:00
+Last Updated: 2026-07-04T22:10:36-06:00
+Status Updated: 2026-07-04T22:10:36-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence. D9 creates and smokes the Cloudflare Pages hosted preview. D10 adds a manual GitHub Actions technical-preview artifact lane for Windows, macOS, and Linux, plus checksum generation, and locally verifies the Windows technical-preview NSIS package while holding public desktop downloads until signing/notarization and smoke gates pass. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence. D9 creates and smokes the Cloudflare Pages hosted preview. D10 adds a manual GitHub Actions technical-preview artifact lane for Windows, macOS, and Linux, plus checksum generation, and locally verifies the Windows technical-preview NSIS package while holding public desktop downloads until signing/notarization and smoke gates pass. D11 adds the public launch master plan so Old Skool AI hub work, hosted web/PWA release, desktop trust gates, cybersecurity checks, support/withdrawal needs, and go/no-go decisions are controlled before public distribution. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
 
 ## Purpose
 
@@ -35,7 +35,7 @@ The desktop version exists because local machine inspection changes the trust pr
 - The desktop prototype now has a D4 `Check this computer` flow for selected local AI tools only; it does not return paths, run at startup, use broad Tauri plugin permissions, or claim public packaging/signing readiness.
 - The hosted/browser install path does not perform local discovery. It says computer checking requires the desktop app.
 - The D6 internal Windows package path can generate an unsigned NSIS installer for evidence only. It is not public release readiness.
-- The D8 web/PWA release-candidate pass is complete locally, but Cloudflare hosting has not been created or smoke tested yet.
+- The D8 web/PWA release-candidate pass is complete locally, and D9 created a Cloudflare Pages hosted preview for smoke testing.
 
 The current project classification in `project-control.yaml` is:
 
@@ -1263,6 +1263,23 @@ Current desktop artifact lanes:
 | macOS DMG technical preview | workflow-ready, not run locally | No | Unsigned/unnotarized until Apple Developer ID and notarization are configured and proven. |
 | Linux AppImage/`.deb` technical preview | workflow-ready, not run locally | No | Needs Linux smoke, checksum/signature decision, dependency notes, and install/uninstall notes before public links. |
 
+### Desktop Chunk D11 - Public Launch Master Plan
+
+Status: task complete, release hold
+
+Status Updated: 2026-07-04T22:10:36-06:00
+
+Decision packet:
+
+- [Public Launch Master Plan](2026-07-04-public-launch-master-plan.md)
+
+D11 result:
+
+- Created one controlling release map for the Old Skool AI hub, hosted web/PWA app, desktop download lanes, cybersecurity checks, support/withdrawal needs, and public go/no-go decisions.
+- Recommended the first public shape: one Old Skool AI hub/tab as the friendly doorway, with `guidedailabs.com` and `guidedaijourney.com` linking there, and one Cloudflare Pages-backed app destination for online use.
+- Kept public desktop downloads held until signing/notarization, checksum, platform smoke, support/withdrawal copy, and owner launch approval pass.
+- Recommended D12 as the Old Skool AI hub handoff package, not a DNS, GitHub Release, social launch, or desktop download chunk.
+
 ## Open Decisions
 
 - Canonical public hub: owner preference is an Old Skool AI tab/page that links from the other two sites and eventually contains both "use online" and desktop download choices.
@@ -1303,6 +1320,7 @@ Current desktop artifact lanes:
 
 Choose the next lane deliberately:
 
+- For public hub work, run D12 Old Skool AI hub handoff package: page/tab instructions, online-app copy, held desktop-download copy, cross-site link instructions, and rollback/removal notes.
 - For hosted release engineering, choose the canonical public URL, decide whether Cloudflare Pages should be GitHub-connected before production or use a documented direct-upload release process, then smoke the canonical/custom domain before adding public links.
 - For product completion, run Chunk Sixteen MVP polish and documentation if the owner wants docs tightened before public launch.
 - For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests or creating a controlled desktop beta.

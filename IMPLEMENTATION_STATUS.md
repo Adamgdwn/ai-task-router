@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T21:52:19-06:00
-Status: d10-desktop-technical-preview-artifact-lane-draft-complete-public-download-hold
-Status Updated: 2026-07-04T21:52:19-06:00
+Last Updated: 2026-07-04T22:10:36-06:00
+Status: d11-public-launch-master-plan-task-complete-release-hold
+Status Updated: 2026-07-04T22:10:36-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D10 desktop technical-preview artifact lane, building on D9 Cloudflare hosted preview smoke and D6 packaging/signing evidence.
+Desktop Chunk D11 public launch master plan, building on D9 Cloudflare hosted preview smoke, D10 desktop technical-preview artifact lane, and D6 packaging/signing evidence.
 
-Completion target: Draft complete, public download hold.
+Completion target: Task complete, release hold.
 
-Current state: D10 adds a manual GitHub Actions workflow and local scripts for Windows, macOS, and Linux technical-preview desktop artifacts with SHA-256 checksum generation. Public desktop downloads are still held. The browser/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. The next public-release step is owner-confirmed Old Skool AI hub/canonical URL selection, Cloudflare GitHub-integration/direct-upload decision, custom-domain smoke if used, desktop signing/trust work where applicable, and owner launch decision before public website links, desktop downloads, or social launch.
+Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map for the Old Skool AI hub, hosted web/PWA release gates, desktop trust/signing gates, cybersecurity checklist, support/withdrawal needs, and public go/no-go board. Public desktop downloads are still held. The browser/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. The next public-release step is D12 Old Skool AI hub handoff, then owner-confirmed canonical URL selection, Cloudflare GitHub-integration/direct-upload decision, custom-domain smoke if used, desktop signing/trust work where applicable, and owner launch decision before public website links, desktop downloads, or social launch.
 
 ## Scope
 
@@ -101,9 +101,17 @@ D10 provides:
 - Package scripts for Windows NSIS, macOS DMG, Linux AppImage, and Linux `.deb` technical-preview builds.
 - `npm run desktop:checksums`, which writes `SHA256SUMS.txt` beside generated desktop packages.
 
+D11 provides:
+
+- `docs/2026-07-04-public-launch-master-plan.md`, the public release execution map.
+- A recommended first public shape: Old Skool AI as the hub/tab, with Guided AI Labs and Guided AI Journey linking there, and one Cloudflare Pages-backed app destination for online use.
+- Separated release lanes for public hub, hosted web/PWA, Windows desktop, macOS desktop, Linux desktop, and public support.
+- A phase plan from master-plan baseline through Old Skool AI hub handoff, Cloudflare production decision, hosted release gate, desktop trust/signing readiness, controlled beta, and public desktop downloads.
+- A public go/no-go board for unresolved owner and technical decisions.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, and a D9 Cloudflare Pages hosted test preview. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, public website links, social launch links, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, and a D9 Cloudflare Pages hosted test preview. D11 adds planning/control documentation only. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, public website links, social launch links, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -200,6 +208,8 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D10 `npm run desktop:checksums` wrote `src-tauri\target\release\bundle\SHA256SUMS.txt`.
 - D10 `Get-AuthenticodeSignature` reported `NotSigned` for both the Windows NSIS installer and rebuilt release executable.
 - D10 `git diff --check` passed with only normal Windows LF-to-CRLF notices.
+- D11 governance preflight passed with 0 warnings before public launch master planning.
+- D11 close-out validation passed: governance preflight reported 0 warnings, `git diff --check` reported only normal Windows LF-to-CRLF notices, and the release-boundary text scan found only correction or negative-boundary references.
 
 ## Known Gaps
 
@@ -220,9 +230,10 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node and Chromium passed; retest normal browsers and final domain before public launch.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If the hosted app is deployed under a subpath rather than a domain root, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
+- Public launch now has a master plan, but the D12 Old Skool AI hub handoff package has not been created yet.
 
 ## Next Chunk
 
-Choose the Old Skool AI hub implementation path, decide whether the hosted app should live under a subpath, Cloudflare Pages default URL, or a new owned subdomain, and decide whether to run the D10 workflow now for internal technical-preview artifacts. Run Chunk Sixteen first if the owner wants documentation and polish tightened before public launch.
+Run D12 as the Old Skool AI hub handoff package: exact Linux-side page/tab instructions, online-app copy, held desktop-download copy, cross-site link instructions for `guidedailabs.com` and `guidedaijourney.com`, and rollback/removal notes.
 
-Proceeding beyond D10 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, Cloudflare production/canonical launch, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.
+Proceeding beyond D11 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, Cloudflare production/canonical launch, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.

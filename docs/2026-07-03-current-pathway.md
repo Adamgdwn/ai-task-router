@@ -1,15 +1,15 @@
 # Current Build Pathway
 
 Document ID: PATH-ENG-001
-Version: 0.5.0
+Version: 0.6.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-04T21:52:19-06:00
-Status Updated: 2026-07-04T21:52:19-06:00
+Last Updated: 2026-07-04T22:10:36-06:00
+Status Updated: 2026-07-04T22:10:36-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -21,11 +21,11 @@ The current product source is [docs/PRODUCT_BRIEF.md](PRODUCT_BRIEF.md), derived
 
 ## Future Distribution Note
 
-Reference only as of 2026-07-04T21:49:15-06:00: the owner wants Old Skool AI to be the primary public product/download hub, with `guidedailabs.com` and `guidedaijourney.com` linking there. The owner also wants Windows, Mac, and Linux downloads as soon as possible. D10 adds a manual technical-preview artifact lane for Windows/macOS/Linux builds, but public ordinary-user desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner launch approval pass. D9 created a Cloudflare Pages direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`; it is for smoke testing, not public launch.
+Reference only as of 2026-07-04T22:10:36-06:00: the owner wants Old Skool AI to be the primary public product/download hub, with `guidedailabs.com` and `guidedaijourney.com` linking there. The owner also wants Windows, Mac, and Linux downloads as soon as possible. D10 adds a manual technical-preview artifact lane for Windows/macOS/Linux builds, but public ordinary-user desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner launch approval pass. D11 adds the public launch master plan in [docs/2026-07-04-public-launch-master-plan.md](2026-07-04-public-launch-master-plan.md), making the Old Skool AI hub, hosted web/PWA, desktop trust gates, support/withdrawal needs, and go/no-go board the controlled release map. D9 created a Cloudflare Pages direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`; it is for smoke testing, not public launch.
 
 ## Future Desktop Trust Note
 
-Reference only as of 2026-07-04T21:49:15-06:00: the project should keep two distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md). Desktop Chunk D0 is confirmed for planning, Desktop Chunk D1 selected Tauri for the first shell spike in [ADR-0001](decisions/adr-0001-desktop-wrapper.md), Desktop Chunk D2 has the shell scaffold and Windows prerequisites, Desktop Chunk D3 defined the trust-boundary contract and CSP hardening, Desktop Chunk D4 implements a desktop-only `Check this computer` local AI tool discovery flow using custom Rust commands, Desktop Chunk D5 implements the hosted/browser PWA install path, Desktop Chunk D6 adds an opt-in internal Windows NSIS packaging path plus signing requirements documentation, Desktop Chunk D7 records the release/security readiness packet in [docs/2026-07-04-release-security-readiness-packet.md](2026-07-04-release-security-readiness-packet.md), D8 records the web/PWA release-candidate security pass in [docs/2026-07-04-web-release-candidate-security-pass.md](2026-07-04-web-release-candidate-security-pass.md), D9 records the Cloudflare Pages hosted preview smoke in [docs/2026-07-04-cloudflare-pages-hosted-preview-smoke.md](2026-07-04-cloudflare-pages-hosted-preview-smoke.md), and D10 records the manual desktop technical-preview artifact lane in [docs/2026-07-04-desktop-technical-preview-artifacts.md](2026-07-04-desktop-technical-preview-artifacts.md). D4 keeps broad Tauri plugin permissions empty, rejects path details, hides model names by default, does not run startup/background scans, and validates with build-only desktop checks because Windows Application Control still blocks dev-mode, unsigned release executable launch, and final execution of the generated release Rust test binary. D5 adds manifest/install icons/service worker/install copy only; browser/PWA local discovery remains prohibited. D6 generated an unsigned internal NSIS artifact for evidence only; D10 can generate unsigned/unnotarized technical-preview artifacts for platform verification only. Public release remains held until canonical URL/Old Skool AI hub decisions, custom-domain smoke if used, GitHub integration or direct-upload release process decision, desktop signing/trust evidence where applicable, and owner launch decision pass. The terminal `npm run detect:local-models` command remains separate and explicit.
+Reference only as of 2026-07-04T22:10:36-06:00: the project should keep two distribution options open: a hosted/PWA web app for low-friction use and a signed desktop app for permissioned local machine discovery. The detailed planning baseline is [docs/2026-07-04-desktop-trust-distribution-plan.md](2026-07-04-desktop-trust-distribution-plan.md), and the public release execution map is [docs/2026-07-04-public-launch-master-plan.md](2026-07-04-public-launch-master-plan.md). Desktop Chunk D0 is confirmed for planning, Desktop Chunk D1 selected Tauri for the first shell spike in [ADR-0001](decisions/adr-0001-desktop-wrapper.md), Desktop Chunk D2 has the shell scaffold and Windows prerequisites, Desktop Chunk D3 defined the trust-boundary contract and CSP hardening, Desktop Chunk D4 implements a desktop-only `Check this computer` local AI tool discovery flow using custom Rust commands, Desktop Chunk D5 implements the hosted/browser PWA install path, Desktop Chunk D6 adds an opt-in internal Windows NSIS packaging path plus signing requirements documentation, Desktop Chunk D7 records the release/security readiness packet in [docs/2026-07-04-release-security-readiness-packet.md](2026-07-04-release-security-readiness-packet.md), D8 records the web/PWA release-candidate security pass in [docs/2026-07-04-web-release-candidate-security-pass.md](2026-07-04-web-release-candidate-security-pass.md), D9 records the Cloudflare Pages hosted preview smoke in [docs/2026-07-04-cloudflare-pages-hosted-preview-smoke.md](2026-07-04-cloudflare-pages-hosted-preview-smoke.md), D10 records the manual desktop technical-preview artifact lane in [docs/2026-07-04-desktop-technical-preview-artifacts.md](2026-07-04-desktop-technical-preview-artifacts.md), and D11 records the public launch master plan. D4 keeps broad Tauri plugin permissions empty, rejects path details, hides model names by default, does not run startup/background scans, and validates with build-only desktop checks because Windows Application Control still blocks dev-mode, unsigned release executable launch, and final execution of the generated release Rust test binary. D5 adds manifest/install icons/service worker/install copy only; browser/PWA local discovery remains prohibited. D6 generated an unsigned internal NSIS artifact for evidence only; D10 can generate unsigned/unnotarized technical-preview artifacts for platform verification only. Public release remains held until canonical URL/Old Skool AI hub decisions, custom-domain smoke if used, GitHub integration or direct-upload release process decision, desktop signing/trust evidence where applicable, and owner launch decision pass. The terminal `npm run detect:local-models` command remains separate and explicit.
 
 ## Future Product Planning Note
 
@@ -120,6 +120,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Canonical URL owner correction | complete | 2026-07-04T20:49:44-06:00 | Technical Lead | Corrected release handoffs to stop recommending unconfirmed `https://app.oldskoolai.com/`; the canonical URL must now be selected from an owner-controlled root site, subpath, Cloudflare Pages default URL, or newly created subdomain before public launch. |
 | Desktop Chunk D9 Cloudflare Pages hosted preview smoke | task complete, release hold | 2026-07-04T21:05:03-06:00 | Technical Lead | Created Cloudflare Pages project `ai-task-router`, deployed a Wrangler direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`, verified hosted HTTPS behavior with Node and Chromium, ran hosted Playwright E2E, and kept public launch held until canonical URL/custom-domain/GitHub-integration decisions pass. |
 | Desktop Chunk D10 desktop technical-preview artifacts | draft complete, public download hold | 2026-07-04T21:52:19-06:00 | Technical Lead | Added a manual GitHub Actions workflow for Windows/macOS/Linux technical-preview artifacts, a shared Tauri preview bundle config, platform package scripts, and SHA-256 checksum file generation. Local Windows technical-preview packaging passed and produced a `NotSigned` NSIS artifact for technical review only; public downloads remain held until signing/notarization, smoke tests, support/withdrawal copy, and owner public-launch approval pass. |
+| Desktop Chunk D11 public launch master plan | task complete, release hold | 2026-07-04T22:10:36-06:00 | Technical Lead | Added [Public Launch Master Plan](2026-07-04-public-launch-master-plan.md) to control the Old Skool AI hub path, hosted web/PWA release gates, desktop trust/signing gates, cybersecurity checklist, support/withdrawal needs, and public go/no-go board before launch work continues. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -3057,10 +3058,82 @@ Stop condition:
 
 Stop if workflow syntax, package scripts, checksum generation, or local validation fails in a way that would make generated artifacts ambiguous or unsafe to label.
 
+## Desktop Chunk D11 - Public Launch Master Plan
+
+Status: task complete, release hold
+Status Updated: 2026-07-04T22:10:36-06:00
+
+Completion target: Task complete
+
+Budget class: Medium
+
+Objective:
+
+Create one structured public release execution plan so the Old Skool AI hub, hosted web/PWA release, desktop downloads, cybersecurity checks, support path, withdrawal path, and owner go/no-go decisions are controlled before launch work continues.
+
+User outcome:
+
+The owner can see the whole path to free public distribution without guessing which release lane comes next or accidentally treating unsigned desktop artifacts as ordinary-user downloads.
+
+Allowed files or folders:
+
+- `docs/2026-07-04-public-launch-master-plan.md`
+- `docs/2026-07-03-current-pathway.md`
+- `docs/2026-07-04-desktop-trust-distribution-plan.md`
+- `docs/context-map.md`
+- `docs/deployment-guide.md`
+- `docs/roadmap.md`
+- `docs/runbook.md`
+- `docs/CHANGELOG.md`
+- `IMPLEMENTATION_STATUS.md`
+- `README.md`
+
+Non-goals:
+
+- no DNS or custom-domain changes
+- no Cloudflare production promotion
+- no public website link publishing
+- no social launch
+- no public GitHub Release
+- no desktop signing workflow
+- no macOS notarization workflow
+- no public desktop download buttons
+- no D10 manual workflow run
+- no provider connections, telemetry, backend storage, or execution workflow
+
+Product boundary reminders:
+
+- Old Skool AI is the preferred public product hub.
+- The hosted app and desktop app remain separate release lanes.
+- The browser/PWA cannot check the user's computer.
+- Desktop downloads remain held until platform trust gates pass or a separately documented technical-preview exception is accepted.
+- The current MVP remains recommendation-only and local-first.
+
+Implementation:
+
+- Added [Public Launch Master Plan](2026-07-04-public-launch-master-plan.md).
+- Defined launch principles, recommended first public shape, release lanes, phase plan, cybersecurity checklist, copy requirements, and public go/no-go board.
+- Recommended D12 as the Old Skool AI hub handoff package.
+- Updated this pathway, desktop trust plan, deployment guide, runbook, changelog, README, and implementation status so the master plan is discoverable from normal entry points.
+
+Release decision:
+
+Hold public launch. D11 is a planning/control chunk only; public web links, DNS/custom-domain changes, social posts, GitHub Releases, and desktop download buttons remain blocked until their release gates pass and owner launch approval is recorded.
+
+Rollback or recovery:
+
+Remove `docs/2026-07-04-public-launch-master-plan.md` and revert the D11 documentation references. No provider-side state, DNS, public release, artifact publication, or desktop signing state is created by this chunk.
+
+Stop condition:
+
+Stop if the master plan blurs web/PWA and desktop release gates, implies public desktop downloads are ready, or creates any external release side effect.
+
 ## Validation Log
 
 | Timestamp | Command | Result | Notes |
 |-----------|---------|--------|-------|
+| 2026-07-04T22:10:36-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; text scan for unconfirmed URL and premature desktop-download claims | passed | D11 close-out validation passed. Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; text scan found only correction/negative-boundary references for `app.oldskoolai.com`, "public desktop downloads are ready", and "safe to install". |
+| 2026-07-04T22:03:36-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance preflight reported 0 warnings before D11 public launch master planning. |
 | 2026-07-04T21:52:19-06:00 | `bash scripts/governance-preflight.sh`; `node --check scripts/inspect-desktop-artifacts.mjs`; `node --check scripts/inspect-desktop-artifacts.node-test.mjs`; JSON parse check; `npx --yes yaml-lint .github/workflows/desktop-technical-preview.yml`; `npm audit --audit-level=moderate`; `npm run test:scripts`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `npm run desktop:package:windows:technical-preview`; `npm run desktop:artifacts`; `npm run desktop:checksums`; `Get-AuthenticodeSignature`; `git diff --check` | passed with public download hold | D10 validation passed. Governance preflight reported 0 warnings; syntax and JSON checks passed; workflow YAML parsed; audit found 0 vulnerabilities; script tests passed 4 tests; Vitest passed 12 files and 88 tests; production build passed with existing 519.84 kB chunk-size warning; web RC scan found no release-blocking findings; Windows technical-preview NSIS package built; `npm run desktop:artifacts` reported size `1.90 MiB` and SHA-256 `C6438D8EDBDFFEC8375D9538373F4C2E681DE02EE037474C1C0C11B006CA0B86`; `npm run desktop:checksums` wrote `SHA256SUMS.txt`; `Get-AuthenticodeSignature` reported `NotSigned` for both installer and rebuilt executable; whitespace check reported only normal Windows LF-to-CRLF notices. Remote macOS/Linux workflow artifacts were not generated in this local chunk. |
 | 2026-07-04T21:05:03-06:00 | `bash scripts/governance-preflight.sh`; `npm audit --audit-level=moderate`; `npm run test:scripts`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test`; hosted `PLAYWRIGHT_BASE_URL=... npx playwright test`; Cloudflare Pages project/deployment checks | passed with existing build warning and Windows-curl caveat | D9 hosted preview validation passed. Cloudflare Pages project `ai-task-router` was created, Wrangler direct-upload preview `https://preview-20260704-0c7b253.ai-task-router.pages.dev` was deployed, Node/Chromium HTTPS smoke passed, hosted Playwright passed 6 Chromium tests, audit found 0 vulnerabilities, script tests passed 4 tests, Vitest passed 12 files and 88 tests, build retained the existing 519.84 kB chunk-size warning, and web RC scan found no release-blocking findings. Windows `curl.exe`/PowerShell hit a TLS handshake failure against the preview alias while Node and Chromium succeeded; retest browsers and the final custom domain before public launch. |
 | 2026-07-04T20:35:49-06:00 | `bash scripts/governance-preflight.sh`; `npm audit --audit-level=moderate`; `npm run test:scripts`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test`; `git diff --check` | passed with existing build warning | D8 close-out validation passed. Governance reported 0 warnings; audit found 0 vulnerabilities; Node script tests passed 4 tests; Vitest passed 12 files and 88 tests; production build passed with the existing 519.84 kB chunk-size warning; web RC scan found no release-blocking findings; Playwright passed 6 Chromium tests; whitespace check reported only normal Windows LF-to-CRLF notices. |
@@ -3195,8 +3268,8 @@ Stop if workflow syntax, package scripts, checksum generation, or local validati
 
 ## Next Handoff
 
-D10 is draft complete with a public download hold. The web/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`, and the desktop track now has a manual Windows/macOS/Linux technical-preview artifact workflow plus a locally verified Windows NSIS technical-preview package. Do not publish or share unsigned/unnotarized desktop artifacts with non-technical users. Do not create public GitHub Releases, custom-domain/DNS changes, public desktop downloads, social launch posts, updater flows, or signing workflows without a separate approved chunk and release gate evidence.
+D11 is task complete with a release hold. The public launch master plan is now [docs/2026-07-04-public-launch-master-plan.md](2026-07-04-public-launch-master-plan.md), and it is the controlling map for Old Skool AI hub work, hosted web/PWA release gates, desktop trust/signing gates, cybersecurity checks, support/withdrawal needs, and public go/no-go decisions. The web/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`, and the desktop track has a manual Windows/macOS/Linux technical-preview artifact workflow plus a locally verified Windows NSIS technical-preview package. Do not publish or share unsigned/unnotarized desktop artifacts with non-technical users. Do not create public GitHub Releases, custom-domain/DNS changes, public desktop downloads, social launch posts, updater flows, or signing workflows without a separate approved chunk and release gate evidence.
 
-Recommended next sequence: choose the Old Skool AI hub implementation path and decide whether the online app opens from a Cloudflare Pages URL, a subpath, or a newly created owned subdomain. Decide whether to run the D10 manual workflow now for internal technical-preview artifacts; do not expose those artifacts as public downloads unless a technical-preview exception is explicitly accepted and documented. Retest normal browsers and the final custom domain because Windows `curl.exe`/PowerShell hit a TLS handshake failure against the preview alias while Node and Chromium succeeded. Resolve the Windows Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness.
+Recommended next sequence: run D12 as the Old Skool AI hub handoff package. Create the exact Linux-side page/tab instructions, online-app copy, held desktop-download copy, and cross-site link instructions for `guidedailabs.com` and `guidedaijourney.com`. Keep desktop download buttons hidden or explicitly held until signing and safety checks pass. After D12, choose the canonical hosted app URL and Cloudflare production path, then smoke the final URL before public links or social sharing. Decide whether to run the D10 manual workflow only for internal technical-preview artifacts; do not expose those artifacts as public downloads unless a technical-preview exception is explicitly accepted and documented. Resolve the Windows Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness.
 
 Preserve the conversational UX direction now covered by E2E: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, optional desktop-only `Check this computer`, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not expand local discovery into broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, packaging, signing, updater, or execution workflows without a separate approved chunk.
