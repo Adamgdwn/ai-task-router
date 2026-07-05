@@ -1,15 +1,15 @@
 # AI Task Router Impact Estimator Methodology
 
 Document ID: GUI-ENG-002
-Version: 0.1.0
+Version: 0.2.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-05
 Last Reviewed: 2026-07-05
-Next Review: Before public impact claims, website publication, social launch copy, or in-app estimator release
+Next Review: Before source refresh, exact public savings claims, social launch copy, live pricing tables, or opt-in estimator release
 Timestamp: 2026-07-05T08:52:38-06:00
-Last Updated: 2026-07-05T09:01:13-06:00
+Last Updated: 2026-07-05T09:34:16-06:00
 
 ## Purpose
 
@@ -27,16 +27,20 @@ This is not a public proof that AI Task Router saves a fixed amount of money, en
 
 ## Current Status
 
-Status: Draft complete
+Status: Task complete for public insight panel; methodology remains source-snapshot based
 
-Completion target: Draft complete
+Completion target: Task complete for adding the safe public impact story to the online app
 
 Implemented in this repo:
 
 - `src/domain/impact/impactEstimator.ts`
+- `src/domain/impact/publicImpactSnapshot.ts`
 - `src/tests/unit/impactEstimator.test.ts`
+- `src/ui/screens/TaskRoutingScreens.tsx`
 
-The estimator is not wired into the public UI yet. The first release app still uses qualitative cost and energy preferences in routing. This methodology can support the next public copy/review chunk or a future opt-in estimator feature.
+D16 wires a compact public impact insight into the Best Options screen and adds a small Start Here skill-building cue. The public panel uses one reviewed-source snapshot and visible caveats. It is not a live pricing table, not a provider-usage import, and not a per-user savings calculator.
+
+Deployment and smoke evidence are recorded in [2026-07-05-public-impact-insight-cloudflare-update.md](2026-07-05-public-impact-insight-cloudflare-update.md).
 
 ## Source Refresh Algorithm
 
@@ -235,6 +239,27 @@ Future opt-in estimator:
 - let users edit the inputs
 - avoid telemetry, account connections, and provider billing imports
 
+## Current Public UI
+
+The public app now shows the impact story at the decision moment, directly after the Best Options recommendation summary.
+
+Visible public claims are intentionally bounded:
+
+- "This app does not run AI or promise savings."
+- "Example estimates use reviewed public API pricing and energy research."
+- "They are not your bill, and they are not a guarantee."
+
+The visible examples include:
+
+- a 100k-token API pricing comparison
+- a right-sizing scenario for 100 similar tasks
+- a scenario energy estimate
+- a skill payoff statement about better defaults
+- a recommendation-specific note based on the current best option's resource level
+- a collapsed source list with official pricing and environmental references
+
+The UI does not fetch provider pricing, inspect provider usage history, connect accounts, run AI, send prompts, or collect telemetry.
+
 ## Validation
 
 | Timestamp | Check | Result | Notes |
@@ -244,12 +269,15 @@ Future opt-in estimator:
 | 2026-07-05T08:58:09-06:00 | `npm run test` | passed | Full Vitest suite passed: 13 files and 93 tests. |
 | 2026-07-05T08:58:09-06:00 | `npm run build` | passed with existing warning | TypeScript and Vite production build passed; existing 519.84 kB chunk-size warning remains. |
 | 2026-07-05T09:01:13-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices. |
+| 2026-07-05T09:30:02-06:00 | `npm run test -- impactEstimator`; `npm run test -- App` | passed | Focused D16 tests passed: impact suite 1 file and 7 tests; App suite 1 file and 14 tests. |
+| 2026-07-05T09:30:21-06:00 | `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test` | passed with existing build warning | Full Vitest passed 13 files and 95 tests; production build passed with existing Vite chunk-size warning; web RC scan passed; local Playwright passed 6 Chromium tests. |
+| 2026-07-05T09:34:16-06:00 | Local visual smoke and hosted production smoke | passed | Desktop/mobile preview checks had no horizontal overflow; source details opened cleanly on mobile; Cloudflare production deployment and hosted Playwright/Chromium impact smoke passed. |
 
 ## Handoff
 
-This chunk creates the calculation backbone and claim-safe methodology. The next bounded chunk can be either:
+This methodology now supports the public in-app impact insight while preserving safe claim boundaries. The next bounded chunk can be either:
 
-- public copy review for a video, LinkedIn, Facebook, or YouTube launch post using the safe language above
+- public copy review for a video, LinkedIn, Facebook, or YouTube launch post using the safe language now visible in the app
 - a small in-app estimator UI that remains local-only and opt-in
 - an Old Skool AI methodology page, after owner review and a fresh source check
 

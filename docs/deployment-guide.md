@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-05T07:57:15-06:00
+Status Updated: 2026-07-05T09:34:16-06:00
 
 ## Current Release State
 
-AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`.
+AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`. D16 updated the production app with the public impact insight panel.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). Social launch, custom-domain work, and public desktop downloads remain separate gated chunks.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 records the [public impact insight Cloudflare update](2026-07-05-public-impact-insight-cloudflare-update.md). Social launch, custom-domain work, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -49,7 +49,7 @@ Prefer one app/tool destination linked from the Old Skool AI hub instead of thre
 
 ## Deployment Steps
 
-D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. D13 deployed the production Pages URL through Wrangler direct upload. D14 published the Old Skool AI hub and cross-site links. No custom domain, DNS change, social launch post, public GitHub Release, or public desktop download has been created.
+D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. D13 deployed the production Pages URL through Wrangler direct upload. D14 published the Old Skool AI hub and cross-site links. D16 redeployed the same production Pages URL with the public impact insight panel from source `b4daec6`. No custom domain, DNS change, social launch post, public GitHub Release, exact public savings claim, live pricing fetch, or public desktop download has been created.
 
 Future hosted web/PWA release should use this shape:
 

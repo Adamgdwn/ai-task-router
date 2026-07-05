@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D15 impact-estimator methodology is draft complete; social launch, custom domains, exact public savings claims, and public desktop downloads remain separate gated chunks
-Status Updated: 2026-07-05T09:01:13-06:00
+Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D16 public impact insight UI is deployed; social launch, custom domains, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
+Status Updated: 2026-07-05T09:34:16-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -45,6 +45,8 @@ Active plan: [docs/2026-07-03-current-pathway.md](docs/2026-07-03-current-pathwa
 Product brief: [docs/PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md)
 
 Impact-estimator methodology: [docs/2026-07-05-impact-estimator-methodology.md](docs/2026-07-05-impact-estimator-methodology.md)
+
+Public impact insight update: [docs/2026-07-05-public-impact-insight-cloudflare-update.md](docs/2026-07-05-public-impact-insight-cloudflare-update.md)
 
 ## Planned Stack
 
@@ -160,7 +162,7 @@ npm run desktop:checksums
 
 Windows can be built on this Windows lab. macOS and Linux packages should be built on matching OS runners, using the manual GitHub Actions workflow `Desktop Technical Preview Artifacts`. These artifacts are for owner/developer inspection only until signing, notarization, checksums, install/launch/uninstall smoke, support/withdrawal copy, and owner launch approval pass.
 
-Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). Do not use the D9 preview alias in public links.
+Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). Do not use the D9 preview alias in public links.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -208,6 +210,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Old Skool AI hub handoff package](docs/2026-07-04-old-skool-ai-hub-handoff.md)
 - [Cloudflare production launch smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md)
 - [Public hub and cross-site link smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md)
+- [Public impact insight Cloudflare update](docs/2026-07-05-public-impact-insight-cloudflare-update.md)
 - [Release and security readiness packet](docs/2026-07-04-release-security-readiness-packet.md)
 - [Web release candidate security pass](docs/2026-07-04-web-release-candidate-security-pass.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)

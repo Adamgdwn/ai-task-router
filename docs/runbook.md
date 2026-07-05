@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-05T07:57:15-06:00
+Last Updated: 2026-07-05T09:34:16-06:00
 Status: active
 Owner: Technical Lead
 
@@ -46,7 +46,7 @@ Troubleshooting:
 
 ### Public Web Release Readiness
 
-As of 2026-07-05T07:22:04-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), and D13 deployed the production web/PWA app:
+As of 2026-07-05T09:34:16-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), D13 deployed the production web/PWA app, D14 published the public hub/cross-site links, and D16 redeployed the production app with the public impact insight panel:
 
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
@@ -58,9 +58,10 @@ As of 2026-07-05T07:22:04-06:00, D7 selected the intended free distribution path
 - Link `guidedailabs.com` and `guidedaijourney.com` to the Old Skool AI hub rather than separate app copies; D14 published and smoked those links.
 - The first canonical app URL is the Cloudflare Pages production URL; no custom domain has been attached.
 - YouTube, Facebook, and LinkedIn links should wait for a separate owner-approved social launch copy/review chunk.
+- Exact public savings, carbon, water, or bill-reduction claims should wait for a separate source-refresh and owner-review chunk.
 - D8 added `npm run scan:web-rc` for production artifact checks.
 - D9 added hosted Playwright support through `PLAYWRIGHT_BASE_URL`.
-- D13 is the Cloudflare production launch smoke packet. D14 is the public hub and cross-site link smoke packet. The next release step is owner approval for social sharing or a separate desktop trust/signing chunk.
+- D13 is the Cloudflare production launch smoke packet. D14 is the public hub and cross-site link smoke packet. D16 is the public impact insight Cloudflare update packet. The next release step is owner approval for social sharing or a separate desktop trust/signing chunk.
 
 Minimum pre-public checks:
 

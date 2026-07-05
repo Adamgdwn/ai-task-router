@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-05T09:01:13-06:00
-Status: d15-impact-estimator-methodology-draft-complete
-Status Updated: 2026-07-05T09:01:13-06:00
+Last Updated: 2026-07-05T09:34:16-06:00
+Status: d16-public-impact-insight-deployed
+Status Updated: 2026-07-05T09:34:16-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Impact estimator methodology draft, building on Desktop Chunk D14 public hub and cross-site link smoke, D13 Cloudflare production launch smoke, D12 Old Skool AI hub handoff package, D11 public launch master plan, D9 Cloudflare hosted preview smoke, D10 desktop technical-preview artifact lane, and D6 packaging/signing evidence.
+Public impact insight UI deployed, building on D15 impact estimator methodology, Desktop Chunk D14 public hub and cross-site link smoke, D13 Cloudflare production launch smoke, D12 Old Skool AI hub handoff package, D11 public launch master plan, D9 Cloudflare hosted preview smoke, D10 desktop technical-preview artifact lane, and D6 packaging/signing evidence.
 
-Completion target: Draft complete for impact calculation methodology.
+Completion target: Task complete for public impact insight UI and production web update.
 
-Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package, D13 adds `docs/2026-07-05-cloudflare-production-launch-smoke.md` as the production web/PWA evidence packet, D14 adds `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md` as the public hub/cross-site evidence packet, and D15 adds `docs/2026-07-05-impact-estimator-methodology.md` as the impact calculation methodology. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Public desktop downloads, social launch posts, custom-domain/DNS work, exact public savings claims, live pricing tables, and GitHub Releases remain separate gated chunks.
+Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package, D13 adds `docs/2026-07-05-cloudflare-production-launch-smoke.md` as the production web/PWA evidence packet, D14 adds `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md` as the public hub/cross-site evidence packet, D15 adds `docs/2026-07-05-impact-estimator-methodology.md` as the impact calculation methodology, and D16 adds `docs/2026-07-05-public-impact-insight-cloudflare-update.md` as the public impact UI production-update evidence packet. The browser/PWA app is live at `https://ai-task-router.pages.dev/` with the public impact insight in Best Options, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Public desktop downloads, social launch posts, custom-domain/DNS work, exact public savings claims, live pricing fetches, live pricing tables, provider connections, and GitHub Releases remain separate gated chunks.
 
 ## Scope
 
@@ -140,9 +140,17 @@ D15 provides:
 - `src/domain/impact/impactEstimator.ts`, a deterministic local calculation module with reviewed-source pricing anchors and scenario energy anchors.
 - `src/tests/unit/impactEstimator.test.ts`, covering 100k-token math, cached input pricing, right-sizing cost savings, energy/water ranges, and source anchoring.
 
+D16 provides:
+
+- `src/domain/impact/publicImpactSnapshot.ts`, a reviewed-source public snapshot for the in-app impact panel.
+- A Best Options impact insight section with 100k-token pricing, right-sizing, energy, skill payoff, route-specific framing, caveats, and official source links.
+- A Start Here cue that the app helps build judgment about when a smaller route is enough.
+- `scripts/web-release-candidate-scan.mjs` allowlist entries for the official source links, while retaining the unexpected external URL release gate.
+- `docs/2026-07-05-public-impact-insight-cloudflare-update.md`, the Cloudflare production update and smoke packet for deployment `cd2c5112` from source `b4daec6`.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, D9 Cloudflare Pages hosted test preview, D13 Cloudflare Pages production deployment, and D14 public hub/cross-site links. D11 adds planning/control documentation, D12 adds website handoff documentation, D13 adds production web launch evidence, D14 adds public web doorway evidence, and D15 adds draft impact-estimator methodology without wiring it into the UI. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, social launch links, public desktop downloads, exact public savings claims, live pricing fetches, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, D9 Cloudflare Pages hosted test preview, D13 Cloudflare Pages production deployment, D14 public hub/cross-site links, and D16 public impact insight UI. D11 adds planning/control documentation, D12 adds website handoff documentation, D13 adds production web launch evidence, D14 adds public web doorway evidence, D15 adds impact-estimator methodology, and D16 wires a caveated reviewed-source impact story into the public Best Options screen. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, social launch links, public desktop downloads, exact public savings claims, live pricing fetches, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -248,6 +256,16 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D15 full unit validation passed: `npm run test` ran 13 files and 93 tests.
 - D15 production build passed with the existing Vite chunk-size warning.
 - D15 close-out governance and whitespace checks passed: `bash scripts/governance-preflight.sh` reported 0 warnings and `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- D16 governance preflight passed with 0 warnings before public UI/release work.
+- D16 focused validation passed: `npm run test -- impactEstimator` ran 1 file and 7 tests; `npm run test -- App` ran 1 file and 14 tests.
+- D16 full unit validation passed: `npm run test` ran 13 files and 95 tests.
+- D16 production build passed with the existing Vite chunk-size warning.
+- D16 web release-candidate scan passed after official source links were explicitly allowlisted.
+- D16 local Playwright passed 6 Chromium tests, including the impact insight assertion.
+- D16 local visual smoke passed on desktop and mobile, including source-details-open mobile with no horizontal overflow.
+- D16 Cloudflare production deployment passed: `b4daec6` deployed to `https://cd2c5112.ai-task-router.pages.dev`; canonical `https://ai-task-router.pages.dev/` served root, manifest, service worker, and PWA icons with HTTP 200.
+- D16 hosted Playwright passed 6 Chromium tests against `https://ai-task-router.pages.dev`.
+- D16 hosted Chromium impact smoke passed: impact panel rendered, caveat was visible, initial load observed 0 external requests, and no desktop horizontal overflow.
 
 ## Known Gaps
 
@@ -266,7 +284,7 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Guided AI Journey local `main` still has the pre-existing unpushed commit `236fd7e` and is intentionally ahead/behind `origin/main`; D14 was safely pushed from a temporary worktree based on `origin/main` as commit `610438b`.
 - A first Vercel deploy attempt from the temporary Journey worktree targeted an accidental temporary Vercel project before `.vercel/project.json` was copied from the real repo. The correct production deployment succeeded and is aliased to `https://www.guidedaijourney.com/`; cleanup of the accidental temporary provider object remains a follow-up if desired.
 - Public social launch links have not been created.
-- The D15 impact estimator is not wired into the public UI, published as a public methodology page, or approved as exact public savings claims.
+- The D16 public impact panel is not an opt-in user-specific savings calculator and is not approved as exact public savings claims.
 - Provider pricing and environmental anchors must be refreshed before public impact claims because pricing, model routing, infrastructure, and provider disclosures change.
 - Custom-domain/DNS work has not been done.
 - Windows `curl.exe` and PowerShell `Invoke-WebRequest` passed against the production Pages URL; the D9 preview alias remains historical only.
@@ -276,6 +294,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Choose the next bounded lane: owner-reviewed social/video launch copy using the D15 safe impact language, a reviewed methodology page, an opt-in local estimator UI, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved release chunk. Keep public desktop downloads held.
+Choose the next bounded lane: owner-reviewed social/video launch copy using the now-public safe impact language, a reviewed methodology page, an opt-in local estimator UI, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved release chunk. Keep public desktop downloads held.
 
-Proceeding beyond D15 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, live pricing fetches, exact public savings claims, or external actions without a separate approved chunk.
+Proceeding beyond D16 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, live pricing fetches, exact public savings claims, or external actions without a separate approved chunk.
