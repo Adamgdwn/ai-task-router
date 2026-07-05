@@ -1,15 +1,15 @@
 # Current Build Pathway
 
 Document ID: PATH-ENG-001
-Version: 0.4.8
+Version: 0.4.9
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-04T19:34:29-06:00
-Status Updated: 2026-07-04T19:34:29-06:00
+Last Updated: 2026-07-04T20:02:34-06:00
+Status Updated: 2026-07-04T20:02:34-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -115,7 +115,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Desktop Chunk D5 PWA install path | integration complete | 2026-07-04T18:41:17-06:00 | Technical Lead | Added browser install manifest, branded 192px/512px PWA icons, production-only service-worker registration, Start Here install copy, service-worker gating tests, and production-preview evidence that install metadata is served. Browser/PWA local discovery remains prohibited and public hosting was not executed. |
 | Desktop Chunk D6 packaging and signing spike | draft complete | 2026-07-04T19:20:30-06:00 | Technical Lead | Added an opt-in internal Windows NSIS packaging config and script, artifact SHA-256 inspection helper, Node script tests, official-source signing requirements, and an internal unsigned artifact evidence record. Public desktop release remains blocked until platform signing/trust checks pass. |
 | Desktop Chunk D7 release and security readiness packet | task complete, release hold | 2026-07-04T19:34:29-06:00 | Technical Lead | Added the D7 release/security readiness packet, confirmed GitHub plus Cloudflare as the intended free distribution path, recommended one canonical Cloudflare Pages app URL linked from the three existing sites, added a public security policy, and held public release until E2E/cybersecurity gates and desktop signing/trust checks pass. |
-| Chunk Fifteen E2E tests and fixture suite | queued | 2026-07-04T10:20:07-06:00 | Technical Lead | Add practical fixtures and E2E coverage against the corrected researched manual-add and contextual task-include MVP workflows when the owner returns to the web MVP lane. |
+| Chunk Fifteen E2E tests and fixture suite | integration complete | 2026-07-04T20:02:34-06:00 | Technical Lead | Added 22 safe fixture tasks and Playwright E2E coverage for first-run setup, My AI Tools manual-add/local-model/remove/migration behavior, contextual task include choices, routing, saved route cards, prompt-package export preparation, route-log feedback, no-execution controls, and narrow-viewport overflow. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -2555,8 +2555,8 @@ Chunk Fifteen should protect this UX with E2E coverage: no standalone `What To I
 
 ## Chunk Fifteen - E2E Tests And Fixture Suite
 
-Status: active next
-Status Updated: 2026-07-04T10:20:07-06:00
+Status: integration complete
+Status Updated: 2026-07-04T20:02:34-06:00
 
 Completion target: Integration complete
 
@@ -2605,17 +2605,17 @@ Domain terms to use:
 
 Acceptance criteria:
 
-- [ ] Adds at least 20 fixture tasks covering public, internal, confidential, regulated, highly restricted, public-facing risk, current-facts, citation, coding, writing, planning, packaging, and review scenarios.
-- [ ] Adds E2E coverage for first-run setup or seeded defaults.
-- [ ] Adds E2E coverage for My AI Tools: one blank starter row, explicit `Add another tool`, researched provider-specific account dropdowns, Local model choices, `Remove tool`, selected-count updates, stale five-row migration, no selected-chip wrapping, and no horizontal overflow.
-- [ ] Adds E2E coverage that no standalone `What To Include` onboarding screen is present.
-- [ ] Adds E2E coverage for My Task's optional include question, `Nothing specific` default, source-choice selection, and clear behavior.
-- [ ] Adds E2E coverage for task intake to route results.
-- [ ] Adds E2E coverage for route card and prompt package viewing.
-- [ ] Adds E2E coverage for saving a route log entry and adding feedback.
-- [ ] Adds E2E coverage for export-preparation behavior if UI exists.
-- [ ] Adds a boundary test that no "execute", "connect account", or provider-send workflow is present.
-- [ ] E2E tests are deterministic and do not require external network calls after dependencies are installed.
+- [x] Adds at least 20 fixture tasks covering public, internal, confidential, regulated, highly restricted, public-facing risk, current-facts, citation, coding, writing, planning, packaging, and review scenarios.
+- [x] Adds E2E coverage for first-run setup or seeded defaults.
+- [x] Adds E2E coverage for My AI Tools: one blank starter row, explicit `Add another tool`, researched provider-specific account dropdowns, Local model choices, `Remove tool`, selected-count updates, stale five-row migration, no selected-chip wrapping, and no horizontal overflow.
+- [x] Adds E2E coverage that no standalone `What To Include` onboarding screen is present.
+- [x] Adds E2E coverage for My Task's optional include question, `Nothing specific` default, source-choice selection, and clear behavior.
+- [x] Adds E2E coverage for task intake to route results.
+- [x] Adds E2E coverage for route card and prompt package viewing.
+- [x] Adds E2E coverage for saving a route log entry and adding feedback.
+- [x] Adds E2E coverage for export-preparation behavior if UI exists.
+- [x] Adds a boundary test that no "execute", "connect account", or provider-send workflow is present.
+- [x] E2E tests are deterministic and do not require external network calls after dependencies are installed.
 
 Test expectations:
 
@@ -2646,7 +2646,7 @@ Stop when E2E and unit suites pass reliably. Do not perform MVP polish or docume
 
 Handoff note:
 
-Next chunk should polish the MVP, update user/operator docs, and prepare a v0.2 release-readiness review.
+Reached. Chunk Fifteen adds the fixture suite and Playwright E2E coverage for the corrected web MVP workflows. The E2E browser cache dependency was installed with `npx playwright install chromium` on this Windows machine. Next release-path work should run D8 Web Release Candidate And Cybersecurity Pass before public hosting, or Chunk Sixteen if the owner wants a documentation/polish pass first.
 
 ## Chunk Sixteen - MVP Polish And Documentation
 
@@ -2951,11 +2951,12 @@ Stop desktop planning or implementation if the scope expands into background sca
 | 2026-07-04T19:20:30-06:00 | `npm run test`; `npm run test:scripts`; `node --check scripts\inspect-desktop-artifacts.mjs`; `node --check scripts\inspect-desktop-artifacts.node-test.mjs`; `npm run build`; `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:build`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `npm run desktop:artifacts`; `git diff --check` | passed | D6 close-out validation passed after renaming the Node-only script test away from Vitest collection: Vitest suite passed 12 files and 88 tests; Node script suite passed 2 tests; production web build passed with the existing Vite chunk-size warning; no-bundle desktop build passed; audit found 0 vulnerabilities; governance preflight reported 0 warnings; artifact inspection still reported SHA-256 `FF170B0B681AA1954881767524E805C005AF72402C5B0AE7FCB0AF8934AC3BFD`; whitespace check reported only normal Windows LF-to-CRLF notices. |
 | 2026-07-04T19:34:29-06:00 | `bash scripts/governance-preflight.sh`; official source review | passed | D7 readiness startup passed with 0 governance warnings. GitHub Releases/Pages/HTTPS, Cloudflare Pages/custom domains, Microsoft code signing, OWASP ASVS/WSTG, Tauri capabilities, and RustSec references were reviewed before recording the release/security packet. |
 | 2026-07-04T19:41:25-06:00 | `npm run test`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | D7 close-out validation passed: Vitest suite passed 12 files and 88 tests; audit found 0 vulnerabilities; governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices. |
+| 2026-07-04T20:02:34-06:00 | `bash scripts/governance-preflight.sh`; `npm run test`; `npm run build`; `npx playwright test`; `git diff --check` | passed | Chunk Fifteen close-out validation passed: governance preflight reported 0 warnings; Vitest suite passed 12 files and 88 tests; TypeScript/Vite production build passed with the existing chunk-size warning; Playwright ran 6 Chromium tests covering fixtures, first-run setup, My AI Tools, stale local-store migration, routing/artifacts/feedback, no-execution controls, and narrow-viewport overflow; whitespace check reported only normal Windows LF-to-CRLF notices. |
 
 ## Next Handoff
 
-Desktop Chunk D7 is task complete as a readiness packet and public release is held. Do not publish or share the D6 unsigned NSIS artifact with non-technical users. Do not create public GitHub Releases, Cloudflare production deployments, DNS changes, desktop downloads, social launch posts, updater flows, or signing workflows without a separate approved chunk and release gate evidence.
+Chunk Fifteen is integration complete and public release remains held. Do not publish or share the D6 unsigned NSIS artifact with non-technical users. Do not create public GitHub Releases, Cloudflare production deployments, DNS changes, desktop downloads, social launch posts, updater flows, or signing workflows without a separate approved chunk and release gate evidence.
 
-Recommended next sequence: finish Chunk Fifteen fixture/E2E coverage for the corrected web MVP, then run D8 Web Release Candidate And Cybersecurity Pass for local security scans, Cloudflare Pages preview planning, canonical URL decision, HTTPS checks, smoke matrix, rollback checklist, and final go/no-go. Resolve the Windows Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. If hosting under a subpath, review Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links before release.
+Recommended next sequence: run D8 Web Release Candidate And Cybersecurity Pass for local security scans, Cloudflare Pages preview planning, canonical URL decision, HTTPS checks, smoke matrix, rollback checklist, and final go/no-go. Chunk Sixteen remains available first if the owner wants the MVP documentation/polish pass before release engineering. Resolve the Windows Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. If hosting under a subpath, review Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links before release.
 
-If the owner returns to the web MVP lane instead, resume Chunk Fifteen: add the fixture suite and Playwright end-to-end coverage for the corrected MVP workflows. Keep the conversational UX direction intact: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, optional desktop-only `Check this computer`, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not expand local discovery into broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, packaging, signing, updater, or execution workflows without a separate approved chunk.
+Preserve the conversational UX direction now covered by E2E: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, optional desktop-only `Check this computer`, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not expand local discovery into broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, packaging, signing, updater, or execution workflows without a separate approved chunk.

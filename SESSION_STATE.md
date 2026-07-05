@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-04T19:34:29-06:00
-Status: desktop-d7-release-security-readiness-task-complete
-Status Updated: 2026-07-04T19:34:29-06:00
+Last Updated: 2026-07-04T20:02:34-06:00
+Status: chunk-fifteen-e2e-integration-complete
+Status Updated: 2026-07-04T20:02:34-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop Chunk D7: record release and security readiness before public hosting, social sharing, GitHub Release artifacts, or desktop installer distribution.
+Chunk Fifteen: add fixture tasks and Playwright E2E coverage for the corrected web MVP before public hosting.
 
-Current result: D7 is task complete as a readiness packet. The repo records GitHub plus Cloudflare as the intended free distribution path, recommends one canonical Cloudflare Pages app URL linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, adds `SECURITY.md`, and holds public launch until E2E, cybersecurity, hosting, signing, and smoke gates pass.
+Current result: Chunk Fifteen is integration complete. The repo now has 22 safe fixture tasks and six Playwright tests covering first-run setup, My AI Tools manual selection/local models/remove/migration behavior, contextual task include choices, route generation, saved decision cards, prompt package export preparation, route-log feedback, no-execution controls, and narrow-viewport overflow. Public launch remains held until cybersecurity, hosting, signing, and smoke gates pass.
 
 ## Files Changed In This Session
 
@@ -50,6 +50,9 @@ Current result: D7 is task complete as a readiness packet. The repo records GitH
 - `docs/2026-07-04-desktop-packaging-signing-spike.md`
 - `docs/2026-07-04-release-security-readiness-packet.md`
 - `SECURITY.md`
+- `src/tests/fixtures/e2eTaskFixtures.ts`
+- `src/tests/e2e/mvp-workflows.spec.ts`
+- `vitest.config.ts`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -116,6 +119,8 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - `Get-AuthenticodeSignature` on the generated NSIS installer and rebuilt release executable
 - `npm run test:scripts`
 - official GitHub Releases, GitHub Pages/HTTPS, Cloudflare Pages/custom domains, Microsoft Windows code signing, OWASP ASVS/WSTG, Tauri capabilities, and RustSec references reviewed for D7
+- `npx playwright install chromium`
+- `npx playwright test`
 
 ## Validation Notes
 
@@ -164,6 +169,8 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D7 governance startup passed: `bash scripts/governance-preflight.sh` reported 0 warnings.
 - D7 did not deploy hosting, change DNS, publish a GitHub Release, sign artifacts, upload artifacts, enable an updater, or share social links.
 - D7 close-out validation passed: `npm run test` ran 12 files and 88 tests; `npm audit --audit-level=moderate` found 0 vulnerabilities; `bash scripts/governance-preflight.sh` reported 0 warnings; `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- Chunk Fifteen installed the missing Playwright Chromium browser cache locally with `npx playwright install chromium`.
+- Chunk Fifteen close-out validation passed: `bash scripts/governance-preflight.sh` reported 0 warnings; `npm run test` ran 12 files and 88 tests; `npm run build` passed with the existing Vite chunk-size warning; `npx playwright test` passed 6 Chromium tests; `git diff --check` reported only normal Windows LF-to-CRLF notices.
 
 ## Known Gaps
 
@@ -183,4 +190,4 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
 ## Next Handoff
 
-Resume with Chunk Fifteen E2E fixtures if the owner wants product completion before public launch. Resume with D8 Web Release Candidate And Cybersecurity Pass if the owner wants release engineering next: local security scans, Cloudflare Pages preview planning, canonical URL confirmation, HTTPS checks, smoke matrix, rollback checklist, and launch go/no-go. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep D7 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, public hosting, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.
+Resume with D8 Web Release Candidate And Cybersecurity Pass if the owner wants release engineering next: local security scans, Cloudflare Pages preview planning, canonical URL confirmation, HTTPS checks, smoke matrix, rollback checklist, and launch go/no-go. Run Chunk Sixteen first if the owner wants documentation and polish tightened before release engineering. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep D7/D8 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, public hosting, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.

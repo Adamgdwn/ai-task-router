@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T19:34:29-06:00
-Status: desktop-d7-release-security-readiness-task-complete
-Status Updated: 2026-07-04T19:34:29-06:00
+Last Updated: 2026-07-04T20:02:34-06:00
+Status: chunk-fifteen-e2e-integration-complete
+Status Updated: 2026-07-04T20:02:34-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D7 release and security readiness packet, building on the desktop distribution lane and future hosted/PWA release path.
+Chunk Fifteen E2E tests and fixture suite, building on the corrected web MVP and D7 release hold.
 
-Completion target: Task complete.
+Completion target: Integration complete.
 
-Current state: D7 is task complete as a readiness packet. The repo records GitHub plus Cloudflare as the intended free distribution path, recommends one canonical Cloudflare Pages app URL linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, adds a public `SECURITY.md`, and holds public launch until E2E, cybersecurity, hosting, signing, and smoke gates pass.
+Current state: Chunk Fifteen is integration complete. The repo now has 22 safe fixture tasks and Playwright E2E coverage for first-run setup, manual AI tool selection, stale local-store migration, contextual task include choices, routing, saved route cards, prompt-package export preparation, route-log feedback, no-execution controls, and narrow-viewport overflow. Public launch is still held until cybersecurity, hosting, signing, and smoke gates pass.
 
 ## Scope
 
@@ -72,6 +72,12 @@ The D7 release/security readiness packet provides:
 - A public `SECURITY.md` with the current security model and vulnerability reporting route.
 - Deployment, runbook, risk, roadmap, README, desktop plan, and pathway updates for the GitHub plus Cloudflare distribution direction.
 - A hold decision: no public web launch, social sharing, GitHub Release artifact, or desktop download until release evidence passes.
+
+Chunk Fifteen provides:
+
+- `src/tests/fixtures/e2eTaskFixtures.ts` with 22 non-sensitive fixture tasks covering public, internal, confidential, regulated, highly restricted, public-facing risk, current-facts, citation, coding, writing, planning, packaging, review, research, synthesis, and analysis scenarios.
+- `src/tests/e2e/mvp-workflows.spec.ts` with six Playwright tests covering the corrected web MVP workflows and no-execution boundary.
+- A Vitest exclusion for `src/tests/e2e/**` so unit tests and Playwright tests run in the right harnesses.
 
 ## Product Boundary
 
@@ -138,6 +144,8 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D7 `bash scripts/governance-preflight.sh` passed with 0 warnings.
 - D7 official source review covered GitHub Releases/Pages/HTTPS, Cloudflare Pages/custom domains, Microsoft code signing, OWASP ASVS/WSTG, Tauri capabilities, and RustSec.
 - D7 close-out validation passed: `npm run test` ran 12 files and 88 tests; `npm audit --audit-level=moderate` found 0 vulnerabilities; `bash scripts/governance-preflight.sh` reported 0 warnings; `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- Chunk Fifteen installed the missing local Playwright Chromium browser cache with `npx playwright install chromium`.
+- Chunk Fifteen close-out validation passed: `bash scripts/governance-preflight.sh` reported 0 warnings; `npm run test` ran 12 files and 88 tests; `npm run build` passed with the existing Vite chunk-size warning; `npx playwright test` passed 6 Chromium tests; `git diff --check` reported only normal Windows LF-to-CRLF notices.
 
 ## Known Gaps
 
@@ -156,6 +164,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Return to the web MVP lane for Chunk Fifteen E2E fixtures, then run D8 Web Release Candidate And Cybersecurity Pass for local security scans, Cloudflare Pages preview planning, canonical URL confirmation, HTTPS checks, smoke matrix, rollback checklist, and launch go/no-go.
+Run D8 Web Release Candidate And Cybersecurity Pass for local security scans, Cloudflare Pages preview planning, canonical URL confirmation, HTTPS checks, smoke matrix, rollback checklist, and launch go/no-go. Run Chunk Sixteen first if the owner wants documentation and polish tightened before release engineering.
 
 Proceeding beyond D7 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public hosting, public installer publishing, DNS changes, GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.

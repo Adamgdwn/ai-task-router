@@ -1,7 +1,7 @@
 # 2026-07-03T11:49:34-06:00 - Roadmap
 
 Document status: draft baseline
-Status Updated: 2026-07-04T19:34:29-06:00
+Status Updated: 2026-07-04T20:02:34-06:00
 
 ## Now
 
@@ -25,8 +25,6 @@ Status Updated: 2026-07-04T19:34:29-06:00
 - Add local persistence with IndexedDB.
 - Add Markdown, JSON, and CSV export/import.
 - Build setup, task intake, results, route card, prompt package, route log, and feedback UI.
-- Add at least 20 fixture tasks covering the MVP acceptance categories.
-- Add end-to-end tests for setup, routing, export, and feedback.
 - Polish documentation for v0.2 handoff.
 
 ## Future Distribution
@@ -39,6 +37,7 @@ Status Updated: 2026-07-04T19:34:29-06:00
 - Use [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) as the baseline for desktop trust, signing, and release work.
 - Desktop Chunk D0 is confirmed for planning, and Desktop Chunk D1 selected Tauri for the first desktop shell spike.
 - Desktop Chunks D2 through D7 now cover the Tauri shell, trust boundary, permissioned local discovery, PWA install path, an opt-in unsigned internal Windows package artifact for evidence, and the release/security readiness packet. Public desktop release, signing, updater, provider connections, credentials, telemetry, broad folder access, and file indexing are not approved.
+- Chunk Fifteen added 22 fixture tasks and Playwright E2E coverage for setup, routing, export preparation, feedback, no-execution controls, and narrow-viewport overflow.
 - Run an owner governance review before desktop implementation because local machine inspection is a higher-trust surface than the v0.2 browser app.
 
 ## Explicitly Deferred
