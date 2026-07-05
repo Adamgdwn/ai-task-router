@@ -54,6 +54,13 @@ export type RightSizingEstimate = {
 
 export type EnergySourceId = "google-ai-impact-2026-07-05" | "how-hungry-is-ai-2026-07-05";
 
+export type EnergySource = {
+  id: EnergySourceId;
+  label: string;
+  url: string;
+  reviewedAt: string;
+};
+
 export type EnergyAnchor = {
   id: string;
   label: string;
@@ -153,6 +160,21 @@ export const modelPricingAnchors = [
   anchor("deepseek-v4-flash-cache-miss", "DeepSeek", "DeepSeek V4 Flash", "deepseek-pricing-2026-07-05", 0.14, 0.28, 0.0028),
   anchor("deepseek-v4-pro-cache-miss", "DeepSeek", "DeepSeek V4 Pro", "deepseek-pricing-2026-07-05", 0.435, 0.87, 0.003625),
 ] satisfies ModelPricingAnchor[];
+
+export const energySources = [
+  {
+    id: "google-ai-impact-2026-07-05",
+    label: "Google Cloud AI inference impact measurement",
+    url: "https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference",
+    reviewedAt: impactCatalogReviewedAt,
+  },
+  {
+    id: "how-hungry-is-ai-2026-07-05",
+    label: "How Hungry is AI?",
+    url: "https://arxiv.org/html/2505.09598v1",
+    reviewedAt: impactCatalogReviewedAt,
+  },
+] satisfies EnergySource[];
 
 export const energyAnchors = [
   {

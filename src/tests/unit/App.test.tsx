@@ -51,6 +51,7 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Choose my tools" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Install the browser version", level: 3 })).toBeInTheDocument();
     expect(screen.getByText(/Computer checking still needs the desktop app/)).toBeInTheDocument();
+    expect(screen.getByText(/when a smaller route is enough/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "What To Include" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Choose what to include" })).not.toBeInTheDocument();
 
@@ -412,6 +413,9 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Balanced route", level: 4 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Premium route", level: 4 })).toBeInTheDocument();
     expect(screen.getAllByText("Best fit").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Every task is a chance to build better AI judgment." })).toBeInTheDocument();
+    expect(screen.getByText("100k-token example")).toBeInTheDocument();
+    expect(screen.getByText(/not your bill, and they are not a guarantee/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Warnings" })).toBeInTheDocument();
     expect(screen.getByText(/Human approval is required before using public-facing/)).toBeInTheDocument();
 

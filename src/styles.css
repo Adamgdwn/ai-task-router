@@ -1270,6 +1270,116 @@ button:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.impactSection {
+  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
+  padding: 18px 0;
+}
+
+.impactLead {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.impactLead h3 {
+  color: var(--brand-navy);
+  font-size: 1.15rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.impactLead p,
+.impactMetricGrid span,
+.impactDetails p,
+.impactRouteNote {
+  color: var(--muted-ink);
+  line-height: 1.48;
+  margin: 0;
+}
+
+.impactCaveat,
+.impactRouteNote {
+  background: #eef8fb;
+  border: 1px solid #cdeaf2;
+  border-left: 4px solid var(--brand-teal-bright);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.impactMetricGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.impactMetricGrid div {
+  border-left: 3px solid var(--brand-teal);
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding-left: 12px;
+}
+
+.impactMetricGrid dt {
+  color: var(--muted-ink);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.impactMetricGrid dd {
+  color: var(--brand-navy);
+  font-size: 1.08rem;
+  font-weight: 900;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.impactRouteNote,
+.impactDetails {
+  grid-column: 1 / -1;
+}
+
+.impactDetails {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.impactDetails summary {
+  color: var(--brand-teal);
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.impactDetails[open] {
+  gap: 12px;
+}
+
+.impactSourceLinks {
+  columns: 2;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.impactSourceLinks li {
+  break-inside: avoid;
+  line-height: 1.45;
+  margin-bottom: 6px;
+}
+
+.impactSourceLinks a {
+  color: #0a6f8f;
+  overflow-wrap: anywhere;
+}
+
 .routeComparisonGrid {
   display: grid;
   gap: 12px;
@@ -1907,6 +2017,7 @@ button:focus-visible {
   .sourceChoiceGrid,
   .taskConversationGrid,
   .taskShortcutGrid,
+  .impactSection,
   .routeComparisonGrid,
   .artifactToolbar,
   .artifactTwoColumn,
@@ -1964,6 +2075,8 @@ button:focus-visible {
   .sourceChoiceGrid,
   .taskConversationGrid,
   .taskShortcutGrid,
+  .impactSection,
+  .impactMetricGrid,
   .routeComparisonGrid,
   .resultSummaryBand,
   .saveRoutePanel,
@@ -2026,6 +2139,10 @@ button:focus-visible {
 
   .feedbackPanel {
     position: static;
+  }
+
+  .impactSourceLinks {
+    columns: 1;
   }
 }
 

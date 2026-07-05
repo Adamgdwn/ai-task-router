@@ -91,6 +91,7 @@ export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps
         <h3 id="plain-promise-heading">What this will and will not do</h3>
         <ul>
           <li>It helps choose a sensible AI path before you paste anything into a tool.</li>
+          <li>It helps build judgment about when a smaller route is enough, reducing waste in the right scenario.</li>
           <li>It keeps choices and saved plans in this browser.</li>
           <li>It does not log in, connect accounts, search files, send prompts, or run AI for you.</li>
         </ul>

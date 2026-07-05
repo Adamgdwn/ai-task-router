@@ -1,12 +1,16 @@
 import {
   defaultHundredThousandTokenRun,
+  energyAnchors,
+  energySources,
   estimateAvoidedResourceUse,
   estimateHundredThousandTokenCostUsd,
   estimateRightSizingCostSavings,
   estimateTokenRunCostUsd,
   modelPricingAnchors,
+  pricingSources,
   requirePricingAnchor,
 } from "../../domain/impact/impactEstimator";
+import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 
 describe("impact estimator", () => {
   it("calculates 100k-token benchmark costs from per-million-token pricing", () => {
@@ -68,10 +72,37 @@ describe("impact estimator", () => {
   });
 
   it("keeps every pricing anchor tied to a reviewed source", () => {
+    const pricingSourceIds = new Set(pricingSources.map((source) => source.id));
+
     for (const pricingAnchor of modelPricingAnchors) {
       expect(pricingAnchor.sourceId).toMatch(/2026-07-05$/);
+      expect(pricingSourceIds.has(pricingAnchor.sourceId)).toBe(true);
       expect(pricingAnchor.inputUsdPerMillionTokens).toBeGreaterThanOrEqual(0);
       expect(pricingAnchor.outputUsdPerMillionTokens).toBeGreaterThanOrEqual(0);
     }
+  });
+
+  it("keeps every energy anchor tied to a reviewed source", () => {
+    const energySourceIds = new Set(energySources.map((source) => source.id));
+
+    for (const energyAnchor of energyAnchors) {
+      expect(energyAnchor.sourceId).toMatch(/2026-07-05$/);
+      expect(energySourceIds.has(energyAnchor.sourceId)).toBe(true);
+      expect(energyAnchor.wattHoursPerRun).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("builds the public impact snapshot from the reviewed estimator", () => {
+    const snapshot = buildDefaultPublicImpactSnapshot();
+
+    expect(snapshot.tokenBenchmark.tokenCount).toBe(100_000);
+    expect(snapshot.tokenBenchmark.lowerCostUsd).toBeCloseTo(0.04625);
+    expect(snapshot.tokenBenchmark.comparisonCostUsd).toBeCloseTo(1.125);
+    expect(snapshot.rightSizingExample.netAvoidedCostUsd).toBeCloseTo(85.8375);
+    expect(snapshot.environmentalExample.netAvoidedWattHours).toBeCloseTo(101);
+    expect(snapshot.sourceLinks.map((source) => source.url)).toContain("https://developers.openai.com/api/docs/pricing");
+    expect(snapshot.sourceLinks.map((source) => source.url)).toContain(
+      "https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference",
+    );
   });
 });

@@ -143,11 +143,14 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await page.getByRole("button", { name: "Show me my best options" }).click();
 
   await expect(page.getByRole("heading", { name: "Best Options", level: 2 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Every task is a chance to build better AI judgment." })).toBeVisible();
+  await expect(page.locator("dt").filter({ hasText: "100k-token example" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lean route", level: 4 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Balanced route", level: 4 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Premium route", level: 4 })).toBeVisible();
   await expect(page.getByText(/Human approval is required before using public-facing/)).toBeVisible();
+  await expectNoHorizontalOverflow(page);
 
   await page.getByRole("button", { name: "Save decision and prompts" }).click();
   await expect(page.getByText("Decision card, prompts, and Past Choices record saved on this device.")).toBeVisible();
