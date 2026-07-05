@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-05T07:57:15-06:00
-Status: d14-public-hub-cross-site-links-live
-Status Updated: 2026-07-05T07:57:15-06:00
+Last Updated: 2026-07-05T09:01:13-06:00
+Status: d15-impact-estimator-methodology-draft-complete
+Status Updated: 2026-07-05T09:01:13-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D14 public hub and cross-site link smoke, building on D13 Cloudflare production launch smoke, D12 Old Skool AI hub handoff package, D11 public launch master plan, D9 Cloudflare hosted preview smoke, D10 desktop technical-preview artifact lane, and D6 packaging/signing evidence.
+Impact estimator methodology draft, building on Desktop Chunk D14 public hub and cross-site link smoke, D13 Cloudflare production launch smoke, D12 Old Skool AI hub handoff package, D11 public launch master plan, D9 Cloudflare hosted preview smoke, D10 desktop technical-preview artifact lane, and D6 packaging/signing evidence.
 
-Completion target: Task complete, public web doorway live.
+Completion target: Draft complete for impact calculation methodology.
 
-Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package, D13 adds `docs/2026-07-05-cloudflare-production-launch-smoke.md` as the production web/PWA evidence packet, and D14 adds `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md` as the public hub/cross-site evidence packet. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Public desktop downloads, social launch posts, custom-domain/DNS work, and GitHub Releases remain separate gated chunks.
+Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package, D13 adds `docs/2026-07-05-cloudflare-production-launch-smoke.md` as the production web/PWA evidence packet, D14 adds `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md` as the public hub/cross-site evidence packet, and D15 adds `docs/2026-07-05-impact-estimator-methodology.md` as the impact calculation methodology. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Public desktop downloads, social launch posts, custom-domain/DNS work, exact public savings claims, live pricing tables, and GitHub Releases remain separate gated chunks.
 
 ## Scope
 
@@ -134,9 +134,15 @@ D14 provides:
 - Guided AI Labs and Guided AI Journey footer links to the Old Skool AI hub.
 - Public HTTP and Playwright smoke evidence across desktop and mobile for the hub, support/security route, cross-site links, app URL, redirects, and no stale preview or desktop-download claims on the D14 public pages.
 
+D15 provides:
+
+- `docs/2026-07-05-impact-estimator-methodology.md`, a draft methodology for source-refresh, 100k-token benchmark pricing, right-sizing cost savings, scenario energy/water estimates, and public-safe copy.
+- `src/domain/impact/impactEstimator.ts`, a deterministic local calculation module with reviewed-source pricing anchors and scenario energy anchors.
+- `src/tests/unit/impactEstimator.test.ts`, covering 100k-token math, cached input pricing, right-sizing cost savings, energy/water ranges, and source anchoring.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, D9 Cloudflare Pages hosted test preview, D13 Cloudflare Pages production deployment, and D14 public hub/cross-site links. D11 adds planning/control documentation, D12 adds website handoff documentation, D13 adds production web launch evidence, and D14 adds public web doorway evidence. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, social launch links, public desktop downloads, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, D9 Cloudflare Pages hosted test preview, D13 Cloudflare Pages production deployment, and D14 public hub/cross-site links. D11 adds planning/control documentation, D12 adds website handoff documentation, D13 adds production web launch evidence, D14 adds public web doorway evidence, and D15 adds draft impact-estimator methodology without wiring it into the UI. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, social launch links, public desktop downloads, exact public savings claims, live pricing fetches, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -238,6 +244,10 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D12 governance preflight passed with 0 warnings before the Old Skool AI hub handoff package.
 - D12 close-out validation passed: governance preflight reported 0 warnings; `git diff --check` reported only normal Windows LF-to-CRLF notices; release-boundary scans found no stale D12-not-created wording and only historical or negative-boundary references for preview URLs, unconfirmed app subdomain, and premature desktop-download claims.
 - D14 public hub/cross-site validation passed: Old Skool AI `npm run typecheck`, `npm run lint`, `npm run build`, governance check, and `git diff --check`; Guided AI Labs `npm run lint`, `npm run build`, governance preflight, and `git diff --check`; Guided AI Journey `npm run typecheck`, `npm run lint`, production build with existing repo-local env loaded into process, and `git diff --check`; public HTTP/Playwright smoke confirmed the app, hub, support/security route, Guided AI Labs link, Guided AI Journey link, apex redirects, mobile/desktop rendering, and no stale preview or desktop-download claims on D14 public pages.
+- D15 focused estimator validation passed: `npm run test -- impactEstimator` ran 1 file and 5 tests.
+- D15 full unit validation passed: `npm run test` ran 13 files and 93 tests.
+- D15 production build passed with the existing Vite chunk-size warning.
+- D15 close-out governance and whitespace checks passed: `bash scripts/governance-preflight.sh` reported 0 warnings and `git diff --check` reported only normal Windows LF-to-CRLF notices.
 
 ## Known Gaps
 
@@ -256,6 +266,8 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Guided AI Journey local `main` still has the pre-existing unpushed commit `236fd7e` and is intentionally ahead/behind `origin/main`; D14 was safely pushed from a temporary worktree based on `origin/main` as commit `610438b`.
 - A first Vercel deploy attempt from the temporary Journey worktree targeted an accidental temporary Vercel project before `.vercel/project.json` was copied from the real repo. The correct production deployment succeeded and is aliased to `https://www.guidedaijourney.com/`; cleanup of the accidental temporary provider object remains a follow-up if desired.
 - Public social launch links have not been created.
+- The D15 impact estimator is not wired into the public UI, published as a public methodology page, or approved as exact public savings claims.
+- Provider pricing and environmental anchors must be refreshed before public impact claims because pricing, model routing, infrastructure, and provider disclosures change.
 - Custom-domain/DNS work has not been done.
 - Windows `curl.exe` and PowerShell `Invoke-WebRequest` passed against the production Pages URL; the D9 preview alias remains historical only.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
@@ -264,6 +276,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Choose the next bounded lane: owner-reviewed social launch copy, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved release chunk. Keep public desktop downloads held.
+Choose the next bounded lane: owner-reviewed social/video launch copy using the D15 safe impact language, a reviewed methodology page, an opt-in local estimator UI, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved release chunk. Keep public desktop downloads held.
 
-Proceeding beyond D14 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.
+Proceeding beyond D15 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, live pricing fetches, exact public savings claims, or external actions without a separate approved chunk.

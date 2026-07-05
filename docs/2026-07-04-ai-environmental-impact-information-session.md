@@ -1,15 +1,15 @@
 # AI Environmental Impact Information Session
 
 Document ID: GUI-ENG-001
-Version: 0.1.0
+Version: 0.2.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before public claims, estimator implementation, website publication, or social launch
-Last Updated: 2026-07-04T23:35:00-06:00
-Status Updated: 2026-07-04T23:35:00-06:00
+Last Updated: 2026-07-05T08:58:47-06:00
+Status Updated: 2026-07-05T08:58:47-06:00
 
 ## Purpose
 
@@ -31,6 +31,8 @@ Use this document for:
 - future impact-estimator design
 - public-copy preparation after review
 - education about right-sized AI use
+
+For the calculation backbone and source-refresh procedure, use [AI Task Router Impact Estimator Methodology](2026-07-05-impact-estimator-methodology.md). That D15 methodology adds a local deterministic estimator module, 100k-token pricing examples, right-sizing cost formulas, and scenario-based energy/water calculations. It remains draft methodology, not live public marketing copy.
 
 Do not use this document as:
 
@@ -539,10 +541,11 @@ Completion target: Draft complete
 Known gaps:
 
 - This is an information-session draft, not public marketing copy.
+- The D15 impact-estimator methodology now exists as a calculation backbone, but it is not wired into the public UI or published as a methodology page.
 - Source values should be refreshed before public publication because provider infrastructure and model routing change quickly.
 - The app does not yet measure avoided retries, avoided agent loops, or right-sized model choices.
 - Public claims require a reviewed methodology and owner approval.
 
 Next action:
 
-- Decide whether to turn this into a public methodology page, an in-app estimator work packet, or an information-session slide outline.
+- Decide whether to turn the D15 methodology into reviewed social/video copy, a public methodology page, or an opt-in local estimator UI.

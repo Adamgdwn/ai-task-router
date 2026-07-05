@@ -7,9 +7,9 @@ Owner: Technical Lead
 
 ## Current Objective
 
-Desktop Chunk D14: publish the Old Skool AI hub, public support/security route, and cross-site links to the live Cloudflare Pages app.
+Impact estimator methodology after D14 public web launch.
 
-Current result: D14 is task complete. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Public desktop downloads, social launch posts, custom-domain/DNS work, and GitHub Releases remain held for separate approved chunks.
+Current result: D15 impact methodology is draft complete. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. D15 added a reviewed-source calculation backbone for 100k-token pricing examples, right-sizing cost savings, and scenario-based energy/water ranges. Public desktop downloads, social launch posts, custom-domain/DNS work, live pricing tables, exact public savings claims, and GitHub Releases remain held for separate approved chunks.
 
 ## Files Changed In This Session
 
@@ -60,6 +60,9 @@ Current result: D14 is task complete. The browser/PWA app is live at `https://ai
 - `docs/2026-07-04-cloudflare-pages-hosted-preview-smoke.md`
 - `docs/2026-07-05-cloudflare-production-launch-smoke.md`
 - `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md`
+- `docs/2026-07-05-impact-estimator-methodology.md`
+- `src/domain/impact/impactEstimator.ts`
+- `src/tests/unit/impactEstimator.test.ts`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -230,6 +233,7 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - Guided AI Journey local `main` still has the pre-existing unpushed commit `236fd7e` and is intentionally ahead/behind `origin/main`; D14 was safely pushed from a temporary worktree based on `origin/main` as commit `610438b`.
 - A first Vercel deploy attempt from the temporary Journey worktree targeted an accidental temporary Vercel project before `.vercel/project.json` was copied from the real repo. The correct production deployment succeeded and is aliased to `https://www.guidedaijourney.com/`; cleanup of the accidental temporary provider object remains a follow-up if desired.
 - Public social launch links have not been created.
+- D15 impact methodology is not wired into the UI or published as exact public savings claims.
 - Custom-domain/DNS work has not been done.
 - Windows `curl.exe` and PowerShell `Invoke-WebRequest` passed against the production Pages URL; the D9 preview alias remains historical only.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
@@ -237,4 +241,4 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
 ## Next Handoff
 
-Resume by choosing the next bounded release lane: owner-reviewed social launch copy, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved chunk. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D14 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.
+Resume by choosing the next bounded release lane: owner-reviewed social/video launch copy using the D15 safe impact language, a reviewed public methodology page, an opt-in local estimator UI, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved chunk. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D15 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, live pricing fetches, exact public savings claims, or external actions without a separately approved chunk.

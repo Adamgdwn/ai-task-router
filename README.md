@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; social launch, custom domains, and public desktop downloads remain separate gated chunks
-Status Updated: 2026-07-05T07:57:15-06:00
+Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D15 impact-estimator methodology is draft complete; social launch, custom domains, exact public savings claims, and public desktop downloads remain separate gated chunks
+Status Updated: 2026-07-05T09:01:13-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -43,6 +43,8 @@ Current target: v0.2 Local Web App MVP
 Active plan: [docs/2026-07-03-current-pathway.md](docs/2026-07-03-current-pathway.md)
 
 Product brief: [docs/PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md)
+
+Impact-estimator methodology: [docs/2026-07-05-impact-estimator-methodology.md](docs/2026-07-05-impact-estimator-methodology.md)
 
 ## Planned Stack
 

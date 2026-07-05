@@ -1,8 +1,8 @@
 # 2026-07-03T11:49:34-06:00 - Start Here
 
-Last Updated: 2026-07-05T07:57:15-06:00
+Last Updated: 2026-07-05T09:01:13-06:00
 Status: draft
-Status Updated: 2026-07-05T07:57:15-06:00
+Status Updated: 2026-07-05T09:01:13-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -56,9 +56,9 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 ## Agent Handoff
 
-D14 is task complete. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, the public security route is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Evidence is recorded in `docs/2026-07-05-cloudflare-production-launch-smoke.md` and `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md`.
+D15 impact methodology is draft complete. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, the public security route is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Evidence is recorded in `docs/2026-07-05-cloudflare-production-launch-smoke.md` and `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md`. The new impact calculation backbone is recorded in `docs/2026-07-05-impact-estimator-methodology.md` and implemented in `src/domain/impact/impactEstimator.ts`.
 
-The next chunk should be an owner-approved social launch copy/review step for YouTube, Facebook, and/or LinkedIn, or a separate desktop trust/signing chunk. Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, or custom-domain/DNS changes without a separate approved chunk and release gate evidence.
+The next chunk should be an owner-approved social/video launch copy-review step using the safe D15 impact language, a reviewed public methodology page, an opt-in local estimator UI, or a separate desktop trust/signing chunk. Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, custom-domain/DNS changes, live pricing tables, or exact public savings claims without a separate approved chunk and release gate evidence.
 
 Update this file only when the top-level plan or handoff point changes. Put detailed step-by-step progress in the active plan named above.
 
