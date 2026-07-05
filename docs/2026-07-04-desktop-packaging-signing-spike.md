@@ -1,15 +1,15 @@
 # 2026-07-04 - Desktop Packaging And Signing Spike
 
 Document ID: PATH-ENG-003
-Version: 0.1.0
+Version: 0.2.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before Desktop Chunk D7 beta release-candidate work
-Last Updated: 2026-07-04T19:20:30-06:00
-Status Updated: 2026-07-04T19:20:30-06:00
+Next Review: Before controlled desktop beta, signing work, or public desktop download work
+Last Updated: 2026-07-04T19:34:29-06:00
+Status Updated: 2026-07-04T19:34:29-06:00
 
 ## Purpose
 
@@ -150,9 +150,13 @@ Desktop release remains blocked until:
 
 ## Next Action
 
-Move to Desktop Chunk D7 only after the owner chooses the beta distribution path and approves the required signing/account work. A safe next slice is a decision packet for:
+Desktop Chunk D7 is complete as a release/security readiness packet in [docs/2026-07-04-release-security-readiness-packet.md](2026-07-04-release-security-readiness-packet.md).
+
+Do not publish the D6 unsigned NSIS artifact. Before controlled desktop beta, complete a separate signing/trust chunk for:
 
 - Windows Store/MSIX versus direct installer
 - legal publisher identity
 - whether macOS/Linux are beta targets now or later
 - whether auto-update remains deferred
+
+For public web launch, complete Chunk Fifteen E2E fixtures and D8 Web Release Candidate And Cybersecurity Pass before Cloudflare production hosting or social sharing.

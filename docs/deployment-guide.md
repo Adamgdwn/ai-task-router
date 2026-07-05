@@ -1,10 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-04T19:20:30-06:00
+Status Updated: 2026-07-04T19:34:29-06:00
 
 ## Current Release State
 
 AI Task Router is not publicly deployed yet.
+
+Desktop Chunk D7 records the release/security readiness packet and keeps public release on hold until the web/PWA release gate, cybersecurity checks, and desktop signing/trust gates pass.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -33,12 +35,15 @@ The browser/PWA build does not perform local AI tool discovery. Local computer c
 - `staging`: not created yet.
 - `prod`: not created yet.
 
-Future public hosting references:
+Future public hosting decision:
 
-- likely canonical product home: `oldskoolai.com`
-- planned link sources: `guidedailabs.com` and `guidedaijourney.com`
+- primary host: Cloudflare Pages
+- public source/release hub: GitHub
+- recommended canonical app URL: `https://app.oldskoolai.com/`
+- planned link sources: `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`
+- planned social link sources after release gate: YouTube, Facebook, and LinkedIn
 
-Exact public paths, preview URL, launch timing, and cross-site link placement are not decided yet.
+The canonical public URL still needs owner confirmation before deployment. Prefer one app URL linked from all three websites instead of three independent app copies.
 
 ## Deployment Steps
 
@@ -46,14 +51,16 @@ No public deployment has been executed.
 
 Future hosted web/PWA release should use this shape:
 
-1. Complete v0.2 release-readiness review.
+1. Complete v0.2 release-readiness review and D7/D8 security gate.
 2. Build from a clean install.
 3. Smoke test `dist/` locally or in a private preview.
 4. Confirm the manifest, 192px and 512px icons, service worker, and install copy are present.
 5. Confirm no provider calls, credentials, telemetry, hidden uploads, or browser-based desktop-discovery claims are present in the web build.
-6. Deploy to the chosen static site path over HTTPS.
-7. Smoke test primary flows on desktop and mobile browsers.
-8. Add public links only after the preview passes.
+6. Deploy to a private or low-visibility Cloudflare Pages preview.
+7. Confirm HTTPS and canonical URL behavior.
+8. Smoke test primary flows on desktop and mobile browsers.
+9. Confirm rollback to a previous Pages deployment.
+10. Add public website and social links only after the preview passes.
 
 Local production preview command:
 
@@ -103,6 +110,9 @@ Before any public web release:
 - `npx playwright test` if E2E coverage exists
 - manual browser smoke test on desktop and narrow viewport
 - no-secrets and no-hidden-network review
+- Cloudflare Pages preview over HTTPS
+- canonical URL, service-worker scope, and rollback check
+- public copy review for browser-vs-desktop capability boundaries
 
 Before any public desktop release:
 

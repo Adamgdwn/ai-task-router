@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T19:20:30-06:00
+Last Updated: 2026-07-04T19:34:29-06:00
 Status: active
 Owner: Technical Lead
 
@@ -43,6 +43,33 @@ Troubleshooting:
 - The service worker is intentionally not registered during Vite dev mode and not registered inside Tauri.
 - The browser/PWA build must not claim it can check the user's computer. Local AI tool discovery requires the desktop app.
 - If hosting under a subpath, update Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links before release.
+
+### Public Web Release Readiness
+
+As of 2026-07-04T19:34:29-06:00, D7 selected the intended free distribution path but did not deploy it:
+
+- GitHub remains the public source/release hub.
+- Cloudflare Pages is the preferred public host.
+- Use one canonical app URL, recommended as `https://app.oldskoolai.com/`, and link to it from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`.
+- YouTube, Facebook, and LinkedIn links should wait until the web/PWA release gate passes.
+
+Minimum pre-public checks:
+
+```bash
+npm ci
+npm audit --audit-level=moderate
+npm run test
+npm run build
+npm run preview -- --host 127.0.0.1 --port 5184
+```
+
+Release troubleshooting:
+
+- Do not launch from social channels until the production preview and security checks pass.
+- Do not create three independent app deployments unless the service-worker scope, cache, support, and rollback plan are explicit.
+- If the owner chooses a subpath instead of a root app subdomain, update Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links first.
+- Confirm public copy says the browser/PWA app cannot check the computer.
+- Use [release and security readiness packet](2026-07-04-release-security-readiness-packet.md) as the D7 gate.
 
 ### Desktop Build Toolchain
 

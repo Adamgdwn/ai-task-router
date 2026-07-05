@@ -14,5 +14,6 @@
 - Completed Desktop Chunk D4 permissioned local AI tool detection: custom Rust commands, desktop-only `Check this computer` UI, allowlisted Ollama/LM Studio/Jan/GPT4All checks, summary-first results, optional model-name reveal, no path return, no broad Tauri plugin permissions, and build-only desktop validation while Windows Application Control blocks launch smoke.
 - Completed Desktop Chunk D5 PWA install path: added web app manifest, branded 192px/512px install icons, production-only service-worker registration, Start Here browser-install copy, service-worker registration tests, deployment/runbook notes, and explicit browser-vs-desktop local-discovery boundaries.
 - Completed Desktop Chunk D6 packaging/signing spike: added an opt-in unsigned internal Windows NSIS packaging config/script, package artifact SHA-256 inspection helper, script tests, generated one internal unsigned package artifact for evidence, and documented Windows/macOS/Linux signing gates while keeping public desktop release blocked.
+- Completed Desktop Chunk D7 release/security readiness: added the D7 readiness packet, recorded GitHub plus Cloudflare as the intended free distribution path, recommended one canonical Cloudflare Pages app URL linked from the three existing sites, added `SECURITY.md`, and held public launch until E2E, cybersecurity, hosting, signing, and smoke gates pass.
 
 

@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.8.0
+Version: 0.9.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before Desktop Chunk D7 beta release-candidate work or public web hosting work
-Last Updated: 2026-07-04T19:20:30-06:00
-Status Updated: 2026-07-04T19:20:30-06:00
+Next Review: Before D8 web release candidate work, public web hosting, or controlled desktop beta work
+Last Updated: 2026-07-04T19:34:29-06:00
+Status Updated: 2026-07-04T19:34:29-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path while holding public release until E2E, cybersecurity, signing, and smoke gates pass. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
 
 ## Purpose
 
@@ -1107,25 +1107,52 @@ D6 is draft complete as of 2026-07-04T19:20:30-06:00. The repo now has an opt-in
 
 D6 details are recorded in [Desktop Packaging And Signing Spike](2026-07-04-desktop-packaging-signing-spike.md).
 
-### Desktop Chunk D7 - Controlled Beta Release Candidate
+### Desktop Chunk D7 - Release And Security Readiness Packet
 
-Completion target: Release ready candidate
+Status: task complete, release hold
+
+Status Updated: 2026-07-04T19:34:29-06:00
+
+Completion target: Task complete
 
 Outcome:
 
-Signed or clearly controlled beta installers are ready for limited users with instructions, checksums, support notes, and rollback path.
+D7 records the release and cybersecurity gate before any public web hosting, social sharing, GitHub Release, or desktop installer distribution. The owner confirmed the desired free distribution route: GitHub for source/release transparency, Cloudflare for hosting, visible links from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, and later sharing through YouTube, Facebook, and LinkedIn.
+
+Decision packet:
+
+- [Release And Security Readiness Packet](2026-07-04-release-security-readiness-packet.md)
+
+D7 decision:
+
+Release is held. The hosted browser/PWA path should be the first public surface after E2E and cybersecurity checks pass. The desktop app remains blocked for ordinary users until Windows Application Control/signing/trusted-path is resolved, the installer is signed or Store/MSIX path is proven, checksums are published, and install/launch/local-discovery/clear-results/uninstall smoke tests pass.
+
+Recommended public web shape:
+
+- one canonical Cloudflare Pages app URL
+- links from the three existing websites to that canonical URL
+- GitHub Pages as fallback only
+- GitHub Releases later for signed desktop artifacts, release notes, and checksums
+- no public desktop download from the D6 unsigned NSIS artifact
+
+D7 validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- Official GitHub, Cloudflare, Microsoft, OWASP, Tauri, and RustSec sources were reviewed for release/security planning.
+- No deploy, DNS, GitHub Release, signing, updater, or artifact upload was performed.
 
 ## Open Decisions
 
+- Canonical public app URL: recommended `https://app.oldskoolai.com/`, but owner still needs to confirm subdomain versus subpath.
 - Canonical product name for the desktop app.
 - Legal publisher name for signing.
-- Windows distribution path: Microsoft Store, direct signed installer, or both.
+- Windows distribution path: Microsoft Store/MSIX, direct signed installer, or both.
 - macOS distribution path and Apple Developer account ownership.
 - Linux artifact set: AppImage only first, or AppImage plus `.deb`.
 - Whether a later separately reviewed prototype should include user-selected folder inspection.
 - Whether model names are hidden by default, shown with consent, or never stored.
-- Whether auto-update is required for the first desktop release.
-- Whether a public privacy page is needed before beta.
+- Auto-update is deferred unless separately approved.
+- Public privacy/local-access page is required before controlled desktop beta or public launch.
 - Whether governance level should rise before desktop implementation.
 
 ## Non-Goals Until Explicitly Approved
@@ -1150,8 +1177,9 @@ Signed or clearly controlled beta installers are ready for limited users with in
 
 Choose the next lane deliberately:
 
-- For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests, then decide whether to continue toward Desktop Chunk D7 controlled beta release-candidate work.
-- For the hosted web lane, plan public hosting separately for `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, including HTTPS, path/base decisions, smoke tests, and rollback.
+- For product completion, return to Chunk Fifteen fixture and E2E coverage before public launch.
+- For release engineering, run D8 Web Release Candidate And Cybersecurity Pass: local security scan, Cloudflare Pages preview plan, canonical URL decision, HTTPS check, smoke matrix, and rollback checklist.
+- For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests or creating a controlled desktop beta.
 - For the web MVP lane, return to Chunk Fifteen fixture and E2E coverage.
 
 Do not expand D4/D5/D6 into arbitrary folder inspection, broad filesystem permissions, provider connections, credentials, telemetry, updater, public hosting, file indexing, auto-upload, whole-drive search, public installer publishing, or external actions without a separately approved chunk.

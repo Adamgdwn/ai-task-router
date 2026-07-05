@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-04T19:20:30-06:00
-Status: desktop-d6-packaging-signing-spike-draft-complete
-Status Updated: 2026-07-04T19:20:30-06:00
+Last Updated: 2026-07-04T19:34:29-06:00
+Status: desktop-d7-release-security-readiness-task-complete
+Status Updated: 2026-07-04T19:34:29-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop Chunk D6: create internal packaging evidence and document signing requirements while keeping public desktop release blocked.
+Desktop Chunk D7: record release and security readiness before public hosting, social sharing, GitHub Release artifacts, or desktop installer distribution.
 
-Current result: D6 is draft complete. The repo has an opt-in internal Windows NSIS package config/script, artifact SHA-256 inspection helper, Node tests for the helper, and a dated D6 signing requirements note. The internal Windows package build passed and generated an unsigned NSIS installer for evidence only. Public desktop release remains blocked by signing, platform trust, checksums, installer smoke tests, and owner distribution decisions.
+Current result: D7 is task complete as a readiness packet. The repo records GitHub plus Cloudflare as the intended free distribution path, recommends one canonical Cloudflare Pages app URL linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, adds `SECURITY.md`, and holds public launch until E2E, cybersecurity, hosting, signing, and smoke gates pass.
 
 ## Files Changed In This Session
 
@@ -48,6 +48,8 @@ Current result: D6 is draft complete. The repo has an opt-in internal Windows NS
 - `scripts/inspect-desktop-artifacts.mjs`
 - `scripts/inspect-desktop-artifacts.node-test.mjs`
 - `docs/2026-07-04-desktop-packaging-signing-spike.md`
+- `docs/2026-07-04-release-security-readiness-packet.md`
+- `SECURITY.md`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -113,6 +115,7 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:package:windows:internal`
 - `Get-AuthenticodeSignature` on the generated NSIS installer and rebuilt release executable
 - `npm run test:scripts`
+- official GitHub Releases, GitHub Pages/HTTPS, Cloudflare Pages/custom domains, Microsoft Windows code signing, OWASP ASVS/WSTG, Tauri capabilities, and RustSec references reviewed for D7
 
 ## Validation Notes
 
@@ -158,6 +161,9 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D6 generated `src-tauri\target\release\bundle\nsis\AI Task Router_0.2.0_x64-setup.exe`, size `1,990,042` bytes, SHA-256 `FF170B0B681AA1954881767524E805C005AF72402C5B0AE7FCB0AF8934AC3BFD`.
 - D6 signature checks reported `NotSigned` for both the generated NSIS installer and `src-tauri\target\release\ai-task-router-desktop.exe`.
 - D6 script test passed: `npm run test:scripts` ran 2 Node tests.
+- D7 governance startup passed: `bash scripts/governance-preflight.sh` reported 0 warnings.
+- D7 did not deploy hosting, change DNS, publish a GitHub Release, sign artifacts, upload artifacts, enable an updater, or share social links.
+- D7 close-out validation passed: `npm run test` ran 12 files and 88 tests; `npm audit --audit-level=moderate` found 0 vulnerabilities; `bash scripts/governance-preflight.sh` reported 0 warnings; `git diff --check` reported only normal Windows LF-to-CRLF notices.
 
 ## Known Gaps
 
@@ -170,9 +176,11 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
 - Public web hosting has not been executed.
+- Public social launch links have not been created.
+- Canonical public URL is recommended as `https://app.oldskoolai.com/` but still needs owner confirmation before deployment.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If deployed under a subpath, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 
 ## Next Handoff
 
-Resume from Desktop Chunk D7 controlled beta release-candidate planning only if the owner wants to continue the desktop distribution lane. A safer next decision packet is Windows Store/MSIX versus direct signed installer, legal publisher identity, macOS/Linux beta timing, and whether auto-update remains deferred. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke. The hosted/PWA install path is integrated but not publicly hosted. Keep D6 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, public hosting, public installer publishing, code signing, updater, or external actions without a separately approved chunk.
+Resume with Chunk Fifteen E2E fixtures if the owner wants product completion before public launch. Resume with D8 Web Release Candidate And Cybersecurity Pass if the owner wants release engineering next: local security scans, Cloudflare Pages preview planning, canonical URL confirmation, HTTPS checks, smoke matrix, rollback checklist, and launch go/no-go. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep D7 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, public hosting, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.
