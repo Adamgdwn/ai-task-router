@@ -16,6 +16,11 @@ vi.mock("@tauri-apps/api/core", () => ({
   invoke: vi.fn(),
 }));
 
+type TestInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
 let databaseCounter = 0;
 const storesToDelete: LocalStore[] = [];
 
@@ -44,6 +49,8 @@ describe("App", () => {
     expect(screen.getByText("Your browser only")).toBeInTheDocument();
     expect(screen.getByText("No hidden AI calls or telemetry")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Choose my tools" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Install the browser version", level: 3 })).toBeInTheDocument();
+    expect(screen.getByText(/Computer checking still needs the desktop app/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "What To Include" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Choose what to include" })).not.toBeInTheDocument();
 
@@ -53,6 +60,32 @@ describe("App", () => {
       expect(screen.getByRole("heading", { name: definition.title, level: 2 })).toBeInTheDocument();
       expect(screen.getByText(definition.summary)).toBeInTheDocument();
     }
+  });
+
+  it("offers browser install when the browser exposes the install prompt", async () => {
+    const user = userEvent.setup();
+    const prompt = vi.fn().mockResolvedValue(undefined);
+
+    render(<App store={buildTestStore()} />);
+
+    expect(await screen.findByText(/Computer checking still needs the desktop app/)).toBeInTheDocument();
+
+    const installEvent = new Event("beforeinstallprompt", { cancelable: true }) as TestInstallPromptEvent;
+    Object.assign(installEvent, {
+      prompt,
+      userChoice: Promise.resolve({ outcome: "accepted", platform: "web" }),
+    });
+
+    window.dispatchEvent(installEvent);
+
+    expect(installEvent.defaultPrevented).toBe(true);
+
+    await user.click(await screen.findByRole("button", { name: "Install browser app" }));
+
+    await waitFor(() => {
+      expect(prompt).toHaveBeenCalledTimes(1);
+    });
+    expect(await screen.findByText("Install started. Your browser will finish it.")).toBeInTheDocument();
   });
 
   it("lets users add familiar AI apps one at a time and keeps changes after refresh", async () => {

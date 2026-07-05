@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T18:16:13-06:00
+Last Updated: 2026-07-04T18:41:17-06:00
 Status: active
 Owner: Technical Lead
 
@@ -17,6 +17,32 @@ List likely failure conditions and what to do first.
 List critical dependencies and how to check them.
 
 ## System Tools And Troubleshooting
+
+### Hosted Web/PWA Preview
+
+As of 2026-07-04T18:41:17-06:00, the browser build includes a PWA install path:
+
+- `public/manifest.webmanifest`
+- `public/service-worker.js`
+- `public/pwa/icon-192.png`
+- `public/pwa/icon-512.png`
+- install metadata in `index.html`
+- production-only service-worker registration in `src/pwa/registerServiceWorker.ts`
+
+Preview command:
+
+```bash
+npm run build
+npm run preview -- --host 127.0.0.1 --port 5184
+```
+
+Troubleshooting:
+
+- The browser install prompt depends on browser support, HTTPS or local preview, and browser-specific engagement rules.
+- The app may still be usable as a normal website even when a browser does not show an install prompt.
+- The service worker is intentionally not registered during Vite dev mode and not registered inside Tauri.
+- The browser/PWA build must not claim it can check the user's computer. Local AI tool discovery requires the desktop app.
+- If hosting under a subpath, update Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links before release.
 
 ### Desktop Build Toolchain
 

@@ -1,13 +1,13 @@
 # Tool Permission Matrix
 
-Last Updated: 2026-07-04T18:16:13-06:00
+Last Updated: 2026-07-04T18:41:17-06:00
 Status: active
 Owner: Technical Lead
-Status Updated: 2026-07-04T18:16:13-06:00
+Status Updated: 2026-07-04T18:41:17-06:00
 
 | Tool | Purpose | Allowed Actions | Prohibited Actions | Approval Required | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Browser app | Recommend AI task routes from user-entered setup and task details. | Read/write browser-local IndexedDB, generate local route cards, prompt packages, exports, and route logs. | Provider API calls, account connections, credential storage, telemetry, hidden uploads, file indexing, external actions. | User action for exports, saves, resets, and feedback entry. | Current v0.2 surface. |
+| Browser app / PWA | Recommend AI task routes from user-entered setup and task details; allow supported browsers to install the hosted app. | Read/write browser-local IndexedDB, generate local route cards, prompt packages, exports, and route logs; serve web app manifest, branded PWA icons, and same-origin app-shell service-worker cache in production. | Provider API calls, account connections, credential storage, telemetry, hidden uploads, file indexing, local computer discovery, external actions. | User action for exports, saves, resets, feedback entry, and browser install. | Current v0.2 browser surface. Browser/PWA cannot check the computer; desktop local discovery remains separate. |
 | `npm run detect:local-models` | Explicit local terminal check for common local model tools. | Read-only checks for Ollama and common local model folders; summary output by default. | Browser state changes, network calls, provider login, file content indexing, hidden telemetry, arbitrary shell execution. | User must run the command manually. | `--details` and `--json` can reveal more local details and should be used intentionally. |
 | Tauri desktop shell | Run the existing React app inside a desktop window and host the D4 custom Rust discovery commands. | Load bundled app assets, use one main window, apply an explicit CSP, and keep default Tauri plugin permissions empty. | Broad filesystem permissions, shell/process plugins, uploads, telemetry, updater, provider connections, credentials, file indexing, packaging/signing claims. | None beyond normal user launch; local discovery still requires explicit user action in the UI. | Current D2-D4 surface. No-bundle build passes; `desktop:dev` and unsigned release executable launch are blocked by Windows Application Control. |
 | `get_desktop_discovery_options` desktop command | Let the desktop UI show which allowlisted local AI checks are available. | Return OS/platform and fixed tool options using `desktopDiscoveryOptionsResponseSchema`. | Scanning folders, listing models, reading files, running commands, connecting providers, collecting telemetry. | User must open the desktop `Check this computer` flow before this matters in the UI. | Implemented in D4 as a custom Rust command in `src-tauri/src/discovery.rs`. |

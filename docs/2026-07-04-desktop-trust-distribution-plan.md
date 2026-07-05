@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.6.0
+Version: 0.7.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before Desktop Chunk D5 PWA install path or D6 packaging/signing spike
-Last Updated: 2026-07-04T18:16:13-06:00
-Status Updated: 2026-07-04T18:16:13-06:00
+Next Review: Before Desktop Chunk D6 packaging/signing spike or public web hosting work
+Last Updated: 2026-07-04T18:41:17-06:00
+Status Updated: 2026-07-04T18:41:17-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
 
 ## Purpose
 
@@ -28,10 +28,12 @@ The desktop version exists because local machine inspection changes the trust pr
 
 - The current app is a Vite, React, and TypeScript web app.
 - The current build artifact is static browser output from `npm run build`.
+- The browser build now includes a PWA install path: web app manifest, service worker, and branded 192px/512px icons.
 - Browser storage is local IndexedDB through Dexie.
 - The app is recommendation-only. It does not call provider APIs, connect accounts, store credentials, upload files, index folders, or execute external actions.
 - `npm run detect:local-models` exists as a separate explicit local command. It checks Ollama and common local model folders, prints a summary by default, and does not change app state.
 - The desktop prototype now has a D4 `Check this computer` flow for selected local AI tools only; it does not return paths, run at startup, use broad Tauri plugin permissions, or claim public packaging/signing readiness.
+- The hosted/browser install path does not perform local discovery. It says computer checking requires the desktop app.
 
 The current project classification in `project-control.yaml` is:
 
@@ -734,6 +736,59 @@ D4 known limits:
 - D4 does not inspect arbitrary folders, connect accounts, call provider APIs, upload data, store credentials, index files, or run external actions.
 - The terminal-only `npm run detect:local-models` command remains separate and explicit.
 
+## Desktop Chunk D5 PWA Install Path
+
+Status: integration complete
+
+Status Updated: 2026-07-04T18:41:17-06:00
+
+Completion target: Integration complete
+
+Result:
+
+D5 implements the hosted/browser install path without changing the desktop trust boundary. The production web build now has install metadata, branded PWA icons, a production-only service worker, and a Start Here install card that keeps ordinary users oriented: the browser version can be installed where supported, but checking the computer requires the desktop app.
+
+Official source basis reviewed on 2026-07-04:
+
+- MDN making PWAs installable: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable
+- web.dev PWA install criteria: https://web.dev/articles/install-criteria
+- Chrome installable manifest audit: https://developer.chrome.com/docs/lighthouse/pwa/installable-manifest
+
+Current D5 browser/PWA surface:
+
+- `public/manifest.webmanifest` defines the install name, short name, start URL `/`, scope `/`, standalone display, theme/background colors, and icon metadata.
+- `public/pwa/icon-192.png` and `public/pwa/icon-512.png` reuse the Guided AI Labs icon set at the sizes expected by common installability checks.
+- `public/service-worker.js` caches same-origin app-shell assets and handles same-origin navigation/assets only.
+- `src/pwa/registerServiceWorker.ts` registers the service worker only in production HTTPS or local preview, never in Vite dev mode and never inside Tauri.
+- `index.html` links the manifest and install icon.
+- Start Here now includes an `Install the browser version` card. It listens for `beforeinstallprompt` when supported, provides fallback browser-menu copy, and explicitly says local computer checking requires the desktop app.
+
+D5 non-goals:
+
+- no public hosting or DNS work
+- no desktop packaging, signing, updater, notarization, installers, checksums, or public downloads
+- no provider calls, external APIs, account connections, telemetry, remote sync, uploads, or hidden network calls
+- no local AI tool discovery in the browser/PWA version
+- no arbitrary folder inspection, file indexing, startup/background scanning, or service-worker background sync/push
+
+D5 validation:
+
+- `npm run test -- App pwaServiceWorker` passed with 2 files and 17 tests.
+- `node --check public\service-worker.js` passed.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- `npm run test` passed with 12 files and 88 tests.
+- `npm run build` passed with the existing Vite chunk-size warning.
+- Build output included `dist/manifest.webmanifest`, `dist/service-worker.js`, `dist/pwa/icon-192.png`, and `dist/pwa/icon-512.png`.
+- Local production preview at `http://127.0.0.1:5184/` served the install metadata: manifest link present, Apple icon link present, manifest name `AI Task Router | Guided AI Labs`, display `standalone`, start URL `/`, two icons, 200 responses for both icon URLs, 200 response for `service-worker.js`, and service-worker install/fetch handlers present.
+
+D5 known limits:
+
+- Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
+- Public hosting has not been executed.
+- If hosted under a subpath rather than domain root, review Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links before release.
+- D5 is not public release readiness; it is install-path integration.
+
 ### Phase 1: Desktop Tool Decision Spike
 
 Goal:
@@ -962,7 +1017,7 @@ Validation:
 
 ## Suggested Future Chunks
 
-These are the desktop-track chunks. D0 through D4 now have current states; D5 and later remain planned future work unless the owner explicitly continues that lane.
+These are the desktop-track chunks. D0 through D5 now have current states; D6 and later remain planned future work unless the owner explicitly continues that lane.
 
 ### Desktop Chunk D0 - Owner Decision And Governance Review
 
@@ -1032,6 +1087,10 @@ Outcome:
 
 The hosted web app can be installed from supported browsers while clearly stating that local discovery requires the desktop version.
 
+Current state:
+
+D5 is integration complete as of 2026-07-04T18:41:17-06:00. The browser build has a manifest, branded 192px/512px icons, production-only service-worker registration, Start Here browser-install copy, service-worker gating tests, and preview evidence that install metadata is served from production output. Public hosting is not executed, and browser/PWA local discovery remains prohibited.
+
 ### Desktop Chunk D6 - Packaging And Signing Spike
 
 Completion target: Draft complete
@@ -1083,7 +1142,8 @@ Signed or clearly controlled beta installers are ready for limited users with in
 
 Choose the next lane deliberately:
 
-- For a low-friction public path, proceed to Desktop Chunk D5 and document the hosted/PWA install experience while clearly stating that computer checking requires the desktop app.
 - For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests, then continue toward Desktop Chunk D6 packaging/signing research.
+- For the hosted web lane, plan public hosting separately for `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, including HTTPS, path/base decisions, smoke tests, and rollback.
+- For the web MVP lane, return to Chunk Fifteen fixture and E2E coverage.
 
-Do not expand D4 into arbitrary folder inspection, broad filesystem permissions, provider connections, credentials, telemetry, updater, packaging, signing, file indexing, auto-upload, whole-drive search, or external actions without a separately approved chunk.
+Do not expand D4/D5 into arbitrary folder inspection, broad filesystem permissions, provider connections, credentials, telemetry, updater, packaging, signing, public hosting, file indexing, auto-upload, whole-drive search, or external actions without a separately approved chunk.

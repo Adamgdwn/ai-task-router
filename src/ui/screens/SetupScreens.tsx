@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import {
   getDesktopDiscoveryOptions,
   isDesktopDiscoveryAvailable,
@@ -53,6 +53,11 @@ const shoppingPathSteps = [
   },
 ] as const;
 
+type BrowserInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
 type StartHereScreenProps = {
   definition: ScreenDefinition;
   onNavigate: (screenId: string) => void;
@@ -79,6 +84,7 @@ export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps
             </button>
           </section>
         ))}
+        <PwaInstallPanel />
       </section>
 
       <section className="plainPromise" aria-labelledby="plain-promise-heading">
@@ -90,6 +96,82 @@ export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps
         </ul>
       </section>
     </article>
+  );
+}
+
+function PwaInstallPanel() {
+  const desktopAvailable = isDesktopDiscoveryAvailable();
+  const [installPrompt, setInstallPrompt] = useState<BrowserInstallPromptEvent | null>(null);
+  const [installState, setInstallState] = useState<"idle" | "available" | "accepted" | "dismissed" | "installed" | "error">(
+    "idle",
+  );
+
+  useEffect(() => {
+    if (desktopAvailable) {
+      return undefined;
+    }
+
+    function handleBeforeInstallPrompt(event: Event) {
+      event.preventDefault();
+      setInstallPrompt(event as BrowserInstallPromptEvent);
+      setInstallState("available");
+    }
+
+    function handleAppInstalled() {
+      setInstallPrompt(null);
+      setInstallState("installed");
+    }
+
+    if (isStandaloneBrowserApp()) {
+      setInstallState("installed");
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, [desktopAvailable]);
+
+  if (desktopAvailable) {
+    return null;
+  }
+
+  async function installBrowserApp() {
+    if (!installPrompt) {
+      return;
+    }
+
+    const promptEvent = installPrompt;
+    setInstallPrompt(null);
+
+    try {
+      await promptEvent.prompt();
+      const choice = await promptEvent.userChoice;
+
+      setInstallState(choice.outcome === "accepted" ? "accepted" : "dismissed");
+    } catch (_error) {
+      setInstallState("error");
+    }
+  }
+
+  return (
+    <section className="pathStep pwaInstallStep" aria-labelledby="pwa-install-heading">
+      <span>Install</span>
+      <h3 id="pwa-install-heading">Install the browser version</h3>
+      <p>
+        Use it like a regular app where your browser supports install. Computer checking still needs the desktop app.
+      </p>
+      {installPrompt && installState === "available" ? (
+        <button onClick={() => void installBrowserApp()} type="button">
+          Install browser app
+        </button>
+      ) : (
+        <p className="pwaInstallStatus">{pwaInstallStatusMessage(installState)}</p>
+      )}
+    </section>
   );
 }
 
@@ -938,6 +1020,34 @@ function desktopDiscoveryErrorMessage(error: unknown) {
   }
 
   return "The computer check could not finish. You can still add tools manually.";
+}
+
+function pwaInstallStatusMessage(
+  installState: "idle" | "available" | "accepted" | "dismissed" | "installed" | "error",
+) {
+  if (installState === "accepted") {
+    return "Install started. Your browser will finish it.";
+  }
+
+  if (installState === "dismissed") {
+    return "No problem. You can install later from the browser menu when it is available.";
+  }
+
+  if (installState === "installed") {
+    return "Installed. Open it from your app list when you want the browser version.";
+  }
+
+  if (installState === "error") {
+    return "The browser install prompt was not available. Try the browser menu instead.";
+  }
+
+  return "Your browser may show Install app in the address bar or menu after the hosted site is loaded over HTTPS.";
+}
+
+function isStandaloneBrowserApp() {
+  const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+
+  return Boolean(window.matchMedia?.("(display-mode: standalone)").matches || navigatorWithStandalone.standalone);
 }
 
 function replaceRecord<T extends { id: string }>(records: readonly T[], updatedRecord: T): T[] {

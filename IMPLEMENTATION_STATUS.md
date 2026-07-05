@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T18:16:13-06:00
-Status: desktop-d4-permissioned-local-discovery-build-validated
-Status Updated: 2026-07-04T18:16:13-06:00
+Last Updated: 2026-07-04T18:41:17-06:00
+Status: desktop-d5-pwa-install-path-integrated
+Status Updated: 2026-07-04T18:41:17-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D4 permissioned local AI tool detection, building on the Desktop Chunk D3 trust boundary.
+Desktop Chunk D5 PWA install path, building on the hosted/PWA track in the desktop trust and distribution plan.
 
 Completion target: Integration complete.
 
-Current state: D4 local discovery prototype implemented; scaffold present; Windows prerequisites installed; no-bundle desktop build passes; dev mode and unsigned release executable launch remain blocked by Windows Application Control.
+Current state: D5 browser install path integrated; production web build includes a manifest, branded PWA icons, production-only service-worker registration, and Start Here install copy. D4 desktop local discovery remains implemented for the desktop app only. Windows desktop dev mode and unsigned release executable launch remain blocked by Windows Application Control.
 
 ## Scope
 
@@ -49,9 +49,18 @@ The D4 local-discovery slice provides:
 - Summary-first results, optional capped model-name details, clear results, and add-to-My-AI-Tools actions.
 - No path return, no startup/background scans, no user-supplied paths, and no broad Tauri plugin permissions.
 
+The D5 hosted/PWA install slice provides:
+
+- `public/manifest.webmanifest` with name, short name, start URL, standalone display mode, theme/background colors, and 192px/512px Guided AI Labs icons.
+- `public/service-worker.js` with same-origin app-shell caching, navigation fallback, install/activate/fetch handlers, and old-cache cleanup.
+- `public/pwa/icon-192.png` and `public/pwa/icon-512.png` copied from the existing Guided AI Labs desktop icon set.
+- `src/pwa/registerServiceWorker.ts` to register the service worker only in production HTTPS or local preview, never during Vite dev mode or inside Tauri.
+- Start Here browser-install UI that responds to `beforeinstallprompt`, keeps fallback browser-menu copy, and explicitly says computer checking requires the desktop app.
+- Tests for the install prompt path and service-worker registration gating.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only. It still does not add arbitrary folder inspection, package signing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only. The browser/PWA track adds installability only. Neither track adds arbitrary folder inspection, package signing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -97,6 +106,13 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D4 `npm run desktop:info` passed after prepending `C:\Users\adamg\.cargo\bin` to the current shell PATH.
 - D4 `npm run desktop:build` passed after prepending `C:\Users\adamg\.cargo\bin` and built `src-tauri\target\release\ai-task-router-desktop.exe`.
 - D4 `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- D5 focused `npm run test -- App pwaServiceWorker` passed with 2 files and 17 tests.
+- D5 `node --check public\service-worker.js` passed.
+- D5 `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- D5 `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- D5 `npm run test` passed with 12 files and 88 tests.
+- D5 `npm run build` passed with the existing Vite chunk-size warning and produced `dist/manifest.webmanifest`, `dist/service-worker.js`, `dist/pwa/icon-192.png`, and `dist/pwa/icon-512.png`.
+- D5 local production preview on `http://127.0.0.1:5184/` served the install metadata: manifest link present, Apple icon link present, manifest name `AI Task Router | Guided AI Labs`, display `standalone`, start URL `/`, two icons, both icon URLs returned 200, service worker returned 200, and install/fetch handlers were present.
 
 ## Known Gaps
 
@@ -106,9 +122,12 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Some fresh shells may need a restart or temporary `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"` before Tauri can see Rust.
 - Public desktop packaging, signing, updater, and installer remain out of scope.
 - Interactive desktop launch smoke for D4 remains blocked until the lab Application Control/signing/trusted-path issue is resolved.
+- Public web hosting has not been executed.
+- Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
+- If the hosted app is deployed under a subpath rather than a domain root, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 
 ## Next Chunk
 
-Either proceed to Desktop Chunk D5 for the hosted/PWA install path, resolve the local Windows Application Control blockers through an approved lab policy/signing/trusted-path route before interactive desktop smoke tests, or move to D6 packaging/signing research as build-only work.
+Either proceed to Desktop Chunk D6 packaging/signing research as build-only work, resolve the local Windows Application Control blockers through an approved lab policy/signing/trusted-path route before interactive desktop smoke tests, or return to the web MVP lane for Chunk Fifteen E2E fixtures.
 
-Proceeding beyond D4 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions without a separate approved chunk.
+Proceeding beyond D5 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, public hosting, or external actions without a separate approved chunk.

@@ -40,6 +40,17 @@ For material or risk-triggering work, add the full governance path:
 The browser app stays local-first and recommendation-only. It does not sign in to providers, verify paid plans, call AI
 APIs, scan files, or run local model tools.
 
+The hosted browser app can be installed from supported browsers after a production build is served over HTTPS or local
+preview. The installable browser version still runs as the browser app: it saves choices locally in the browser and does
+not check the computer for local AI tools.
+
+To preview the installable browser build locally:
+
+```bash
+npm run build
+npm run preview -- --host 127.0.0.1 --port 5184
+```
+
 To inspect this machine for common local model tooling, run:
 
 ```bash

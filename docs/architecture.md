@@ -12,7 +12,7 @@ The MVP is intentionally not an AI agent. It does not execute actions, call prov
 
 ## Components
 
-Planned MVP components:
+Current MVP components:
 
 - UI shell and screens for setup, task intake, route results, route cards, prompt packages, route logs, and reference material
 - domain types and runtime schemas
@@ -24,6 +24,7 @@ Planned MVP components:
 - prompt package generator
 - local IndexedDB persistence
 - Markdown, JSON, and CSV export/import utilities
+- PWA web manifest, branded install icons, and a production-only service worker for the hosted/browser install path
 - unit and end-to-end tests
 
 ## Data Flow
@@ -43,6 +44,11 @@ Planned v0.2 flow:
 
 All MVP data stays in browser-local storage or user-triggered exports.
 
+The hosted/browser build can be installed from supported browsers through the web app manifest and service worker. The
+service worker caches same-origin app-shell assets only; it does not add provider calls, telemetry, local machine
+inspection, file indexing, account connections, or background data collection. The browser/PWA install path remains
+separate from desktop local discovery.
+
 ## Dependencies
 
 Planned implementation dependencies:
@@ -54,6 +60,7 @@ Planned implementation dependencies:
 - Dexie / IndexedDB
 - Vitest
 - Playwright
+- Web App Manifest and Service Worker
 - Mermaid for reference diagrams
 
 Excluded from v0.2:

@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser MVP validation lane, with Desktop Chunk D4 permissioned local AI tool detection implemented for the desktop app; desktop build passes, but dev mode and unsigned release executable launch are blocked by Windows Application Control
-Status Updated: 2026-07-04T18:16:13-06:00
+Status: v0.2 browser MVP validation lane, with Desktop Chunk D5 PWA install path integrated for the hosted/browser app; desktop local discovery remains desktop-only and unsigned desktop launch remains blocked by Windows Application Control
+Status Updated: 2026-07-04T18:41:17-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -49,6 +49,7 @@ Product brief: [docs/PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md)
 - Dexie / IndexedDB
 - Vitest
 - Playwright
+- Web app manifest and service worker for the hosted/PWA install path
 - Tauri, for the desktop shell and permissioned local discovery prototype
 
 ## Local Setup
@@ -85,6 +86,16 @@ Build the app:
 ```bash
 npm run build
 ```
+
+Preview the production web/PWA build locally:
+
+```bash
+npm run preview -- --host 127.0.0.1 --port 5184
+```
+
+The hosted browser app now includes an install manifest, Guided AI Labs app icons, and a production-only service worker.
+Supported browsers may offer an Install app option when the site is served over HTTPS or local preview. The browser/PWA
+version cannot check the user's computer; local AI tool discovery requires the desktop app.
 
 Check the desktop shell environment:
 

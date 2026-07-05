@@ -1,7 +1,7 @@
 # 2026-07-03T11:49:34-06:00 - Roadmap
 
 Document status: draft baseline
-Status Updated: 2026-07-04T14:56:49-06:00
+Status Updated: 2026-07-04T18:41:17-06:00
 
 ## Now
 
@@ -33,7 +33,7 @@ Status Updated: 2026-07-04T14:56:49-06:00
 
 - Host the web app publicly only after release-readiness review and deployment planning.
 - Keep `oldskoolai.com` as the likely canonical product home, with links from `guidedailabs.com` and `guidedaijourney.com`.
-- Add a PWA install path for the hosted app where supported.
+- Keep the D5 PWA install path for the hosted app where supported; public hosting still needs a separate release/deployment chunk.
 - Plan a separate signed desktop app for Windows, macOS, and Linux when local machine discovery is ready.
 - Use [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) as the baseline for desktop trust, signing, and release work.
 - Desktop Chunk D0 is confirmed for planning, and Desktop Chunk D1 selected Tauri for the first desktop shell spike.

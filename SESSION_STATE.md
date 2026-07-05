@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-04T18:16:13-06:00
-Status: desktop-d4-permissioned-local-discovery-build-validated
-Status Updated: 2026-07-04T18:16:13-06:00
+Last Updated: 2026-07-04T18:41:17-06:00
+Status: desktop-d5-pwa-install-path-integrated
+Status Updated: 2026-07-04T18:41:17-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop Chunk D4: implement permissioned desktop-only local AI tool detection against the D3 trust-boundary contract.
+Desktop Chunk D5: implement the hosted/browser PWA install path while keeping local computer checking desktop-only.
 
-Current result: D4 local discovery prototype is implemented and build-validated. The desktop app has a user-started `Check this computer` flow for allowlisted local AI tools. `desktop:dev` and unsigned release executable launch remain blocked by Windows Application Control, so interactive desktop launch smoke is not claimed.
+Current result: D5 PWA install path is integrated and build-validated. The production browser build includes a web app manifest, Guided AI Labs 192px/512px icons, a production-only service worker, and Start Here install copy that says computer checking requires the desktop app. D4 local discovery remains desktop-only. `desktop:dev` and unsigned release executable launch remain blocked by Windows Application Control, so interactive desktop launch smoke is still not claimed.
 
 ## Files Changed In This Session
 
@@ -36,6 +36,14 @@ Current result: D4 local discovery prototype is implemented and build-validated.
 - `docs/CHANGELOG.md`
 - `IMPLEMENTATION_STATUS.md`
 - `SESSION_STATE.md`
+- `index.html`
+- `public/manifest.webmanifest`
+- `public/pwa/icon-192.png`
+- `public/pwa/icon-512.png`
+- `public/service-worker.js`
+- `src/main.tsx`
+- `src/pwa/registerServiceWorker.ts`
+- `src/tests/unit/pwaServiceWorker.test.ts`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -72,6 +80,15 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - `npm audit --audit-level=moderate`
 - `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:info`
 - `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:build`
+- official PWA installability references reviewed from MDN, web.dev, and Chrome for Developers
+- copied existing Guided AI Labs icon assets into `public/pwa/icon-192.png` and `public/pwa/icon-512.png`
+- `npm run test -- App pwaServiceWorker`
+- `node --check public\service-worker.js`
+- `npm audit --audit-level=moderate`
+- `bash scripts/governance-preflight.sh`
+- `npm run build`
+- production preview checks at `http://127.0.0.1:5184/` for manifest link, Apple icon link, manifest fields, icon URLs, and service-worker install/fetch handlers
+- `npm run test`
 - release executable launch smoke test attempt
 - `Get-AuthenticodeSignature`
 - Windows Code Integrity event review
@@ -116,6 +133,13 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D4 audit found 0 vulnerabilities and governance preflight passed with 0 warnings.
 - D4 `npm run desktop:info` and `npm run desktop:build` passed after prepending `C:\Users\adamg\.cargo\bin` to the current shell PATH.
 - D4 no-bundle desktop build produced `src-tauri\target\release\ai-task-router-desktop.exe`.
+- D5 focused validation passed: `npm run test -- App pwaServiceWorker` ran 2 files and 17 tests.
+- D5 service-worker syntax validation passed: `node --check public\service-worker.js`.
+- D5 audit found 0 vulnerabilities: `npm audit --audit-level=moderate`.
+- D5 governance preflight passed with 0 warnings: `bash scripts/governance-preflight.sh`.
+- D5 production build passed: `npm run build` completed with the existing Vite chunk-size warning and included `dist/manifest.webmanifest`, `dist/service-worker.js`, `dist/pwa/icon-192.png`, and `dist/pwa/icon-512.png`.
+- D5 full unit validation passed: `npm run test` ran 12 files and 88 tests.
+- D5 local production preview check on `http://127.0.0.1:5184/` confirmed the manifest link, Apple icon link, manifest name `AI Task Router | Guided AI Labs`, display `standalone`, start URL `/`, two icons, 200 responses for both icon URLs, 200 response for `service-worker.js`, and service-worker install/fetch handlers.
 
 ## Known Gaps
 
@@ -126,7 +150,10 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - Do not bypass or weaken Code Integrity silently.
 - Do not add broad filesystem permissions, arbitrary shell/process access, telemetry, provider connections, updater, signing, packaging, credentials, file indexing, or external actions beyond D4 without a separately approved chunk.
 - D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
+- Public web hosting has not been executed.
+- Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
+- If deployed under a subpath, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 
 ## Next Handoff
 
-Resume from Desktop Chunk D5 if the owner wants the hosted/PWA install path next, or resolve the lab policy/signing/trusted-path blocker before claiming interactive desktop discovery smoke. The Tauri scaffold exists; prerequisites are installed; D4 custom Rust discovery commands, desktop UI, frontend bridge, tests, build, audit, governance, `desktop:info`, and `desktop:build` are verified. Keep D4 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, packaging, signing, updater, or external actions without a separately approved chunk.
+Resume from Desktop Chunk D6 packaging/signing research if the owner wants to continue the desktop distribution lane, resolve the lab policy/signing/trusted-path blocker before claiming interactive desktop discovery smoke, or return to web MVP Chunk Fifteen for fixture/E2E coverage. The hosted/PWA install path is integrated but not publicly hosted. Keep D5 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, public hosting, packaging, signing, updater, or external actions without a separately approved chunk.
