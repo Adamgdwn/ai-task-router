@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T21:05:03-06:00
-Status: d9-cloudflare-hosted-preview-smoke-complete-release-hold
-Status Updated: 2026-07-04T21:05:03-06:00
+Last Updated: 2026-07-04T21:52:19-06:00
+Status: d10-desktop-technical-preview-artifact-lane-draft-complete-public-download-hold
+Status Updated: 2026-07-04T21:52:19-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D9 Cloudflare Pages hosted preview smoke, building on D8 local web release-candidate security evidence.
+Desktop Chunk D10 desktop technical-preview artifact lane, building on D9 Cloudflare hosted preview smoke and D6 packaging/signing evidence.
 
-Completion target: Task complete, release hold.
+Completion target: Draft complete, public download hold.
 
-Current state: D9 is task complete with public release still held. The browser/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. Hosted Node/Chromium HTTPS smoke, hosted Playwright E2E, audit, script tests, unit tests, production build, and web artifact scan all passed. The next hosted-release step is owner-confirmed canonical URL selection, Cloudflare GitHub-integration/direct-upload decision, custom-domain smoke if used, and owner launch decision before public website links or social launch.
+Current state: D10 adds a manual GitHub Actions workflow and local scripts for Windows, macOS, and Linux technical-preview desktop artifacts with SHA-256 checksum generation. Public desktop downloads are still held. The browser/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. The next public-release step is owner-confirmed Old Skool AI hub/canonical URL selection, Cloudflare GitHub-integration/direct-upload decision, custom-domain smoke if used, desktop signing/trust work where applicable, and owner launch decision before public website links, desktop downloads, or social launch.
 
 ## Scope
 
@@ -93,9 +93,17 @@ D9 provides:
 - Hosted Playwright support through `PLAYWRIGHT_BASE_URL` in `playwright.config.ts`.
 - Hosted smoke evidence for root page, manifest, service worker, PWA icons, service-worker registration, and no observed external requests during Chromium load.
 
+D10 provides:
+
+- `docs/2026-07-04-desktop-technical-preview-artifacts.md`, the D10 evidence packet for technical-preview desktop artifacts.
+- `.github/workflows/desktop-technical-preview.yml`, a manual GitHub Actions workflow for Windows, macOS, and Linux technical-preview artifacts.
+- `src-tauri/tauri.technical-preview.conf.json`, a shared bundle config with updater artifacts disabled.
+- Package scripts for Windows NSIS, macOS DMG, Linux AppImage, and Linux `.deb` technical-preview builds.
+- `npm run desktop:checksums`, which writes `SHA256SUMS.txt` beside generated desktop packages.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only and an opt-in internal unsigned Windows package build for evidence. The browser/PWA track adds installability, D8 local release-candidate evidence, and a D9 Cloudflare Pages hosted test preview. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, public website links, social launch links, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, and a D9 Cloudflare Pages hosted test preview. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, public website links, social launch links, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -180,6 +188,18 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D9 `npx playwright test` passed locally with 6 Chromium tests after adding hosted-base-url support.
 - D9 hosted `PLAYWRIGHT_BASE_URL=https://preview-20260704-0c7b253.ai-task-router.pages.dev npx playwright test` passed with 6 Chromium tests.
 - D9 final validation passed: `npm audit --audit-level=moderate`, `npm run test:scripts`, `npm run test`, `npm run build`, and `npm run scan:web-rc`. Build retained the existing Vite chunk-size warning only.
+- D10 governance preflight passed with 0 warnings.
+- D10 syntax and config checks passed: `node --check scripts/inspect-desktop-artifacts.mjs`, `node --check scripts/inspect-desktop-artifacts.node-test.mjs`, JSON parse check for `package.json` and `src-tauri/tauri.technical-preview.conf.json`, and `npx --yes yaml-lint .github/workflows/desktop-technical-preview.yml`.
+- D10 `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- D10 `npm run test:scripts` passed with 4 Node script tests, including checksum file output.
+- D10 `npm run test` passed with 12 files and 88 tests.
+- D10 `npm run build` passed with the existing Vite chunk-size warning.
+- D10 `npm run scan:web-rc` passed with no release-blocking findings.
+- D10 Windows technical-preview package build passed and generated `src-tauri\target\release\bundle\nsis\AI Task Router_0.2.0_x64-setup.exe`.
+- D10 `npm run desktop:artifacts` reported size `1.90 MiB` and SHA-256 `C6438D8EDBDFFEC8375D9538373F4C2E681DE02EE037474C1C0C11B006CA0B86`.
+- D10 `npm run desktop:checksums` wrote `src-tauri\target\release\bundle\SHA256SUMS.txt`.
+- D10 `Get-AuthenticodeSignature` reported `NotSigned` for both the Windows NSIS installer and rebuilt release executable.
+- D10 `git diff --check` passed with only normal Windows LF-to-CRLF notices.
 
 ## Known Gaps
 
@@ -189,6 +209,8 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Some fresh shells may need a restart or temporary `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"` before Tauri can see Rust.
 - Public desktop packaging, signing, updater, and installer distribution remain out of scope.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
+- D10 technical-preview artifacts are not public-release downloads and must not be linked from Old Skool AI until signing/notarization, smoke tests, support/withdrawal copy, and owner approval pass or a technical-preview exception is explicitly accepted.
+- The D10 GitHub Actions workflow has to be manually run before remote Windows/macOS/Linux artifacts exist.
 - Interactive desktop launch smoke for D4 remains blocked until the lab Application Control/signing/trusted-path issue is resolved.
 - Cloudflare Pages hosted preview exists, but public launch has not happened.
 - Cloudflare Pages project is not connected to GitHub yet; production release path still needs a GitHub-integration vs direct-upload decision.
@@ -201,6 +223,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Choose the canonical URL from the owner-controlled domains or Cloudflare Pages default URL, decide whether Cloudflare Pages should be GitHub-connected before production or use a documented direct-upload release process, and smoke the canonical/custom domain before public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before public launch.
+Choose the Old Skool AI hub implementation path, decide whether the hosted app should live under a subpath, Cloudflare Pages default URL, or a new owned subdomain, and decide whether to run the D10 workflow now for internal technical-preview artifacts. Run Chunk Sixteen first if the owner wants documentation and polish tightened before public launch.
 
-Proceeding beyond D9 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, Cloudflare production/canonical launch, public installer publishing, DNS changes, GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.
+Proceeding beyond D10 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, Cloudflare production/canonical launch, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.

@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.10.1
+Version: 0.11.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before D8 web release candidate work, public web hosting, or controlled desktop beta work
-Last Updated: 2026-07-04T20:49:44-06:00
-Status Updated: 2026-07-04T20:49:44-06:00
+Next Review: Before public website download links, signing work, or controlled desktop beta work
+Last Updated: 2026-07-04T21:52:19-06:00
+Status Updated: 2026-07-04T21:52:19-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence while still holding public launch until Cloudflare Pages HTTPS preview, canonical URL confirmation, and custom-domain smoke pass. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence. D9 creates and smokes the Cloudflare Pages hosted preview. D10 adds a manual GitHub Actions technical-preview artifact lane for Windows, macOS, and Linux, plus checksum generation, and locally verifies the Windows technical-preview NSIS package while holding public desktop downloads until signing/notarization and smoke gates pass. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
 
 ## Purpose
 
@@ -1224,10 +1224,52 @@ D9 validation:
 - Hosted `PLAYWRIGHT_BASE_URL=https://preview-20260704-0c7b253.ai-task-router.pages.dev npx playwright test` passed with 6 Chromium tests.
 - Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node HTTPS/fetch and Chromium succeeded; retest normal browsers and the final custom domain before public launch.
 
+### Desktop Chunk D10 - Desktop Technical-Preview Artifacts
+
+Status: draft complete, public download hold
+
+Status Updated: 2026-07-04T21:49:15-06:00
+
+Completion target: Draft complete
+
+Outcome:
+
+D10 creates a same-day technical-preview artifact lane for Windows, macOS, and Linux without creating public website download buttons or public GitHub Releases.
+
+Decision packet:
+
+- [Desktop Technical Preview Artifacts](2026-07-04-desktop-technical-preview-artifacts.md)
+
+D10 result:
+
+- Added manual workflow `.github/workflows/desktop-technical-preview.yml`.
+- Added `src-tauri/tauri.technical-preview.conf.json`.
+- Added technical-preview package scripts for Windows NSIS, macOS DMG, Linux AppImage, and Linux `.deb`.
+- Added `npm run desktop:checksums`.
+- Added SHA-256 checksum file writing to `scripts/inspect-desktop-artifacts.mjs`.
+- Added Node test coverage for checksum file output.
+- Locally built the Windows NSIS technical-preview artifact and generated `SHA256SUMS.txt`.
+- Confirmed the local Windows installer and rebuilt executable are `NotSigned`, so the public download hold remains.
+
+D10 release decision:
+
+Hold public desktop downloads. Technical-preview artifacts are for owner/developer inspection and platform build verification only. Old Skool AI public download buttons should wait until platform signing/notarization, checksum, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner launch approval pass, unless the owner separately accepts and documents a technical-preview exception.
+
+Current desktop artifact lanes:
+
+| Lane | Status | Public download? | Notes |
+|---|---|---|---|
+| Windows NSIS technical preview | local build verified | No | Unsigned until Windows signing or Store/MSIX path is chosen and proven. |
+| macOS DMG technical preview | workflow-ready, not run locally | No | Unsigned/unnotarized until Apple Developer ID and notarization are configured and proven. |
+| Linux AppImage/`.deb` technical preview | workflow-ready, not run locally | No | Needs Linux smoke, checksum/signature decision, dependency notes, and install/uninstall notes before public links. |
+
 ## Open Decisions
 
-- Canonical public app URL: pending; owner confirmed the three root websites but not `https://app.oldskoolai.com/`, so the next chunk must choose root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain.
+- Canonical public hub: owner preference is an Old Skool AI tab/page that links from the other two sites and eventually contains both "use online" and desktop download choices.
+- Hosted app placement from the Old Skool AI hub: pending; choose subpath embed/link, Cloudflare Pages default URL, or a newly created subdomain under an owned domain.
 - Cloudflare production release path: decide whether to connect the Pages project to GitHub before production or accept a documented Wrangler direct-upload release process.
+- Whether to run the D10 manual workflow now for internal technical-preview artifacts.
+- Whether the owner wants to explicitly accept a technical-preview exception before public signing/notarization gates, or keep downloads internal until the gates pass.
 - Canonical product name for the desktop app.
 - Legal publisher name for signing.
 - Windows distribution path: Microsoft Store/MSIX, direct signed installer, or both.

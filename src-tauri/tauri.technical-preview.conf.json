@@ -1,0 +1,30 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "publisher": "Guided AI Labs Ltd",
+    "homepage": "https://guidedailabs.com",
+    "category": "Productivity",
+    "shortDescription": "Plain-language AI task routing for everyday users.",
+    "longDescription": "AI Task Router helps people choose an AI tool path and prepare prompts locally. The desktop technical preview adds explicit, local-only checks for selected AI tools on the user's computer.",
+    "copyright": "Copyright (c) 2026 Guided AI Labs Ltd",
+    "createUpdaterArtifacts": false,
+    "windows": {
+      "allowDowngrades": false,
+      "digestAlgorithm": "sha256",
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "installMode": "currentUser",
+        "languages": ["English"],
+        "displayLanguageSelector": false,
+        "startMenuFolder": "Guided AI Labs"
+      }
+    }
+  }
+}

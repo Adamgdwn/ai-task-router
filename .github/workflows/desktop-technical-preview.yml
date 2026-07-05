@@ -1,0 +1,93 @@
+name: Desktop Technical Preview Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: Days to keep the technical-preview artifacts
+        required: true
+        default: "14"
+
+permissions:
+  contents: read
+
+jobs:
+  build-desktop-artifacts:
+    name: Build ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Windows x64 unsigned NSIS
+            os: windows-latest
+            artifact_suffix: windows-x64-unsigned-nsis
+            rust_targets: ""
+            package_command: npm run desktop:package:windows:technical-preview
+          - label: macOS Apple Silicon unsigned DMG
+            os: macos-latest
+            artifact_suffix: macos-aarch64-unsigned-dmg
+            rust_targets: aarch64-apple-darwin
+            package_command: npm run desktop:package:macos:technical-preview -- --target aarch64-apple-darwin
+          - label: macOS Intel unsigned DMG
+            os: macos-latest
+            artifact_suffix: macos-x64-unsigned-dmg
+            rust_targets: x86_64-apple-darwin
+            package_command: npm run desktop:package:macos:technical-preview -- --target x86_64-apple-darwin
+          - label: Linux x64 AppImage and deb
+            os: ubuntu-22.04
+            artifact_suffix: linux-x64-appimage-deb
+            rust_targets: ""
+            package_command: npm run desktop:package:linux:technical-preview
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Add Rust target
+        if: matrix.rust_targets != ''
+        run: rustup target add ${{ matrix.rust_targets }}
+
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
+
+      - name: Install app dependencies
+        run: npm ci
+
+      - name: Build technical-preview package
+        run: ${{ matrix.package_command }}
+
+      - name: Write SHA-256 checksums
+        run: npm run desktop:checksums
+
+      - name: Upload technical-preview artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-task-router-${{ matrix.artifact_suffix }}
+          retention-days: ${{ inputs.retention_days }}
+          if-no-files-found: error
+          path: |
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.msix
+            src-tauri/target/release/bundle/**/*.rpm
+            src-tauri/target/release/bundle/**/*.zip
+            src-tauri/target/release/bundle/SHA256SUMS.txt

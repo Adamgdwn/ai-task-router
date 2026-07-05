@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { listDesktopArtifacts, sha256File } from "./inspect-desktop-artifacts.mjs";
+import { listDesktopArtifacts, sha256File, writeDesktopChecksums } from "./inspect-desktop-artifacts.mjs";
 
 test("lists desktop package artifacts with size and checksum", async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "ai-task-router-artifacts-"));
@@ -37,6 +37,13 @@ test("lists desktop package artifacts with size and checksum", async () => {
       artifacts[0].sha256,
       createHash("sha256").update("debian-package").digest("hex").toUpperCase(),
     );
+
+    const checksumPath = path.join(tempRoot, "SHA256SUMS.txt");
+    await writeDesktopChecksums(tempRoot, checksumPath);
+
+    const checksumBody = await readFile(checksumPath, "utf8");
+    assert.match(checksumBody, /AI Task Router_0\.2\.0_x64-setup\.exe/);
+    assert.match(checksumBody, /ai-task-router_0\.2\.0_amd64\.deb/);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }

@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA release-candidate lane, with Desktop Chunk D9 Cloudflare hosted preview smoke complete; public release remains on hold pending canonical URL, custom-domain/GitHub-integration decision, signing, and trust gates
-Status Updated: 2026-07-04T21:05:03-06:00
+Status: v0.2 browser/PWA release-candidate lane, with Desktop Chunk D10 technical-preview artifact lane added; public release remains on hold pending Old Skool AI hub/canonical URL, custom-domain/GitHub-integration decision, signing, and trust gates
+Status Updated: 2026-07-04T21:52:19-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -143,7 +143,18 @@ npm run desktop:artifacts
 
 The D6 internal package command uses `src-tauri/tauri.internal-windows.conf.json` and `--no-sign`. The generated NSIS installer is not for public distribution or non-technical beta users until the signing, trust, checksum, install, launch, and uninstall checks are approved.
 
-Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The D7/D8/D9 recommendation is one canonical Cloudflare Pages app URL, linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, with social sharing only after hosted preview, E2E, cybersecurity, HTTPS, custom-domain, and rollback checks pass. D9 created a Cloudflare Pages test preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`; it is not the selected canonical public URL yet.
+Build technical-preview desktop packages for platform verification:
+
+```bash
+npm run desktop:package:windows:technical-preview
+npm run desktop:package:macos:technical-preview
+npm run desktop:package:linux:technical-preview
+npm run desktop:checksums
+```
+
+Windows can be built on this Windows lab. macOS and Linux packages should be built on matching OS runners, using the manual GitHub Actions workflow `Desktop Technical Preview Artifacts`. These artifacts are for owner/developer inspection only until signing, notarization, checksums, install/launch/uninstall smoke, support/withdrawal copy, and owner launch approval pass.
+
+Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The current product direction is one Old Skool AI hub/tab linking to the online tool and future downloads, with `guidedailabs.com` and `guidedaijourney.com` linking there. D9 created a Cloudflare Pages test preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`; it is not the selected canonical public URL yet.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -153,7 +164,7 @@ Desktop prerequisites installed on this Windows machine:
 - Windows SDK `10.0.26100.0`
 - WebView2 `149.0.4022.98`
 
-The desktop app is still an internal prototype. It now has a desktop-only `Check this computer` flow for selected local AI tools and an opt-in unsigned internal Windows package build, but it does not add public packaging, signing, updater, provider connections, telemetry, credentials, file indexing, arbitrary folder inspection, or external actions.
+The desktop app is still an internal prototype. It now has a desktop-only `Check this computer` flow for selected local AI tools and a manual technical-preview artifact lane, but it does not add public download approval, signing, updater, provider connections, telemetry, credentials, file indexing, arbitrary folder inspection, or external actions.
 
 Desktop Chunk D4 implements the first native local discovery path: custom Rust commands check only allowlisted local tools after user approval, hide model names by default, reject path details, and return schema-validated results to the UI. Browser users still add tools manually.
 

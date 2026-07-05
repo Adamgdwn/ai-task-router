@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T20:49:44-06:00
+Last Updated: 2026-07-04T21:52:19-06:00
 Status: active
 Owner: Technical Lead
 
@@ -85,6 +85,37 @@ Release troubleshooting:
 - Confirm public copy says the browser/PWA app cannot check the computer.
 - Use [release and security readiness packet](2026-07-04-release-security-readiness-packet.md) as the D7 gate.
 - Use [web release candidate security pass](2026-07-04-web-release-candidate-security-pass.md) as the D8 local evidence packet.
+
+### Desktop Technical-Preview Artifacts
+
+As of 2026-07-04T21:40:44-06:00, D10 adds a manual artifact lane for owner/developer inspection:
+
+```text
+GitHub -> Actions -> Desktop Technical Preview Artifacts -> Run workflow
+```
+
+Expected workflow artifacts:
+
+- `ai-task-router-windows-x64-unsigned-nsis`
+- `ai-task-router-macos-aarch64-unsigned-dmg`
+- `ai-task-router-macos-x64-unsigned-dmg`
+- `ai-task-router-linux-x64-appimage-deb`
+
+Local commands:
+
+```bash
+npm run desktop:package:windows:technical-preview
+npm run desktop:package:macos:technical-preview
+npm run desktop:package:linux:technical-preview
+npm run desktop:checksums
+```
+
+Notes:
+
+- Build macOS and Linux packages on matching GitHub runners or matching local machines.
+- Do not add these artifacts to public Old Skool AI download buttons yet.
+- Do not create public GitHub Releases from these artifacts until signing/notarization, smoke tests, support/withdrawal copy, and owner launch approval pass.
+- Each generated bundle directory should include `SHA256SUMS.txt` after `npm run desktop:checksums`.
 
 ### Desktop Build Toolchain
 

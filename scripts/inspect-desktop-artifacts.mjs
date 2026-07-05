@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { readdir, stat } from "node:fs/promises";
+import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -70,6 +70,26 @@ export async function listDesktopArtifacts(rootDir = defaultBundleDir) {
   return artifacts;
 }
 
+export function desktopArtifactChecksumLine(artifact) {
+  return `${artifact.sha256}  ${artifact.path.replaceAll(path.sep, "/")}`;
+}
+
+export async function writeDesktopChecksums(
+  rootDir = defaultBundleDir,
+  outputPath = path.join(rootDir, "SHA256SUMS.txt"),
+) {
+  const artifacts = await listDesktopArtifacts(rootDir);
+  const body = artifacts.map(desktopArtifactChecksumLine).join("\n") + (artifacts.length > 0 ? "\n" : "");
+
+  await mkdir(path.dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, body, "utf8");
+
+  return {
+    artifacts,
+    outputPath,
+  };
+}
+
 function formatSize(bytes) {
   if (bytes < 1024) {
     return `${bytes} B`;
@@ -79,11 +99,39 @@ function formatSize(bytes) {
   return `${mib.toFixed(2)} MiB`;
 }
 
+function parseArgs(rawArgs) {
+  const options = {
+    rootDir: defaultBundleDir,
+    writeChecksums: false,
+    requireArtifacts: false,
+  };
+
+  for (const arg of rawArgs) {
+    if (arg === "--write-checksums") {
+      options.writeChecksums = true;
+      continue;
+    }
+
+    if (arg === "--require-artifacts") {
+      options.requireArtifacts = true;
+      continue;
+    }
+
+    options.rootDir = path.resolve(arg);
+  }
+
+  return options;
+}
+
 async function main() {
-  const rootDir = process.argv[2] ? path.resolve(process.argv[2]) : defaultBundleDir;
+  const { rootDir, writeChecksums, requireArtifacts } = parseArgs(process.argv.slice(2));
   const artifacts = await listDesktopArtifacts(rootDir);
 
   if (artifacts.length === 0) {
+    if (requireArtifacts) {
+      throw new Error(`No desktop package artifacts found under ${path.relative(process.cwd(), rootDir) || "."}.`);
+    }
+
     console.log(`No desktop package artifacts found under ${path.relative(process.cwd(), rootDir) || "."}.`);
     return;
   }
@@ -93,6 +141,12 @@ async function main() {
     console.log(`- ${artifact.path}`);
     console.log(`  size: ${formatSize(artifact.sizeBytes)}`);
     console.log(`  sha256: ${artifact.sha256}`);
+  }
+
+  if (writeChecksums) {
+    const outputPath = path.join(rootDir, "SHA256SUMS.txt");
+    await writeDesktopChecksums(rootDir, outputPath);
+    console.log(`Wrote checksums to ${path.relative(process.cwd(), outputPath)}`);
   }
 }
 

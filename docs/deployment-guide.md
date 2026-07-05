@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-04T21:05:03-06:00
+Status Updated: 2026-07-04T21:52:19-06:00
 
 ## Current Release State
 
 AI Task Router is not publicly launched yet.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Public release remains on hold until canonical URL selection, custom-domain smoke if used, GitHub integration or direct-upload release process decision, owner launch decision, and desktop signing/trust gates pass where applicable.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Public release remains on hold until the Old Skool AI hub/canonical URL decision, custom-domain smoke if used, GitHub integration or direct-upload release process decision, owner launch decision, and desktop signing/trust gates pass where applicable.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -40,15 +40,16 @@ Future public hosting decision:
 - primary host: Cloudflare Pages
 - public source/release hub: GitHub
 - current hosted preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev`
-- canonical app URL: not selected yet; use one owner-controlled root site, subpath, Cloudflare Pages default URL, or a newly created subdomain under `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`
-- planned link sources: `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`
+- canonical public hub: owner preference is an Old Skool AI tab/page with "use online" and future download choices
+- canonical app URL: not selected yet; choose whether the Old Skool AI hub links to a Cloudflare Pages URL, a subpath, or a newly created subdomain under an owned domain
+- planned link sources: `oldskoolai.com` as the main hub, with `guidedailabs.com` and `guidedaijourney.com` linking there
 - planned social link sources after release gate: YouTube, Facebook, and LinkedIn
 
-The canonical public URL still needs owner confirmation before public launch. Prefer one app URL linked from all three websites instead of three independent app copies.
+The canonical public URL still needs owner confirmation before public launch. Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies.
 
 ## Deployment Steps
 
-D9 created a Cloudflare Pages direct-upload preview for smoke testing. No custom domain, DNS change, public website link, social launch post, GitHub Release, or desktop download has been created.
+D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. No custom domain, DNS change, public website link, social launch post, public GitHub Release, or public desktop download has been created.
 
 Future hosted web/PWA release should use this shape:
 
@@ -82,7 +83,7 @@ npx playwright test
 
 D9 caveat: Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node HTTPS/fetch and Chromium succeeded. Retest normal browsers and the final custom domain before public launch.
 
-Future desktop distribution is separate from web hosting. Desktop Chunk D6 added an internal unsigned Windows NSIS package path for evidence only; use [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md) and [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) before any signing, notarization, checksums, public installers, or public download links.
+Future desktop distribution is separate from web hosting. Desktop Chunk D6 added an internal unsigned Windows NSIS package path for evidence only. Desktop Chunk D10 adds a manual GitHub Actions technical-preview lane for Windows/macOS/Linux artifacts, documented in [desktop technical preview artifacts](2026-07-04-desktop-technical-preview-artifacts.md). Use [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md) and [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) before any public signing, notarization, public installers, or public download links.
 
 Internal Windows packaging evidence command:
 
@@ -93,6 +94,17 @@ npm run desktop:artifacts
 ```
 
 The D6 artifact is unsigned and must not be published. Before public desktop release, choose the Windows Store/MSIX or direct signed-installer path, confirm legal publisher identity, sign/notarize where required, publish checksums, and pass install/launch/uninstall smoke tests on target OSes.
+
+Technical-preview desktop artifact commands:
+
+```bash
+npm run desktop:package:windows:technical-preview
+npm run desktop:package:macos:technical-preview
+npm run desktop:package:linux:technical-preview
+npm run desktop:checksums
+```
+
+Use `.github/workflows/desktop-technical-preview.yml` for macOS and Linux artifacts because they should be built on matching OS runners. These artifacts are not public release downloads.
 
 ## Rollback
 
