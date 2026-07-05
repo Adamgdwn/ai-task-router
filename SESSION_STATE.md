@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-04T20:02:34-06:00
-Status: chunk-fifteen-e2e-integration-complete
-Status Updated: 2026-07-04T20:02:34-06:00
+Last Updated: 2026-07-04T20:35:49-06:00
+Status: d8-web-release-candidate-security-pass-complete-release-hold
+Status Updated: 2026-07-04T20:35:49-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Chunk Fifteen: add fixture tasks and Playwright E2E coverage for the corrected web MVP before public hosting.
+Desktop Chunk D8: run the web release-candidate and cybersecurity pass before public hosting.
 
-Current result: Chunk Fifteen is integration complete. The repo now has 22 safe fixture tasks and six Playwright tests covering first-run setup, My AI Tools manual selection/local models/remove/migration behavior, contextual task include choices, route generation, saved decision cards, prompt package export preparation, route-log feedback, no-execution controls, and narrow-viewport overflow. Public launch remains held until cybersecurity, hosting, signing, and smoke gates pass.
+Current result: D8 is task complete with public release still held. The browser/PWA artifact passed local clean install, audit, script tests, unit tests, production build, artifact scan, Playwright E2E, and local production-preview smoke. Next hosted-release work is Cloudflare Pages HTTPS preview, canonical URL confirmation, custom-domain smoke, and owner launch decision.
 
 ## Files Changed In This Session
 
@@ -53,6 +53,9 @@ Current result: Chunk Fifteen is integration complete. The repo now has 22 safe 
 - `src/tests/fixtures/e2eTaskFixtures.ts`
 - `src/tests/e2e/mvp-workflows.spec.ts`
 - `vitest.config.ts`
+- `scripts/web-release-candidate-scan.mjs`
+- `scripts/web-release-candidate-scan.node-test.mjs`
+- `docs/2026-07-04-web-release-candidate-security-pass.md`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -121,6 +124,13 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - official GitHub Releases, GitHub Pages/HTTPS, Cloudflare Pages/custom domains, Microsoft Windows code signing, OWASP ASVS/WSTG, Tauri capabilities, and RustSec references reviewed for D7
 - `npx playwright install chromium`
 - `npx playwright test`
+- official Cloudflare Pages Git integration, build configuration, preview deployments, custom domains, rollbacks, GitHub dependency/secret scanning, Dependabot, CodeQL, OWASP ASVS, and OWASP WSTG references reviewed for D8
+- `node --check scripts\web-release-candidate-scan.mjs`
+- `node --check scripts\web-release-candidate-scan.node-test.mjs`
+- `npm run scan:web-rc`
+- `npm ci`
+- stopped stale repo-owned `agents\agent-picker` Vite dev/preview Node processes after the first `npm ci` attempt hit a Windows file lock
+- local production preview smoke at `http://127.0.0.1:5185/`
 
 ## Validation Notes
 
@@ -171,6 +181,17 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D7 close-out validation passed: `npm run test` ran 12 files and 88 tests; `npm audit --audit-level=moderate` found 0 vulnerabilities; `bash scripts/governance-preflight.sh` reported 0 warnings; `git diff --check` reported only normal Windows LF-to-CRLF notices.
 - Chunk Fifteen installed the missing Playwright Chromium browser cache locally with `npx playwright install chromium`.
 - Chunk Fifteen close-out validation passed: `bash scripts/governance-preflight.sh` reported 0 warnings; `npm run test` ran 12 files and 88 tests; `npm run build` passed with the existing Vite chunk-size warning; `npx playwright test` passed 6 Chromium tests; `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- D8 governance preflight passed with 0 warnings and official source review covered current Cloudflare Pages, GitHub security, and OWASP references.
+- D8 added `npm run scan:web-rc` with script tests; `node --check` passed for both new script files and `npm run test:scripts` passed 4 Node tests.
+- D8 `npm ci` initially hit `EPERM` on Rolldown's native binding because stale repo-owned Vite dev/preview servers were running; stopping only the `agents\agent-picker` Node processes cleared the lock.
+- D8 clean install then passed: 125 packages added, 126 packages audited, 0 vulnerabilities.
+- D8 `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- D8 `npm run test` passed with 12 files and 88 tests.
+- D8 `npm run build` passed with the existing 519.84 kB Vite chunk-size warning.
+- D8 `npm run scan:web-rc` passed with no release-blocking findings.
+- D8 `npx playwright test` passed with 6 Chromium tests.
+- D8 local production preview served root 200, manifest link, Apple icon link, manifest 200 with name `AI Task Router | Guided AI Labs`, display `standalone`, start URL `/`, scope `/`, 192px icon 200, 512px icon 200, service worker 200, install/fetch handlers, and same-origin-only guard.
+- D8 close-out validation passed at 2026-07-04T20:35:49-06:00: governance preflight, audit, script tests, unit tests, build, web RC scan, Playwright E2E, and whitespace check all passed; build retained the existing chunk-size warning only.
 
 ## Known Gaps
 
@@ -182,7 +203,7 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - Do not add broad filesystem permissions, arbitrary shell/process access, telemetry, provider connections, updater, code signing, public installer publishing, credentials, file indexing, or external actions beyond D6 without a separately approved chunk.
 - D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
-- Public web hosting has not been executed.
+- Public web hosting has not been executed; Cloudflare Pages preview and HTTPS smoke have not run yet.
 - Public social launch links have not been created.
 - Canonical public URL is recommended as `https://app.oldskoolai.com/` but still needs owner confirmation before deployment.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
@@ -190,4 +211,4 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
 ## Next Handoff
 
-Resume with D8 Web Release Candidate And Cybersecurity Pass if the owner wants release engineering next: local security scans, Cloudflare Pages preview planning, canonical URL confirmation, HTTPS checks, smoke matrix, rollback checklist, and launch go/no-go. Run Chunk Sixteen first if the owner wants documentation and polish tightened before release engineering. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep D7/D8 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, public hosting, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.
+Resume with Cloudflare Pages preview configuration if the owner wants hosted release engineering next: create a preview from GitHub, verify HTTPS/PWA/service-worker behavior, confirm canonical URL, then decide whether to attach `app.oldskoolai.com` and add public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before hosted preview. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D8 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, Cloudflare production hosting, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.

@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-04T19:34:29-06:00
+Status Updated: 2026-07-04T20:35:49-06:00
 
 ## Current Release State
 
 AI Task Router is not publicly deployed yet.
 
-Desktop Chunk D7 records the release/security readiness packet and keeps public release on hold until the web/PWA release gate, cybersecurity checks, and desktop signing/trust gates pass.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Public release remains on hold until Cloudflare Pages preview, HTTPS, canonical URL, custom-domain smoke, and desktop signing/trust gates pass where applicable.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -47,20 +47,20 @@ The canonical public URL still needs owner confirmation before deployment. Prefe
 
 ## Deployment Steps
 
-No public deployment has been executed.
+No public deployment has been executed. D8 local release-candidate evidence passed, but Cloudflare Pages preview and HTTPS checks have not run yet.
 
 Future hosted web/PWA release should use this shape:
 
-1. Complete v0.2 release-readiness review and D7/D8 security gate.
-2. Build from a clean install.
-3. Smoke test `dist/` locally or in a private preview.
-4. Confirm the manifest, 192px and 512px icons, service worker, and install copy are present.
-5. Confirm no provider calls, credentials, telemetry, hidden uploads, or browser-based desktop-discovery claims are present in the web build.
-6. Deploy to a private or low-visibility Cloudflare Pages preview.
+1. Use the D8 evidence packet as the local release-candidate baseline.
+2. Create a Cloudflare Pages preview from GitHub.
+3. Use build command `npm ci && npm run build`.
+4. Use output directory `dist`.
+5. Confirm the manifest, 192px and 512px icons, service worker, and install copy are present over HTTPS.
+6. Confirm no provider calls, credentials, telemetry, hidden uploads, or browser-based desktop-discovery claims are present in the hosted web build.
 7. Confirm HTTPS and canonical URL behavior.
 8. Smoke test primary flows on desktop and mobile browsers.
-9. Confirm rollback to a previous Pages deployment.
-10. Add public website and social links only after the preview passes.
+9. Confirm rollback to a previous Pages production deployment before public launch.
+10. Add public website and social links only after the preview and custom-domain smoke pass.
 
 Local production preview command:
 
@@ -106,6 +106,7 @@ Before any public web release:
 - `npm audit --audit-level=moderate`
 - `npm run test`
 - `npm run build`
+- `npm run scan:web-rc`
 - local production preview check for `manifest.webmanifest`, `service-worker.js`, and both PWA icon sizes
 - `npx playwright test` if E2E coverage exists
 - manual browser smoke test on desktop and narrow viewport

@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T20:02:34-06:00
-Status: chunk-fifteen-e2e-integration-complete
-Status Updated: 2026-07-04T20:02:34-06:00
+Last Updated: 2026-07-04T20:35:49-06:00
+Status: d8-web-release-candidate-security-pass-complete-release-hold
+Status Updated: 2026-07-04T20:35:49-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Chunk Fifteen E2E tests and fixture suite, building on the corrected web MVP and D7 release hold.
+Desktop Chunk D8 web release-candidate security pass, building on Chunk Fifteen E2E coverage and the D7 release hold.
 
-Completion target: Integration complete.
+Completion target: Task complete, release hold.
 
-Current state: Chunk Fifteen is integration complete. The repo now has 22 safe fixture tasks and Playwright E2E coverage for first-run setup, manual AI tool selection, stale local-store migration, contextual task include choices, routing, saved route cards, prompt-package export preparation, route-log feedback, no-execution controls, and narrow-viewport overflow. Public launch is still held until cybersecurity, hosting, signing, and smoke gates pass.
+Current state: D8 is task complete with public release still held. The browser/PWA artifact has local release-candidate evidence: clean install, dependency audit, script tests, unit tests, production build, web artifact scan, Playwright E2E, and local production-preview smoke all passed. The next hosted-release step is a Cloudflare Pages HTTPS preview and canonical URL/custom-domain smoke before public website links or social launch.
 
 ## Scope
 
@@ -79,9 +79,15 @@ Chunk Fifteen provides:
 - `src/tests/e2e/mvp-workflows.spec.ts` with six Playwright tests covering the corrected web MVP workflows and no-execution boundary.
 - A Vitest exclusion for `src/tests/e2e/**` so unit tests and Playwright tests run in the right harnesses.
 
+D8 provides:
+
+- `scripts/web-release-candidate-scan.mjs` and `npm run scan:web-rc`, a repeatable production artifact scan for high-confidence secret patterns, unexpected external URLs, root-domain PWA manifest fields, required PWA icon entries, and service-worker guardrails.
+- `scripts/web-release-candidate-scan.node-test.mjs` with Node tests for safe artifacts and release-blocking findings that do not print secret-looking values.
+- `docs/2026-07-04-web-release-candidate-security-pass.md`, the D8 evidence packet with validation, source basis, Cloudflare preview plan, smoke matrix, rollback checklist, and release hold.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only and an opt-in internal unsigned Windows package build for evidence. The browser/PWA track adds installability only. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only and an opt-in internal unsigned Windows package build for evidence. The browser/PWA track adds installability and D8 local release-candidate evidence only. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, public hosting, DNS changes, social launch links, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -146,6 +152,16 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D7 close-out validation passed: `npm run test` ran 12 files and 88 tests; `npm audit --audit-level=moderate` found 0 vulnerabilities; `bash scripts/governance-preflight.sh` reported 0 warnings; `git diff --check` reported only normal Windows LF-to-CRLF notices.
 - Chunk Fifteen installed the missing local Playwright Chromium browser cache with `npx playwright install chromium`.
 - Chunk Fifteen close-out validation passed: `bash scripts/governance-preflight.sh` reported 0 warnings; `npm run test` ran 12 files and 88 tests; `npm run build` passed with the existing Vite chunk-size warning; `npx playwright test` passed 6 Chromium tests; `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- D8 governance preflight passed with 0 warnings and official Cloudflare Pages, GitHub security, and OWASP sources were reviewed.
+- D8 `npm ci` initially hit a Windows `EPERM` lock from stale repo-owned Vite dev/preview servers; those `agents\agent-picker` Node processes were stopped and `npm ci` then passed with 0 vulnerabilities.
+- D8 `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- D8 `npm run test:scripts` passed with 4 Node script tests.
+- D8 `npm run test` passed with 12 files and 88 tests.
+- D8 `npm run build` passed with the existing Vite chunk-size warning.
+- D8 `npm run scan:web-rc` passed with no release-blocking findings.
+- D8 `npx playwright test` passed with 6 Chromium tests.
+- D8 local production preview at `http://127.0.0.1:5185/` served root, manifest, Apple icon, 192px icon, 512px icon, and service worker with install/fetch handlers and same-origin-only guard.
+- D8 close-out validation passed at 2026-07-04T20:35:49-06:00: governance preflight, audit, script tests, unit tests, build, web RC scan, Playwright E2E, and whitespace check all passed; build retained the existing chunk-size warning only.
 
 ## Known Gaps
 
@@ -156,7 +172,7 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Public desktop packaging, signing, updater, and installer distribution remain out of scope.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
 - Interactive desktop launch smoke for D4 remains blocked until the lab Application Control/signing/trusted-path issue is resolved.
-- Public web hosting has not been executed.
+- Public web hosting has not been executed; Cloudflare Pages preview and HTTPS smoke have not run yet.
 - Public social launch links have not been created.
 - The canonical public app URL still needs owner confirmation before deployment.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
@@ -164,6 +180,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Run D8 Web Release Candidate And Cybersecurity Pass for local security scans, Cloudflare Pages preview planning, canonical URL confirmation, HTTPS checks, smoke matrix, rollback checklist, and launch go/no-go. Run Chunk Sixteen first if the owner wants documentation and polish tightened before release engineering.
+Create a Cloudflare Pages preview from GitHub, verify HTTPS/PWA/service-worker behavior, confirm the canonical URL, and run hosted smoke before public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before hosted preview.
 
-Proceeding beyond D7 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public hosting, public installer publishing, DNS changes, GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.
+Proceeding beyond D8 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, Cloudflare production hosting, public installer publishing, DNS changes, GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.

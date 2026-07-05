@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser MVP validation lane, with Desktop Chunk D7 release/security readiness packet complete; public release remains on hold pending E2E, cybersecurity, hosting, signing, and trust gates
-Status Updated: 2026-07-04T19:34:29-06:00
+Status: v0.2 browser/PWA release-candidate lane, with Desktop Chunk D8 local web security evidence complete; public release remains on hold pending Cloudflare preview, canonical URL, hosted smoke, signing, and trust gates
+Status Updated: 2026-07-04T20:35:49-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -70,6 +70,13 @@ Run the smoke test:
 
 ```bash
 npm run test
+```
+
+Run the web release-candidate artifact scan after a production build:
+
+```bash
+npm run build
+npm run scan:web-rc
 ```
 
 Check for local model tools on this machine:
@@ -129,7 +136,7 @@ npm run desktop:artifacts
 
 The D6 internal package command uses `src-tauri/tauri.internal-windows.conf.json` and `--no-sign`. The generated NSIS installer is not for public distribution or non-technical beta users until the signing, trust, checksum, install, launch, and uninstall checks are approved.
 
-Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The D7 recommendation is one canonical Cloudflare Pages app URL, linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, with social sharing only after the preview, E2E, cybersecurity, and rollback checks pass.
+Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The D7/D8 recommendation is one canonical Cloudflare Pages app URL, linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, with social sharing only after the hosted preview, E2E, cybersecurity, HTTPS, custom-domain, and rollback checks pass. D8 local release-candidate evidence passed; Cloudflare Pages preview has not been created yet.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -174,6 +181,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Desktop trust and distribution plan](docs/2026-07-04-desktop-trust-distribution-plan.md)
 - [Desktop packaging and signing spike](docs/2026-07-04-desktop-packaging-signing-spike.md)
 - [Release and security readiness packet](docs/2026-07-04-release-security-readiness-packet.md)
+- [Web release candidate security pass](docs/2026-07-04-web-release-candidate-security-pass.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)
 - [Security policy](SECURITY.md)
 - [Durable development policy](docs/policy/durable-development-engineering-policy.md)

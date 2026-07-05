@@ -13,6 +13,7 @@
     "desktop:artifacts": "node scripts/inspect-desktop-artifacts.mjs",
     "desktop:info": "tauri info",
     "detect:local-models": "node scripts/detect-local-models.mjs",
+    "scan:web-rc": "node scripts/web-release-candidate-scan.mjs",
     "test": "vitest run",
     "test:scripts": "node --test scripts/*.node-test.mjs",
     "test:watch": "vitest",

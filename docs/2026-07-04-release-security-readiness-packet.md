@@ -1,7 +1,7 @@
 # 2026-07-04 - Release And Security Readiness Packet
 
 Document ID: AUD-ENG-001
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,6 +9,7 @@ Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before public web hosting, controlled desktop beta, or social link launch
 Timestamp: 2026-07-04T19:34:29-06:00
+Last Updated: 2026-07-04T20:35:49-06:00
 
 ## Purpose
 
@@ -55,7 +56,7 @@ Recommended release shape:
 
 | Surface | Recommendation | Status |
 |---|---|---|
-| Hosted app | Use Cloudflare Pages as the primary public host for the web/PWA build. | Planned, not deployed |
+| Hosted app | Use Cloudflare Pages as the primary public host for the web/PWA build. | Local D8 RC evidence passed; Cloudflare preview not deployed |
 | Canonical URL | Use one canonical app URL and link to it from all three websites to avoid duplicate service-worker scopes and stale builds. | Decision pending |
 | Existing websites | Add clear calls to action on `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com` that point to the canonical app URL. | Planned |
 | GitHub | Keep the repo public and use GitHub Releases later for signed desktop artifacts, checksums, and release notes. | Planned |
@@ -225,12 +226,12 @@ Desktop download pages must also include:
 
 | Blocker | Impact | Next move |
 |---|---|---|
-| Public web release has not passed E2E/security gate. | Do not launch social links yet. | Finish Chunk Fifteen fixture/E2E lane, then run D8 web release candidate security pass. |
+| Cloudflare Pages preview and HTTPS smoke have not run. | Do not launch public links or social links yet. | Create Cloudflare Pages preview, verify HTTPS, PWA metadata, service-worker scope, and browser-vs-desktop copy. |
 | Canonical public URL not final. | Vite base, manifest scope, service worker, and links may need different settings. | Owner chooses root subdomain vs subpath before deployment. |
 | Windows Application Control still blocks unsigned executable/test runs. | Desktop discovery smoke cannot be claimed on current lab setup. | Resolve through approved lab policy, signing, or trusted path. |
 | Desktop installer is unsigned. | Not suitable for ordinary-user download. | Choose Store/MSIX or direct signing path, then sign before beta. |
 | Legal publisher identity not final. | Signing, Store identity, user trust copy, and website copy could diverge. | Confirm legal publisher name before signing. |
-| Security reporting route is not mature. | Public users need a clear vulnerability path. | Add `SECURITY.md`, then enable GitHub private vulnerability reporting where available. |
+| Security reporting route is basic. | Public users need a clear vulnerability path. | `SECURITY.md` exists; enable GitHub private vulnerability reporting where available before public launch. |
 
 ## D7 Decision
 
@@ -249,6 +250,34 @@ Recommended next sequence:
 5. Launch the hosted browser/PWA when the release gate passes.
 6. Continue desktop signing/App Control work separately before any desktop beta.
 
+## D8 Decision
+
+D8 status: Task complete as a web release-candidate security pass, with release hold.
+
+Decision packet:
+
+- [Web Release Candidate Security Pass](2026-07-04-web-release-candidate-security-pass.md)
+
+Release decision: hold.
+
+Reason: The browser/PWA artifact passed local release-candidate checks, but Cloudflare Pages preview hosting, HTTPS behavior, custom-domain behavior, and owner canonical URL confirmation are not verified yet.
+
+D8 result:
+
+- Added `npm run scan:web-rc` for repeatable production artifact checks.
+- Clean install, dependency audit, script tests, unit tests, production build, production artifact scan, Playwright E2E, and local production-preview smoke passed.
+- Cloudflare Pages preview configuration and rollback checklist are documented.
+- Public website links, social launch, GitHub Releases, DNS changes, Cloudflare production deployment, desktop downloads, signing, updater, telemetry, provider connections, and external actions remain out of scope.
+
+Recommended next sequence:
+
+1. Confirm `https://app.oldskoolai.com/` or choose a subpath alternative.
+2. Create a Cloudflare Pages preview from GitHub with build command `npm ci && npm run build` and output directory `dist`.
+3. Smoke test the HTTPS preview and public copy.
+4. Attach the canonical URL only after preview passes.
+5. Add public links from the three existing websites only after custom-domain smoke passes.
+6. Share through YouTube, Facebook, and LinkedIn only after the owner makes the launch decision.
+
 ## Validation
 
 | Timestamp | Check | Result | Notes |
@@ -256,9 +285,11 @@ Recommended next sequence:
 | 2026-07-04T19:34:29-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance preflight reported 0 warnings before D7 docs work. |
 | 2026-07-04T19:34:29-06:00 | official source review | passed | GitHub, Cloudflare, Microsoft, OWASP, Tauri, and RustSec sources reviewed for current release/security planning. |
 | 2026-07-04T19:41:25-06:00 | `npm run test`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Unit suite passed with 12 files and 88 tests; audit found 0 vulnerabilities; governance reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices. |
+| 2026-07-04T20:27:56-06:00 | `npm ci`; `npm audit --audit-level=moderate`; `npm run test:scripts`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test`; local production preview smoke | passed with existing build warning | D8 local web RC pass completed. Clean install passed after stale repo-owned Vite dev/preview servers were stopped; audit found 0 vulnerabilities; script tests passed 4 tests; Vitest passed 12 files and 88 tests; build passed with the existing chunk-size warning; web RC scan passed; Playwright passed 6 Chromium tests; production preview served root, manifest, icons, and service worker. |
+| 2026-07-04T20:35:49-06:00 | D8 close-out validation | passed | Governance preflight, dependency audit, script tests, unit tests, production build, web RC scan, Playwright E2E, and whitespace check all passed; build retained the existing chunk-size warning only. |
 
 ## Handoff
 
 Do not publish the D6 unsigned NSIS installer.
 
-Resume with Chunk Fifteen if the priority is product completion before public web launch. Resume with D8 if the priority is release engineering: local security scan, Cloudflare Pages preview plan, canonical URL decision, and rollback checklist.
+Resume with Cloudflare Pages preview configuration if the priority is hosted release engineering. Resume with Chunk Sixteen if the owner wants MVP polish and documentation tightened before hosted preview. Public launch remains held until HTTPS preview, canonical URL, custom-domain smoke, and owner launch decision pass.

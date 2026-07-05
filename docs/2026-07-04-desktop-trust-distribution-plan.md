@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.9.0
+Version: 0.10.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before D8 web release candidate work, public web hosting, or controlled desktop beta work
-Last Updated: 2026-07-04T19:34:29-06:00
-Status Updated: 2026-07-04T19:34:29-06:00
+Last Updated: 2026-07-04T20:35:49-06:00
+Status Updated: 2026-07-04T20:35:49-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path while holding public release until E2E, cybersecurity, signing, and smoke gates pass. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence while still holding public launch until Cloudflare Pages HTTPS preview, canonical URL confirmation, and custom-domain smoke pass. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
 
 ## Purpose
 
@@ -35,6 +35,7 @@ The desktop version exists because local machine inspection changes the trust pr
 - The desktop prototype now has a D4 `Check this computer` flow for selected local AI tools only; it does not return paths, run at startup, use broad Tauri plugin permissions, or claim public packaging/signing readiness.
 - The hosted/browser install path does not perform local discovery. It says computer checking requires the desktop app.
 - The D6 internal Windows package path can generate an unsigned NSIS installer for evidence only. It is not public release readiness.
+- The D8 web/PWA release-candidate pass is complete locally, but Cloudflare hosting has not been created or smoke tested yet.
 
 The current project classification in `project-control.yaml` is:
 
@@ -1141,6 +1142,46 @@ D7 validation:
 - Official GitHub, Cloudflare, Microsoft, OWASP, Tauri, and RustSec sources were reviewed for release/security planning.
 - No deploy, DNS, GitHub Release, signing, updater, or artifact upload was performed.
 
+### Desktop Chunk D8 - Web Release Candidate And Cybersecurity Pass
+
+Status: task complete, release hold
+
+Status Updated: 2026-07-04T20:27:56-06:00
+
+Completion target: Task complete
+
+Outcome:
+
+D8 completed the local web/PWA release-candidate and cybersecurity pass. The browser/PWA artifact is ready for Cloudflare Pages preview configuration, but it is not public-release approved yet.
+
+Decision packet:
+
+- [Web Release Candidate Security Pass](2026-07-04-web-release-candidate-security-pass.md)
+
+D8 result:
+
+- Added `npm run scan:web-rc`, a repeatable production artifact scan for high-confidence secret patterns, unexpected external URLs, root-domain PWA manifest fields, required PWA icon entries, and service-worker guardrails.
+- Verified clean install, dependency audit, script tests, unit tests, production build, production artifact scan, Playwright E2E, and local production-preview metadata.
+- Documented Cloudflare Pages preview configuration: GitHub repo, build command `npm ci && npm run build`, output directory `dist`, no required environment variables, and recommended custom domain `app.oldskoolai.com`.
+- Documented HTTPS preview smoke requirements, public-link hold, and rollback checklist.
+
+D8 release decision:
+
+Hold public launch. The next release-engineering step is Cloudflare Pages preview creation and HTTPS smoke. Do not add public links from `oldskoolai.com`, `guidedailabs.com`, `guidedaijourney.com`, YouTube, Facebook, or LinkedIn until the hosted preview/custom-domain checks pass and the owner makes the launch decision.
+
+D8 validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- Official Cloudflare Pages, GitHub security, and OWASP sources were reviewed.
+- `npm ci` passed after stale repo-owned Vite dev/preview servers were stopped.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- `npm run test:scripts` passed with 4 Node script tests.
+- `npm run test` passed with 12 files and 88 tests.
+- `npm run build` passed with the existing Vite chunk-size warning.
+- `npm run scan:web-rc` passed with no release-blocking findings.
+- `npx playwright test` passed with 6 Chromium tests.
+- Local production preview at `http://127.0.0.1:5185/` served root page, manifest, Apple icon, 192px icon, 512px icon, and service worker with install/fetch handlers and same-origin-only guard.
+
 ## Open Decisions
 
 - Canonical public app URL: recommended `https://app.oldskoolai.com/`, but owner still needs to confirm subdomain versus subpath.
@@ -1177,9 +1218,8 @@ D7 validation:
 
 Choose the next lane deliberately:
 
-- For product completion, return to Chunk Fifteen fixture and E2E coverage before public launch.
-- For release engineering, run D8 Web Release Candidate And Cybersecurity Pass: local security scan, Cloudflare Pages preview plan, canonical URL decision, HTTPS check, smoke matrix, and rollback checklist.
+- For hosted release engineering, create a Cloudflare Pages preview from GitHub, verify HTTPS and PWA behavior, confirm the canonical URL, then decide whether to attach `app.oldskoolai.com` and add public links.
+- For product completion, run Chunk Sixteen MVP polish and documentation if the owner wants docs tightened before hosted preview.
 - For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests or creating a controlled desktop beta.
-- For the web MVP lane, return to Chunk Fifteen fixture and E2E coverage.
 
 Do not expand D4/D5/D6 into arbitrary folder inspection, broad filesystem permissions, provider connections, credentials, telemetry, updater, public hosting, file indexing, auto-upload, whole-drive search, public installer publishing, or external actions without a separately approved chunk.

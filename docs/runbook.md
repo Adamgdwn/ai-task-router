@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T19:34:29-06:00
+Last Updated: 2026-07-04T20:35:49-06:00
 Status: active
 Owner: Technical Lead
 
@@ -46,12 +46,13 @@ Troubleshooting:
 
 ### Public Web Release Readiness
 
-As of 2026-07-04T19:34:29-06:00, D7 selected the intended free distribution path but did not deploy it:
+As of 2026-07-04T20:27:56-06:00, D7 selected the intended free distribution path and D8 completed local web/PWA release-candidate evidence, but public hosting has not been deployed:
 
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
 - Use one canonical app URL, recommended as `https://app.oldskoolai.com/`, and link to it from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`.
 - YouTube, Facebook, and LinkedIn links should wait until the web/PWA release gate passes.
+- D8 added `npm run scan:web-rc` for production artifact checks.
 
 Minimum pre-public checks:
 
@@ -60,16 +61,20 @@ npm ci
 npm audit --audit-level=moderate
 npm run test
 npm run build
+npm run scan:web-rc
+npx playwright test
 npm run preview -- --host 127.0.0.1 --port 5184
 ```
 
 Release troubleshooting:
 
+- If `npm ci` fails on Windows with a locked Rolldown native binding, check for stale `agents\agent-picker` Vite dev/preview `node.exe` processes and stop only the repo-owned processes before retrying.
 - Do not launch from social channels until the production preview and security checks pass.
 - Do not create three independent app deployments unless the service-worker scope, cache, support, and rollback plan are explicit.
 - If the owner chooses a subpath instead of a root app subdomain, update Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links first.
 - Confirm public copy says the browser/PWA app cannot check the computer.
 - Use [release and security readiness packet](2026-07-04-release-security-readiness-packet.md) as the D7 gate.
+- Use [web release candidate security pass](2026-07-04-web-release-candidate-security-pass.md) as the D8 local evidence packet.
 
 ### Desktop Build Toolchain
 

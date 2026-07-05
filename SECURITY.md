@@ -1,6 +1,6 @@
 # Security Policy
 
-Last Updated: 2026-07-04T19:34:29-06:00
+Last Updated: 2026-07-04T20:35:49-06:00
 Status: active
 Owner: Project Owner
 
@@ -8,7 +8,7 @@ Owner: Project Owner
 
 AI Task Router is not publicly released yet.
 
-The current browser/PWA build is a local-first MVP candidate. The current desktop build is an internal prototype. The D6 Windows installer is unsigned internal evidence only and must not be shared as an ordinary-user download.
+The current browser/PWA build has local D8 release-candidate evidence but has not passed Cloudflare Pages HTTPS preview or custom-domain smoke yet. The current desktop build is an internal prototype. The D6 Windows installer is unsigned internal evidence only and must not be shared as an ordinary-user download.
 
 ## Security Model
 
@@ -43,4 +43,4 @@ Include:
 
 ## Release Gate
 
-Before public links or desktop downloads are advertised, the project must pass the release/security gate recorded in [docs/2026-07-04-release-security-readiness-packet.md](docs/2026-07-04-release-security-readiness-packet.md).
+Before public links or desktop downloads are advertised, the project must pass the release/security gate recorded in [docs/2026-07-04-release-security-readiness-packet.md](docs/2026-07-04-release-security-readiness-packet.md) and the D8 web release-candidate gate recorded in [docs/2026-07-04-web-release-candidate-security-pass.md](docs/2026-07-04-web-release-candidate-security-pass.md).
