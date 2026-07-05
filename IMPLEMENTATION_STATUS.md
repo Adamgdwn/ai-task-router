@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-05T10:49:02-06:00
-Status: d18-public-stage-guidance-cloudflare-update
-Status Updated: 2026-07-05T10:49:02-06:00
+Last Updated: 2026-07-05T11:12:24-06:00
+Status: d19-public-pdf-report-cloudflare-update
+Status Updated: 2026-07-05T11:12:24-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Public suggested-stage guidance added and deployed, building on the D17 desktop download readiness gate, D16 public impact insight UI, D15 impact estimator methodology, D14 public hub and cross-site link smoke, D13 Cloudflare production launch smoke, D12 Old Skool AI hub handoff package, D11 public launch master plan, D10 desktop technical-preview artifact lane, D9 Cloudflare hosted preview smoke, and D6 packaging/signing evidence.
+PDF-ready saved Decision Card reports added and deployed, building on the D18 public suggested-stage guidance, D17 desktop download readiness gate, D16 public impact insight UI, D15 impact estimator methodology, D14 public hub and cross-site link smoke, D13 Cloudflare production launch smoke, D12 Old Skool AI hub handoff package, D11 public launch master plan, D10 desktop technical-preview artifact lane, D9 Cloudflare hosted preview smoke, and D6 packaging/signing evidence.
 
-Completion target: Task complete for public web/PWA suggested-stage guidance.
+Completion target: Task complete for public web/PWA PDF-ready Decision Card reports.
 
-Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package, D13 adds `docs/2026-07-05-cloudflare-production-launch-smoke.md` as the production web/PWA evidence packet, D14 adds `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md` as the public hub/cross-site evidence packet, D15 adds `docs/2026-07-05-impact-estimator-methodology.md` as the impact calculation methodology, D16 adds `docs/2026-07-05-public-impact-insight-cloudflare-update.md` as the public impact UI production-update evidence packet, D17 adds `docs/2026-07-05-desktop-download-readiness-gate.md` as the desktop download readiness evidence packet, and D18 adds `docs/2026-07-05-public-stage-guidance-cloudflare-update.md` as the public stage-guidance production-update evidence packet. The browser/PWA app is live at `https://ai-task-router.pages.dev/` with public impact insight and suggested-stage guidance in Best Options, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Desktop technical-preview artifacts have a checksum/readiness gate, but public desktop downloads, social launch posts, custom-domain/DNS work, exact public savings claims, live pricing/model fetches, live pricing tables, provider connections, and GitHub Releases remain separate gated chunks.
+Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package, D13 adds `docs/2026-07-05-cloudflare-production-launch-smoke.md` as the production web/PWA evidence packet, D14 adds `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md` as the public hub/cross-site evidence packet, D15 adds `docs/2026-07-05-impact-estimator-methodology.md` as the impact calculation methodology, D16 adds `docs/2026-07-05-public-impact-insight-cloudflare-update.md` as the public impact UI production-update evidence packet, D17 adds `docs/2026-07-05-desktop-download-readiness-gate.md` as the desktop download readiness evidence packet, D18 adds `docs/2026-07-05-public-stage-guidance-cloudflare-update.md` as the public stage-guidance production-update evidence packet, and D19 adds `docs/2026-07-05-public-pdf-report-cloudflare-update.md` as the public PDF report production-update evidence packet. The browser/PWA app is live at `https://ai-task-router.pages.dev/` with public impact insight, suggested-stage guidance, and PDF-ready saved Decision Card reports, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Desktop technical-preview artifacts have a checksum/readiness gate, but public desktop downloads, social launch posts, custom-domain/DNS work, exact public savings claims, live pricing/model fetches, live pricing tables, provider connections, and GitHub Releases remain separate gated chunks.
 
 ## Scope
 
@@ -165,9 +165,16 @@ D18 provides:
 - Suggested Stages in route-card Markdown export.
 - `docs/2026-07-05-public-stage-guidance-cloudflare-update.md`, the Cloudflare production update and smoke packet for deployment `98a58ca6` from source `9d3154d`.
 
+D19 provides:
+
+- `src/ui/screens/ImpactInsightPanel.tsx`, a shared public impact panel used by Best Options and saved Decision Cards.
+- Saved Decision Cards with impact context and a `Save PDF report` action that calls the browser print path.
+- Print CSS that hides app chrome/export controls and keeps report header, suggested stages, impact context, warnings, and route tradeoffs visible.
+- `docs/2026-07-05-public-pdf-report-cloudflare-update.md`, the Cloudflare production update and smoke packet for deployment `49d21829` from source `9c870ce`.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, a manual technical-preview artifact lane, and a desktop artifact readiness gate. The browser/PWA track adds installability, D8 local release-candidate evidence, D9 Cloudflare Pages hosted test preview, D13 Cloudflare Pages production deployment, D14 public hub/cross-site links, D16 public impact insight UI, and D18 public suggested-stage guidance. D11 adds planning/control documentation, D12 adds website handoff documentation, D13 adds production web launch evidence, D14 adds public web doorway evidence, D15 adds impact-estimator methodology, D16 wires a caveated reviewed-source impact story into the public Best Options screen, D17 keeps desktop artifact readiness machine-checkable without publishing installers, and D18 adds compact stage-and-recommended-help guidance without turning the app into a project planner. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, social launch links, public desktop downloads, exact public savings claims, live pricing/model fetches, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, a manual technical-preview artifact lane, and a desktop artifact readiness gate. The browser/PWA track adds installability, D8 local release-candidate evidence, D9 Cloudflare Pages hosted test preview, D13 Cloudflare Pages production deployment, D14 public hub/cross-site links, D16 public impact insight UI, D18 public suggested-stage guidance, and D19 PDF-ready saved Decision Card reports. D11 adds planning/control documentation, D12 adds website handoff documentation, D13 adds production web launch evidence, D14 adds public web doorway evidence, D15 adds impact-estimator methodology, D16 wires a caveated reviewed-source impact story into the public Best Options screen, D17 keeps desktop artifact readiness machine-checkable without publishing installers, D18 adds compact stage-and-recommended-help guidance without turning the app into a project planner, and D19 lets users save a local browser PDF report without a server renderer. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, social launch links, public desktop downloads, exact public savings claims, live pricing/model fetches, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -300,6 +307,11 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D18 Cloudflare production deployment passed: source `9d3154d` deployed to `https://98a58ca6.ai-task-router.pages.dev`; canonical `https://ai-task-router.pages.dev/` served root, manifest, service worker, and PWA icons with HTTP 200.
 - D18 hosted Playwright passed 6 Chromium tests against `https://ai-task-router.pages.dev`.
 - D18 hosted Chromium stage-guidance smoke passed: Suggested stages rendered for a generated route, 4 stage cards were visible, initial load observed 0 external requests, and desktop width had no horizontal overflow.
+- D19 focused validation passed: `npx tsc --noEmit` and `npm run test -- App` ran 14 App tests.
+- D19 full validation passed: `npm run test` ran 13 files and 96 tests; `npm run build` passed with the existing Vite chunk-size warning; `npm run scan:web-rc` passed; `npm audit --audit-level=moderate` found 0 vulnerabilities; `bash scripts/governance-preflight.sh` reported 0 warnings; `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- D19 local and hosted PDF-report smokes passed: saved Decision Card showed `Save PDF report`, included impact context, had no desktop/mobile overflow, observed 0 external requests on hosted smoke, and print CSS hid app chrome/export controls while keeping report content visible.
+- D19 Cloudflare production deployment passed: source `9c870ce` deployed to `https://49d21829.ai-task-router.pages.dev`; canonical `https://ai-task-router.pages.dev/` served root, manifest, and service worker with HTTP 200.
+- D19 hosted Playwright passed 6 Chromium tests against `https://ai-task-router.pages.dev`.
 
 ## Known Gaps
 
@@ -313,7 +325,7 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D17 `npm run desktop:gate:public` is expected to fail until platform trust evidence exists.
 - The D10 GitHub Actions workflow has to be manually run before remote Windows/macOS/Linux artifacts exist.
 - Interactive desktop launch smoke for D4 remains blocked until the lab Application Control/signing/trusted-path issue is resolved.
-- Cloudflare Pages production URL exists at `https://ai-task-router.pages.dev/` and currently includes the D18 suggested-stage guidance.
+- Cloudflare Pages production URL exists at `https://ai-task-router.pages.dev/` and currently includes the D19 PDF-ready saved Decision Card report path.
 - Cloudflare Pages project is not connected to GitHub yet; D13 accepted direct upload for the first production web release.
 - Old Skool AI public hub and support/security routes are live; Guided AI Labs and Guided AI Journey now link to the hub.
 - Guided AI Journey local `main` still has the pre-existing unpushed commit `236fd7e` and is intentionally ahead/behind `origin/main`; D14 was safely pushed from a temporary worktree based on `origin/main` as commit `610438b`.
@@ -321,6 +333,7 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Public social launch links have not been created.
 - The D16 public impact panel is not an opt-in user-specific savings calculator and is not approved as exact public savings claims.
 - The D18 suggested-stage guidance is not a full project plan or project-management workflow; it is compact local guidance based on the selected route.
+- The D19 PDF report path uses the browser print dialog and is not a server-rendered PDF service.
 - Provider pricing and environmental anchors must be refreshed before public impact claims because pricing, model routing, infrastructure, and provider disclosures change.
 - Custom-domain/DNS work has not been done.
 - Windows `curl.exe` and PowerShell `Invoke-WebRequest` passed against the production Pages URL; the D9 preview alias remains historical only.
@@ -330,6 +343,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Choose the next bounded lane: owner-reviewed social/video launch copy using the now-public safe impact language, a reviewed methodology page, an opt-in local estimator UI, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved release chunk. For desktop downloads, choose Windows Store/MSIX versus direct signing, confirm publisher identity, and resolve the Application Control/signing/trusted-path blocker before ordinary-user beta. Keep public desktop downloads held.
+Choose the next bounded lane: owner-reviewed social/video launch copy using the now-public safe impact, stage-guidance, and report language; a reviewed methodology page; an opt-in local estimator UI; desktop trust/signing readiness; Cloudflare/GitHub/custom-domain automation; or another explicitly approved release chunk. For desktop downloads, choose Windows Store/MSIX versus direct signing, confirm publisher identity, and resolve the Application Control/signing/trusted-path blocker before ordinary-user beta. Keep public desktop downloads held.
 
-Proceeding beyond D18 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, live pricing/model fetches, exact public savings claims, or external actions without a separate approved chunk.
+Proceeding beyond D19 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, live pricing/model fetches, exact public savings claims, or external actions without a separate approved chunk.
