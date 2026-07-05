@@ -1,4 +1,5 @@
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { invoke } from "@tauri-apps/api/core";
 import userEvent from "@testing-library/user-event";
 import { App } from "../../App";
 import {
@@ -11,11 +12,18 @@ import { screenDefinitions } from "../../ui/screens/screenDefinitions";
 import { legacyPrefilledToolModels } from "../fixtures/legacyPrefilledToolModels";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
 
+vi.mock("@tauri-apps/api/core", () => ({
+  invoke: vi.fn(),
+}));
+
 let databaseCounter = 0;
 const storesToDelete: LocalStore[] = [];
 
 afterEach(async () => {
   cleanup();
+  vi.mocked(invoke).mockReset();
+  delete (window as Window & { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
+  delete (window as Window & { __TAURI__?: unknown }).__TAURI__;
 
   await Promise.all(storesToDelete.map((store) => store.deleteDatabase()));
   storesToDelete.length = 0;
@@ -148,6 +156,142 @@ describe("App", () => {
 
     await waitFor(() => {
       expect(screen.getAllByRole("region", { name: "Tool selection" })).toHaveLength(1);
+    });
+  });
+
+  it("lets desktop users check selected local tools and add found tools to My AI Tools", async () => {
+    const user = userEvent.setup();
+    const invokeMock = vi.mocked(invoke);
+
+    Object.defineProperty(window, "__TAURI_INTERNALS__", {
+      configurable: true,
+      value: {},
+    });
+
+    invokeMock.mockImplementation(async (command, payload) => {
+      if (command === "get_desktop_discovery_options") {
+        return {
+          schemaVersion: 1,
+          platform: "windows",
+          options: [
+            {
+              toolId: "ollama",
+              label: "Ollama",
+              summary: "Checks the Ollama app and its common local model folder.",
+              checkKinds: ["fixed-cli", "known-folder"],
+              defaultSelected: true,
+              detailsAvailable: true,
+            },
+            {
+              toolId: "lm-studio",
+              label: "LM Studio",
+              summary: "Checks common LM Studio model folders.",
+              checkKinds: ["known-folder"],
+              defaultSelected: true,
+              detailsAvailable: true,
+            },
+            {
+              toolId: "jan",
+              label: "Jan",
+              summary: "Checks common Jan model folders.",
+              checkKinds: ["known-folder"],
+              defaultSelected: true,
+              detailsAvailable: true,
+            },
+            {
+              toolId: "gpt4all",
+              label: "GPT4All",
+              summary: "Checks common GPT4All model folders.",
+              checkKinds: ["known-folder"],
+              defaultSelected: true,
+              detailsAvailable: true,
+            },
+          ],
+        };
+      }
+
+      if (command === "run_desktop_discovery") {
+        const request = (payload as { request: { detailLevel: "summary" | "details"; selectedToolIds: string[] } })
+          .request;
+
+        expect(request.selectedToolIds).not.toContain("jan");
+
+        return {
+          schemaVersion: 1,
+          requestId: "desktop-check-test",
+          checkedAt: "2026-07-04T17:53:03-06:00",
+          platform: "windows",
+          summary: {
+            toolsChecked: request.selectedToolIds.length,
+            toolsDetected: 1,
+            modelsFound: 2,
+          },
+          results: request.selectedToolIds.map((toolId) =>
+            toolId === "ollama"
+              ? {
+                  toolId: "ollama",
+                  label: "Ollama",
+                  status: "models-found",
+                  detected: true,
+                  modelCount: 2,
+                  modelNames: request.detailLevel === "details" ? ["llama3:latest"] : [],
+                  checkedLocationCount: 2,
+                  shownPathDetails: false,
+                  note: "Ollama answered the read-only model list check.",
+                }
+              : {
+                  toolId,
+                  label: toolId === "lm-studio" ? "LM Studio" : "GPT4All",
+                  status: "not-found",
+                  detected: false,
+                  modelCount: 0,
+                  modelNames: [],
+                  checkedLocationCount: 2,
+                  shownPathDetails: false,
+                  note: "No common local model folder was found.",
+                },
+          ),
+        };
+      }
+
+      throw new Error(`Unexpected invoke command: ${command}`);
+    });
+
+    render(<App store={buildTestStore()} />);
+
+    await user.click(screen.getByRole("button", { name: "My AI Tools" }));
+
+    expect(await screen.findByRole("button", { name: "Check this computer" })).toBeInTheDocument();
+    expect(invokeMock).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Check this computer" }));
+    expect(await screen.findByRole("group", { name: "What should we check?" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("checkbox", { name: /Jan/ }));
+    await user.click(screen.getByRole("button", { name: "Run check" }));
+
+    expect((await screen.findAllByText(/Found 1 tool and 2 local models/)).length).toBeGreaterThan(0);
+    expect(screen.queryByText("llama3:latest")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Add Ollama to My AI Tools" }));
+
+    expect(await screen.findByText("Ollama was added. Save my choices when you are ready.")).toBeInTheDocument();
+    const localToolRow = screen.getAllByRole("region", { name: "Tool selection" })[0];
+    expect(within(localToolRow).getByRole("combobox", { name: "AI app for user-mid-synthesis-model" })).toHaveDisplayValue(
+      "Local or private AI",
+    );
+    expect(within(localToolRow).getByRole("combobox", { name: "Local model for user-mid-synthesis-model" })).toHaveDisplayValue(
+      "Ollama",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Show model names" }));
+
+    expect(await screen.findByText("llama3:latest")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Hide model names" }));
+
+    await waitFor(() => {
+      expect(screen.queryByText("llama3:latest")).not.toBeInTheDocument();
     });
   });
 

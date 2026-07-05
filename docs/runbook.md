@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T16:25:09-06:00
+Last Updated: 2026-07-04T18:16:13-06:00
 Status: active
 Owner: Technical Lead
 
@@ -52,6 +52,7 @@ Current troubleshooting item:
 - Windows Code Integrity logged event IDs `3033` and `3077`; policy ID `{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}` said the generated build script did not meet Enterprise signing level requirements.
 - `citool -lp` could not list policy details in the current non-elevated session (`0x80070005`), and Device Guard reports code integrity enforcement active.
 - After the D3 rebuild, `npm run desktop:build` still succeeds when Rust is on PATH, but launching the rebuilt unsigned release executable is also blocked by Windows Application Control. `Get-AuthenticodeSignature` reports it is not digitally signed, SHA-256 `079EF12762D987A877146E6051B32A1E2ED9BC42507B020959F00F2793C7512B`, and Code Integrity events `3033`/`3077` cite the same policy ID.
+- After the D4 local-discovery implementation, `npm run desktop:info`, `cargo test --manifest-path src-tauri\Cargo.toml --lib --release --no-run`, `cargo fmt --manifest-path src-tauri\Cargo.toml --check`, and `npm run desktop:build` pass when `C:\Users\adamg\.cargo\bin` is prepended to the current shell PATH. `cargo test --manifest-path src-tauri\Cargo.toml --lib --release` passed earlier in the D4 code loop, but the final rerun was blocked when Windows Application Control prevented the generated release test executable from launching. D4 launch smoke remains unclaimed until the same Windows Application Control issue is resolved.
 - Do not weaken or bypass Application Control silently. Resolve through the Windows lab security policy, a trusted development folder/policy exception, or an approved elevated admin troubleshooting session.
 
 ## Recovery

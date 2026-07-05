@@ -1,5 +1,10 @@
 import { useState, type ChangeEvent, type ReactNode } from "react";
 import {
+  getDesktopDiscoveryOptions,
+  isDesktopDiscoveryAvailable,
+  runDesktopDiscovery,
+} from "../../desktop/desktopDiscovery";
+import {
   applyEverydayToolSelection,
   everydayToolFrequencyRank,
   everydayToolProviders,
@@ -12,6 +17,10 @@ import {
   type EverydayToolProviderId,
 } from "../../domain/defaults/everydayToolCatalog";
 import type {
+  DesktopDiscoveryOption,
+  DesktopDiscoveryRequest,
+  DesktopDiscoveryResponse,
+  DesktopDiscoveryToolResult,
   ModelInventoryItem,
   PolicyDefault,
   ScoringWeights,
@@ -268,6 +277,7 @@ function InventoryGroup({
   const emptyRowsToShow = selectedCount === 0 ? 1 : extraEmptyRows;
   const visibleModels = visibleToolRows(toolSlots, emptyRowsToShow);
   const canAddAnotherTool = emptySlotCount > emptyRowsToShow;
+  const [desktopDiscoveryAddMessage, setDesktopDiscoveryAddMessage] = useState<string | null>(null);
 
   function updateToolSlot(updatedModel: ModelInventoryItem) {
     const currentModel = models.find((model) => model.id === updatedModel.id);
@@ -314,12 +324,62 @@ function InventoryGroup({
     });
   }
 
+  function addDiscoveredTool(result: DesktopDiscoveryToolResult) {
+    const accountId = localAccountIdForDesktopTool(result.toolId);
+
+    if (!result.detected || !accountId) {
+      setDesktopDiscoveryAddMessage(`${result.label} was not added because it was not found on this computer.`);
+      return;
+    }
+
+    const existingTool = toolSlots.find((model) => {
+      const selection = inferEverydayToolSelection(model);
+
+      return model.enabled && selection.providerId === "local" && selection.accountId === accountId;
+    });
+
+    if (existingTool) {
+      setDesktopDiscoveryAddMessage(`${result.label} is already in My AI Tools.`);
+      return;
+    }
+
+    const emptyToolSlot = toolSlots.find((model) => !isEverydayToolSelected(model));
+
+    if (!emptyToolSlot) {
+      setDesktopDiscoveryAddMessage("There is no empty tool row left. Remove one before adding another local tool.");
+      return;
+    }
+
+    const nextModels = replaceRecord(
+      models,
+      applyEverydayToolSelection(emptyToolSlot, {
+        providerId: "local",
+        accountId,
+        frequencyId: "weekly",
+      }),
+    );
+
+    setExtraEmptyRows((currentRows) => Math.max(0, currentRows - 1));
+    setup.updateModelInventory(nextModels);
+    setup.updateSetupPreferences({
+      ...setup.preferences,
+      preferredModelId: preferredToolIdFromFrequency(nextModels),
+    });
+    setDesktopDiscoveryAddMessage(`${result.label} was added. Save my choices when you are ready.`);
+  }
+
   return (
     <section className="setupGroup" aria-labelledby={domIdFor(title)}>
       <div className="groupHeader">
         <h3 id={domIdFor(title)}>{title}</h3>
         <span>{selectedCount} selected</span>
       </div>
+
+      <DesktopDiscoveryPanel
+        addMessage={desktopDiscoveryAddMessage}
+        disabled={setup.status === "saving"}
+        onAddFoundTool={addDiscoveredTool}
+      />
 
       <div className="setupRecordList">
         {visibleModels.length === 0 ? (
@@ -346,6 +406,250 @@ function InventoryGroup({
         <span aria-hidden="true">+</span>
         Add another tool
       </button>
+    </section>
+  );
+}
+
+function DesktopDiscoveryPanel({
+  addMessage,
+  disabled,
+  onAddFoundTool,
+}: {
+  addMessage: string | null;
+  disabled: boolean;
+  onAddFoundTool: (result: DesktopDiscoveryToolResult) => void;
+}) {
+  const desktopAvailable = isDesktopDiscoveryAvailable();
+  const [options, setOptions] = useState<DesktopDiscoveryOption[]>([]);
+  const [selectedToolIds, setSelectedToolIds] = useState<DesktopDiscoveryRequest["selectedToolIds"]>([]);
+  const [result, setResult] = useState<DesktopDiscoveryResponse | null>(null);
+  const [status, setStatus] = useState<"idle" | "loading-options" | "choosing" | "checking" | "results" | "error">(
+    "idle",
+  );
+  const [message, setMessage] = useState<string | null>(null);
+  const [showingDetails, setShowingDetails] = useState(false);
+  const busy = status === "loading-options" || status === "checking";
+
+  async function loadOptions() {
+    setStatus("loading-options");
+    setMessage("Opening the local checklist.");
+    setResult(null);
+    setShowingDetails(false);
+
+    try {
+      const response = await getDesktopDiscoveryOptions();
+      setOptions(response.options);
+      setSelectedToolIds(response.options.filter((option) => option.defaultSelected).map((option) => option.toolId));
+      setStatus("choosing");
+      setMessage("Choose the tools you want checked on this computer.");
+    } catch (error) {
+      setStatus("error");
+      setMessage(desktopDiscoveryErrorMessage(error));
+    }
+  }
+
+  async function runCheck(detailLevel: "summary" | "details") {
+    if (selectedToolIds.length === 0) {
+      setMessage("Choose at least one local AI tool before running the check.");
+      return;
+    }
+
+    setStatus("checking");
+    setMessage("Checking only the tools you selected. Nothing is uploaded.");
+
+    try {
+      const response = await runDesktopDiscovery({
+        requestId: `desktop-check-${Date.now()}`,
+        selectedToolIds,
+        detailLevel,
+        includePathDetails: false,
+      });
+
+      setResult(response);
+      setStatus("results");
+      setShowingDetails(detailLevel === "details");
+      setMessage(desktopDiscoverySummaryMessage(response));
+    } catch (error) {
+      setStatus("error");
+      setMessage(desktopDiscoveryErrorMessage(error));
+    }
+  }
+
+  function toggleTool(toolId: DesktopDiscoveryRequest["selectedToolIds"][number]) {
+    setSelectedToolIds((currentToolIds) =>
+      currentToolIds.includes(toolId)
+        ? currentToolIds.filter((currentToolId) => currentToolId !== toolId)
+        : [...currentToolIds, toolId],
+    );
+  }
+
+  function cancelCheck() {
+    setStatus("idle");
+    setOptions([]);
+    setSelectedToolIds([]);
+    setResult(null);
+    setShowingDetails(false);
+    setMessage("Computer check cancelled.");
+  }
+
+  function clearResults() {
+    setStatus("idle");
+    setResult(null);
+    setShowingDetails(false);
+    setMessage("Computer check results cleared.");
+  }
+
+  function hideModelNames() {
+    if (!result) {
+      return;
+    }
+
+    setResult({
+      ...result,
+      results: result.results.map((toolResult) => ({
+        ...toolResult,
+        modelNames: [],
+      })),
+    });
+    setShowingDetails(false);
+    setMessage("Model names are hidden again.");
+  }
+
+  if (!desktopAvailable) {
+    return (
+      <section className="desktopDiscoveryCard" aria-labelledby="desktop-discovery-heading">
+        <div>
+          <p className="screenKicker">Desktop app</p>
+          <h4 id="desktop-discovery-heading">Check this computer</h4>
+        </div>
+        <p>
+          The desktop app can look for local AI tools with your approval. In this browser, add tools manually below.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="desktopDiscoveryCard" aria-labelledby="desktop-discovery-heading">
+      <div className="desktopDiscoveryHeader">
+        <div>
+          <p className="screenKicker">Desktop app</p>
+          <h4 id="desktop-discovery-heading">Check this computer</h4>
+        </div>
+        <span>Local only</span>
+      </div>
+
+      <p>
+        We can check for local AI tools already on this computer. You choose what we check. We will not read your
+        documents, upload anything, or connect accounts.
+      </p>
+
+      {status === "idle" ? (
+        <button disabled={disabled} onClick={() => void loadOptions()} type="button">
+          Check this computer
+        </button>
+      ) : null}
+
+      {status === "loading-options" || status === "checking" ? <p className="desktopDiscoveryStatus">{message}</p> : null}
+
+      {status === "choosing" ? (
+        <div className="desktopDiscoveryChooser">
+          <fieldset disabled={busy || disabled}>
+            <legend>What should we check?</legend>
+            <div className="desktopDiscoveryOptions">
+              {options.map((option) => (
+                <label key={option.toolId}>
+                  <input
+                    checked={selectedToolIds.includes(option.toolId)}
+                    onChange={() => toggleTool(option.toolId)}
+                    type="checkbox"
+                  />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.summary}</small>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="desktopDiscoveryActions">
+            <button disabled={busy || disabled || selectedToolIds.length === 0} onClick={() => void runCheck("summary")} type="button">
+              Run check
+            </button>
+            <button className="secondaryButton" disabled={busy} onClick={cancelCheck} type="button">
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {status === "results" && result ? (
+        <div className="desktopDiscoveryResults" aria-live="polite">
+          <div>
+            <strong>{desktopDiscoverySummaryMessage(result)}</strong>
+            <p>Results are shown without file paths. Model names stay hidden unless you ask to see them.</p>
+          </div>
+
+          <div className="desktopDiscoveryResultList">
+            {result.results.map((toolResult) => (
+              <section key={toolResult.toolId} className="desktopDiscoveryResult">
+                <div>
+                  <h5>{toolResult.label}</h5>
+                  <p>{friendlyDesktopDiscoveryStatus(toolResult)}</p>
+                  {toolResult.note ? <small>{toolResult.note}</small> : null}
+                  {toolResult.modelNames.length > 0 ? (
+                    <ul>
+                      {toolResult.modelNames.map((modelName) => (
+                        <li key={modelName}>{modelName}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+                {toolResult.detected ? (
+                  <button disabled={disabled} onClick={() => onAddFoundTool(toolResult)} type="button">
+                    Add {toolResult.label} to My AI Tools
+                  </button>
+                ) : null}
+              </section>
+            ))}
+          </div>
+
+          <div className="desktopDiscoveryActions">
+            {result.summary.modelsFound > 0 && !showingDetails ? (
+              <button disabled={busy || disabled} onClick={() => void runCheck("details")} type="button">
+                Show model names
+              </button>
+            ) : null}
+            {showingDetails ? (
+              <button className="secondaryButton" disabled={busy} onClick={hideModelNames} type="button">
+                Hide model names
+              </button>
+            ) : null}
+            <button className="secondaryButton" disabled={busy} onClick={clearResults} type="button">
+              Clear results
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {status === "error" && message ? (
+        <div className="setupAlert" role="alert">
+          {message}
+        </div>
+      ) : null}
+
+      {message && status !== "error" && status !== "loading-options" && status !== "checking" ? (
+        <p className="desktopDiscoveryStatus" role="status">
+          {message}
+        </p>
+      ) : null}
+
+      {addMessage ? (
+        <p className="desktopDiscoveryStatus" role="status">
+          {addMessage}
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -576,6 +880,64 @@ function preferredToolIdFromFrequency(models: ModelInventoryItem[]): ModelInvent
 
     return frequencyComparison || left.id.localeCompare(right.id);
   })[0]?.id;
+}
+
+function localAccountIdForDesktopTool(toolId: DesktopDiscoveryToolResult["toolId"]): EverydayToolAccountId | undefined {
+  const localAccountIds: Partial<Record<DesktopDiscoveryToolResult["toolId"], EverydayToolAccountId>> = {
+    ollama: "local-ollama",
+    "lm-studio": "local-lm-studio",
+    jan: "local-jan",
+    gpt4all: "local-gpt4all",
+  };
+
+  return localAccountIds[toolId];
+}
+
+function desktopDiscoverySummaryMessage(response: DesktopDiscoveryResponse) {
+  const { toolsChecked, toolsDetected, modelsFound } = response.summary;
+  const toolWord = toolsChecked === 1 ? "tool" : "tools";
+  const detectedWord = toolsDetected === 1 ? "tool" : "tools";
+  const modelWord = modelsFound === 1 ? "local model" : "local models";
+
+  if (modelsFound > 0) {
+    return `Checked ${toolsChecked} ${toolWord}. Found ${toolsDetected} ${detectedWord} and ${modelsFound} ${modelWord}.`;
+  }
+
+  return `Checked ${toolsChecked} ${toolWord}. Found ${toolsDetected} ${detectedWord}.`;
+}
+
+function friendlyDesktopDiscoveryStatus(result: DesktopDiscoveryToolResult) {
+  if (result.status === "models-found") {
+    const modelWord = result.modelCount === 1 ? "local model" : "local models";
+
+    return `Found ${result.label} with ${result.modelCount} ${modelWord}.`;
+  }
+
+  if (result.status === "folder-found" || result.status === "installed-no-models-found") {
+    return `Found ${result.label}, but no local models were listed.`;
+  }
+
+  if (result.status === "blocked") {
+    return `${result.label} could not be checked because the operating system blocked the read-only check.`;
+  }
+
+  if (result.status === "timed-out") {
+    return `${result.label} took too long to answer.`;
+  }
+
+  if (result.status === "error") {
+    return `${result.label} could not finish the local check.`;
+  }
+
+  return `${result.label} was not found in the common local places checked.`;
+}
+
+function desktopDiscoveryErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "The computer check could not finish. You can still add tools manually.";
 }
 
 function replaceRecord<T extends { id: string }>(records: readonly T[], updatedRecord: T): T[] {

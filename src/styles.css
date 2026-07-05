@@ -478,6 +478,128 @@ button:focus-visible {
   padding: 12px 14px;
 }
 
+.desktopDiscoveryCard {
+  background: #f7fbfd;
+  border: 1px solid #cdeaf2;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.desktopDiscoveryHeader {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.desktopDiscoveryHeader span {
+  background: #e2f3f7;
+  border: 1px solid #b8e2eb;
+  border-radius: 999px;
+  color: var(--brand-navy);
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
+.desktopDiscoveryCard h4,
+.desktopDiscoveryResult h5 {
+  color: var(--brand-navy);
+}
+
+.desktopDiscoveryChooser,
+.desktopDiscoveryResults {
+  display: grid;
+  gap: 12px;
+}
+
+.desktopDiscoveryChooser fieldset {
+  border: 0;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+.desktopDiscoveryChooser legend {
+  color: #334b5a;
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.desktopDiscoveryOptions,
+.desktopDiscoveryResultList {
+  display: grid;
+  gap: 10px;
+}
+
+.desktopDiscoveryOptions label,
+.desktopDiscoveryResult {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.desktopDiscoveryOptions label {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 12px;
+}
+
+.desktopDiscoveryOptions span,
+.desktopDiscoveryResult {
+  min-width: 0;
+}
+
+.desktopDiscoveryOptions small,
+.desktopDiscoveryResult small,
+.desktopDiscoveryResults p,
+.desktopDiscoveryStatus {
+  color: #526274;
+}
+
+.desktopDiscoveryResult {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 12px;
+}
+
+.desktopDiscoveryResult p {
+  margin-top: 4px;
+}
+
+.desktopDiscoveryResult ul {
+  color: #243442;
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.desktopDiscoveryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.desktopDiscoveryStatus {
+  background: #ffffff;
+  border: 1px solid #dbe7ee;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  padding: 10px 12px;
+}
+
 .groupHeader,
 .recordHeader {
   align-items: start;
@@ -1838,12 +1960,14 @@ button:focus-visible {
   .routeLogControls,
   .routeLogWorkspace,
   .routeLogMetaGrid,
+  .desktopDiscoveryResult,
   .feedbackFormGrid {
     grid-template-columns: 1fr;
   }
 
   .setupToolbar,
   .groupHeader,
+  .desktopDiscoveryHeader,
   .recordHeader,
   .routeCardHeader,
   .promptStepHeader,
@@ -1879,6 +2003,7 @@ button:focus-visible {
   .artifactActions a,
   .routeLogToolbar button,
   .routeLogEntryActions button,
+  .desktopDiscoveryActions button,
   .feedbackPanel button {
     width: 100%;
   }

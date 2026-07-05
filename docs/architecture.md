@@ -65,18 +65,18 @@ Excluded from v0.2:
 - cloud databases
 - vector databases
 - background workers
-- desktop wrappers
+- public desktop wrappers and installers
 - hosted multi-user infrastructure
 
 ## Future Desktop Architecture
 
 Desktop packaging is intentionally excluded from v0.2. The future desktop track is documented in [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md).
 
-The future architecture keeps the React frontend and adds a narrow Tauri native layer for desktop-only local discovery. The frontend should not receive broad filesystem access. Native commands should be allowlisted, read-only, timeout-bound, schema-validated, and triggered only after explicit user approval.
+The desktop architecture keeps the React frontend and adds a narrow Tauri native layer for desktop-only local discovery. The frontend does not receive broad filesystem access. Native commands are allowlisted, read-only, timeout-bound, schema-validated, and triggered only after explicit user approval.
 
-ADR-0001 selected Tauri for the shell spike. The current desktop shell has no custom native commands and an empty default capability permission list. Desktop Chunk D3 defines the future `get_desktop_discovery_options` and `run_desktop_discovery` command contracts with Zod schemas in `src/domain/schemas.ts`, but does not implement those commands yet.
+ADR-0001 selected Tauri for the shell spike. Desktop Chunk D3 defined the `get_desktop_discovery_options` and `run_desktop_discovery` command contracts with Zod schemas in `src/domain/schemas.ts`. Desktop Chunk D4 implements those commands in `src-tauri/src/discovery.rs` and registers them through the Tauri invoke handler while keeping the default capability permission list free of broad `fs`, `shell`, process, upload, updater, provider, credential, telemetry, or database plugin permissions.
 
-Future desktop detection should remain limited to user-approved checks for local AI tools and model folders. It must not silently scan the machine, index files, upload local data, store credentials, or execute provider actions.
+Desktop detection is limited to user-approved checks for allowlisted local AI tools and known model folders. It must not silently scan the machine, index files, expose paths, upload local data, store credentials, or execute provider actions.
 
 ## Key Decisions
 
@@ -84,5 +84,5 @@ Future desktop detection should remain limited to user-approved checks for local
 - Build directly in this repository unless the owner later chooses a nested app folder.
 - Keep permission levels capped at local draft/export; there is no execute permission level.
 - Treat route recommendations and prompt packages as local decision artifacts, not actions.
-- Treat installable desktop distribution as a separate future product surface requiring a trust-boundary design, governance review, and signing plan before implementation.
+- Treat public installable desktop distribution as a separate future product surface requiring a signing plan, packaging review, and owner approval before release.
 

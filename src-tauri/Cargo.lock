@@ -21,6 +21,8 @@ dependencies = [
 name = "ai-task-router-desktop"
 version = "0.2.0"
 dependencies = [
+ "chrono",
+ "serde",
  "tauri",
  "tauri-build",
 ]

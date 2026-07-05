@@ -1,21 +1,21 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T16:30:17-06:00
-Status: desktop-d3-trust-boundary-complete-app-control-launch-blocked
-Status Updated: 2026-07-04T16:25:09-06:00
+Last Updated: 2026-07-04T18:16:13-06:00
+Status: desktop-d4-permissioned-local-discovery-build-validated
+Status Updated: 2026-07-04T18:16:13-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D3 trust-boundary and permission model, building on the Desktop Chunk D2 shell spike.
+Desktop Chunk D4 permissioned local AI tool detection, building on the Desktop Chunk D3 trust boundary.
 
-Completion target: Task complete.
+Completion target: Integration complete.
 
-Current state: D3 trust-boundary contract complete; scaffold present; Windows prerequisites installed; no-bundle desktop build passes; dev mode and the current rebuilt unsigned release executable are blocked by Windows Application Control.
+Current state: D4 local discovery prototype implemented; scaffold present; Windows prerequisites installed; no-bundle desktop build passes; dev mode and unsigned release executable launch remain blocked by Windows Application Control.
 
 ## Scope
 
-This slice added the minimum Tauri v2 desktop shell around the existing Vite/React app while keeping the desktop trust boundary closed.
+This desktop track keeps the Tauri native surface narrow and controlled around the existing Vite/React app.
 
 The D2 shell slice provides:
 
@@ -38,13 +38,24 @@ The D3 trust-boundary slice provides:
 - Unit coverage for schema defaults, redaction gates, summary consistency, duplicate tool rejection, and path-detail rejection.
 - Updated desktop trust plan, permission matrix, architecture note, risk register, README, changelog, and pathway handoff.
 
+The D4 local-discovery slice provides:
+
+- `@tauri-apps/api` as a runtime dependency for desktop IPC.
+- Custom Rust commands `get_desktop_discovery_options` and `run_desktop_discovery` in `src-tauri/src/discovery.rs`.
+- Command registration in `src-tauri/src/lib.rs`.
+- A frontend bridge in `src/desktop/desktopDiscovery.ts` that detects Tauri runtime availability and validates native responses with Zod before UI use.
+- A desktop-only `Check this computer` panel in My AI Tools.
+- Allowlisted checks for `ollama`, `lm-studio`, `jan`, and `gpt4all`.
+- Summary-first results, optional capped model-name details, clear results, and add-to-My-AI-Tools actions.
+- No path return, no startup/background scans, no user-supplied paths, and no broad Tauri plugin permissions.
+
 ## Product Boundary
 
-This desktop track does not yet add native discovery, folder inspection, package signing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only. It still does not add arbitrary folder inspection, package signing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
-The future desktop command names are documented only: `get_desktop_discovery_options` and `run_desktop_discovery`. They are not implemented yet.
+The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery` are implemented as custom Rust commands, not broad shell or filesystem plugin permissions.
 
 ## Evidence
 
@@ -75,17 +86,29 @@ The future desktop command names are documented only: `get_desktop_discovery_opt
 - D3 `npm run desktop:build` passed after prepending `C:\Users\adamg\.cargo\bin`.
 - D3 release executable launch smoke test was blocked by Windows Application Control. Signature check reports unsigned, SHA-256 `079EF12762D987A877146E6051B32A1E2ED9BC42507B020959F00F2793C7512B`, and Code Integrity event IDs `3033`/`3077` cite policy ID `{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}`.
 - Final D3 documentation close-out checks passed: `bash scripts/governance-preflight.sh` reported 0 warnings and `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- D4 focused `npm run test -- App` passed with 1 file and 13 tests.
+- D4 `npm run test` passed with 11 files and 84 tests.
+- D4 `npm run build` passed with the existing Vite chunk-size warning.
+- D4 `cargo test --manifest-path src-tauri\Cargo.toml --lib --release` passed earlier in the code loop with 4 Rust tests; the final close-out rerun was blocked by Windows Application Control when executing the generated release test binary.
+- D4 `cargo test --manifest-path src-tauri\Cargo.toml --lib --release --no-run` passed in final close-out.
+- D4 `cargo fmt --manifest-path src-tauri\Cargo.toml --check` passed.
+- D4 `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- D4 `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- D4 `npm run desktop:info` passed after prepending `C:\Users\adamg\.cargo\bin` to the current shell PATH.
+- D4 `npm run desktop:build` passed after prepending `C:\Users\adamg\.cargo\bin` and built `src-tauri\target\release\ai-task-router-desktop.exe`.
+- D4 `git diff --check` reported only normal Windows LF-to-CRLF notices.
 
 ## Known Gaps
 
 - `npm run desktop:dev` does not launch yet because local Windows Application Control blocks generated debug build scripts.
 - The current rebuilt unsigned release executable does not launch because local Windows Application Control blocks it.
+- The generated release Rust test executable from final close-out does not launch because local Windows Application Control blocks it.
 - Some fresh shells may need a restart or temporary `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"` before Tauri can see Rust.
-- Public desktop packaging, signing, updater, installer, and local discovery remain out of scope.
-- Native desktop local discovery remains design-only until D4 is explicitly implemented against the D3 contract.
+- Public desktop packaging, signing, updater, and installer remain out of scope.
+- Interactive desktop launch smoke for D4 remains blocked until the lab Application Control/signing/trusted-path issue is resolved.
 
 ## Next Chunk
 
-Either resolve the local Windows Application Control blockers through an approved lab policy/signing/trusted-path route, or proceed to Desktop Chunk D4 as a native discovery prototype against the D3 contract using build-only validation until launch is approved again.
+Either proceed to Desktop Chunk D5 for the hosted/PWA install path, resolve the local Windows Application Control blockers through an approved lab policy/signing/trusted-path route before interactive desktop smoke tests, or move to D6 packaging/signing research as build-only work.
 
-Proceeding to implementation beyond the D3 contract still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, folder inspection beyond approved local model checks, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions.
+Proceeding beyond D4 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions without a separate approved chunk.

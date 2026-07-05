@@ -1,22 +1,31 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-04T16:30:17-06:00
-Status: desktop-d3-trust-boundary-complete-app-control-launch-blocked
-Status Updated: 2026-07-04T16:25:09-06:00
+Last Updated: 2026-07-04T18:16:13-06:00
+Status: desktop-d4-permissioned-local-discovery-build-validated
+Status Updated: 2026-07-04T18:16:13-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop Chunk D3: define the trust-boundary and permission model for future desktop local discovery while keeping native discovery and local machine inspection out of scope.
+Desktop Chunk D4: implement permissioned desktop-only local AI tool detection against the D3 trust-boundary contract.
 
-Current result: D3 trust-boundary contract complete; scaffold present; Windows prerequisites installed; no-bundle desktop build passes; `desktop:dev` and the current rebuilt unsigned release executable are blocked by Windows Application Control.
+Current result: D4 local discovery prototype is implemented and build-validated. The desktop app has a user-started `Check this computer` flow for allowlisted local AI tools. `desktop:dev` and unsigned release executable launch remain blocked by Windows Application Control, so interactive desktop launch smoke is not claimed.
 
 ## Files Changed In This Session
 
-- `src-tauri/tauri.conf.json`
-- `src/domain/schemas.ts`
-- `src/domain/types.ts`
-- `src/tests/unit/domainSchemas.test.ts`
+- `package.json`
+- `package-lock.json`
+- `src-tauri/Cargo.toml`
+- `src-tauri/Cargo.lock`
+- `src-tauri/build.rs`
+- `src-tauri/capabilities/default.json`
+- `src-tauri/src/lib.rs`
+- `src-tauri/src/main.rs`
+- `src-tauri/src/discovery.rs`
+- `src/desktop/desktopDiscovery.ts`
+- `src/styles.css`
+- `src/tests/unit/App.test.tsx`
+- `src/ui/screens/SetupScreens.tsx`
 - `docs/tool-permission-matrix.md`
 - `docs/architecture.md`
 - `docs/risks/risk-register.md`
@@ -28,7 +37,7 @@ Current result: D3 trust-boundary contract complete; scaffold present; Windows p
 - `IMPLEMENTATION_STATUS.md`
 - `SESSION_STATE.md`
 
-Earlier D2 scaffold files remain from the prior commit: `package.json`, `package-lock.json`, `vite.config.ts`, `.gitignore`, and `src-tauri/*`.
+Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
 ## Commands Run
 
@@ -67,6 +76,15 @@ Earlier D2 scaffold files remain from the prior commit: `package.json`, `package
 - `Get-AuthenticodeSignature`
 - Windows Code Integrity event review
 - `git diff --check`
+- `npm install @tauri-apps/api@^2.11.1`
+- `npm run test -- App`
+- `npm run test`
+- `npm run build`
+- `cargo test --manifest-path src-tauri\Cargo.toml --lib --release`
+- `cargo fmt --manifest-path src-tauri\Cargo.toml --check`
+- `npm audit --audit-level=moderate`
+- `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:info`
+- `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:build`
 
 ## Validation Notes
 
@@ -90,16 +108,25 @@ Earlier D2 scaffold files remain from the prior commit: `package.json`, `package
 - D3 `npm run desktop:build` passed after prepending `C:\Users\adamg\.cargo\bin`.
 - D3 release executable launch smoke test was blocked by Windows Application Control. Signature check reports unsigned; SHA-256 `079EF12762D987A877146E6051B32A1E2ED9BC42507B020959F00F2793C7512B`; Code Integrity event IDs `3033` and `3077` cite policy ID `{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}`.
 - Final D3 documentation close-out checks passed: `bash scripts/governance-preflight.sh` reported 0 warnings and `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- D4 added custom Rust discovery commands and a desktop-only UI path without broad Tauri plugin permissions.
+- D4 focused App validation passed: `npm run test -- App` ran 1 file and 13 tests.
+- D4 full unit validation passed: `npm run test` ran 11 files and 84 tests.
+- D4 web build passed with the existing Vite chunk-size warning.
+- D4 Rust validation passed earlier in the code loop: `cargo test --manifest-path src-tauri\Cargo.toml --lib --release` ran 4 tests. The final close-out rerun compiled but Windows Application Control blocked the generated release test executable; `cargo test --manifest-path src-tauri\Cargo.toml --lib --release --no-run` and `cargo fmt --manifest-path src-tauri\Cargo.toml --check` passed.
+- D4 audit found 0 vulnerabilities and governance preflight passed with 0 warnings.
+- D4 `npm run desktop:info` and `npm run desktop:build` passed after prepending `C:\Users\adamg\.cargo\bin` to the current shell PATH.
+- D4 no-bundle desktop build produced `src-tauri\target\release\ai-task-router-desktop.exe`.
 
 ## Known Gaps
 
 - `npm run desktop:dev` still needs the Windows lab Application Control policy issue resolved.
 - The current rebuilt unsigned release executable also needs an approved lab policy/signing/trusted-path resolution before launch smoke tests can pass again.
+- The generated release Rust test executable also needs the same App Control resolution before final `cargo test --release` execution can pass consistently.
 - Some fresh shells may need restart or temporary `.cargo\bin` prepending before Tauri can see Rust.
 - Do not bypass or weaken Code Integrity silently.
-- Do not add broad filesystem permissions, arbitrary shell/process access, telemetry, provider connections, updater, signing, packaging, credentials, file indexing, or external actions during D4.
-- Native local discovery remains unimplemented until an owner-approved D4 prototype is built against the D3 contract.
+- Do not add broad filesystem permissions, arbitrary shell/process access, telemetry, provider connections, updater, signing, packaging, credentials, file indexing, or external actions beyond D4 without a separately approved chunk.
+- D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
 
 ## Next Handoff
 
-Resume from Desktop Chunk D3/D4. The Tauri scaffold exists; prerequisites are installed; `desktop:info`, Cargo metadata, `desktop:build`, explicit CSP, and desktop discovery schema contracts are verified. The remaining local blockers are Windows Application Control blocking Cargo's generated debug `build-script-build.exe` and blocking the current rebuilt unsigned release executable. See `docs/runbook.md` for installed system tools and troubleshooting details. The next choice is to resolve the lab policy/signing/trusted-path blocker or proceed to D4 native discovery prototype only within the D3 contract using build-only validation until launch is approved again.
+Resume from Desktop Chunk D5 if the owner wants the hosted/PWA install path next, or resolve the lab policy/signing/trusted-path blocker before claiming interactive desktop discovery smoke. The Tauri scaffold exists; prerequisites are installed; D4 custom Rust discovery commands, desktop UI, frontend bridge, tests, build, audit, governance, `desktop:info`, and `desktop:build` are verified. Keep D4 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, packaging, signing, updater, or external actions without a separately approved chunk.

@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser MVP validation lane, with the Desktop Chunk D3 trust-boundary contract complete; desktop build passes, but dev mode and the current rebuilt unsigned release executable are blocked by Windows Application Control
-Status Updated: 2026-07-04T16:30:17-06:00
+Status: v0.2 browser MVP validation lane, with Desktop Chunk D4 permissioned local AI tool detection implemented for the desktop app; desktop build passes, but dev mode and unsigned release executable launch are blocked by Windows Application Control
+Status Updated: 2026-07-04T18:16:13-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -49,7 +49,7 @@ Product brief: [docs/PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md)
 - Dexie / IndexedDB
 - Vitest
 - Playwright
-- Tauri, for the desktop shell spike only
+- Tauri, for the desktop shell and permissioned local discovery prototype
 
 ## Local Setup
 
@@ -100,7 +100,7 @@ npm run desktop:dev
 
 Current Windows lab note: `npm run desktop:dev` reaches the Vite dev server but the debug Rust build is blocked by Windows Application Control policy when Cargo tries to execute a generated `build-script-build.exe`.
 
-After the D3 rebuild, the unsigned release executable is also blocked by the same Application Control policy family. The no-bundle desktop build still succeeds when the current shell can see `C:\Users\adamg\.cargo\bin`.
+After the D4 rebuild, the unsigned release executable launch remains blocked by the same Application Control policy family. The no-bundle desktop build still succeeds when the current shell can see `C:\Users\adamg\.cargo\bin`.
 
 Build the desktop shell without packaging:
 
@@ -116,9 +116,9 @@ Desktop prerequisites installed on this Windows machine:
 - Windows SDK `10.0.26100.0`
 - WebView2 `149.0.4022.98`
 
-The desktop shell is a spike only. It does not add native discovery, folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, or external actions.
+The desktop app is still an internal prototype. It now has a desktop-only `Check this computer` flow for selected local AI tools, but it does not add packaging, signing, updater, provider connections, telemetry, credentials, file indexing, arbitrary folder inspection, or external actions.
 
-Desktop Chunk D3 adds only the trust-boundary contract for future native local discovery: explicit CSP, documented command contracts, and TypeScript/Zod schemas. The desktop app still does not inspect the computer from the UI.
+Desktop Chunk D4 implements the first native local discovery path: custom Rust commands check only allowlisted local tools after user approval, hide model names by default, reject path details, and return schema-validated results to the UI. Browser users still add tools manually.
 
 Manual local start check used for Chunk One:
 
