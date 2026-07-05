@@ -46,13 +46,15 @@ Troubleshooting:
 
 ### Public Web Release Readiness
 
-As of 2026-07-04T20:27:56-06:00, D7 selected the intended free distribution path and D8 completed local web/PWA release-candidate evidence, but public hosting has not been deployed:
+As of 2026-07-04T21:05:03-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, and D9 created the first Cloudflare Pages hosted preview:
 
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
-- Use one canonical app URL and link to it from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`; the owner has not confirmed `https://app.oldskoolai.com/`, so choose root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain before deployment.
+- Current test preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
+- Use one canonical app URL and link to it from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`; the owner has not confirmed `https://app.oldskoolai.com/`, so choose root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain before public launch.
 - YouTube, Facebook, and LinkedIn links should wait until the web/PWA release gate passes.
 - D8 added `npm run scan:web-rc` for production artifact checks.
+- D9 added hosted Playwright support through `PLAYWRIGHT_BASE_URL`.
 
 Minimum pre-public checks:
 
@@ -66,9 +68,17 @@ npx playwright test
 npm run preview -- --host 127.0.0.1 --port 5184
 ```
 
+Hosted preview E2E:
+
+```powershell
+$env:PLAYWRIGHT_BASE_URL="https://preview-20260704-0c7b253.ai-task-router.pages.dev"
+npx playwright test
+```
+
 Release troubleshooting:
 
 - If `npm ci` fails on Windows with a locked Rolldown native binding, check for stale `agents\agent-picker` Vite dev/preview `node.exe` processes and stop only the repo-owned processes before retrying.
+- If Windows `curl.exe` or PowerShell `Invoke-WebRequest` fails TLS against the Cloudflare preview alias, retest with Chromium/normal browsers and the final custom domain before launch. D9 saw this curl/PowerShell issue while Node and Chromium succeeded.
 - Do not launch from social channels until the production preview and security checks pass.
 - Do not create three independent app deployments unless the service-worker scope, cache, support, and rollback plan are explicit.
 - If the owner chooses a subpath instead of a root app domain/subdomain, update Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links first.

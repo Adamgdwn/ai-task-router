@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA release-candidate lane, with Desktop Chunk D8 local web security evidence complete; public release remains on hold pending Cloudflare preview, canonical URL, hosted smoke, signing, and trust gates
-Status Updated: 2026-07-04T20:35:49-06:00
+Status: v0.2 browser/PWA release-candidate lane, with Desktop Chunk D9 Cloudflare hosted preview smoke complete; public release remains on hold pending canonical URL, custom-domain/GitHub-integration decision, signing, and trust gates
+Status Updated: 2026-07-04T21:05:03-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -104,6 +104,13 @@ The hosted browser app now includes an install manifest, Guided AI Labs app icon
 Supported browsers may offer an Install app option when the site is served over HTTPS or local preview. The browser/PWA
 version cannot check the user's computer; local AI tool discovery requires the desktop app.
 
+Run Playwright against a hosted preview:
+
+```powershell
+$env:PLAYWRIGHT_BASE_URL="https://preview-20260704-0c7b253.ai-task-router.pages.dev"
+npx playwright test
+```
+
 Check the desktop shell environment:
 
 ```bash
@@ -136,7 +143,7 @@ npm run desktop:artifacts
 
 The D6 internal package command uses `src-tauri/tauri.internal-windows.conf.json` and `--no-sign`. The generated NSIS installer is not for public distribution or non-technical beta users until the signing, trust, checksum, install, launch, and uninstall checks are approved.
 
-Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The D7/D8 recommendation is one canonical Cloudflare Pages app URL, linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, with social sharing only after the hosted preview, E2E, cybersecurity, HTTPS, custom-domain, and rollback checks pass. D8 local release-candidate evidence passed; Cloudflare Pages preview has not been created yet.
+Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The D7/D8/D9 recommendation is one canonical Cloudflare Pages app URL, linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, with social sharing only after hosted preview, E2E, cybersecurity, HTTPS, custom-domain, and rollback checks pass. D9 created a Cloudflare Pages test preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`; it is not the selected canonical public URL yet.
 
 Desktop prerequisites installed on this Windows machine:
 

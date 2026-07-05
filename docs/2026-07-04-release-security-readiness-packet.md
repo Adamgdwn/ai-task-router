@@ -1,15 +1,15 @@
 # 2026-07-04 - Release And Security Readiness Packet
 
 Document ID: AUD-ENG-001
-Version: 1.1.1
+Version: 1.2.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before public web hosting, controlled desktop beta, or social link launch
+Next Review: Before custom domain, controlled desktop beta, or social link launch
 Timestamp: 2026-07-04T19:34:29-06:00
-Last Updated: 2026-07-04T20:49:44-06:00
+Last Updated: 2026-07-04T21:05:03-06:00
 
 ## Purpose
 
@@ -56,7 +56,7 @@ Recommended release shape:
 
 | Surface | Recommendation | Status |
 |---|---|---|
-| Hosted app | Use Cloudflare Pages as the primary public host for the web/PWA build. | Local D8 RC evidence passed; Cloudflare preview not deployed |
+| Hosted app | Use Cloudflare Pages as the primary public host for the web/PWA build. | D8 local RC evidence passed; D9 hosted preview passed; public launch still held |
 | Canonical URL | Use one canonical app URL and link to it from all three websites to avoid duplicate service-worker scopes and stale builds. | Decision pending |
 | Existing websites | Add clear calls to action on `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com` that point to the canonical app URL. | Planned |
 | GitHub | Keep the repo public and use GitHub Releases later for signed desktop artifacts, checksums, and release notes. | Planned |
@@ -97,7 +97,7 @@ Key source implications for this project:
 
 Preferred first public path:
 
-1. Cloudflare Pages project builds from GitHub.
+1. Cloudflare Pages project builds from GitHub, or a documented direct-upload release process is accepted.
 2. Production build command: `npm ci && npm run build`.
 3. Build output directory: `dist`.
 4. Canonical public app URL is attached to one Cloudflare Pages project.
@@ -112,7 +112,9 @@ Canonical URL options:
 | `https://oldskoolai.com/ai-task-router/` | Keeps the app visibly inside OldSkoolAI. | Requires Vite `base`, manifest `start_url`/`scope`, service-worker cache URL review. |
 | `https://tools.guidedailabs.com/ai-task-router/` | Strong Guided AI Labs brand alignment. | Same subpath/service-worker review if not root. |
 
-Owner correction: `https://app.oldskoolai.com/` is not owned or confirmed as the canonical app URL. Choose one owner-controlled root site, subpath, Cloudflare Pages default URL, or a newly created subdomain under `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com` before deployment, then add obvious links from the three main websites.
+Owner correction: `https://app.oldskoolai.com/` is not owned or confirmed as the canonical app URL. Choose one owner-controlled root site, subpath, Cloudflare Pages default URL, or a newly created subdomain under `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com` before public launch, then add obvious links from the three main websites.
+
+D9 hosted preview update: Cloudflare Pages project `ai-task-router` now exists and has a direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. This is smoke evidence only, not the selected canonical public URL.
 
 Avoid deploying three independent copies unless there is a clear reason. Three copies create extra cache, service-worker, support, and version drift risk.
 
@@ -226,8 +228,8 @@ Desktop download pages must also include:
 
 | Blocker | Impact | Next move |
 |---|---|---|
-| Cloudflare Pages preview and HTTPS smoke have not run. | Do not launch public links or social links yet. | Create Cloudflare Pages preview, verify HTTPS, PWA metadata, service-worker scope, and browser-vs-desktop copy. |
-| Canonical public URL not final. | Vite base, manifest scope, service worker, and links may need different settings. | Owner chooses root subdomain vs subpath before deployment. |
+| Canonical public URL and custom-domain smoke are not complete. | Do not launch public links or social links yet. | Choose the canonical URL, attach a custom domain only if selected, verify HTTPS, PWA metadata, service-worker scope, and browser-vs-desktop copy. |
+| Cloudflare Pages project is not connected to GitHub yet. | Production release automation/traceability is not final. | Decide whether to connect GitHub before production or accept a documented direct-upload release process. |
 | Windows Application Control still blocks unsigned executable/test runs. | Desktop discovery smoke cannot be claimed on current lab setup. | Resolve through approved lab policy, signing, or trusted path. |
 | Desktop installer is unsigned. | Not suitable for ordinary-user download. | Choose Store/MSIX or direct signing path, then sign before beta. |
 | Legal publisher identity not final. | Signing, Store identity, user trust copy, and website copy could diverge. | Confirm legal publisher name before signing. |
@@ -260,7 +262,7 @@ Decision packet:
 
 Release decision: hold.
 
-Reason: The browser/PWA artifact passed local release-candidate checks, but Cloudflare Pages preview hosting, HTTPS behavior, custom-domain behavior, and owner canonical URL confirmation are not verified yet.
+Reason: The browser/PWA artifact passed local release-candidate checks. D9 later proved Cloudflare Pages preview hosting, but custom-domain behavior, GitHub integration or direct-upload release process, and owner canonical URL confirmation are still not verified yet.
 
 D8 result:
 
@@ -272,10 +274,40 @@ D8 result:
 Recommended next sequence:
 
 1. Confirm the canonical public app URL from the owner-controlled root sites, a subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain.
-2. Create a Cloudflare Pages preview from GitHub with build command `npm ci && npm run build` and output directory `dist`.
-3. Smoke test the HTTPS preview and public copy.
-4. Attach the canonical URL only after preview passes.
+2. Decide whether to connect Cloudflare Pages to GitHub before production or accept a documented direct-upload release process.
+3. Attach the canonical URL only after the owner confirms the URL.
+4. Smoke test the canonical URL/custom domain over HTTPS.
 5. Add public links from the three existing websites only after custom-domain smoke passes.
+6. Share through YouTube, Facebook, and LinkedIn only after the owner makes the launch decision.
+
+## D9 Decision
+
+D9 status: Task complete as a Cloudflare Pages hosted preview smoke, with release hold.
+
+Decision packet:
+
+- [Cloudflare Pages Hosted Preview Smoke](2026-07-04-cloudflare-pages-hosted-preview-smoke.md)
+
+Release decision: hold.
+
+Reason: The Cloudflare Pages preview passed Node/Chromium HTTPS smoke and hosted Playwright E2E, but the canonical public URL is not selected, no custom domain has been attached or smoked, the Pages project is not connected to GitHub yet, and the owner has not made the launch decision.
+
+D9 result:
+
+- Created Cloudflare Pages project `ai-task-router`.
+- Deployed a Wrangler direct-upload preview to `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
+- Verified hosted root, manifest, service worker, and PWA icons over HTTPS with Node.
+- Verified hosted title, heading, manifest, service-worker registration, and zero observed external requests with Chromium.
+- Added `PLAYWRIGHT_BASE_URL` support to `playwright.config.ts` and ran the E2E suite against the Cloudflare preview.
+- Public website links, social launch, GitHub Releases, DNS/custom-domain changes, desktop downloads, signing, updater, telemetry, provider connections, and external actions remain out of scope.
+
+Recommended next sequence:
+
+1. Choose the canonical public app URL.
+2. Decide whether Cloudflare Pages should be GitHub-connected before production or whether direct upload is acceptable with documented release steps.
+3. Attach and smoke a custom domain only after the URL decision.
+4. Retest normal browsers and the final domain, especially because Windows `curl.exe`/PowerShell hit a TLS handshake failure against the preview alias while Node and Chromium passed.
+5. Add public links from the three existing websites only after custom-domain/canonical URL smoke passes.
 6. Share through YouTube, Facebook, and LinkedIn only after the owner makes the launch decision.
 
 ## Validation
@@ -288,9 +320,10 @@ Recommended next sequence:
 | 2026-07-04T20:27:56-06:00 | `npm ci`; `npm audit --audit-level=moderate`; `npm run test:scripts`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test`; local production preview smoke | passed with existing build warning | D8 local web RC pass completed. Clean install passed after stale repo-owned Vite dev/preview servers were stopped; audit found 0 vulnerabilities; script tests passed 4 tests; Vitest passed 12 files and 88 tests; build passed with the existing chunk-size warning; web RC scan passed; Playwright passed 6 Chromium tests; production preview served root, manifest, icons, and service worker. |
 | 2026-07-04T20:35:49-06:00 | D8 close-out validation | passed | Governance preflight, dependency audit, script tests, unit tests, production build, web RC scan, Playwright E2E, and whitespace check all passed; build retained the existing chunk-size warning only. |
 | 2026-07-04T20:49:44-06:00 | canonical URL owner correction | passed | Owner clarified that `https://app.oldskoolai.com/` is not owned or confirmed; the packet now keeps canonical URL selection pending and tied to owner-controlled domains or Cloudflare Pages default URL. |
+| 2026-07-04T21:05:03-06:00 | D9 hosted preview validation | passed with caveat | Cloudflare Pages project `ai-task-router` and direct-upload preview `https://preview-20260704-0c7b253.ai-task-router.pages.dev` were created. Node/Chromium HTTPS smoke, hosted Playwright E2E, audit, script tests, unit tests, build, and web RC scan passed. Windows `curl.exe`/PowerShell hit a TLS handshake failure against the preview alias while Node and Chromium passed. |
 
 ## Handoff
 
 Do not publish the D6 unsigned NSIS installer.
 
-Resume with Cloudflare Pages preview configuration if the priority is hosted release engineering. Resume with Chunk Sixteen if the owner wants MVP polish and documentation tightened before hosted preview. Public launch remains held until HTTPS preview, canonical URL, custom-domain smoke, and owner launch decision pass.
+Resume with canonical URL selection and the Cloudflare Pages GitHub-integration/direct-upload decision if the priority is hosted release engineering. Resume with Chunk Sixteen if the owner wants MVP polish and documentation tightened before public launch. Public launch remains held until canonical URL, custom-domain smoke if used, browser retest, and owner launch decision pass.

@@ -1,7 +1,7 @@
 # 2026-07-03T11:49:34-06:00 - Roadmap
 
 Document status: draft baseline
-Status Updated: 2026-07-04T20:49:44-06:00
+Status Updated: 2026-07-04T21:05:03-06:00
 
 ## Now
 
@@ -38,7 +38,7 @@ Status Updated: 2026-07-04T20:49:44-06:00
 - Desktop Chunk D0 is confirmed for planning, and Desktop Chunk D1 selected Tauri for the first desktop shell spike.
 - Desktop Chunks D2 through D7 now cover the Tauri shell, trust boundary, permissioned local discovery, PWA install path, an opt-in unsigned internal Windows package artifact for evidence, and the release/security readiness packet. Public desktop release, signing, updater, provider connections, credentials, telemetry, broad folder access, and file indexing are not approved.
 - Chunk Fifteen added 22 fixture tasks and Playwright E2E coverage for setup, routing, export preparation, feedback, no-execution controls, and narrow-viewport overflow.
-- Desktop Chunk D8 completed local web/PWA release-candidate security evidence and added `npm run scan:web-rc`; public hosting still waits for Cloudflare Pages HTTPS preview, canonical URL confirmation, custom-domain smoke, and owner launch decision.
+- Desktop Chunk D8 completed local web/PWA release-candidate security evidence and added `npm run scan:web-rc`; Desktop Chunk D9 created a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev` and passed hosted E2E. Public launch still waits for canonical URL confirmation, custom-domain smoke if used, Cloudflare GitHub-integration/direct-upload decision, and owner launch decision.
 - Run an owner governance review before desktop implementation because local machine inspection is a higher-trust surface than the v0.2 browser app.
 
 ## Explicitly Deferred

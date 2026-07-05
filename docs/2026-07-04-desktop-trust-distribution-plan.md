@@ -1182,9 +1182,52 @@ D8 validation:
 - `npx playwright test` passed with 6 Chromium tests.
 - Local production preview at `http://127.0.0.1:5185/` served root page, manifest, Apple icon, 192px icon, 512px icon, and service worker with install/fetch handlers and same-origin-only guard.
 
+### Desktop Chunk D9 - Cloudflare Pages Hosted Preview Smoke
+
+Status: task complete, release hold
+
+Status Updated: 2026-07-04T21:05:03-06:00
+
+Completion target: Task complete
+
+Outcome:
+
+D9 created the first Cloudflare Pages hosted preview and proved the browser/PWA MVP can run from a hosted HTTPS URL without adding public website links or changing DNS.
+
+Decision packet:
+
+- [Cloudflare Pages Hosted Preview Smoke](2026-07-04-cloudflare-pages-hosted-preview-smoke.md)
+
+D9 result:
+
+- Created Cloudflare Pages project `ai-task-router`.
+- Deployed a Wrangler direct-upload preview to `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
+- Confirmed the Cloudflare deployment was preview-only, with no environment variables and no Functions.
+- Verified hosted root, manifest, service worker, and PWA icons over HTTPS with Node.
+- Verified hosted title, heading, manifest, service-worker registration, and zero observed external requests with Chromium.
+- Added `PLAYWRIGHT_BASE_URL` support to `playwright.config.ts` and ran the E2E suite against the Cloudflare preview.
+
+D9 release decision:
+
+Hold public launch. The preview works, but the canonical public URL is not selected, no custom domain has been attached or smoked, the Cloudflare Pages project is not connected to GitHub yet, and the owner has not made the launch decision.
+
+D9 validation:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- Cloudflare token/account access was verified from the master environment file without printing token values.
+- `npm audit --audit-level=moderate` found 0 vulnerabilities.
+- `npm run test:scripts` passed with 4 Node script tests.
+- `npm run test` passed with 12 files and 88 tests.
+- `npm run build` passed with the existing Vite chunk-size warning.
+- `npm run scan:web-rc` passed with no release-blocking findings.
+- `npx playwright test` passed locally with 6 Chromium tests.
+- Hosted `PLAYWRIGHT_BASE_URL=https://preview-20260704-0c7b253.ai-task-router.pages.dev npx playwright test` passed with 6 Chromium tests.
+- Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node HTTPS/fetch and Chromium succeeded; retest normal browsers and the final custom domain before public launch.
+
 ## Open Decisions
 
 - Canonical public app URL: pending; owner confirmed the three root websites but not `https://app.oldskoolai.com/`, so the next chunk must choose root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain.
+- Cloudflare production release path: decide whether to connect the Pages project to GitHub before production or accept a documented Wrangler direct-upload release process.
 - Canonical product name for the desktop app.
 - Legal publisher name for signing.
 - Windows distribution path: Microsoft Store/MSIX, direct signed installer, or both.
@@ -1218,8 +1261,8 @@ D8 validation:
 
 Choose the next lane deliberately:
 
-- For hosted release engineering, create a Cloudflare Pages preview from GitHub, verify HTTPS and PWA behavior, confirm the canonical URL from the owner-controlled domains, then decide whether to attach a custom domain/subdomain and add public links.
-- For product completion, run Chunk Sixteen MVP polish and documentation if the owner wants docs tightened before hosted preview.
+- For hosted release engineering, choose the canonical public URL, decide whether Cloudflare Pages should be GitHub-connected before production or use a documented direct-upload release process, then smoke the canonical/custom domain before adding public links.
+- For product completion, run Chunk Sixteen MVP polish and documentation if the owner wants docs tightened before public launch.
 - For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests or creating a controlled desktop beta.
 
 Do not expand D4/D5/D6 into arbitrary folder inspection, broad filesystem permissions, provider connections, credentials, telemetry, updater, public hosting, file indexing, auto-upload, whole-drive search, public installer publishing, or external actions without a separately approved chunk.

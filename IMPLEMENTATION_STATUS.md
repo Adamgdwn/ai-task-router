@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T20:35:49-06:00
-Status: d8-web-release-candidate-security-pass-complete-release-hold
-Status Updated: 2026-07-04T20:35:49-06:00
+Last Updated: 2026-07-04T21:05:03-06:00
+Status: d9-cloudflare-hosted-preview-smoke-complete-release-hold
+Status Updated: 2026-07-04T21:05:03-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D8 web release-candidate security pass, building on Chunk Fifteen E2E coverage and the D7 release hold.
+Desktop Chunk D9 Cloudflare Pages hosted preview smoke, building on D8 local web release-candidate security evidence.
 
 Completion target: Task complete, release hold.
 
-Current state: D8 is task complete with public release still held. The browser/PWA artifact has local release-candidate evidence: clean install, dependency audit, script tests, unit tests, production build, web artifact scan, Playwright E2E, and local production-preview smoke all passed. The next hosted-release step is a Cloudflare Pages HTTPS preview and owner-confirmed canonical URL/custom-domain smoke before public website links or social launch.
+Current state: D9 is task complete with public release still held. The browser/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. Hosted Node/Chromium HTTPS smoke, hosted Playwright E2E, audit, script tests, unit tests, production build, and web artifact scan all passed. The next hosted-release step is owner-confirmed canonical URL selection, Cloudflare GitHub-integration/direct-upload decision, custom-domain smoke if used, and owner launch decision before public website links or social launch.
 
 ## Scope
 
@@ -85,9 +85,17 @@ D8 provides:
 - `scripts/web-release-candidate-scan.node-test.mjs` with Node tests for safe artifacts and release-blocking findings that do not print secret-looking values.
 - `docs/2026-07-04-web-release-candidate-security-pass.md`, the D8 evidence packet with validation, source basis, Cloudflare preview plan, smoke matrix, rollback checklist, and release hold.
 
+D9 provides:
+
+- `docs/2026-07-04-cloudflare-pages-hosted-preview-smoke.md`, the D9 evidence packet for the hosted Cloudflare Pages preview.
+- Cloudflare Pages project `ai-task-router`.
+- Direct-upload test preview `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
+- Hosted Playwright support through `PLAYWRIGHT_BASE_URL` in `playwright.config.ts`.
+- Hosted smoke evidence for root page, manifest, service worker, PWA icons, service-worker registration, and no observed external requests during Chromium load.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only and an opt-in internal unsigned Windows package build for evidence. The browser/PWA track adds installability and D8 local release-candidate evidence only. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, public hosting, DNS changes, social launch links, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only and an opt-in internal unsigned Windows package build for evidence. The browser/PWA track adds installability, D8 local release-candidate evidence, and a D9 Cloudflare Pages hosted test preview. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, public website links, social launch links, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -162,6 +170,16 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D8 `npx playwright test` passed with 6 Chromium tests.
 - D8 local production preview at `http://127.0.0.1:5185/` served root, manifest, Apple icon, 192px icon, 512px icon, and service worker with install/fetch handlers and same-origin-only guard.
 - D8 close-out validation passed at 2026-07-04T20:35:49-06:00: governance preflight, audit, script tests, unit tests, build, web RC scan, Playwright E2E, and whitespace check all passed; build retained the existing chunk-size warning only.
+- D9 governance preflight passed with 0 warnings before Cloudflare provider work.
+- D9 verified Cloudflare token/account access from the master environment file without printing or documenting token values.
+- D9 created Cloudflare Pages project `ai-task-router`.
+- D9 deployed a Wrangler direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
+- D9 Cloudflare deployment API check reported a preview environment, successful deploy stage, no environment variables, no Functions, branch `preview-20260704-0c7b253`, and commit `0c7b253`.
+- D9 Node HTTPS/fetch checks returned 200 for the preview root, `manifest.webmanifest`, `service-worker.js`, `/pwa/icon-192.png`, and `/pwa/icon-512.png`; both icon paths returned `image/png`.
+- D9 Chromium hosted smoke loaded title `AI Task Router | Guided AI Labs`, first heading `AI Task Router`, manifest link `/manifest.webmanifest`, registered the service worker, and observed 0 external requests during load.
+- D9 `npx playwright test` passed locally with 6 Chromium tests after adding hosted-base-url support.
+- D9 hosted `PLAYWRIGHT_BASE_URL=https://preview-20260704-0c7b253.ai-task-router.pages.dev npx playwright test` passed with 6 Chromium tests.
+- D9 final validation passed: `npm audit --audit-level=moderate`, `npm run test:scripts`, `npm run test`, `npm run build`, and `npm run scan:web-rc`. Build retained the existing Vite chunk-size warning only.
 
 ## Known Gaps
 
@@ -172,14 +190,17 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Public desktop packaging, signing, updater, and installer distribution remain out of scope.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
 - Interactive desktop launch smoke for D4 remains blocked until the lab Application Control/signing/trusted-path issue is resolved.
-- Public web hosting has not been executed; Cloudflare Pages preview and HTTPS smoke have not run yet.
+- Cloudflare Pages hosted preview exists, but public launch has not happened.
+- Cloudflare Pages project is not connected to GitHub yet; production release path still needs a GitHub-integration vs direct-upload decision.
 - Public social launch links have not been created.
-- The canonical public app URL still needs owner confirmation before deployment.
+- The canonical public app URL still needs owner confirmation before public launch.
+- Custom-domain/DNS work has not been done.
+- Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node and Chromium passed; retest normal browsers and final domain before public launch.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If the hosted app is deployed under a subpath rather than a domain root, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 
 ## Next Chunk
 
-Create a Cloudflare Pages preview from GitHub, verify HTTPS/PWA/service-worker behavior, choose the canonical URL from the owner-controlled domains or Cloudflare Pages default URL, and run hosted smoke before public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before hosted preview.
+Choose the canonical URL from the owner-controlled domains or Cloudflare Pages default URL, decide whether Cloudflare Pages should be GitHub-connected before production or use a documented direct-upload release process, and smoke the canonical/custom domain before public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before public launch.
 
-Proceeding beyond D8 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, Cloudflare production hosting, public installer publishing, DNS changes, GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.
+Proceeding beyond D9 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, Cloudflare production/canonical launch, public installer publishing, DNS changes, GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.

@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-04T20:35:49-06:00
-Status: d8-web-release-candidate-security-pass-complete-release-hold
-Status Updated: 2026-07-04T20:35:49-06:00
+Last Updated: 2026-07-04T21:05:03-06:00
+Status: d9-cloudflare-hosted-preview-smoke-complete-release-hold
+Status Updated: 2026-07-04T21:05:03-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop Chunk D8: run the web release-candidate and cybersecurity pass before public hosting.
+Desktop Chunk D9: run the Cloudflare Pages hosted preview smoke before public launch.
 
-Current result: D8 is task complete with public release still held. The browser/PWA artifact passed local clean install, audit, script tests, unit tests, production build, artifact scan, Playwright E2E, and local production-preview smoke. Next hosted-release work is Cloudflare Pages HTTPS preview, owner-confirmed canonical URL selection, custom-domain smoke, and owner launch decision.
+Current result: D9 is task complete with public release still held. The browser/PWA artifact passed local release-candidate evidence and now has a Cloudflare Pages hosted test preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. Hosted Node/Chromium HTTPS smoke and hosted Playwright E2E passed. Next hosted-release work is owner-confirmed canonical URL selection, Cloudflare GitHub-integration/direct-upload decision, custom-domain smoke if used, browser retest, and owner launch decision.
 
 ## Files Changed In This Session
 
@@ -56,6 +56,8 @@ Current result: D8 is task complete with public release still held. The browser/
 - `scripts/web-release-candidate-scan.mjs`
 - `scripts/web-release-candidate-scan.node-test.mjs`
 - `docs/2026-07-04-web-release-candidate-security-pass.md`
+- `playwright.config.ts`
+- `docs/2026-07-04-cloudflare-pages-hosted-preview-smoke.md`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -131,6 +133,13 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - `npm ci`
 - stopped stale repo-owned `agents\agent-picker` Vite dev/preview Node processes after the first `npm ci` attempt hit a Windows file lock
 - local production preview smoke at `http://127.0.0.1:5185/`
+- Cloudflare access check through Wrangler using the master environment file without printing token values
+- `npx --yes wrangler pages project create ai-task-router --production-branch main`
+- `npx --yes wrangler pages deploy dist --project-name ai-task-router --branch preview-20260704-0c7b253 --commit-hash 0c7b253`
+- Cloudflare Pages deployment API check for project/deployment metadata
+- hosted Node HTTPS/fetch smoke for root, manifest, service worker, and PWA icons
+- hosted Chromium smoke for title, heading, manifest, service-worker registration, and external request count
+- hosted `PLAYWRIGHT_BASE_URL=https://preview-20260704-0c7b253.ai-task-router.pages.dev npx playwright test`
 
 ## Validation Notes
 
@@ -192,6 +201,16 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D8 `npx playwright test` passed with 6 Chromium tests.
 - D8 local production preview served root 200, manifest link, Apple icon link, manifest 200 with name `AI Task Router | Guided AI Labs`, display `standalone`, start URL `/`, scope `/`, 192px icon 200, 512px icon 200, service worker 200, install/fetch handlers, and same-origin-only guard.
 - D8 close-out validation passed at 2026-07-04T20:35:49-06:00: governance preflight, audit, script tests, unit tests, build, web RC scan, Playwright E2E, and whitespace check all passed; build retained the existing chunk-size warning only.
+- D9 governance preflight passed with 0 warnings.
+- D9 Cloudflare token/account access succeeded from the master environment file without printing token values.
+- D9 Cloudflare Pages project `ai-task-router` was created.
+- D9 direct-upload preview deployed at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
+- D9 deployment API check reported preview environment, successful deploy stage, no environment variables, no Functions, branch `preview-20260704-0c7b253`, and commit `0c7b253`.
+- D9 Node HTTPS/fetch returned 200 for preview root, `manifest.webmanifest`, `service-worker.js`, `/pwa/icon-192.png`, and `/pwa/icon-512.png`; both icon paths returned `image/png`.
+- D9 Chromium hosted smoke loaded title `AI Task Router | Guided AI Labs`, first heading `AI Task Router`, manifest link `/manifest.webmanifest`, service worker registration, and 0 observed external requests.
+- D9 local `npx playwright test` passed with 6 Chromium tests after adding `PLAYWRIGHT_BASE_URL` support.
+- D9 hosted `PLAYWRIGHT_BASE_URL=https://preview-20260704-0c7b253.ai-task-router.pages.dev npx playwright test` passed with 6 Chromium tests.
+- D9 final validation passed: `npm audit --audit-level=moderate`, `npm run test:scripts`, `npm run test`, `npm run build`, and `npm run scan:web-rc`. Build retained the existing Vite chunk-size warning only.
 
 ## Known Gaps
 
@@ -203,12 +222,15 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - Do not add broad filesystem permissions, arbitrary shell/process access, telemetry, provider connections, updater, code signing, public installer publishing, credentials, file indexing, or external actions beyond D6 without a separately approved chunk.
 - D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
-- Public web hosting has not been executed; Cloudflare Pages preview and HTTPS smoke have not run yet.
+- Cloudflare Pages hosted preview exists, but public launch has not happened.
+- Cloudflare Pages project is not connected to GitHub yet.
 - Public social launch links have not been created.
 - Canonical public URL is not selected yet; the owner confirmed the three root websites but not `https://app.oldskoolai.com/`.
+- Custom-domain/DNS work has not been done.
+- Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node and Chromium passed; retest normal browsers and final domain before public launch.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If deployed under a subpath, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 
 ## Next Handoff
 
-Resume with Cloudflare Pages preview configuration if the owner wants hosted release engineering next: create a preview from GitHub, verify HTTPS/PWA/service-worker behavior, choose the canonical URL from the owner-controlled domains or Cloudflare Pages default URL, then decide whether to attach a custom domain/subdomain and add public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before hosted preview. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D8 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, Cloudflare production hosting, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.
+Resume with canonical URL selection if the owner wants hosted release engineering next: choose the owner-controlled domain/subdomain/subpath or Cloudflare Pages default URL, decide whether to connect Cloudflare Pages to GitHub before production or document a direct-upload release process, then smoke the canonical/custom domain before public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before public launch. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D9 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, Cloudflare production/canonical launch, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.
