@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.7.0
+Version: 0.8.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before Desktop Chunk D6 packaging/signing spike or public web hosting work
-Last Updated: 2026-07-04T18:41:17-06:00
-Status Updated: 2026-07-04T18:41:17-06:00
+Next Review: Before Desktop Chunk D7 beta release-candidate work or public web hosting work
+Last Updated: 2026-07-04T19:20:30-06:00
+Status Updated: 2026-07-04T19:20:30-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
 
 ## Purpose
 
@@ -34,6 +34,7 @@ The desktop version exists because local machine inspection changes the trust pr
 - `npm run detect:local-models` exists as a separate explicit local command. It checks Ollama and common local model folders, prints a summary by default, and does not change app state.
 - The desktop prototype now has a D4 `Check this computer` flow for selected local AI tools only; it does not return paths, run at startup, use broad Tauri plugin permissions, or claim public packaging/signing readiness.
 - The hosted/browser install path does not perform local discovery. It says computer checking requires the desktop app.
+- The D6 internal Windows package path can generate an unsigned NSIS installer for evidence only. It is not public release readiness.
 
 The current project classification in `project-control.yaml` is:
 
@@ -140,6 +141,7 @@ Current official references:
 - Tauri macOS signing docs: https://v2.tauri.app/distribute/sign/macos/
 - Microsoft Windows app code signing options: https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options
 - Apple notarization docs: https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution
+- Desktop Chunk D6 packaging/signing spike: [docs/2026-07-04-desktop-packaging-signing-spike.md](2026-07-04-desktop-packaging-signing-spike.md)
 
 Desktop Chunk D1 selected Tauri for the first desktop shell spike. See [ADR-0001: Desktop Wrapper Choice For Trusted Local Discovery](decisions/adr-0001-desktop-wrapper.md). Tauri is accepted for the D2 spike only; the project can still fall back to Electron if D2 produces evidence that Tauri is a poor fit.
 
@@ -1017,7 +1019,7 @@ Validation:
 
 ## Suggested Future Chunks
 
-These are the desktop-track chunks. D0 through D5 now have current states; D6 and later remain planned future work unless the owner explicitly continues that lane.
+These are the desktop-track chunks. D0 through D6 now have current states; D7 and later remain planned future work unless the owner explicitly continues that lane.
 
 ### Desktop Chunk D0 - Owner Decision And Governance Review
 
@@ -1099,6 +1101,12 @@ Outcome:
 
 Internal packages build for target OSes, signing requirements are documented, and public release remains blocked until trust checks pass.
 
+Current state:
+
+D6 is draft complete as of 2026-07-04T19:20:30-06:00. The repo now has an opt-in internal Windows NSIS packaging config and script, plus artifact inspection with SHA-256 output. The Windows internal package build passed and generated `src-tauri\target\release\bundle\nsis\AI Task Router_0.2.0_x64-setup.exe`, size `1,990,042` bytes, SHA-256 `FF170B0B681AA1954881767524E805C005AF72402C5B0AE7FCB0AF8934AC3BFD`. The installer and rebuilt release executable both report `NotSigned`. This artifact is internal evidence only; do not publish it or send it to non-technical users.
+
+D6 details are recorded in [Desktop Packaging And Signing Spike](2026-07-04-desktop-packaging-signing-spike.md).
+
 ### Desktop Chunk D7 - Controlled Beta Release Candidate
 
 Completion target: Release ready candidate
@@ -1142,8 +1150,8 @@ Signed or clearly controlled beta installers are ready for limited users with in
 
 Choose the next lane deliberately:
 
-- For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests, then continue toward Desktop Chunk D6 packaging/signing research.
+- For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests, then decide whether to continue toward Desktop Chunk D7 controlled beta release-candidate work.
 - For the hosted web lane, plan public hosting separately for `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`, including HTTPS, path/base decisions, smoke tests, and rollback.
 - For the web MVP lane, return to Chunk Fifteen fixture and E2E coverage.
 
-Do not expand D4/D5 into arbitrary folder inspection, broad filesystem permissions, provider connections, credentials, telemetry, updater, packaging, signing, public hosting, file indexing, auto-upload, whole-drive search, or external actions without a separately approved chunk.
+Do not expand D4/D5/D6 into arbitrary folder inspection, broad filesystem permissions, provider connections, credentials, telemetry, updater, public hosting, file indexing, auto-upload, whole-drive search, public installer publishing, or external actions without a separately approved chunk.

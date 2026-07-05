@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T18:41:17-06:00
+Last Updated: 2026-07-04T19:20:30-06:00
 Status: active
 Owner: Technical Lead
 
@@ -80,6 +80,30 @@ Current troubleshooting item:
 - After the D3 rebuild, `npm run desktop:build` still succeeds when Rust is on PATH, but launching the rebuilt unsigned release executable is also blocked by Windows Application Control. `Get-AuthenticodeSignature` reports it is not digitally signed, SHA-256 `079EF12762D987A877146E6051B32A1E2ED9BC42507B020959F00F2793C7512B`, and Code Integrity events `3033`/`3077` cite the same policy ID.
 - After the D4 local-discovery implementation, `npm run desktop:info`, `cargo test --manifest-path src-tauri\Cargo.toml --lib --release --no-run`, `cargo fmt --manifest-path src-tauri\Cargo.toml --check`, and `npm run desktop:build` pass when `C:\Users\adamg\.cargo\bin` is prepended to the current shell PATH. `cargo test --manifest-path src-tauri\Cargo.toml --lib --release` passed earlier in the D4 code loop, but the final rerun was blocked when Windows Application Control prevented the generated release test executable from launching. D4 launch smoke remains unclaimed until the same Windows Application Control issue is resolved.
 - Do not weaken or bypass Application Control silently. Resolve through the Windows lab security policy, a trusted development folder/policy exception, or an approved elevated admin troubleshooting session.
+
+### Internal Desktop Packaging
+
+As of 2026-07-04T19:12:31-06:00, Desktop Chunk D6 can build an internal unsigned Windows NSIS installer for evidence only:
+
+```powershell
+$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"
+npm run desktop:package:windows:internal
+npm run desktop:artifacts
+```
+
+D6 generated:
+
+| Artifact | Size | SHA-256 | Signature |
+|---|---:|---|---|
+| `src-tauri\target\release\bundle\nsis\AI Task Router_0.2.0_x64-setup.exe` | `1,990,042` bytes | `FF170B0B681AA1954881767524E805C005AF72402C5B0AE7FCB0AF8934AC3BFD` | `NotSigned` |
+
+Troubleshooting:
+
+- The D6 package config is `src-tauri/tauri.internal-windows.conf.json`; normal `npm run desktop:build` remains no-bundle.
+- The package command uses `--no-sign`; the resulting installer and rebuilt release executable are expected to be unsigned.
+- Do not publish, upload, or send the unsigned installer to ordinary users.
+- Do not run installer launch/install smoke tests until the lab Application Control/signing/trusted-path issue is resolved through an approved route.
+- For public release planning, use [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md).
 
 ## Recovery
 

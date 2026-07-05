@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T18:41:17-06:00
-Status: desktop-d5-pwa-install-path-integrated
-Status Updated: 2026-07-04T18:41:17-06:00
+Last Updated: 2026-07-04T19:20:30-06:00
+Status: desktop-d6-packaging-signing-spike-draft-complete
+Status Updated: 2026-07-04T19:20:30-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D5 PWA install path, building on the hosted/PWA track in the desktop trust and distribution plan.
+Desktop Chunk D6 packaging and signing spike, building on the desktop distribution lane in the desktop trust and distribution plan.
 
-Completion target: Integration complete.
+Completion target: Draft complete.
 
-Current state: D5 browser install path integrated; production web build includes a manifest, branded PWA icons, production-only service-worker registration, and Start Here install copy. D4 desktop local discovery remains implemented for the desktop app only. Windows desktop dev mode and unsigned release executable launch remain blocked by Windows Application Control.
+Current state: D6 internal Windows packaging evidence is complete. The repo has an opt-in unsigned NSIS packaging config/script and a repeatable artifact inspection helper. The internal Windows package build passed and produced an unsigned installer with a recorded SHA-256. Public desktop release remains blocked by signing, platform trust, install/launch/uninstall smoke tests, and owner distribution decisions.
 
 ## Scope
 
@@ -58,9 +58,17 @@ The D5 hosted/PWA install slice provides:
 - Start Here browser-install UI that responds to `beforeinstallprompt`, keeps fallback browser-menu copy, and explicitly says computer checking requires the desktop app.
 - Tests for the install prompt path and service-worker registration gating.
 
+The D6 packaging/signing spike provides:
+
+- `src-tauri/tauri.internal-windows.conf.json`, an explicit internal Windows NSIS packaging config.
+- `npm run desktop:package:windows:internal`, which builds with `--no-sign` and leaves normal `desktop:build` as a no-bundle build.
+- `scripts/inspect-desktop-artifacts.mjs` and `npm run desktop:artifacts`, which report package artifact size and SHA-256.
+- Node script tests for the artifact inspector.
+- A dated D6 signing requirements note in `docs/2026-07-04-desktop-packaging-signing-spike.md`.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only. The browser/PWA track adds installability only. Neither track adds arbitrary folder inspection, package signing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only and an opt-in internal unsigned Windows package build for evidence. The browser/PWA track adds installability only. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -113,6 +121,13 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D5 `npm run test` passed with 12 files and 88 tests.
 - D5 `npm run build` passed with the existing Vite chunk-size warning and produced `dist/manifest.webmanifest`, `dist/service-worker.js`, `dist/pwa/icon-192.png`, and `dist/pwa/icon-512.png`.
 - D5 local production preview on `http://127.0.0.1:5184/` served the install metadata: manifest link present, Apple icon link present, manifest name `AI Task Router | Guided AI Labs`, display `standalone`, start URL `/`, two icons, both icon URLs returned 200, service worker returned 200, and install/fetch handlers were present.
+- D6 `node --check scripts\inspect-desktop-artifacts.mjs` passed.
+- D6 JSON parse check for `package.json` and `src-tauri/tauri.internal-windows.conf.json` passed.
+- D6 pre-package `npm run desktop:artifacts` passed and correctly found no package artifacts before packaging.
+- D6 `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:package:windows:internal` passed and generated `src-tauri\target\release\bundle\nsis\AI Task Router_0.2.0_x64-setup.exe`.
+- D6 `npm run desktop:artifacts` reported package size `1.90 MiB` and SHA-256 `FF170B0B681AA1954881767524E805C005AF72402C5B0AE7FCB0AF8934AC3BFD`.
+- D6 `Get-AuthenticodeSignature` reported `NotSigned` for both the generated NSIS installer and `src-tauri\target\release\ai-task-router-desktop.exe`.
+- D6 `npm run test:scripts` passed with 2 Node tests.
 
 ## Known Gaps
 
@@ -120,7 +135,8 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - The current rebuilt unsigned release executable does not launch because local Windows Application Control blocks it.
 - The generated release Rust test executable from final close-out does not launch because local Windows Application Control blocks it.
 - Some fresh shells may need a restart or temporary `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"` before Tauri can see Rust.
-- Public desktop packaging, signing, updater, and installer remain out of scope.
+- Public desktop packaging, signing, updater, and installer distribution remain out of scope.
+- The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
 - Interactive desktop launch smoke for D4 remains blocked until the lab Application Control/signing/trusted-path issue is resolved.
 - Public web hosting has not been executed.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
@@ -128,6 +144,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Either proceed to Desktop Chunk D6 packaging/signing research as build-only work, resolve the local Windows Application Control blockers through an approved lab policy/signing/trusted-path route before interactive desktop smoke tests, or return to the web MVP lane for Chunk Fifteen E2E fixtures.
+Either proceed to Desktop Chunk D7 controlled beta release-candidate planning, resolve the local Windows Application Control blockers through an approved lab policy/signing/trusted-path route before interactive desktop smoke tests, or return to the web MVP lane for Chunk Fifteen E2E fixtures.
 
-Proceeding beyond D5 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, packaging, signing, updater, provider connections, telemetry, credentials, file indexing, public hosting, or external actions without a separate approved chunk.
+Proceeding beyond D6 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public hosting, public installer publishing, or external actions without a separate approved chunk.

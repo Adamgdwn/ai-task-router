@@ -77,7 +77,7 @@ Excluded from v0.2:
 
 ## Future Desktop Architecture
 
-Desktop packaging is intentionally excluded from v0.2. The future desktop track is documented in [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md).
+Public desktop packaging is intentionally excluded from v0.2. Desktop Chunk D6 adds only an opt-in unsigned internal Windows package build for evidence, documented in [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md). The future desktop track is documented in [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md).
 
 The desktop architecture keeps the React frontend and adds a narrow Tauri native layer for desktop-only local discovery. The frontend does not receive broad filesystem access. Native commands are allowlisted, read-only, timeout-bound, schema-validated, and triggered only after explicit user approval.
 

@@ -9,9 +9,12 @@
     "tauri": "tauri",
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build --no-bundle",
+    "desktop:package:windows:internal": "tauri build --bundles nsis --no-sign --ci --config src-tauri/tauri.internal-windows.conf.json",
+    "desktop:artifacts": "node scripts/inspect-desktop-artifacts.mjs",
     "desktop:info": "tauri info",
     "detect:local-models": "node scripts/detect-local-models.mjs",
     "test": "vitest run",
+    "test:scripts": "node --test scripts/*.node-test.mjs",
     "test:watch": "vitest",
     "preview": "vite preview"
   },

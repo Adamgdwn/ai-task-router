@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser MVP validation lane, with Desktop Chunk D5 PWA install path integrated for the hosted/browser app; desktop local discovery remains desktop-only and unsigned desktop launch remains blocked by Windows Application Control
-Status Updated: 2026-07-04T18:41:17-06:00
+Status: v0.2 browser MVP validation lane, with Desktop Chunk D6 internal Windows packaging evidence complete; desktop public release remains blocked by signing and trust gates
+Status Updated: 2026-07-04T19:20:30-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -119,6 +119,16 @@ Build the desktop shell without packaging:
 npm run desktop:build
 ```
 
+Build an internal unsigned Windows installer for packaging evidence only:
+
+```bash
+$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"
+npm run desktop:package:windows:internal
+npm run desktop:artifacts
+```
+
+The D6 internal package command uses `src-tauri/tauri.internal-windows.conf.json` and `--no-sign`. The generated NSIS installer is not for public distribution or non-technical beta users until the signing, trust, checksum, install, launch, and uninstall checks are approved.
+
 Desktop prerequisites installed on this Windows machine:
 
 - Rustup `1.29.0` with Rust/Cargo `1.96.1`, default `stable-x86_64-pc-windows-msvc`
@@ -127,7 +137,7 @@ Desktop prerequisites installed on this Windows machine:
 - Windows SDK `10.0.26100.0`
 - WebView2 `149.0.4022.98`
 
-The desktop app is still an internal prototype. It now has a desktop-only `Check this computer` flow for selected local AI tools, but it does not add packaging, signing, updater, provider connections, telemetry, credentials, file indexing, arbitrary folder inspection, or external actions.
+The desktop app is still an internal prototype. It now has a desktop-only `Check this computer` flow for selected local AI tools and an opt-in unsigned internal Windows package build, but it does not add public packaging, signing, updater, provider connections, telemetry, credentials, file indexing, arbitrary folder inspection, or external actions.
 
 Desktop Chunk D4 implements the first native local discovery path: custom Rust commands check only allowlisted local tools after user approval, hide model names by default, reject path details, and return schema-validated results to the UI. Browser users still add tools manually.
 
@@ -160,6 +170,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Manual](docs/manual.md)
 - [Roadmap](docs/roadmap.md)
 - [Desktop trust and distribution plan](docs/2026-07-04-desktop-trust-distribution-plan.md)
+- [Desktop packaging and signing spike](docs/2026-07-04-desktop-packaging-signing-spike.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)
 - [Durable development policy](docs/policy/durable-development-engineering-policy.md)
 - [Engineering standards](docs/standards/README.md)

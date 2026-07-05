@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-04T18:41:17-06:00
+Status Updated: 2026-07-04T19:20:30-06:00
 
 ## Current Release State
 
@@ -64,7 +64,17 @@ npm run preview -- --host 127.0.0.1 --port 5184
 If the hosted app is deployed under a subpath rather than a domain root, review Vite `base`, `manifest.webmanifest`
 `start_url`/`scope`, service-worker cache URLs, and public link paths before release.
 
-Future desktop distribution is separate from web hosting. Use [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) before adding desktop packaging, signing, notarization, checksums, or public installers.
+Future desktop distribution is separate from web hosting. Desktop Chunk D6 added an internal unsigned Windows NSIS package path for evidence only; use [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md) and [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) before any signing, notarization, checksums, public installers, or public download links.
+
+Internal Windows packaging evidence command:
+
+```powershell
+$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"
+npm run desktop:package:windows:internal
+npm run desktop:artifacts
+```
+
+The D6 artifact is unsigned and must not be published. Before public desktop release, choose the Windows Store/MSIX or direct signed-installer path, confirm legal publisher identity, sign/notarize where required, publish checksums, and pass install/launch/uninstall smoke tests on target OSes.
 
 ## Rollback
 

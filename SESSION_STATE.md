@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-04T18:41:17-06:00
-Status: desktop-d5-pwa-install-path-integrated
-Status Updated: 2026-07-04T18:41:17-06:00
+Last Updated: 2026-07-04T19:20:30-06:00
+Status: desktop-d6-packaging-signing-spike-draft-complete
+Status Updated: 2026-07-04T19:20:30-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop Chunk D5: implement the hosted/browser PWA install path while keeping local computer checking desktop-only.
+Desktop Chunk D6: create internal packaging evidence and document signing requirements while keeping public desktop release blocked.
 
-Current result: D5 PWA install path is integrated and build-validated. The production browser build includes a web app manifest, Guided AI Labs 192px/512px icons, a production-only service worker, and Start Here install copy that says computer checking requires the desktop app. D4 local discovery remains desktop-only. `desktop:dev` and unsigned release executable launch remain blocked by Windows Application Control, so interactive desktop launch smoke is still not claimed.
+Current result: D6 is draft complete. The repo has an opt-in internal Windows NSIS package config/script, artifact SHA-256 inspection helper, Node tests for the helper, and a dated D6 signing requirements note. The internal Windows package build passed and generated an unsigned NSIS installer for evidence only. Public desktop release remains blocked by signing, platform trust, checksums, installer smoke tests, and owner distribution decisions.
 
 ## Files Changed In This Session
 
@@ -44,6 +44,10 @@ Current result: D5 PWA install path is integrated and build-validated. The produ
 - `src/main.tsx`
 - `src/pwa/registerServiceWorker.ts`
 - `src/tests/unit/pwaServiceWorker.test.ts`
+- `src-tauri/tauri.internal-windows.conf.json`
+- `scripts/inspect-desktop-artifacts.mjs`
+- `scripts/inspect-desktop-artifacts.node-test.mjs`
+- `docs/2026-07-04-desktop-packaging-signing-spike.md`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -102,6 +106,13 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - `npm audit --audit-level=moderate`
 - `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:info`
 - `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:build`
+- official Tauri distribution/signing, Tauri updater signing, Microsoft Windows code-signing, and Apple notarization references reviewed for D6
+- `node --check scripts\inspect-desktop-artifacts.mjs`
+- JSON parse check for `package.json` and `src-tauri/tauri.internal-windows.conf.json`
+- `npm run desktop:artifacts`
+- `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:package:windows:internal`
+- `Get-AuthenticodeSignature` on the generated NSIS installer and rebuilt release executable
+- `npm run test:scripts`
 
 ## Validation Notes
 
@@ -140,6 +151,13 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D5 production build passed: `npm run build` completed with the existing Vite chunk-size warning and included `dist/manifest.webmanifest`, `dist/service-worker.js`, `dist/pwa/icon-192.png`, and `dist/pwa/icon-512.png`.
 - D5 full unit validation passed: `npm run test` ran 12 files and 88 tests.
 - D5 local production preview check on `http://127.0.0.1:5184/` confirmed the manifest link, Apple icon link, manifest name `AI Task Router | Guided AI Labs`, display `standalone`, start URL `/`, two icons, 200 responses for both icon URLs, 200 response for `service-worker.js`, and service-worker install/fetch handlers.
+- D6 script syntax validation passed: `node --check scripts\inspect-desktop-artifacts.mjs`.
+- D6 config/package JSON parse check passed.
+- D6 pre-package `npm run desktop:artifacts` passed and reported no package artifacts.
+- D6 internal Windows package build passed: `$env:PATH="$env:USERPROFILE\.cargo\bin;$env:PATH"; npm run desktop:package:windows:internal`.
+- D6 generated `src-tauri\target\release\bundle\nsis\AI Task Router_0.2.0_x64-setup.exe`, size `1,990,042` bytes, SHA-256 `FF170B0B681AA1954881767524E805C005AF72402C5B0AE7FCB0AF8934AC3BFD`.
+- D6 signature checks reported `NotSigned` for both the generated NSIS installer and `src-tauri\target\release\ai-task-router-desktop.exe`.
+- D6 script test passed: `npm run test:scripts` ran 2 Node tests.
 
 ## Known Gaps
 
@@ -148,12 +166,13 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - The generated release Rust test executable also needs the same App Control resolution before final `cargo test --release` execution can pass consistently.
 - Some fresh shells may need restart or temporary `.cargo\bin` prepending before Tauri can see Rust.
 - Do not bypass or weaken Code Integrity silently.
-- Do not add broad filesystem permissions, arbitrary shell/process access, telemetry, provider connections, updater, signing, packaging, credentials, file indexing, or external actions beyond D4 without a separately approved chunk.
+- Do not add broad filesystem permissions, arbitrary shell/process access, telemetry, provider connections, updater, code signing, public installer publishing, credentials, file indexing, or external actions beyond D6 without a separately approved chunk.
 - D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
+- The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
 - Public web hosting has not been executed.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If deployed under a subpath, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 
 ## Next Handoff
 
-Resume from Desktop Chunk D6 packaging/signing research if the owner wants to continue the desktop distribution lane, resolve the lab policy/signing/trusted-path blocker before claiming interactive desktop discovery smoke, or return to web MVP Chunk Fifteen for fixture/E2E coverage. The hosted/PWA install path is integrated but not publicly hosted. Keep D5 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, public hosting, packaging, signing, updater, or external actions without a separately approved chunk.
+Resume from Desktop Chunk D7 controlled beta release-candidate planning only if the owner wants to continue the desktop distribution lane. A safer next decision packet is Windows Store/MSIX versus direct signed installer, legal publisher identity, macOS/Linux beta timing, and whether auto-update remains deferred. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke. The hosted/PWA install path is integrated but not publicly hosted. Keep D6 bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, public hosting, public installer publishing, code signing, updater, or external actions without a separately approved chunk.
