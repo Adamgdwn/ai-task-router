@@ -1,17 +1,17 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T22:43:52-06:00
-Status: d12-night-closeout-release-hold
-Status Updated: 2026-07-04T22:43:52-06:00
+Last Updated: 2026-07-05T07:22:04-06:00
+Status: d13-cloudflare-production-live-link-ready
+Status Updated: 2026-07-05T07:22:04-06:00
 Owner: Technical Lead
 
 ## Completed Work
 
-Desktop Chunk D12 Old Skool AI hub handoff package, building on D11 public launch master plan, D9 Cloudflare hosted preview smoke, D10 desktop technical-preview artifact lane, and D6 packaging/signing evidence.
+Desktop Chunk D13 Cloudflare production launch smoke, building on D12 Old Skool AI hub handoff package, D11 public launch master plan, D9 Cloudflare hosted preview smoke, D10 desktop technical-preview artifact lane, and D6 packaging/signing evidence.
 
-Completion target: Task complete, release hold.
+Completion target: Task complete, web/PWA link-ready.
 
-Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, and D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package. The D12 handoff was also sent through DirectLink on 2026-07-04 at 22:38 MDT, with the working assumption that Adam will make sure Linux reads that handoff before applying Old Skool AI site changes. Public desktop downloads are still held. The browser/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`, but that preview is not the public URL. The next public-release step is D13 canonical app URL and Cloudflare production-path decision, then hosted smoke against the final URL, support route confirmation, desktop signing/trust work where applicable, and owner launch decision before public website links, desktop downloads, or social launch.
+Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package, and D13 adds `docs/2026-07-05-cloudflare-production-launch-smoke.md` as the production web/PWA evidence packet. The browser/PWA app is live and link-ready at `https://ai-task-router.pages.dev/`. Public desktop downloads are still held. Old Skool AI page publication, Guided AI Labs/Guided AI Journey cross-site links, social launch, custom-domain/DNS work, GitHub Releases, and desktop downloads remain separate gated chunks.
 
 ## Scope
 
@@ -118,9 +118,17 @@ D12 provides:
 - A publish checklist that blocks the D9 preview alias and blocks unsigned/unnotarized desktop artifacts.
 - Rollback/removal notes for the page, navigation links, cross-site links, and online-button target.
 
+D13 provides:
+
+- `docs/2026-07-05-cloudflare-production-launch-smoke.md`, the production web/PWA evidence packet.
+- Canonical first public online app URL `https://ai-task-router.pages.dev/`.
+- Wrangler direct-upload production deployment to Cloudflare Pages branch `main`, source `af2b367`.
+- Hosted smoke evidence for root page, manifest, service worker, PWA icons, hosted Playwright E2E, Windows `curl.exe`, PowerShell `Invoke-WebRequest`, service-worker scope, and no observed external requests during Chromium load.
+- Updated release docs that keep Old Skool AI page publication, cross-site links, social launch, custom domains, GitHub Releases, and public desktop downloads gated.
+
 ## Product Boundary
 
-This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, and a D9 Cloudflare Pages hosted test preview. D11 adds planning/control documentation, and D12 adds website handoff documentation only. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, public website links, social launch links, or execution workflows.
+This desktop track now adds narrow native discovery for selected local AI tools only, an opt-in internal unsigned Windows package build for evidence, and a manual technical-preview artifact lane. The browser/PWA track adds installability, D8 local release-candidate evidence, D9 Cloudflare Pages hosted test preview, and D13 Cloudflare Pages production deployment. D11 adds planning/control documentation, D12 adds website handoff documentation, and D13 adds production web launch evidence. Neither track adds arbitrary folder inspection, code signing, public installer publishing, auto-update, provider connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, custom-domain/DNS changes, public website links, social launch links, or execution workflows.
 
 The existing `npm run detect:local-models` command remains explicit and terminal-only.
 
@@ -233,12 +241,11 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - D10 technical-preview artifacts are not public-release downloads and must not be linked from Old Skool AI until signing/notarization, smoke tests, support/withdrawal copy, and owner approval pass or a technical-preview exception is explicitly accepted.
 - The D10 GitHub Actions workflow has to be manually run before remote Windows/macOS/Linux artifacts exist.
 - Interactive desktop launch smoke for D4 remains blocked until the lab Application Control/signing/trusted-path issue is resolved.
-- Cloudflare Pages hosted preview exists, but public launch has not happened.
-- Cloudflare Pages project is not connected to GitHub yet; production release path still needs a GitHub-integration vs direct-upload decision.
+- Cloudflare Pages production URL exists at `https://ai-task-router.pages.dev/`.
+- Cloudflare Pages project is not connected to GitHub yet; D13 accepted direct upload for the first production web release.
 - Public social launch links have not been created.
-- The canonical public app URL still needs owner confirmation before public launch.
 - Custom-domain/DNS work has not been done.
-- Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node and Chromium passed; retest normal browsers and final domain before public launch.
+- Windows `curl.exe` and PowerShell `Invoke-WebRequest` passed against the production Pages URL; the D9 preview alias remains historical only.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If the hosted app is deployed under a subpath rather than a domain root, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 - The Old Skool AI hub package exists, but the Linux-side site page has not been published from this repo.
@@ -247,6 +254,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Run D13 as the canonical online app URL and Cloudflare production-path decision: choose the public app destination linked from Old Skool AI, decide between Cloudflare Pages GitHub integration and documented direct-upload production release, deploy or promote to the selected destination, rerun web/PWA release checks against the final URL, and keep public desktop downloads held.
+Publish or update the Old Skool AI hub page using the D12 copy and D13 app URL, confirm the public support/security route, add Guided AI Labs and Guided AI Journey cross-site links, smoke the public pages on desktop and mobile, and only then decide whether to create social launch posts. Keep public desktop downloads held.
 
-Proceeding beyond D12 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.
+Proceeding beyond D13 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, public installer publishing, DNS changes, public GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.

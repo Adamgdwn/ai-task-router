@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-04T21:05:03-06:00
-Status: d9-cloudflare-hosted-preview-smoke-complete-release-hold
-Status Updated: 2026-07-04T21:05:03-06:00
+Last Updated: 2026-07-05T07:22:04-06:00
+Status: d13-cloudflare-production-live-link-ready
+Status Updated: 2026-07-05T07:22:04-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop Chunk D9: run the Cloudflare Pages hosted preview smoke before public launch.
+Desktop Chunk D13: deploy and smoke the Cloudflare Pages production web/PWA URL.
 
-Current result: D9 is task complete with public release still held. The browser/PWA artifact passed local release-candidate evidence and now has a Cloudflare Pages hosted test preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. Hosted Node/Chromium HTTPS smoke and hosted Playwright E2E passed. Next hosted-release work is owner-confirmed canonical URL selection, Cloudflare GitHub-integration/direct-upload decision, custom-domain smoke if used, browser retest, and owner launch decision.
+Current result: D13 is task complete. The browser/PWA app is live and link-ready at `https://ai-task-router.pages.dev/` after Cloudflare Pages direct-upload production deployment and hosted smoke. Next public-link work is Old Skool AI hub publication with the D13 URL, support route confirmation, Guided AI Labs/Guided AI Journey cross-site links, public page smoke, and then owner approval for social sharing. Desktop downloads remain held.
 
 ## Files Changed In This Session
 
@@ -58,6 +58,7 @@ Current result: D9 is task complete with public release still held. The browser/
 - `docs/2026-07-04-web-release-candidate-security-pass.md`
 - `playwright.config.ts`
 - `docs/2026-07-04-cloudflare-pages-hosted-preview-smoke.md`
+- `docs/2026-07-05-cloudflare-production-launch-smoke.md`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -222,15 +223,14 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - Do not add broad filesystem permissions, arbitrary shell/process access, telemetry, provider connections, updater, code signing, public installer publishing, credentials, file indexing, or external actions beyond D6 without a separately approved chunk.
 - D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
-- Cloudflare Pages hosted preview exists, but public launch has not happened.
-- Cloudflare Pages project is not connected to GitHub yet.
+- Cloudflare Pages production URL exists at `https://ai-task-router.pages.dev/`.
+- Cloudflare Pages project is not connected to GitHub yet; D13 accepted direct upload for the first production web release.
 - Public social launch links have not been created.
-- Canonical public URL is not selected yet; the owner confirmed the three root websites but not `https://app.oldskoolai.com/`.
 - Custom-domain/DNS work has not been done.
-- Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node and Chromium passed; retest normal browsers and final domain before public launch.
+- Windows `curl.exe` and PowerShell `Invoke-WebRequest` passed against the production Pages URL; the D9 preview alias remains historical only.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If deployed under a subpath, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 
 ## Next Handoff
 
-Resume with canonical URL selection if the owner wants hosted release engineering next: choose the owner-controlled domain/subdomain/subpath or Cloudflare Pages default URL, decide whether to connect Cloudflare Pages to GitHub before production or document a direct-upload release process, then smoke the canonical/custom domain before public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before public launch. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D9 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, Cloudflare production/canonical launch, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.
+Resume with Old Skool AI hub publication if the owner wants public-link work next: use the D12 copy, point the online button to `https://ai-task-router.pages.dev/`, confirm the public support/security route, add Guided AI Labs and Guided AI Journey cross-site links, and smoke the public pages before social sharing. Run Chunk Sixteen first if the owner wants documentation and polish tightened before wider launch. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D13 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.

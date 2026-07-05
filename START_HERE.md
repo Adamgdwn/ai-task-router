@@ -1,8 +1,8 @@
 # 2026-07-03T11:49:34-06:00 - Start Here
 
-Last Updated: 2026-07-04T22:43:52-06:00
+Last Updated: 2026-07-05T07:22:04-06:00
 Status: draft
-Status Updated: 2026-07-04T22:43:52-06:00
+Status Updated: 2026-07-05T07:22:04-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -56,9 +56,9 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 ## Agent Handoff
 
-D12 is boxed for the night. The Old Skool AI hub handoff package is complete in `docs/2026-07-04-old-skool-ai-hub-handoff.md`, commit `de02ded` was pushed, and a DirectLink handoff was appended to `X:\DIRECTLINK_CURRENT.md` for the Linux side. Working assumption for the next session: Adam will make sure the Linux side reads that DirectLink handoff before applying Old Skool AI site changes.
+D13 is task complete. The browser/PWA app is live and link-ready at `https://ai-task-router.pages.dev/` after the Cloudflare Pages direct-upload production deployment and hosted smoke recorded in `docs/2026-07-05-cloudflare-production-launch-smoke.md`.
 
-D13 is intentionally paused. Do not start canonical app URL, DNS/custom-domain, GitHub Release, public desktop download, social launch, or public-link work until the next approved chunk.
+The next chunk should publish or update the Old Skool AI hub page using the D12 copy and the D13 final app URL, confirm the public support/security route, add the Guided AI Labs and Guided AI Journey cross-site links, smoke the public pages on desktop and mobile, and then decide whether to create social launch posts. Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, or custom-domain/DNS changes without a separate approved chunk and release gate evidence.
 
 Update this file only when the top-level plan or handoff point changes. Put detailed step-by-step progress in the active plan named above.
 

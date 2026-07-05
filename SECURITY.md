@@ -1,14 +1,14 @@
 # Security Policy
 
-Last Updated: 2026-07-04T20:35:49-06:00
+Last Updated: 2026-07-05T07:22:04-06:00
 Status: active
 Owner: Project Owner
 
 ## Supported Status
 
-AI Task Router is not publicly released yet.
+The browser/PWA app is live at `https://ai-task-router.pages.dev/`. Public desktop downloads are not released.
 
-The current browser/PWA build has local D8 release-candidate evidence but has not passed Cloudflare Pages HTTPS preview or custom-domain smoke yet. The current desktop build is an internal prototype. The D6 Windows installer is unsigned internal evidence only and must not be shared as an ordinary-user download.
+The current browser/PWA build has D8 local release-candidate evidence, D9 Cloudflare Pages preview evidence, and D13 production URL smoke evidence. No custom domain has been attached. The current desktop build is an internal prototype. The D6/D10 Windows installers are unsigned evidence artifacts only and must not be shared as ordinary-user downloads.
 
 ## Security Model
 

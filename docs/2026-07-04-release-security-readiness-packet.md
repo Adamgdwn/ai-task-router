@@ -9,7 +9,7 @@ Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before custom domain, controlled desktop beta, or social link launch
 Timestamp: 2026-07-04T19:34:29-06:00
-Last Updated: 2026-07-04T21:05:03-06:00
+Last Updated: 2026-07-05T07:22:04-06:00
 
 ## Purpose
 
@@ -56,13 +56,13 @@ Recommended release shape:
 
 | Surface | Recommendation | Status |
 |---|---|---|
-| Hosted app | Use Cloudflare Pages as the primary public host for the web/PWA build. | D8 local RC evidence passed; D9 hosted preview passed; public launch still held |
-| Canonical URL | Use one canonical app URL and link to it from all three websites to avoid duplicate service-worker scopes and stale builds. | Decision pending |
+| Hosted app | Use Cloudflare Pages as the primary public host for the web/PWA build. | D13 production URL live and smoked at `https://ai-task-router.pages.dev/` |
+| Canonical URL | Use one canonical app URL and link to it from all three websites to avoid duplicate service-worker scopes and stale builds. | D13 selected `https://ai-task-router.pages.dev/` |
 | Existing websites | Add clear calls to action on `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com` that point to the canonical app URL. | Planned |
 | GitHub | Keep the repo public and use GitHub Releases later for signed desktop artifacts, checksums, and release notes. | Planned |
 | GitHub Pages | Keep as a fallback static host if Cloudflare Pages is delayed. | Fallback |
 | Desktop downloads | Do not publish until signing, checksum, install/launch/uninstall smoke, local discovery smoke, and support/withdrawal checks pass. | Blocked |
-| Social channels | Share only after the web release gate passes and the destination page explains browser vs desktop capabilities. | Blocked |
+| Social channels | Share only after the Old Skool AI hub page and cross-site links are published and smoked. | Blocked |
 
 The safest first public release is the hosted browser/PWA version. The desktop version should remain unavailable to ordinary users until a signed Windows beta path is proven.
 
@@ -114,7 +114,9 @@ Canonical URL options:
 
 Owner correction: `https://app.oldskoolai.com/` is not owned or confirmed as the canonical app URL. Choose one owner-controlled root site, subpath, Cloudflare Pages default URL, or a newly created subdomain under `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com` before public launch, then add obvious links from the three main websites.
 
-D9 hosted preview update: Cloudflare Pages project `ai-task-router` now exists and has a direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. This is smoke evidence only, not the selected canonical public URL.
+D9 hosted preview update: Cloudflare Pages project `ai-task-router` exists and has a direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. This is smoke evidence only, not the current canonical public URL.
+
+D13 production update: the first canonical online app URL is `https://ai-task-router.pages.dev/`, deployed through Wrangler direct upload and smoked in [Cloudflare Production Launch Smoke](2026-07-05-cloudflare-production-launch-smoke.md).
 
 Avoid deploying three independent copies unless there is a clear reason. Three copies create extra cache, service-worker, support, and version drift risk.
 
@@ -228,8 +230,8 @@ Desktop download pages must also include:
 
 | Blocker | Impact | Next move |
 |---|---|---|
-| Canonical public URL and custom-domain smoke are not complete. | Do not launch public links or social links yet. | Choose the canonical URL, attach a custom domain only if selected, verify HTTPS, PWA metadata, service-worker scope, and browser-vs-desktop copy. |
-| Cloudflare Pages project is not connected to GitHub yet. | Production release automation/traceability is not final. | Decide whether to connect GitHub before production or accept a documented direct-upload release process. |
+| Old Skool AI public hub and cross-site link smoke are not complete. | Do not launch social links yet. | Publish/update the hub page with `https://ai-task-router.pages.dev/`, confirm support route, add cross-site links, and smoke public pages. |
+| Cloudflare Pages project is not connected to GitHub yet. | Production release automation/traceability could be improved. | D13 accepted direct upload for the first production web release; consider GitHub integration as future hardening. |
 | Windows Application Control still blocks unsigned executable/test runs. | Desktop discovery smoke cannot be claimed on current lab setup. | Resolve through approved lab policy, signing, or trusted path. |
 | Desktop installer is unsigned. | Not suitable for ordinary-user download. | Choose Store/MSIX or direct signing path, then sign before beta. |
 | Legal publisher identity not final. | Signing, Store identity, user trust copy, and website copy could diverge. | Confirm legal publisher name before signing. |
@@ -309,6 +311,18 @@ Recommended next sequence:
 4. Retest normal browsers and the final domain, especially because Windows `curl.exe`/PowerShell hit a TLS handshake failure against the preview alias while Node and Chromium passed.
 5. Add public links from the three existing websites only after custom-domain/canonical URL smoke passes.
 6. Share through YouTube, Facebook, and LinkedIn only after the owner makes the launch decision.
+
+## D13 Decision
+
+D13 status: Task complete as a Cloudflare Pages production launch smoke.
+
+Decision packet:
+
+- [Cloudflare Production Launch Smoke](2026-07-05-cloudflare-production-launch-smoke.md)
+
+Release decision: web/PWA link-ready.
+
+Reason: The Cloudflare Pages production URL `https://ai-task-router.pages.dev/` passed local and hosted release gates. Public website/social launch still waits for Old Skool AI hub publication, support route confirmation, cross-site link smoke, and owner approval for that public-link step.
 
 ## Validation
 

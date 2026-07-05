@@ -7,9 +7,9 @@ Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before Cloudflare production deployment, public website links, or social launch
+Next Review: Before custom-domain work, public website links, or social launch
 Timestamp: 2026-07-04T20:27:56-06:00
-Last Updated: 2026-07-04T21:05:03-06:00
+Last Updated: 2026-07-05T07:22:04-06:00
 
 ## Purpose
 
@@ -76,7 +76,7 @@ Result: D8 local release-candidate evidence passed. The current browser/PWA buil
 
 Public launch decision: hold.
 
-Reason: D9 has since created and smoked a Cloudflare Pages hosted preview, but canonical URL attachment, custom-domain behavior, GitHub integration or direct-upload release process, and owner URL confirmation are still unverified. Public website links and social launch posts should wait until those checks pass.
+Reason: D9 has since created and smoked a Cloudflare Pages hosted preview, and D13 has since deployed and smoked the production Pages URL at `https://ai-task-router.pages.dev/`. Public website links and social launch posts should wait until the Old Skool AI hub page, support route, and cross-site links are published and smoked.
 
 Recommended next move:
 
@@ -134,10 +134,10 @@ The scanner allows known static reference URLs bundled by dependencies or SVG me
 | Unit tests | passed | `npm run test` ran 12 files and 88 tests. | Continue to keep business rules in unit tests. |
 | Production build | passed with warning | `npm run build`; existing chunk-size warning only. | Consider code-splitting after public preview, not as a release blocker. |
 | E2E workflows | passed | `npx playwright test` passed 6 Chromium tests. | Add additional browsers later if public usage warrants it. |
-| Production preview metadata | passed | Local `dist/` preview served root page, manifest, icons, and service worker. | Repeated on Cloudflare Pages preview in D9. |
+| Production preview metadata | passed | Local `dist/` preview served root page, manifest, icons, and service worker. | Repeated on Cloudflare Pages preview in D9 and production URL in D13. |
 | Browser/PWA local-discovery boundary | passed locally and hosted | E2E and copy checks still show browser/PWA cannot check the computer. | Verify public copy again after canonical URL/custom-domain smoke. |
-| Cloudflare Pages preview HTTPS | passed with Windows-curl caveat | D9 preview URL `https://preview-20260704-0c7b253.ai-task-router.pages.dev` passed Node/Chromium HTTPS and hosted E2E; Windows `curl.exe`/PowerShell TLS checks failed against the preview alias. | Retest normal browsers and final custom domain before public launch. |
-| Canonical app URL | pending owner decision | Owner confirmed the three root websites, but not `https://app.oldskoolai.com/`. | Owner chooses root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain before public launch. |
+| Cloudflare Pages production HTTPS | passed | D13 production URL `https://ai-task-router.pages.dev/` passed Node/Chromium HTTPS, hosted E2E, Windows `curl.exe`, and PowerShell `Invoke-WebRequest`. | Custom-domain smoke remains separate if a custom domain is later attached. |
+| Canonical app URL | complete for first public web release | D13 selected `https://ai-task-router.pages.dev/`. | Use this URL in the Old Skool AI online button unless a later custom-domain chunk changes it. |
 | Existing website links | blocked | No links added to the three existing websites. | Add only after Cloudflare preview/custom-domain smoke passes. |
 | Social launch | blocked | No YouTube, Facebook, or LinkedIn links created. | Add only after public web release gate passes. |
 | Desktop downloads | blocked | D6 installer remains unsigned internal evidence only. | Continue signing/App Control work separately. |
@@ -157,7 +157,9 @@ Recommended preview configuration:
 | Environment variables | None required for the browser/PWA MVP |
 | Custom domain candidate | TBD: owner-confirmed domain, subpath, or subdomain under `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com` |
 
-D9 preview result: Cloudflare Pages project `ai-task-router` now exists and has a direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. The project is not connected to GitHub yet, and `https://ai-task-router.pages.dev/` does not have a production deployment yet.
+D9 preview result: Cloudflare Pages project `ai-task-router` exists and has a direct-upload preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
+
+D13 production result: `https://ai-task-router.pages.dev/` has a production deployment, passed hosted release gates, and is the first canonical app URL.
 
 Preview smoke checklist:
 
@@ -192,8 +194,8 @@ Desktop rollback remains separate and is not covered by this web rollback path.
 
 - Cloudflare Pages project was not created in D8; D9 created project `ai-task-router`.
 - HTTPS preview was not checked in D8; D9 passed Node/Chromium HTTPS smoke and hosted E2E with a Windows `curl.exe`/PowerShell TLS caveat.
-- Canonical URL is still recommended, not owner-confirmed.
-- Cloudflare Pages project is not connected to GitHub yet.
+- Canonical URL is now `https://ai-task-router.pages.dev/` for the first public web release.
+- Cloudflare Pages project is not connected to GitHub yet; D13 accepted direct upload for the first production web release.
 - Public website links were not added.
 - Social launch links were not created.
 - GitHub provider-side CodeQL, Dependabot, dependency review, and secret scanning settings were reviewed but not enabled by D8.
@@ -202,6 +204,6 @@ Desktop rollback remains separate and is not covered by this web rollback path.
 
 ## Handoff
 
-Web/PWA D8 is task complete with a release hold, and D9 hosted preview smoke is task complete with the same release hold.
+Web/PWA D8 is task complete, D9 hosted preview smoke is task complete, and D13 production launch smoke is task complete.
 
-The next release-engineering chunk should confirm the canonical URL from the owner-controlled domains or Cloudflare Pages default URL, decide whether to connect Cloudflare Pages to GitHub before production, smoke the canonical/custom domain, and only then decide whether to add public links from the three existing websites.
+The next release-engineering chunk should publish or update the Old Skool AI hub page with `https://ai-task-router.pages.dev/`, confirm the support route, add cross-site links from the three existing websites, smoke those public pages, and only then decide whether to create social launch posts.

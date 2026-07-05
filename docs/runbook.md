@@ -46,18 +46,19 @@ Troubleshooting:
 
 ### Public Web Release Readiness
 
-As of 2026-07-04T22:23:04-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), and D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md):
+As of 2026-07-05T07:22:04-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), and D13 deployed the production web/PWA app:
 
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
-- Current test preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
+- Current production app URL: `https://ai-task-router.pages.dev/`.
+- Historical test preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
 - Use one canonical app URL and link to it from the Old Skool AI hub; D12 recommends the hub route `/ai-task-router/`, pending Linux-side route confirmation.
 - Link `guidedailabs.com` and `guidedaijourney.com` to the Old Skool AI hub rather than separate app copies.
-- The owner has not confirmed `https://app.oldskoolai.com/`, so choose root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain before public launch.
-- YouTube, Facebook, and LinkedIn links should wait until the web/PWA release gate passes.
+- The first canonical app URL is the Cloudflare Pages production URL; no custom domain has been attached.
+- YouTube, Facebook, and LinkedIn links should wait until the Old Skool AI hub page and cross-site links are published and smoked.
 - D8 added `npm run scan:web-rc` for production artifact checks.
 - D9 added hosted Playwright support through `PLAYWRIGHT_BASE_URL`.
-- D12 is the Old Skool AI hub handoff package. The next release step is canonical app URL and Cloudflare production-path selection, followed by hosted smoke before public links, DNS, GitHub Releases, social launch, or desktop download buttons.
+- D13 is the Cloudflare production launch smoke packet. The next release step is Old Skool AI hub publication with the D13 URL, support route confirmation, cross-site link smoke, and owner approval for social sharing.
 
 Minimum pre-public checks:
 
@@ -74,15 +75,15 @@ npm run preview -- --host 127.0.0.1 --port 5184
 Hosted preview E2E:
 
 ```powershell
-$env:PLAYWRIGHT_BASE_URL="https://preview-20260704-0c7b253.ai-task-router.pages.dev"
+$env:PLAYWRIGHT_BASE_URL="https://ai-task-router.pages.dev"
 npx playwright test
 ```
 
 Release troubleshooting:
 
 - If `npm ci` fails on Windows with a locked Rolldown native binding, check for stale `agents\agent-picker` Vite dev/preview `node.exe` processes and stop only the repo-owned processes before retrying.
-- If Windows `curl.exe` or PowerShell `Invoke-WebRequest` fails TLS against the Cloudflare preview alias, retest with Chromium/normal browsers and the final custom domain before launch. D9 saw this curl/PowerShell issue while Node and Chromium succeeded.
-- Do not launch from social channels until the production preview and security checks pass.
+- D13 confirmed Windows `curl.exe` and PowerShell `Invoke-WebRequest` return HTTP 200 against `https://ai-task-router.pages.dev/`.
+- Do not launch from social channels until the Old Skool AI hub page and cross-site links are published and smoked.
 - Do not create three independent app deployments unless the service-worker scope, cache, support, and rollback plan are explicit.
 - Do not point public users at the D9 preview alias.
 - If the owner chooses a subpath instead of a root app domain/subdomain, update Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links first.

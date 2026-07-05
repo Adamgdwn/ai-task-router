@@ -29,10 +29,12 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA release-candidate lane, with Desktop Chunk D12 Old Skool AI hub handoff package added; public release remains on hold pending canonical URL, custom-domain/GitHub-integration decision, final hosted smoke, signing, and trust gates
-Status Updated: 2026-07-04T22:23:04-06:00
+Status: v0.2 browser/PWA production URL is live and link-ready at `https://ai-task-router.pages.dev/`; Old Skool AI hub publication, social launch, custom domains, and public desktop downloads remain separate gated chunks
+Status Updated: 2026-07-05T07:22:04-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
+
+Current online app: https://ai-task-router.pages.dev/
 
 Current target: v0.2 Local Web App MVP
 
@@ -104,10 +106,10 @@ The hosted browser app now includes an install manifest, Guided AI Labs app icon
 Supported browsers may offer an Install app option when the site is served over HTTPS or local preview. The browser/PWA
 version cannot check the user's computer; local AI tool discovery requires the desktop app.
 
-Run Playwright against a hosted preview:
+Run Playwright against the hosted production app:
 
 ```powershell
-$env:PLAYWRIGHT_BASE_URL="https://preview-20260704-0c7b253.ai-task-router.pages.dev"
+$env:PLAYWRIGHT_BASE_URL="https://ai-task-router.pages.dev"
 npx playwright test
 ```
 
@@ -154,7 +156,7 @@ npm run desktop:checksums
 
 Windows can be built on this Windows lab. macOS and Linux packages should be built on matching OS runners, using the manual GitHub Actions workflow `Desktop Technical Preview Artifacts`. These artifacts are for owner/developer inspection only until signing, notarization, checksums, install/launch/uninstall smoke, support/withdrawal copy, and owner launch approval pass.
 
-Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The current product direction is one Old Skool AI hub/tab linking to the online tool and future downloads, with `guidedailabs.com` and `guidedaijourney.com` linking there. D11 adds the [public launch master plan](docs/2026-07-04-public-launch-master-plan.md) as the controlling release map, and D12 adds the [Old Skool AI hub handoff package](docs/2026-07-04-old-skool-ai-hub-handoff.md) for Linux-side page copy, cross-site links, held desktop-download copy, and rollback notes. D9 created a Cloudflare Pages test preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`; it is not the selected canonical public URL yet.
+Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). The current product direction is one Old Skool AI hub/tab linking to the online tool and future downloads, with `guidedailabs.com` and `guidedaijourney.com` linking there. D11 adds the [public launch master plan](docs/2026-07-04-public-launch-master-plan.md) as the controlling release map, and D12 adds the [Old Skool AI hub handoff package](docs/2026-07-04-old-skool-ai-hub-handoff.md) for Linux-side page copy, cross-site links, held desktop-download copy, and rollback notes. Do not use the D9 preview alias in public links.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -200,6 +202,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Desktop packaging and signing spike](docs/2026-07-04-desktop-packaging-signing-spike.md)
 - [Public launch master plan](docs/2026-07-04-public-launch-master-plan.md)
 - [Old Skool AI hub handoff package](docs/2026-07-04-old-skool-ai-hub-handoff.md)
+- [Cloudflare production launch smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md)
 - [Release and security readiness packet](docs/2026-07-04-release-security-readiness-packet.md)
 - [Web release candidate security pass](docs/2026-07-04-web-release-candidate-security-pass.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)

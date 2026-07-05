@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before publishing Old Skool AI public hub links or desktop download buttons
-Last Updated: 2026-07-04T22:30:30-06:00
-Status Updated: 2026-07-04T22:30:30-06:00
+Last Updated: 2026-07-05T07:22:04-06:00
+Status Updated: 2026-07-05T07:22:04-06:00
 
 ## Purpose
 
@@ -23,7 +23,7 @@ As of 2026-07-04T22:23:04-06:00:
 
 - Old Skool AI is the preferred public doorway.
 - The online app has release-candidate evidence and a Cloudflare Pages smoke-test preview.
-- The smoke-test preview is not the canonical public app URL.
+- The D13 production URL is the first canonical public app URL: `https://ai-task-router.pages.dev/`.
 - The browser/PWA version cannot check the user's computer.
 - The desktop app is the future path for local machine discovery.
 - Desktop technical-preview artifacts are not ordinary-user downloads.
@@ -51,7 +51,7 @@ Primary page actions:
 
 | Action | Label | Target | Current state |
 |---|---|---|---|
-| Online app | `Use the online tool` | `<ONLINE_APP_URL_AFTER_D13_SMOKE>` | Hold until canonical URL is selected and smoked |
+| Online app | `Use the online tool` | `https://ai-task-router.pages.dev/` | Ready after D13 production smoke |
 | Desktop app | `Desktop app coming after safety checks` | None | Hidden or disabled |
 | Support/security | `Report a security issue` | `<PUBLIC_SUPPORT_OR_SECURITY_URL>` | Needs owner-confirmed support route |
 
@@ -258,7 +258,7 @@ https://oldskoolai.com/ai-task-router/
 Before the Old Skool AI page becomes public:
 
 - [ ] The page route is confirmed.
-- [ ] The primary online button uses only the final smoked app URL.
+- [ ] The primary online button uses only the final smoked app URL: `https://ai-task-router.pages.dev/`.
 - [ ] No public link points at the D9 preview alias.
 - [ ] The page says the browser version cannot check the user's computer.
 - [ ] The page says the MVP does not connect AI provider accounts or upload files.
@@ -293,8 +293,8 @@ If only the online app URL fails after publication, keep the Old Skool AI page b
 These decisions remain for the next release chunk:
 
 - final Old Skool AI page route if `/ai-task-router/` does not fit the existing site
-- canonical online app URL
-- Cloudflare Pages production process: GitHub-connected Pages or documented direct upload
+- whether to later replace the Cloudflare Pages default URL with a custom domain
+- whether to later connect Cloudflare Pages to GitHub for production automation
 - support/security contact URL for ordinary users
 - whether the desktop section is fully hidden or shown as a disabled coming-soon section
 - owner approval to publish website links after hosted app smoke passes
@@ -307,6 +307,6 @@ These decisions remain for the next release chunk:
 
 ## Handoff
 
-D12 prepares the website package only. The next release-engineering chunk should choose the canonical online app URL, promote or deploy the app to that destination, rerun the web/PWA release gate against that URL, and then approve or hold the Old Skool AI page publication.
+D12 prepares the website package only. D13 has since selected and smoked the production online app URL: `https://ai-task-router.pages.dev/`. The next release chunk should publish or update the Old Skool AI page with that URL, confirm the support/security route, add cross-site links, and smoke the public pages before social sharing.
 
 Desktop download buttons remain held until the desktop trust gates pass or the owner separately accepts a documented technical-preview exception.

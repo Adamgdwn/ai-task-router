@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before public Old Skool AI links, canonical-domain DNS work, public GitHub Releases, or desktop download buttons
-Last Updated: 2026-07-04T22:30:30-06:00
-Status Updated: 2026-07-04T22:30:30-06:00
+Last Updated: 2026-07-05T07:22:04-06:00
+Status Updated: 2026-07-05T07:22:04-06:00
 
 ## Purpose
 
@@ -19,11 +19,11 @@ It exists to prevent improvised launch work. The public release should move thro
 
 ## Current State
 
-As of 2026-07-04T22:10:36-06:00:
+As of 2026-07-05T07:22:04-06:00:
 
-- The browser/PWA MVP is locally release-candidate ready.
+- The browser/PWA MVP is live and link-ready at `https://ai-task-router.pages.dev/`.
 - Cloudflare Pages preview exists at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
-- The preview is not the public canonical URL.
+- The preview is historical smoke evidence only and is not the public canonical URL.
 - The app has no backend, no Supabase requirement, no provider API calls, no external account connections, no telemetry, and no remote storage requirement.
 - The browser/PWA version cannot inspect the user's computer.
 - The desktop prototype has narrow permissioned local AI tool discovery through Tauri commands.
@@ -32,6 +32,7 @@ As of 2026-07-04T22:10:36-06:00:
 - Public desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner approval pass.
 - The owner preference is one Old Skool AI public hub/tab, with `guidedailabs.com` and `guidedaijourney.com` linking to that hub.
 - D12 adds the [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md), including page structure, plain-language copy, cross-site link instructions, held desktop-download copy, and rollback notes.
+- D13 adds the [Cloudflare Production Launch Smoke](2026-07-05-cloudflare-production-launch-smoke.md), selecting the Cloudflare Pages production URL and validating it with hosted smoke.
 
 ## Launch Principles
 
@@ -65,7 +66,7 @@ Recommended app URL decision for first public release:
 | Lane | Current state | Public outcome | Gate |
 |---|---|---|---|
 | Public hub | Not built in this repo | Old Skool AI page/tab explains the tool and links to the online app | Hub copy, link, rollback, owner approval |
-| Hosted web/PWA | Preview deployed and smoked | People can use the tool online for free | Canonical URL, hosted smoke, web RC checks, launch approval |
+| Hosted web/PWA | Production URL deployed and smoked | People can use the tool online for free | Complete for Cloudflare Pages default URL; custom domain remains separate |
 | Windows desktop | Local unsigned NSIS technical preview exists | Signed installer or Store/MSIX download | Publisher identity, signing path, install/launch/uninstall smoke |
 | macOS desktop | Workflow-ready, not generated | Signed and notarized DMG | Apple Developer ID, notarization, smoke |
 | Linux desktop | Workflow-ready, not generated | AppImage and/or `.deb` download | Linux smoke, checksums/signature decision, dependency notes |
@@ -122,6 +123,8 @@ Acceptance criteria:
 
 ### Phase 2 - Cloudflare Production Path Decision
 
+Status: complete as of D13; first production URL is `https://ai-task-router.pages.dev/`.
+
 Goal:
 
 Choose the hosted app release path before production promotion.
@@ -140,6 +143,8 @@ Recommended default:
 Use the Old Skool AI hub as the public doorway and link to one Cloudflare Pages-backed app destination. Prefer a production Pages URL or explicitly approved owned subdomain over a subpath for the first public release.
 
 ### Phase 3 - Hosted Web/PWA Public Release Gate
+
+Status: complete for the Cloudflare Pages default URL as of D13. Public website links and social launch remain separate gates.
 
 Goal:
 
@@ -320,9 +325,9 @@ It should not say:
 | Gate | Owner | Status | Evidence needed |
 |---|---|---|---|
 | Old Skool AI hub route chosen | Project Owner | partial | D12 recommends `/ai-task-router/`; owner or Linux-side site builder must confirm actual route before publication |
-| Canonical online app URL chosen | Project Owner | pending | URL decision and hosted smoke |
-| Cloudflare release process chosen | Technical Lead / Project Owner | pending | GitHub-connected Pages or direct-upload release process |
-| Web/PWA release gate | Technical Lead | pending | D8/D9 checks rerun against final URL |
+| Canonical online app URL chosen | Project Owner | complete | D13 selected and smoked `https://ai-task-router.pages.dev/` |
+| Cloudflare release process chosen | Technical Lead / Project Owner | complete for D13 | Wrangler direct-upload production release recorded; GitHub integration remains future hardening |
+| Web/PWA release gate | Technical Lead | passed for Pages URL | D13 reran local and hosted checks against `https://ai-task-router.pages.dev/` |
 | Public copy review | Project Owner | partial | D12 supplies ready-to-use hub copy; owner must approve before publication |
 | Support/security route | Project Owner / Technical Lead | partial | `SECURITY.md` exists; public support URL/contact still needed for the hub |
 | Desktop product name | Project Owner | pending | Name recorded before signing |
@@ -335,25 +340,27 @@ It should not say:
 
 ## Immediate Next Chunk Recommendation
 
-Run D13 as the canonical online app URL and Cloudflare production-path decision:
+Run the Old Skool AI public hub publication chunk:
 
-- choose the first public app destination linked from the Old Skool AI hub
-- decide between Cloudflare Pages GitHub integration and documented Wrangler direct-upload production release
-- promote or deploy to the chosen destination only after the decision is recorded
-- rerun the web/PWA release gate against the final URL
+- publish or update the Old Skool AI `AI Task Router` page using the D12 copy
+- point the online-app button to `https://ai-task-router.pages.dev/`
+- confirm the public support/security route
+- add Guided AI Labs and Guided AI Journey links to the Old Skool AI hub
+- smoke the public pages on desktop and mobile
 - keep desktop download buttons hidden or disabled until desktop gates pass
-- do not create public GitHub Releases, social launch posts, or public desktop artifact links in the same chunk
+- do not create public GitHub Releases, custom-domain/DNS changes, social launch posts, or public desktop artifact links in the same chunk
 
 ## Validation
 
 | Timestamp | Check | Result | Notes |
 |---|---|---|---|
+| 2026-07-05T07:22:04-06:00 | D13 local and hosted web/PWA release gate | passed | Cloudflare Pages production URL `https://ai-task-router.pages.dev/` was deployed and smoked; local and hosted Playwright passed; production assets returned 200; Windows `curl.exe` and PowerShell returned 200; Chromium smoke found service-worker scope at the production root and 0 observed external requests. |
 | 2026-07-04T22:30:30-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; release-boundary `rg` scans; D12 handoff presence scan | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; scans found no stale D12-not-created wording and only historical or negative-boundary references for preview URLs, unconfirmed app subdomain, and premature desktop-download claims; D12 handoff doc exists and names D13 as the next release-engineering chunk. No app/runtime tests were run because D12 changed documentation and release-control notes only. |
 | 2026-07-04T22:10:36-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; text scan for unconfirmed URL and premature desktop-download claims | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; text scan found only correction/negative-boundary references for `app.oldskoolai.com`, "public desktop downloads are ready", and "safe to install". |
 | 2026-07-04T22:03:36-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance preflight reported 0 warnings before D11 planning work. |
 
 ## Handoff
 
-D12 creates the Old Skool AI hub handoff package only. It does not publish the website page, launch the app publicly, change DNS, connect Cloudflare production to GitHub, create GitHub Releases, run desktop technical-preview workflows, sign installers, notarize macOS artifacts, or add public desktop download links.
+D13 has deployed and smoked the browser/PWA production app at `https://ai-task-router.pages.dev/`. It did not publish the Old Skool AI page, change DNS, connect Cloudflare production to GitHub, create GitHub Releases, run desktop technical-preview workflows, sign installers, notarize macOS artifacts, create social posts, or add public desktop download links.
 
-The next safest execution chunk is D13 canonical online app URL and Cloudflare production-path decision. Public web launch should wait until the final URL is selected, deployed/promoted, and smoked. Public desktop downloads should wait until platform trust gates pass or a separately documented technical-preview exception is approved.
+The next safest execution chunk is Old Skool AI hub publication and cross-site link smoke. Public desktop downloads should wait until platform trust gates pass or a separately documented technical-preview exception is approved.

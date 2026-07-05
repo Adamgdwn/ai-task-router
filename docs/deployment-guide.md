@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-04T22:23:04-06:00
+Status Updated: 2026-07-05T07:22:04-06:00
 
 ## Current Release State
 
-AI Task Router is not publicly launched yet.
+AI Task Router's browser/PWA app is live and link-ready at `https://ai-task-router.pages.dev/`.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Public release remains on hold until the canonical URL decision, custom-domain smoke if used, GitHub integration or direct-upload release process decision, owner launch decision, and desktop signing/trust gates pass where applicable.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Old Skool AI hub publication, cross-site links, social launch, custom-domain work, and public desktop downloads remain separate gated chunks.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -33,23 +33,23 @@ The browser/PWA build does not perform local AI tool discovery. Local computer c
 
 - `dev`: local Vite development server.
 - `staging`: not created yet.
-- `prod`: not created yet.
+- `prod`: Cloudflare Pages production at `https://ai-task-router.pages.dev/`.
 
 Future public hosting decision:
 
 - primary host: Cloudflare Pages
 - public source/release hub: GitHub
-- current hosted preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev`
+- current hosted preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev` for historical smoke evidence only
 - canonical public hub: D12 recommends an Old Skool AI page/tab at `/ai-task-router/` with "use online" and future download choices, pending Linux-side route confirmation
-- canonical app URL: not selected yet; choose whether the Old Skool AI hub links to a Cloudflare Pages URL, a subpath, or a newly created subdomain under an owned domain
+- canonical app URL: `https://ai-task-router.pages.dev/`
 - planned link sources: `oldskoolai.com` as the main hub, with `guidedailabs.com` and `guidedaijourney.com` linking there
 - planned social link sources after release gate: YouTube, Facebook, and LinkedIn
 
-The canonical public URL still needs owner confirmation before public launch. Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies. Use the [public launch master plan](2026-07-04-public-launch-master-plan.md) and [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md) as the controlling release map before adding public links.
+Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies. Use the [public launch master plan](2026-07-04-public-launch-master-plan.md), [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), and [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md) as the controlling release map before adding public website or social links.
 
 ## Deployment Steps
 
-D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. No custom domain, DNS change, public website link, social launch post, public GitHub Release, or public desktop download has been created.
+D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. D13 deployed the production Pages URL through Wrangler direct upload. No custom domain, DNS change, public website link, social launch post, public GitHub Release, or public desktop download has been created.
 
 Future hosted web/PWA release should use this shape:
 
@@ -57,8 +57,8 @@ Future hosted web/PWA release should use this shape:
 2. Use the D12 Old Skool AI hub handoff for page copy, cross-site links, desktop hold copy, and rollback language.
 3. Use the D8 evidence packet as the local release-candidate baseline.
 4. Use the D9 hosted preview packet as the first Cloudflare Pages smoke baseline.
-5. Decide whether production uses Cloudflare Pages GitHub integration or a documented Wrangler direct-upload release process.
-6. Choose the canonical app URL linked by the Old Skool AI hub.
+5. D13 accepted a documented Wrangler direct-upload release process for the first production web deployment.
+6. Use canonical app URL `https://ai-task-router.pages.dev/` for the Old Skool AI hub online button.
 7. Use build command `npm ci && npm run build`.
 8. Use output directory `dist`.
 9. Confirm the manifest, 192px and 512px icons, service worker, and install copy are present over HTTPS.
@@ -77,10 +77,10 @@ npm run preview -- --host 127.0.0.1 --port 5184
 If the hosted app is deployed under a subpath rather than a domain root, review Vite `base`, `manifest.webmanifest`
 `start_url`/`scope`, service-worker cache URLs, and public link paths before release.
 
-Run hosted Playwright E2E against a preview or canonical URL:
+Run hosted Playwright E2E against the production URL:
 
 ```powershell
-$env:PLAYWRIGHT_BASE_URL="https://preview-20260704-0c7b253.ai-task-router.pages.dev"
+$env:PLAYWRIGHT_BASE_URL="https://ai-task-router.pages.dev"
 npx playwright test
 ```
 
