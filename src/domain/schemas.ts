@@ -44,6 +44,8 @@ export const routeStrategies = ["lean", "balanced", "premium"] as const;
 
 export const routeStepKinds = ["model", "research", "artifact", "human review", "manual"] as const;
 
+export const projectStageKinds = ["frame", "gather", "create", "package", "review"] as const;
+
 export const policyDefaultIds = ["least-resource", "balanced", "quality-first"] as const;
 
 export const desktopDiscoveryPlatforms = ["windows", "macos", "linux", "unknown"] as const;
@@ -244,6 +246,18 @@ export const routeOptionSchema = z
   })
   .strict();
 
+export const projectStageGuidanceSchema = z
+  .object({
+    id: nonEmptyIdSchema,
+    stage: z.enum(projectStageKinds),
+    label: nonEmptyTextSchema,
+    purpose: nonEmptyTextSchema,
+    recommendedModelLabel: nonEmptyTextSchema,
+    recommendedModelId: nonEmptyIdSchema.optional(),
+    routeStepId: nonEmptyIdSchema.optional(),
+  })
+  .strict();
+
 export const promptStepSchema = z
   .object({
     id: nonEmptyIdSchema,
@@ -280,6 +294,7 @@ export const routeCardSchema = z
     sensitivityClass: sensitivityClassSchema,
     recommendedOptionId: nonEmptyIdSchema,
     options: z.array(routeOptionSchema).min(1),
+    stageGuidance: z.array(projectStageGuidanceSchema).max(6).default([]),
     warnings: z.array(nonEmptyTextSchema).default([]),
     blockedRoutes: z.array(blockedRouteSchema).default([]),
     promptPackage: promptPackageSchema,

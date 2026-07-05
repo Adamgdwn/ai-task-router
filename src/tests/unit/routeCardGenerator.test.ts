@@ -110,6 +110,7 @@ describe("route card generator", () => {
 
     const card = generateRouteCard({
       task,
+      models: routeReadyModels,
       hardGateResult,
       scoringResult,
       promptPackage,
@@ -131,6 +132,11 @@ describe("route card generator", () => {
     expect(card.options.find((option) => option.id === card.recommendedOptionId)?.score).toBe(
       scoringResult.recommendedCandidate?.score,
     );
+    expect(card.stageGuidance.map((stage) => stage.stage)).toEqual(["frame", "gather", "create", "review"]);
+    expect(card.stageGuidance.find((stage) => stage.stage === "create")).toMatchObject({
+      label: "Create the first draft",
+      recommendedModelLabel: expect.stringMatching(/Gemini|ChatGPT|Claude/),
+    });
   });
 
   it("preserves hard-gate warnings and blocked reasons on the route card", () => {
@@ -148,6 +154,7 @@ describe("route card generator", () => {
 
     const card = generateRouteCard({
       task,
+      models: routeReadyModels,
       hardGateResult,
       scoringResult,
       promptPackage: buildPromptPackage(task),
@@ -172,6 +179,39 @@ describe("route card generator", () => {
     );
   });
 
+  it("uses research-capable tools beside evidence stages when current facts are requested", () => {
+    const task = buildTask({
+      id: "task-card-current-facts",
+      title: "Research current facts",
+      knowledgeWorkType: "research",
+      outputType: "answer",
+      requiresCurrentFacts: true,
+      requiresCitations: true,
+      qualityBar: "high",
+      requestedSourceIds: ["web"],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "quality-first");
+
+    const card = generateRouteCard({
+      task,
+      models: routeReadyModels,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+
+    const gatherStage = card.stageGuidance.find((stage) => stage.stage === "gather");
+
+    expectValidRouteCard(card);
+    expect(gatherStage).toMatchObject({
+      label: "Check the evidence",
+      recommendedModelId: "user-research-tool",
+      recommendedModelLabel: expect.stringContaining("Perplexity"),
+    });
+    expect(card.stageGuidance.map((stage) => stage.stage)).toContain("review");
+  });
+
   it("keeps human approval requirements visible on card and option records", () => {
     const task = buildTask({
       id: "task-card-public-facing",
@@ -183,6 +223,7 @@ describe("route card generator", () => {
 
     const card = generateRouteCard({
       task,
+      models: routeReadyModels,
       hardGateResult,
       scoringResult,
       promptPackage: buildPromptPackage(task),
@@ -247,6 +288,7 @@ describe("route card generator", () => {
 
     const card = generateRouteCard({
       task,
+      models: routeReadyModels,
       hardGateResult,
       scoringResult,
       promptPackage: buildPromptPackage(task),
@@ -269,6 +311,7 @@ describe("route card generator", () => {
       sourceIds: ["private-source"],
       requiredPermissionLevel: 3,
     });
+    expect(card.stageGuidance.map((stage) => stage.recommendedModelLabel)).toContain("You first");
     expect(card.warnings).toContain(
       "No safe generated route is available; use manual review only until source, model, or policy settings are corrected.",
     );
@@ -289,6 +332,7 @@ describe("route card generator", () => {
     expect(() =>
       generateRouteCard({
         task,
+        models: routeReadyModels,
         hardGateResult,
         scoringResult,
         promptPackage,

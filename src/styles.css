@@ -1279,6 +1279,84 @@ button:focus-visible {
   padding: 18px 0;
 }
 
+.stageGuidanceSection {
+  border-top-color: #c7d5dd;
+}
+
+.stageGuidanceList {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stageGuidanceList li {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--brand-teal);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 32, 0.05);
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.stageGuidanceList li > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.stageGuidanceList li > div > span {
+  color: var(--brand-teal);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.stageGuidanceList h4 {
+  color: var(--brand-navy);
+  font-size: 0.98rem;
+  line-height: 1.25;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.stageGuidanceList p {
+  color: var(--muted-ink);
+  line-height: 1.43;
+  margin: 0;
+}
+
+.stageGuidanceList dl {
+  margin: 0;
+}
+
+.stageGuidanceList dt {
+  color: var(--muted-ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.stageGuidanceList dd {
+  background: #eef8fb;
+  border: 1px solid #cdeaf2;
+  border-radius: 999px;
+  color: var(--brand-navy);
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 4px 0 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 5px 8px;
+}
+
 .impactLead {
   display: grid;
   gap: 8px;

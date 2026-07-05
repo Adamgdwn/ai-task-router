@@ -1,6 +1,7 @@
 import { routeCardSchema } from "../schemas";
 import type {
   BlockedRoute,
+  ModelInventoryItem,
   PermissionLevel,
   PromptPackage,
   RouteCard,
@@ -10,9 +11,11 @@ import type {
 } from "../types";
 import type { HardGateBlock, HardGateResult } from "./hardGates";
 import type { RouteScoringResult, ScoredRouteCandidate } from "./scoring";
+import { buildProjectStageGuidance } from "./stageGuidance";
 
 export type GenerateRouteCardInput = {
   task: TaskIntake;
+  models: ModelInventoryItem[];
   hardGateResult: HardGateResult;
   scoringResult: RouteScoringResult;
   promptPackage: PromptPackage;
@@ -25,6 +28,7 @@ const noSafeRouteWarning =
 
 export function generateRouteCard({
   task,
+  models,
   hardGateResult,
   scoringResult,
   promptPackage,
@@ -47,6 +51,8 @@ export function generateRouteCard({
     recommendedOptionId = fallbackOption.id;
   }
 
+  const recommendedOption = options.find((option) => option.id === recommendedOptionId);
+
   const card: RouteCard = {
     id: routeCardId ?? defaultRouteCardId(task.id),
     taskId: task.id,
@@ -54,6 +60,13 @@ export function generateRouteCard({
     sensitivityClass: task.sensitivityClass,
     recommendedOptionId,
     options,
+    stageGuidance: recommendedOption
+      ? buildProjectStageGuidance({
+          task,
+          recommendedOption,
+          models,
+        })
+      : [],
     warnings: buildCardWarnings(hardGateResult, fallbackOption),
     blockedRoutes: buildBlockedRoutes(hardGateResult, scoringResult),
     promptPackage,

@@ -7,6 +7,7 @@ import type { PromptPackage, PromptStep, RouteCard, RouteOption, RouteStep } fro
 import type { RouteArtifactsController } from "../state/useRouteArtifacts";
 import { ScreenHeader } from "./SetupScreens";
 import type { ScreenDefinition } from "./screenDefinitions";
+import { StageGuidancePanel } from "./StageGuidancePanel";
 
 type RouteArtifactScreenProps = {
   definition: ScreenDefinition;
@@ -35,6 +36,10 @@ export function SavedRouteCardScreen({ definition, artifacts, onOpenTaskIntake }
       {routeCard && promptPackage ? (
         <div className="artifactStack">
           <RouteCardSummary routeCard={routeCard} />
+          <StageGuidancePanel
+            stages={routeCard.stageGuidance}
+            lead="These rough stages were saved with the decision card so the route stays easy to follow later."
+          />
           <MarkdownExportPanel
             copyLabel="Route card Markdown"
             downloadName={artifactFileName("route-card", routeCard.title, routeCard.id)}

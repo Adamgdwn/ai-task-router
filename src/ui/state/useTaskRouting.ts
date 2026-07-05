@@ -270,6 +270,7 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
       });
       const routeCard = generateRouteCard({
         task,
+        models: configuration.modelInventory,
         hardGateResult,
         scoringResult,
         promptPackage,

@@ -12,6 +12,7 @@ import type {
   modelInventoryItemSchema,
   permissionLevelSchema,
   policyDefaultSchema,
+  projectStageGuidanceSchema,
   promptPackageSchema,
   promptStepSchema,
   routeCardSchema,
@@ -36,6 +37,7 @@ export type TaskTemplate = z.infer<typeof taskTemplateSchema>;
 export type TaskIntake = z.infer<typeof taskIntakeSchema>;
 export type RouteStep = z.infer<typeof routeStepSchema>;
 export type RouteOption = z.infer<typeof routeOptionSchema>;
+export type ProjectStageGuidance = z.infer<typeof projectStageGuidanceSchema>;
 export type PromptStep = z.infer<typeof promptStepSchema>;
 export type PromptPackage = z.infer<typeof promptPackageSchema>;
 export type BlockedRoute = z.infer<typeof blockedRouteSchema>;

@@ -91,6 +91,24 @@ const validRouteCard = {
   sensitivityClass: "confidential",
   recommendedOptionId: "route-balanced",
   options: [validRouteOption],
+  stageGuidance: [
+    {
+      id: "stage-task-001-frame",
+      stage: "frame",
+      label: "Frame the job",
+      purpose: "Clarify the goal and quality bar before using a tool.",
+      recommendedModelLabel: "You first",
+    },
+    {
+      id: "stage-task-001-create",
+      stage: "create",
+      label: "Draft the brief",
+      purpose: "Use the recommended tool to prepare the first pass.",
+      recommendedModelId: "small-local-model",
+      recommendedModelLabel: "Small local model",
+      routeStepId: "step-001",
+    },
+  ],
   warnings: ["No external execution is allowed."],
   blockedRoutes: [
     {
@@ -207,6 +225,8 @@ describe("domain schemas", () => {
     expect(routeOptionSchema.parse(validRouteOption)).toEqual(validRouteOption);
     expect(promptStepSchema.parse(validPromptStep)).toEqual(validPromptStep);
     expect(routeCardSchema.parse(validRouteCard)).toEqual(validRouteCard);
+
+    expect(routeCardSchema.parse({ ...validRouteCard, stageGuidance: undefined }).stageGuidance).toEqual([]);
 
     expect(
       routeLogEntrySchema.parse({

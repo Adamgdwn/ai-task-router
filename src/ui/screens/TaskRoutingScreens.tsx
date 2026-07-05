@@ -16,6 +16,7 @@ import type {
 import type { SetupConfigurationController } from "../state/useSetupConfiguration";
 import { ScreenHeader } from "./SetupScreens";
 import type { ScreenDefinition } from "./screenDefinitions";
+import { StageGuidancePanel } from "./StageGuidancePanel";
 
 const publicImpactSnapshot = buildDefaultPublicImpactSnapshot();
 
@@ -458,6 +459,11 @@ function GeneratedResults({
           </div>
         </dl>
       </section>
+
+      <StageGuidancePanel
+        stages={result.routeCard.stageGuidance}
+        lead="A rough path only, with the recommended help beside each stage. Use it to stay organized without turning this into a full project plan."
+      />
 
       <ImpactInsightPanel recommended={recommended} snapshot={publicImpactSnapshot} />
 

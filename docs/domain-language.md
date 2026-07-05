@@ -16,7 +16,10 @@ When a term changes, update this file and the affected code or documentation in 
 
 | Term | Meaning | Avoid Saying | Code/Docs Usage |
 |---|---|---|---|
-| Example Term | Clear definition | Vague synonym | Where and how this term appears. |
+| Route card | A saved decision record for one task, including recommended and alternative routes, warnings, blocked items, prompt package reference, and stage guidance. | plan, recommendation blob | Domain schemas, export/import, Best Options, Decision Card. |
+| Prompt package | Ordered copy-ready prompt steps the user can run manually outside the app. | automation, execution package | Prompt generator, Copy-Ready Prompts, Markdown export. |
+| Suggested stages | A compact set of rough work stages inferred from the task and recommended route. It is not a full project plan. | project plan, workflow automation | Route card `stageGuidance`, Best Options, Decision Card, Markdown export. |
+| Recommended help | The user-visible tool/model or human review label suggested beside a stage. | executor, agent action | Stage guidance UI and Markdown export. |
 
 ## Naming Guidance
 

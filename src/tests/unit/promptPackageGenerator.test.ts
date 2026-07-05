@@ -285,6 +285,7 @@ describe("prompt package generator", () => {
 
     const card = generateRouteCard({
       task,
+      models: routeReadyModels,
       hardGateResult,
       scoringResult,
       promptPackage,

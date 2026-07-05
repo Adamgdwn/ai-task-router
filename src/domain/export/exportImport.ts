@@ -237,6 +237,9 @@ export function serializeRouteCardMarkdown(routeCard: RouteCard, promptPackage: 
     "## Summary",
     recommendedOption?.summary ?? "No recommended route summary is available.",
     "",
+    "## Suggested Stages",
+    stageGuidanceMarkdown(validRouteCard),
+    "",
     "## Warnings",
     markdownList(validRouteCard.warnings),
     "",
@@ -475,6 +478,22 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
     markdownList(option.warnings),
     "",
   ];
+}
+
+function stageGuidanceMarkdown(routeCard: RouteCard): string {
+  if (routeCard.stageGuidance.length === 0) {
+    return "None.";
+  }
+
+  return routeCard.stageGuidance
+    .map((stage, stageIndex) =>
+      [
+        `${stageIndex + 1}. **${stage.label}**`,
+        `   - Recommended help: ${stage.recommendedModelLabel}`,
+        `   - Purpose: ${stage.purpose}`,
+      ].join("\n"),
+    )
+    .join("\n");
 }
 
 function promptPackageMarkdownSection(promptPackage: PromptPackage, headingLevel: 1 | 2): string {
