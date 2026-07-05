@@ -1,7 +1,7 @@
 # 2026-07-03T11:49:34-06:00 - Roadmap
 
 Document status: draft baseline
-Status Updated: 2026-07-04T20:35:49-06:00
+Status Updated: 2026-07-04T20:49:44-06:00
 
 ## Now
 
@@ -31,7 +31,7 @@ Status Updated: 2026-07-04T20:35:49-06:00
 
 - Host the web app publicly only after release-readiness review and deployment planning.
 - Use GitHub plus Cloudflare as the intended free distribution path after the release/security gate passes.
-- Prefer one canonical Cloudflare Pages app URL, recommended as `https://app.oldskoolai.com/`, with links from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`.
+- Prefer one canonical Cloudflare Pages app URL, not three app copies; the canonical URL is not selected yet and should be chosen from an owner-controlled root site, subpath, Cloudflare Pages default URL, or newly created subdomain before public launch.
 - Keep the D5 PWA install path for the hosted app where supported; public hosting still needs a separate release/deployment chunk.
 - Plan a separate signed desktop app for Windows, macOS, and Linux when local machine discovery is ready.
 - Use [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) as the baseline for desktop trust, signing, and release work.

@@ -1,7 +1,7 @@
 # 2026-07-04 - Web Release Candidate Security Pass
 
 Document ID: AUD-ENG-002
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,7 +9,7 @@ Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before Cloudflare production deployment, public website links, or social launch
 Timestamp: 2026-07-04T20:27:56-06:00
-Last Updated: 2026-07-04T20:35:49-06:00
+Last Updated: 2026-07-04T20:49:44-06:00
 
 ## Purpose
 
@@ -64,7 +64,7 @@ Source implications for this project:
 
 - Cloudflare Pages can build static output from the connected GitHub repository using a configured build command and output directory.
 - Preview deployments can be used to review new versions before production, but production rollback planning still needs a production deployment target.
-- Cloudflare custom domains are suitable for a root app subdomain such as `https://app.oldskoolai.com/`.
+- Cloudflare custom domains are suitable for an owner-controlled domain, including a subdomain created under a domain the owner controls. The owner has not confirmed `https://app.oldskoolai.com/` as owned or selected.
 - GitHub dependency review, Dependabot, secret scanning, and CodeQL are appropriate next hardening controls, but D8 did not enable provider-side settings.
 - OWASP ASVS/WSTG remain useful as the web security review frame even though the MVP has no auth, backend, payment, uploaded files, or provider APIs.
 
@@ -80,7 +80,7 @@ Reason: Cloudflare preview hosting, HTTPS behavior, canonical URL attachment, an
 
 Recommended next move:
 
-1. Confirm `https://app.oldskoolai.com/` as the canonical public app URL, or choose a subpath alternative before deployment.
+1. Confirm the canonical public app URL from the owner-controlled domains: a root/subpath on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`, or a newly created subdomain under one of those domains if DNS control allows it.
 2. Create a Cloudflare Pages preview from GitHub with build command `npm ci && npm run build` and output directory `dist`.
 3. Smoke test the Cloudflare preview over HTTPS.
 4. Attach the canonical domain only after preview smoke passes.
@@ -121,6 +121,7 @@ The scanner allows known static reference URLs bundled by dependencies or SVG me
 | 2026-07-04T20:26:17-06:00 | `npx playwright test` | passed | Playwright Chromium passed 6 tests covering fixtures, first-run setup, My AI Tools, stale migration, routing/artifacts/feedback, no-execution controls, and narrow viewport overflow. |
 | 2026-07-04T20:27:56-06:00 | local production preview on `http://127.0.0.1:5185/` | passed | Root page 200; manifest link present; Apple icon link present; manifest 200 with name `AI Task Router | Guided AI Labs`, display `standalone`, start URL `/`, scope `/`; 192px and 512px icons 200; service worker 200 with install/fetch handlers and same-origin-only guard. |
 | 2026-07-04T20:35:49-06:00 | close-out validation | passed | Governance preflight, dependency audit, script tests, unit tests, production build, web RC scan, Playwright E2E, and whitespace check all passed; build retained the existing chunk-size warning only. |
+| 2026-07-04T20:49:44-06:00 | canonical URL owner correction | passed | Owner clarified that `https://app.oldskoolai.com/` is not owned or confirmed; the next release chunk must select an owner-controlled URL or Cloudflare Pages default URL before custom-domain work. |
 
 ## Smoke Matrix
 
@@ -135,7 +136,7 @@ The scanner allows known static reference URLs bundled by dependencies or SVG me
 | Production preview metadata | passed | Local `dist/` preview served root page, manifest, icons, and service worker. | Repeat on Cloudflare Pages HTTPS preview. |
 | Browser/PWA local-discovery boundary | passed locally | E2E and copy checks still show browser/PWA cannot check the computer. | Verify public copy again after Cloudflare deploy. |
 | Cloudflare Pages preview HTTPS | not run | No Cloudflare project/preview URL was configured in D8. | Required before public launch. |
-| Canonical app URL | pending owner decision | Recommended `https://app.oldskoolai.com/`. | Owner confirms subdomain versus subpath before deployment. |
+| Canonical app URL | pending owner decision | Owner confirmed the three root websites, but not `https://app.oldskoolai.com/`. | Owner chooses root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain before deployment. |
 | Existing website links | blocked | No links added to the three existing websites. | Add only after Cloudflare preview/custom-domain smoke passes. |
 | Social launch | blocked | No YouTube, Facebook, or LinkedIn links created. | Add only after public web release gate passes. |
 | Desktop downloads | blocked | D6 installer remains unsigned internal evidence only. | Continue signing/App Control work separately. |
@@ -153,7 +154,7 @@ Recommended preview configuration:
 | Output directory | `dist` |
 | Node version | Use Cloudflare default if it supports the lockfile; otherwise set `NODE_VERSION=24.16.0` to match this D8 machine |
 | Environment variables | None required for the browser/PWA MVP |
-| Custom domain candidate | `app.oldskoolai.com` |
+| Custom domain candidate | TBD: owner-confirmed domain, subpath, or subdomain under `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com` |
 
 Preview smoke checklist:
 
@@ -199,4 +200,4 @@ Desktop rollback remains separate and is not covered by this web rollback path.
 
 Web/PWA D8 is task complete with a release hold.
 
-The next release-engineering chunk should create a Cloudflare Pages preview, verify HTTPS and app behavior from the hosted preview, confirm the canonical URL, and only then decide whether to attach `app.oldskoolai.com` and add public links from the three existing websites.
+The next release-engineering chunk should create a Cloudflare Pages preview, verify HTTPS and app behavior from the hosted preview, confirm the canonical URL from the owner-controlled domains, and only then decide whether to attach a custom domain/subdomain or add public links from the three existing websites.

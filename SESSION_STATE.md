@@ -9,7 +9,7 @@ Owner: Technical Lead
 
 Desktop Chunk D8: run the web release-candidate and cybersecurity pass before public hosting.
 
-Current result: D8 is task complete with public release still held. The browser/PWA artifact passed local clean install, audit, script tests, unit tests, production build, artifact scan, Playwright E2E, and local production-preview smoke. Next hosted-release work is Cloudflare Pages HTTPS preview, canonical URL confirmation, custom-domain smoke, and owner launch decision.
+Current result: D8 is task complete with public release still held. The browser/PWA artifact passed local clean install, audit, script tests, unit tests, production build, artifact scan, Playwright E2E, and local production-preview smoke. Next hosted-release work is Cloudflare Pages HTTPS preview, owner-confirmed canonical URL selection, custom-domain smoke, and owner launch decision.
 
 ## Files Changed In This Session
 
@@ -205,10 +205,10 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
 - Public web hosting has not been executed; Cloudflare Pages preview and HTTPS smoke have not run yet.
 - Public social launch links have not been created.
-- Canonical public URL is recommended as `https://app.oldskoolai.com/` but still needs owner confirmation before deployment.
+- Canonical public URL is not selected yet; the owner confirmed the three root websites but not `https://app.oldskoolai.com/`.
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If deployed under a subpath, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 
 ## Next Handoff
 
-Resume with Cloudflare Pages preview configuration if the owner wants hosted release engineering next: create a preview from GitHub, verify HTTPS/PWA/service-worker behavior, confirm canonical URL, then decide whether to attach `app.oldskoolai.com` and add public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before hosted preview. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D8 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, Cloudflare production hosting, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.
+Resume with Cloudflare Pages preview configuration if the owner wants hosted release engineering next: create a preview from GitHub, verify HTTPS/PWA/service-worker behavior, choose the canonical URL from the owner-controlled domains or Cloudflare Pages default URL, then decide whether to attach a custom domain/subdomain and add public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before hosted preview. Resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D8 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, Cloudflare production hosting, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, or external actions without a separately approved chunk.

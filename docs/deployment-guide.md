@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-04T20:35:49-06:00
+Status Updated: 2026-07-04T20:49:44-06:00
 
 ## Current Release State
 
@@ -39,7 +39,7 @@ Future public hosting decision:
 
 - primary host: Cloudflare Pages
 - public source/release hub: GitHub
-- recommended canonical app URL: `https://app.oldskoolai.com/`
+- canonical app URL: not selected yet; use one owner-controlled root site, subpath, Cloudflare Pages default URL, or a newly created subdomain under `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`
 - planned link sources: `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`
 - planned social link sources after release gate: YouTube, Facebook, and LinkedIn
 

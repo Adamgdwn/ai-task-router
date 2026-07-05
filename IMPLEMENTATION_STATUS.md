@@ -11,7 +11,7 @@ Desktop Chunk D8 web release-candidate security pass, building on Chunk Fifteen 
 
 Completion target: Task complete, release hold.
 
-Current state: D8 is task complete with public release still held. The browser/PWA artifact has local release-candidate evidence: clean install, dependency audit, script tests, unit tests, production build, web artifact scan, Playwright E2E, and local production-preview smoke all passed. The next hosted-release step is a Cloudflare Pages HTTPS preview and canonical URL/custom-domain smoke before public website links or social launch.
+Current state: D8 is task complete with public release still held. The browser/PWA artifact has local release-candidate evidence: clean install, dependency audit, script tests, unit tests, production build, web artifact scan, Playwright E2E, and local production-preview smoke all passed. The next hosted-release step is a Cloudflare Pages HTTPS preview and owner-confirmed canonical URL/custom-domain smoke before public website links or social launch.
 
 ## Scope
 
@@ -180,6 +180,6 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 
 ## Next Chunk
 
-Create a Cloudflare Pages preview from GitHub, verify HTTPS/PWA/service-worker behavior, confirm the canonical URL, and run hosted smoke before public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before hosted preview.
+Create a Cloudflare Pages preview from GitHub, verify HTTPS/PWA/service-worker behavior, choose the canonical URL from the owner-controlled domains or Cloudflare Pages default URL, and run hosted smoke before public links. Run Chunk Sixteen first if the owner wants documentation and polish tightened before hosted preview.
 
 Proceeding beyond D8 still requires owner approval and must not add broad filesystem permissions, arbitrary shell execution, arbitrary folder inspection, code signing, updater, provider connections, telemetry, credentials, file indexing, Cloudflare production hosting, public installer publishing, DNS changes, GitHub Release artifacts, social launch links, or external actions without a separate approved chunk.

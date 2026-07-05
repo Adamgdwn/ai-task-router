@@ -1,7 +1,7 @@
 # 2026-07-04 - Release And Security Readiness Packet
 
 Document ID: AUD-ENG-001
-Version: 1.1.0
+Version: 1.1.1
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,7 +9,7 @@ Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before public web hosting, controlled desktop beta, or social link launch
 Timestamp: 2026-07-04T19:34:29-06:00
-Last Updated: 2026-07-04T20:35:49-06:00
+Last Updated: 2026-07-04T20:49:44-06:00
 
 ## Purpose
 
@@ -104,15 +104,15 @@ Preferred first public path:
 5. `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com` link to the canonical app URL.
 6. Social posts link to a landing/explainer page or the canonical app URL only after the release gate passes.
 
-Recommended canonical URL options:
+Canonical URL options:
 
 | Option | Pros | Tradeoff |
 |---|---|---|
-| `https://app.oldskoolai.com/` | Clean app-specific URL, root scope works well for PWA/service worker, does not take over the main site. | Requires subdomain DNS and cross-site links. |
+| Newly created app subdomain under an owned domain | Clean app-specific URL, root scope works well for PWA/service worker, does not take over the main site. | Requires DNS control and owner confirmation before use. |
 | `https://oldskoolai.com/ai-task-router/` | Keeps the app visibly inside OldSkoolAI. | Requires Vite `base`, manifest `start_url`/`scope`, service-worker cache URL review. |
 | `https://tools.guidedailabs.com/ai-task-router/` | Strong Guided AI Labs brand alignment. | Same subpath/service-worker review if not root. |
 
-Recommendation: use `https://app.oldskoolai.com/` for the first public web/PWA release, then add obvious links from the three main websites.
+Owner correction: `https://app.oldskoolai.com/` is not owned or confirmed as the canonical app URL. Choose one owner-controlled root site, subpath, Cloudflare Pages default URL, or a newly created subdomain under `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com` before deployment, then add obvious links from the three main websites.
 
 Avoid deploying three independent copies unless there is a clear reason. Three copies create extra cache, service-worker, support, and version drift risk.
 
@@ -271,7 +271,7 @@ D8 result:
 
 Recommended next sequence:
 
-1. Confirm `https://app.oldskoolai.com/` or choose a subpath alternative.
+1. Confirm the canonical public app URL from the owner-controlled root sites, a subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain.
 2. Create a Cloudflare Pages preview from GitHub with build command `npm ci && npm run build` and output directory `dist`.
 3. Smoke test the HTTPS preview and public copy.
 4. Attach the canonical URL only after preview passes.
@@ -287,6 +287,7 @@ Recommended next sequence:
 | 2026-07-04T19:41:25-06:00 | `npm run test`; `npm audit --audit-level=moderate`; `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Unit suite passed with 12 files and 88 tests; audit found 0 vulnerabilities; governance reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices. |
 | 2026-07-04T20:27:56-06:00 | `npm ci`; `npm audit --audit-level=moderate`; `npm run test:scripts`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test`; local production preview smoke | passed with existing build warning | D8 local web RC pass completed. Clean install passed after stale repo-owned Vite dev/preview servers were stopped; audit found 0 vulnerabilities; script tests passed 4 tests; Vitest passed 12 files and 88 tests; build passed with the existing chunk-size warning; web RC scan passed; Playwright passed 6 Chromium tests; production preview served root, manifest, icons, and service worker. |
 | 2026-07-04T20:35:49-06:00 | D8 close-out validation | passed | Governance preflight, dependency audit, script tests, unit tests, production build, web RC scan, Playwright E2E, and whitespace check all passed; build retained the existing chunk-size warning only. |
+| 2026-07-04T20:49:44-06:00 | canonical URL owner correction | passed | Owner clarified that `https://app.oldskoolai.com/` is not owned or confirmed; the packet now keeps canonical URL selection pending and tied to owner-controlled domains or Cloudflare Pages default URL. |
 
 ## Handoff
 
