@@ -4,9 +4,9 @@ Status Updated: 2026-07-05T09:34:16-06:00
 
 ## Current Release State
 
-AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`. D16 updated the production app with the public impact insight panel.
+AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`. D16 updated the production app with the public impact insight panel. D17 added the desktop download readiness gate.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 records the [public impact insight Cloudflare update](2026-07-05-public-impact-insight-cloudflare-update.md). Social launch, custom-domain work, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 records the [public impact insight Cloudflare update](2026-07-05-public-impact-insight-cloudflare-update.md). D17 records the [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md). Social launch, custom-domain work, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -49,7 +49,7 @@ Prefer one app/tool destination linked from the Old Skool AI hub instead of thre
 
 ## Deployment Steps
 
-D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. D13 deployed the production Pages URL through Wrangler direct upload. D14 published the Old Skool AI hub and cross-site links. D16 redeployed the same production Pages URL with the public impact insight panel from source `b4daec6`. No custom domain, DNS change, social launch post, public GitHub Release, exact public savings claim, live pricing fetch, or public desktop download has been created.
+D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. D13 deployed the production Pages URL through Wrangler direct upload. D14 published the Old Skool AI hub and cross-site links. D16 redeployed the same production Pages URL with the public impact insight panel from source `b4daec6`. D17 added a desktop artifact readiness gate without publishing installers. No custom domain, DNS change, social launch post, public GitHub Release, exact public savings claim, live pricing fetch, or public desktop download has been created.
 
 Future hosted web/PWA release should use this shape:
 
@@ -86,7 +86,7 @@ npx playwright test
 
 D9 caveat: Windows `curl.exe` and PowerShell `Invoke-WebRequest` hit a TLS handshake failure against the preview alias while Node HTTPS/fetch and Chromium succeeded. Retest normal browsers and the final custom domain before public launch.
 
-Future desktop distribution is separate from web hosting. Desktop Chunk D6 added an internal unsigned Windows NSIS package path for evidence only. Desktop Chunk D10 adds a manual GitHub Actions technical-preview lane for Windows/macOS/Linux artifacts, documented in [desktop technical preview artifacts](2026-07-04-desktop-technical-preview-artifacts.md). Use [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md), [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md), and [public launch master plan](2026-07-04-public-launch-master-plan.md) before any public signing, notarization, public installers, or public download links.
+Future desktop distribution is separate from web hosting. Desktop Chunk D6 added an internal unsigned Windows NSIS package path for evidence only. Desktop Chunk D10 adds a manual GitHub Actions technical-preview lane for Windows/macOS/Linux artifacts, documented in [desktop technical preview artifacts](2026-07-04-desktop-technical-preview-artifacts.md). D17 adds `npm run desktop:gate:technical-preview` and `npm run desktop:gate:public`, documented in [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md). Use [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md), [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md), and [public launch master plan](2026-07-04-public-launch-master-plan.md) before any public signing, notarization, public installers, or public download links.
 
 Internal Windows packaging evidence command:
 
@@ -105,9 +105,10 @@ npm run desktop:package:windows:technical-preview
 npm run desktop:package:macos:technical-preview
 npm run desktop:package:linux:technical-preview
 npm run desktop:checksums
+npm run desktop:gate:technical-preview
 ```
 
-Use `.github/workflows/desktop-technical-preview.yml` for macOS and Linux artifacts because they should be built on matching OS runners. These artifacts are not public release downloads.
+Use `.github/workflows/desktop-technical-preview.yml` for macOS and Linux artifacts because they should be built on matching OS runners. These artifacts are not public release downloads. Run `npm run desktop:gate:public` only as a public-release blocker check; it should fail until platform trust evidence exists.
 
 ## Rollback
 

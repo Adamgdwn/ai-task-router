@@ -75,6 +75,9 @@ jobs:
       - name: Write SHA-256 checksums
         run: npm run desktop:checksums
 
+      - name: Check technical-preview download gate
+        run: npm run desktop:gate:technical-preview
+
       - name: Upload technical-preview artifacts
         uses: actions/upload-artifact@v4
         with:

@@ -15,6 +15,8 @@
     "desktop:package:linux:technical-preview": "tauri build --bundles appimage,deb --ci --config src-tauri/tauri.technical-preview.conf.json",
     "desktop:artifacts": "node scripts/inspect-desktop-artifacts.mjs",
     "desktop:checksums": "node scripts/inspect-desktop-artifacts.mjs --write-checksums --require-artifacts",
+    "desktop:gate:technical-preview": "node scripts/desktop-release-gate.mjs --mode technical-preview",
+    "desktop:gate:public": "node scripts/desktop-release-gate.mjs --mode public",
     "desktop:info": "tauri info",
     "detect:local-models": "node scripts/detect-local-models.mjs",
     "scan:web-rc": "node scripts/web-release-candidate-scan.mjs",

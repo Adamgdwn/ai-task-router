@@ -29,7 +29,7 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D16 public impact insight UI is deployed; social launch, custom domains, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
+Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D16 public impact insight UI is deployed; D17 desktop download readiness gate is in place; social launch, custom domains, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
 Status Updated: 2026-07-05T09:34:16-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
@@ -158,11 +158,20 @@ npm run desktop:package:windows:technical-preview
 npm run desktop:package:macos:technical-preview
 npm run desktop:package:linux:technical-preview
 npm run desktop:checksums
+npm run desktop:gate:technical-preview
 ```
 
-Windows can be built on this Windows lab. macOS and Linux packages should be built on matching OS runners, using the manual GitHub Actions workflow `Desktop Technical Preview Artifacts`. These artifacts are for owner/developer inspection only until signing, notarization, checksums, install/launch/uninstall smoke, support/withdrawal copy, and owner launch approval pass.
+Windows can be built on this Windows lab. macOS and Linux packages should be built on matching OS runners, using the manual GitHub Actions workflow `Desktop Technical Preview Artifacts`. The technical-preview gate verifies generated artifacts and checksums, then keeps public downloads held. These artifacts are for owner/developer inspection only until signing, notarization, install/launch/uninstall smoke, support/withdrawal copy, and owner launch approval pass.
 
-Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). Do not use the D9 preview alias in public links.
+Public desktop download readiness is intentionally stricter:
+
+```bash
+npm run desktop:gate:public
+```
+
+That command should fail until platform trust evidence exists.
+
+Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). Do not use the D9 preview alias in public links.
 
 Desktop prerequisites installed on this Windows machine:
 

@@ -1,8 +1,8 @@
 # 2026-07-03T11:49:34-06:00 - Start Here
 
-Last Updated: 2026-07-05T09:34:16-06:00
+Last Updated: 2026-07-05T10:07:48-06:00
 Status: draft
-Status Updated: 2026-07-05T09:34:16-06:00
+Status Updated: 2026-07-05T10:07:48-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -56,9 +56,9 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 ## Agent Handoff
 
-D16 public impact insight UI is task complete and deployed. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, the public security route is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Evidence is recorded in `docs/2026-07-05-cloudflare-production-launch-smoke.md`, `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md`, and `docs/2026-07-05-public-impact-insight-cloudflare-update.md`. The impact calculation backbone is recorded in `docs/2026-07-05-impact-estimator-methodology.md` and implemented in `src/domain/impact/impactEstimator.ts` plus `src/domain/impact/publicImpactSnapshot.ts`.
+D17 desktop download readiness gate is task complete with public download hold. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, the public security route is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. Evidence is recorded in `docs/2026-07-05-cloudflare-production-launch-smoke.md`, `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md`, `docs/2026-07-05-public-impact-insight-cloudflare-update.md`, and `docs/2026-07-05-desktop-download-readiness-gate.md`. The impact calculation backbone is recorded in `docs/2026-07-05-impact-estimator-methodology.md` and implemented in `src/domain/impact/impactEstimator.ts` plus `src/domain/impact/publicImpactSnapshot.ts`. Desktop artifact/checksum gating is implemented in `scripts/desktop-release-gate.mjs`.
 
-The next chunk should be an owner-approved social/video launch copy-review step using the now-public safe impact language, a reviewed public methodology page, an opt-in local estimator UI, or a separate desktop trust/signing chunk. Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, custom-domain/DNS changes, live pricing tables, live pricing fetches, provider connections, or exact public savings claims without a separate approved chunk and release gate evidence.
+The next chunk should be an owner-approved social/video launch copy-review step using the now-public safe impact language, a reviewed public methodology page, an opt-in local estimator UI, or a separate desktop trust/signing chunk. For desktop downloads, choose the Windows Store/MSIX versus direct signing path, confirm publisher identity, and resolve the Application Control/signing/trusted-path blocker before ordinary-user beta. Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, custom-domain/DNS changes, live pricing tables, live pricing fetches, provider connections, or exact public savings claims without a separate approved chunk and release gate evidence.
 
 Update this file only when the top-level plan or handoff point changes. Put detailed step-by-step progress in the active plan named above.
 

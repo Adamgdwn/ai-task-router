@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-05T09:34:16-06:00
+Last Updated: 2026-07-05T10:07:48-06:00
 Status: active
 Owner: Technical Lead
 
@@ -46,7 +46,7 @@ Troubleshooting:
 
 ### Public Web Release Readiness
 
-As of 2026-07-05T09:34:16-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), D13 deployed the production web/PWA app, D14 published the public hub/cross-site links, and D16 redeployed the production app with the public impact insight panel:
+As of 2026-07-05T10:07:48-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), D13 deployed the production web/PWA app, D14 published the public hub/cross-site links, D16 redeployed the production app with the public impact insight panel, and D17 added the [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md):
 
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
@@ -61,7 +61,7 @@ As of 2026-07-05T09:34:16-06:00, D7 selected the intended free distribution path
 - Exact public savings, carbon, water, or bill-reduction claims should wait for a separate source-refresh and owner-review chunk.
 - D8 added `npm run scan:web-rc` for production artifact checks.
 - D9 added hosted Playwright support through `PLAYWRIGHT_BASE_URL`.
-- D13 is the Cloudflare production launch smoke packet. D14 is the public hub and cross-site link smoke packet. D16 is the public impact insight Cloudflare update packet. The next release step is owner approval for social sharing or a separate desktop trust/signing chunk.
+- D13 is the Cloudflare production launch smoke packet. D14 is the public hub and cross-site link smoke packet. D16 is the public impact insight Cloudflare update packet. D17 is the desktop download readiness gate. The next release step is owner approval for social sharing or a separate desktop trust/signing chunk.
 
 Minimum pre-public checks:
 
@@ -118,6 +118,7 @@ npm run desktop:package:windows:technical-preview
 npm run desktop:package:macos:technical-preview
 npm run desktop:package:linux:technical-preview
 npm run desktop:checksums
+npm run desktop:gate:technical-preview
 ```
 
 Notes:
@@ -126,6 +127,9 @@ Notes:
 - Do not add these artifacts to public Old Skool AI download buttons yet.
 - Do not create public GitHub Releases from these artifacts until signing/notarization, smoke tests, support/withdrawal copy, and owner launch approval pass.
 - Each generated bundle directory should include `SHA256SUMS.txt` after `npm run desktop:checksums`.
+- `npm run desktop:gate:technical-preview` should pass only when artifacts and checksums line up; it still prints the public-download hold.
+- `npm run desktop:gate:public` should fail until platform trust evidence exists.
+- Latest local Windows technical-preview installer hash from D17: `F7086F7F4D87379111F81FC9F839C88C566B46C3F1E931280DBE1E18E4CD80B4`; installer and executable both reported `NotSigned`.
 
 ### Desktop Build Toolchain
 
