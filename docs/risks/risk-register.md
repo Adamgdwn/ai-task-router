@@ -1,6 +1,6 @@
 # Risk Register
 
-Last Updated: 2026-07-05T07:22:04-06:00
+Last Updated: 2026-07-05T07:57:15-06:00
 Status: active
 Owner: Project Owner
 
@@ -8,7 +8,7 @@ Owner: Project Owner
 
 - Tier: low for v0.2 browser MVP
 - Owner: Project Owner
-- Last reviewed: 2026-07-05T07:22:04-06:00
+- Last reviewed: 2026-07-05T07:57:15-06:00
 
 ## Key Risks
 
@@ -20,7 +20,7 @@ Owner: Project Owner
 | R-004 | Desktop app could feel invasive if it inspects local tools or folders without clear consent. | Medium | High | Desktop trust plan, confirmed D0 defaults, ADR-0001, D3 trust-boundary contract, and D4 implementation require explicit user approval, narrow allowlisted checks, summary by default, schema validation, path rejection, clear result clearing, no startup/background scans, and no broad Tauri plugin permissions. | Project Owner | Controlled for D4 |
 | R-005 | Unsigned or poorly explained desktop installers could undermine user trust or trigger platform warnings. | Medium | High | D6 documents signing requirements and creates only an internal unsigned NSIS artifact for evidence. Public desktop release remains blocked until signing/notarization where relevant, checksums, install/launch/uninstall smoke tests, Application Control behavior, and publisher identity are reviewed. | Project Owner | Controlled for D6, public release blocked |
 | R-006 | Local model discovery could leak private path or model details in logs, screenshots, or support reports. | Medium | Medium | D4 hides model names by default, rejects path details, returns no full paths, caps optional model-name details, avoids telemetry, and keeps discovery results local unless the user adds a tool or saves setup. | Project Owner | Controlled for D4 |
-| R-007 | Public website or social links could launch before the web/PWA release and cybersecurity gates pass. | Medium | High | D7 release/security readiness packet holds public launch; D8 local release-candidate evidence passed clean install, audit, tests, build, artifact scan, E2E, and local production preview; D9 hosted preview passed; D13 production URL `https://ai-task-router.pages.dev/` passed hosted smoke. Public website/social launch still waits for Old Skool AI page publication, support route confirmation, and owner approval for that public-link step. | Project Owner | Controlled for D13; public-link step pending |
+| R-007 | Public website or social links could launch before the web/PWA release and cybersecurity gates pass. | Medium | High | D7 release/security readiness packet held public launch; D8 local release-candidate evidence passed; D9 hosted preview passed; D13 production URL `https://ai-task-router.pages.dev/` passed hosted smoke; D14 published and smoked the Old Skool AI hub, public security route, and Guided AI Labs / Guided AI Journey links. Social posts remain a separate owner-approved chunk. | Project Owner | Controlled for D14; social launch held |
 | R-008 | Three independent public app copies could create service-worker, cache, version, and support drift across domains. | Medium | Medium | D13 selected one canonical Cloudflare Pages production URL, `https://ai-task-router.pages.dev/`, to be linked from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`; duplicate app deployments need explicit service-worker scope and rollback review. | Project Owner | Controlled for D13 |
 
 

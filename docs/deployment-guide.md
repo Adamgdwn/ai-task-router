@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-05T07:22:04-06:00
+Status Updated: 2026-07-05T07:57:15-06:00
 
 ## Current Release State
 
-AI Task Router's browser/PWA app is live and link-ready at `https://ai-task-router.pages.dev/`.
+AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Old Skool AI hub publication, cross-site links, social launch, custom-domain work, and public desktop downloads remain separate gated chunks.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). Social launch, custom-domain work, and public desktop downloads remain separate gated chunks.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -42,14 +42,14 @@ Future public hosting decision:
 - current hosted preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev` for historical smoke evidence only
 - canonical public hub: D12 recommends an Old Skool AI page/tab at `/ai-task-router/` with "use online" and future download choices, pending Linux-side route confirmation
 - canonical app URL: `https://ai-task-router.pages.dev/`
-- planned link sources: `oldskoolai.com` as the main hub, with `guidedailabs.com` and `guidedaijourney.com` linking there
-- planned social link sources after release gate: YouTube, Facebook, and LinkedIn
+- public link sources: `oldskoolai.com` is the main hub, with `guidedailabs.com` and `guidedaijourney.com` linking there after D14
+- planned social link sources after owner approval: YouTube, Facebook, and LinkedIn
 
-Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies. Use the [public launch master plan](2026-07-04-public-launch-master-plan.md), [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), and [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md) as the controlling release map before adding public website or social links.
+Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies. Use the [public launch master plan](2026-07-04-public-launch-master-plan.md), [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md), and [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md) as the controlling release map before adding social links or desktop downloads.
 
 ## Deployment Steps
 
-D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. D13 deployed the production Pages URL through Wrangler direct upload. No custom domain, DNS change, public website link, social launch post, public GitHub Release, or public desktop download has been created.
+D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. D13 deployed the production Pages URL through Wrangler direct upload. D14 published the Old Skool AI hub and cross-site links. No custom domain, DNS change, social launch post, public GitHub Release, or public desktop download has been created.
 
 Future hosted web/PWA release should use this shape:
 
@@ -66,7 +66,7 @@ Future hosted web/PWA release should use this shape:
 11. Confirm HTTPS and canonical URL behavior.
 12. Smoke test primary flows on desktop and mobile browsers.
 13. Confirm rollback to a previous Pages production deployment before public launch.
-14. Add public website and social links only after the final URL smoke and owner approval pass.
+14. Add social links only after the public hub smoke and owner approval pass.
 
 Local production preview command:
 

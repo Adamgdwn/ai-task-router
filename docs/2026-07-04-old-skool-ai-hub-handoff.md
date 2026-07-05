@@ -1,15 +1,15 @@
 # 2026-07-04 - Old Skool AI Hub Handoff Package
 
 Document ID: PATH-ENG-006
-Version: 0.1.0
+Version: 0.2.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
-Next Review: Before publishing Old Skool AI public hub links or desktop download buttons
-Last Updated: 2026-07-05T07:22:04-06:00
-Status Updated: 2026-07-05T07:22:04-06:00
+Next Review: Before social launch posts or desktop download buttons
+Last Updated: 2026-07-05T07:57:15-06:00
+Status Updated: 2026-07-05T07:57:15-06:00
 
 ## Purpose
 
@@ -24,6 +24,9 @@ As of 2026-07-04T22:23:04-06:00:
 - Old Skool AI is the preferred public doorway.
 - The online app has release-candidate evidence and a Cloudflare Pages smoke-test preview.
 - The D13 production URL is the first canonical public app URL: `https://ai-task-router.pages.dev/`.
+- D14 published and smoked the Old Skool AI hub at `https://oldskoolai.com/ai-task-router/`.
+- D14 published and linked the public security route at `https://oldskoolai.com/security/`.
+- Guided AI Labs and Guided AI Journey now link to the Old Skool AI hub.
 - The browser/PWA version cannot check the user's computer.
 - The desktop app is the future path for local machine discovery.
 - Desktop technical-preview artifacts are not ordinary-user downloads.
@@ -51,9 +54,9 @@ Primary page actions:
 
 | Action | Label | Target | Current state |
 |---|---|---|---|
-| Online app | `Use the online tool` | `https://ai-task-router.pages.dev/` | Ready after D13 production smoke |
+| Online app | `Use the online tool` | `https://ai-task-router.pages.dev/` | Live after D13/D14 smoke |
 | Desktop app | `Desktop app coming after safety checks` | None | Hidden or disabled |
-| Support/security | `Report a security issue` | `<PUBLIC_SUPPORT_OR_SECURITY_URL>` | Needs owner-confirmed support route |
+| Support/security | `Report a security issue` | `https://oldskoolai.com/security/` | Live after D14 smoke |
 
 Do not point public users to `https://preview-20260704-0c7b253.ai-task-router.pages.dev`. That URL is a smoke-test preview, not the public launch destination.
 
@@ -257,18 +260,18 @@ https://oldskoolai.com/ai-task-router/
 
 Before the Old Skool AI page becomes public:
 
-- [ ] The page route is confirmed.
-- [ ] The primary online button uses only the final smoked app URL: `https://ai-task-router.pages.dev/`.
-- [ ] No public link points at the D9 preview alias.
-- [ ] The page says the browser version cannot check the user's computer.
-- [ ] The page says the MVP does not connect AI provider accounts or upload files.
-- [ ] Desktop buttons are hidden or disabled.
-- [ ] No unsigned or unnotarized desktop artifacts are linked.
-- [ ] Guided AI Labs links to the Old Skool AI hub.
-- [ ] Guided AI Journey links to the Old Skool AI hub.
-- [ ] A support or security contact route is visible or linked.
-- [ ] Desktop and mobile page views are checked.
-- [ ] The page can be unpublished or the navigation link removed quickly.
+- [x] The page route is confirmed.
+- [x] The primary online button uses only the final smoked app URL: `https://ai-task-router.pages.dev/`.
+- [x] No public link points at the D9 preview alias.
+- [x] The page says the browser version cannot check the user's computer.
+- [x] The page says the MVP does not connect AI provider accounts or upload files.
+- [x] Desktop buttons are hidden or disabled.
+- [x] No unsigned or unnotarized desktop artifacts are linked.
+- [x] Guided AI Labs links to the Old Skool AI hub.
+- [x] Guided AI Journey links to the Old Skool AI hub.
+- [x] A support or security contact route is visible or linked.
+- [x] Desktop and mobile page views are checked.
+- [x] The page can be unpublished or the navigation link removed quickly.
 
 ## Rollback Or Removal
 
@@ -292,21 +295,20 @@ If only the online app URL fails after publication, keep the Old Skool AI page b
 
 These decisions remain for the next release chunk:
 
-- final Old Skool AI page route if `/ai-task-router/` does not fit the existing site
 - whether to later replace the Cloudflare Pages default URL with a custom domain
 - whether to later connect Cloudflare Pages to GitHub for production automation
-- support/security contact URL for ordinary users
-- whether the desktop section is fully hidden or shown as a disabled coming-soon section
-- owner approval to publish website links after hosted app smoke passes
+- whether to create YouTube, Facebook, or LinkedIn social launch posts
+- when to resume desktop signing/trust work for ordinary-user downloads
 
 ## Validation
 
 | Timestamp | Check | Result | Notes |
 |---|---|---|---|
 | 2026-07-04T22:30:30-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; release-boundary `rg` scans | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; scans found no stale D12-missing wording and only historical or negative-boundary references for preview URLs, unconfirmed app subdomain, and premature desktop-download claims. No app/runtime tests were run because D12 changed documentation and release-control notes only. |
+| 2026-07-05T07:57:15-06:00 | D14 public hub and cross-site link smoke | passed | Old Skool AI hub, public security route, Guided AI Labs link, and Guided AI Journey link were published and smoked on desktop/mobile. See [Public Hub And Cross-Site Link Smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). |
 
 ## Handoff
 
-D12 prepares the website package only. D13 has since selected and smoked the production online app URL: `https://ai-task-router.pages.dev/`. The next release chunk should publish or update the Old Skool AI page with that URL, confirm the support/security route, add cross-site links, and smoke the public pages before social sharing.
+D12 prepared the website package. D13 selected and smoked the production online app URL: `https://ai-task-router.pages.dev/`. D14 published and smoked the Old Skool AI page, public security route, and cross-site links. The next release chunk should be social launch copy/review or a separate desktop trust/signing chunk.
 
 Desktop download buttons remain held until the desktop trust gates pass or the owner separately accepts a documented technical-preview exception.

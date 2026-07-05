@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T22:23:04-06:00
+Last Updated: 2026-07-05T07:57:15-06:00
 Status: active
 Owner: Technical Lead
 
@@ -51,14 +51,16 @@ As of 2026-07-05T07:22:04-06:00, D7 selected the intended free distribution path
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
 - Current production app URL: `https://ai-task-router.pages.dev/`.
+- Current public hub URL: `https://oldskoolai.com/ai-task-router/`.
+- Current public security route: `https://oldskoolai.com/security/`.
 - Historical test preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
 - Use one canonical app URL and link to it from the Old Skool AI hub; D12 recommends the hub route `/ai-task-router/`, pending Linux-side route confirmation.
-- Link `guidedailabs.com` and `guidedaijourney.com` to the Old Skool AI hub rather than separate app copies.
+- Link `guidedailabs.com` and `guidedaijourney.com` to the Old Skool AI hub rather than separate app copies; D14 published and smoked those links.
 - The first canonical app URL is the Cloudflare Pages production URL; no custom domain has been attached.
-- YouTube, Facebook, and LinkedIn links should wait until the Old Skool AI hub page and cross-site links are published and smoked.
+- YouTube, Facebook, and LinkedIn links should wait for a separate owner-approved social launch copy/review chunk.
 - D8 added `npm run scan:web-rc` for production artifact checks.
 - D9 added hosted Playwright support through `PLAYWRIGHT_BASE_URL`.
-- D13 is the Cloudflare production launch smoke packet. The next release step is Old Skool AI hub publication with the D13 URL, support route confirmation, cross-site link smoke, and owner approval for social sharing.
+- D13 is the Cloudflare production launch smoke packet. D14 is the public hub and cross-site link smoke packet. The next release step is owner approval for social sharing or a separate desktop trust/signing chunk.
 
 Minimum pre-public checks:
 

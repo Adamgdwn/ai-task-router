@@ -1,7 +1,7 @@
 # 2026-07-04 - Release And Security Readiness Packet
 
 Document ID: AUD-ENG-001
-Version: 1.2.0
+Version: 1.3.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,7 +9,7 @@ Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before custom domain, controlled desktop beta, or social link launch
 Timestamp: 2026-07-04T19:34:29-06:00
-Last Updated: 2026-07-05T07:22:04-06:00
+Last Updated: 2026-07-05T07:57:15-06:00
 
 ## Purpose
 
@@ -58,11 +58,11 @@ Recommended release shape:
 |---|---|---|
 | Hosted app | Use Cloudflare Pages as the primary public host for the web/PWA build. | D13 production URL live and smoked at `https://ai-task-router.pages.dev/` |
 | Canonical URL | Use one canonical app URL and link to it from all three websites to avoid duplicate service-worker scopes and stale builds. | D13 selected `https://ai-task-router.pages.dev/` |
-| Existing websites | Add clear calls to action on `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com` that point to the canonical app URL. | Planned |
+| Existing websites | Add clear calls to action on `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com` that point to the public hub or canonical app URL. | D14 live and smoked through the Old Skool AI hub |
 | GitHub | Keep the repo public and use GitHub Releases later for signed desktop artifacts, checksums, and release notes. | Planned |
 | GitHub Pages | Keep as a fallback static host if Cloudflare Pages is delayed. | Fallback |
 | Desktop downloads | Do not publish until signing, checksum, install/launch/uninstall smoke, local discovery smoke, and support/withdrawal checks pass. | Blocked |
-| Social channels | Share only after the Old Skool AI hub page and cross-site links are published and smoked. | Blocked |
+| Social channels | Share only after owner-reviewed copy and channel-specific launch approval. | Not created |
 
 The safest first public release is the hosted browser/PWA version. The desktop version should remain unavailable to ordinary users until a signed Windows beta path is proven.
 
@@ -230,7 +230,7 @@ Desktop download pages must also include:
 
 | Blocker | Impact | Next move |
 |---|---|---|
-| Old Skool AI public hub and cross-site link smoke are not complete. | Do not launch social links yet. | Publish/update the hub page with `https://ai-task-router.pages.dev/`, confirm support route, add cross-site links, and smoke public pages. |
+| Old Skool AI public hub and cross-site link smoke are complete. | Social links still need owner-reviewed copy and launch approval. | Use [Public Hub And Cross-Site Link Smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md) as the current public doorway evidence. |
 | Cloudflare Pages project is not connected to GitHub yet. | Production release automation/traceability could be improved. | D13 accepted direct upload for the first production web release; consider GitHub integration as future hardening. |
 | Windows Application Control still blocks unsigned executable/test runs. | Desktop discovery smoke cannot be claimed on current lab setup. | Resolve through approved lab policy, signing, or trusted path. |
 | Desktop installer is unsigned. | Not suitable for ordinary-user download. | Choose Store/MSIX or direct signing path, then sign before beta. |
@@ -322,7 +322,17 @@ Decision packet:
 
 Release decision: web/PWA link-ready.
 
-Reason: The Cloudflare Pages production URL `https://ai-task-router.pages.dev/` passed local and hosted release gates. Public website/social launch still waits for Old Skool AI hub publication, support route confirmation, cross-site link smoke, and owner approval for that public-link step.
+Reason: The Cloudflare Pages production URL `https://ai-task-router.pages.dev/` passed local and hosted release gates. D14 later published and smoked the Old Skool AI hub, support/security route, and Guided AI Labs/Journey cross-site links. Social launch still waits for owner-reviewed copy and channel-specific approval.
+
+## D14 Decision
+
+D14 status: Task complete as public hub and cross-site link smoke.
+
+Decision packet:
+
+- [Public Hub And Cross-Site Link Smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md)
+
+Reason: The public web doorway is live at `https://oldskoolai.com/ai-task-router/`, points to the app at `https://ai-task-router.pages.dev/`, exposes support/security copy at `https://oldskoolai.com/security/`, and is linked from Guided AI Labs and Guided AI Journey. Public desktop downloads, social posts, custom-domain/DNS work, GitHub Releases, signing/updater, provider connections, telemetry, and backend/storage remain separate gated chunks.
 
 ## Validation
 

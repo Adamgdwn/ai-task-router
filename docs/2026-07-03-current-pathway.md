@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-05T07:22:04-06:00
-Status Updated: 2026-07-05T07:22:04-06:00
+Last Updated: 2026-07-05T07:57:15-06:00
+Status Updated: 2026-07-05T07:57:15-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -21,7 +21,7 @@ The current product source is [docs/PRODUCT_BRIEF.md](PRODUCT_BRIEF.md), derived
 
 ## Future Distribution Note
 
-Reference only as of 2026-07-05T07:22:04-06:00: the owner wants Old Skool AI to be the primary public product/download hub, with `guidedailabs.com` and `guidedaijourney.com` linking there. The owner also wants Windows, Mac, and Linux downloads as soon as possible. D10 adds a manual technical-preview artifact lane for Windows/macOS/Linux builds, but public ordinary-user desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner launch approval pass. D11 adds the public launch master plan in [docs/2026-07-04-public-launch-master-plan.md](2026-07-04-public-launch-master-plan.md), making the Old Skool AI hub, hosted web/PWA, desktop trust gates, support/withdrawal needs, and go/no-go board the controlled release map. D12 adds the [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md) with Linux-side page copy, cross-site links, held desktop-download copy, publish checklist, and rollback notes. D13 adds the [Cloudflare Production Launch Smoke](2026-07-05-cloudflare-production-launch-smoke.md), selecting and smoking `https://ai-task-router.pages.dev/` as the first canonical online app URL. D9's preview alias remains historical smoke evidence only and must not be used in public links.
+Reference only as of 2026-07-05T07:57:15-06:00: the owner wants Old Skool AI to be the primary public product/download hub, with `guidedailabs.com` and `guidedaijourney.com` linking there. The owner also wants Windows, Mac, and Linux downloads as soon as possible. D10 adds a manual technical-preview artifact lane for Windows/macOS/Linux builds, but public ordinary-user desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner launch approval pass. D11 adds the public launch master plan in [docs/2026-07-04-public-launch-master-plan.md](2026-07-04-public-launch-master-plan.md), making the Old Skool AI hub, hosted web/PWA, desktop trust gates, support/withdrawal needs, and go/no-go board the controlled release map. D12 adds the [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md) with Linux-side page copy, cross-site links, held desktop-download copy, publish checklist, and rollback notes. D13 adds the [Cloudflare Production Launch Smoke](2026-07-05-cloudflare-production-launch-smoke.md), selecting and smoking `https://ai-task-router.pages.dev/` as the first canonical online app URL. D14 adds the [Public Hub And Cross-Site Link Smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md), publishing the Old Skool AI hub, public security route, and Guided AI Labs / Guided AI Journey links. D9's preview alias remains historical smoke evidence only and must not be used in public links.
 
 ## Future Desktop Trust Note
 
@@ -125,6 +125,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Night closeout documentation sweep | task complete | 2026-07-04T22:43:52-06:00 | Technical Lead | Updated the token-friendly startup handoff, recorded the DirectLink assumption that Adam will ensure Linux reads the sent handoff, updated implementation status and work tracking, and left D13 intentionally paused. |
 | AI environmental impact information session | draft complete | 2026-07-04T23:38:12-06:00 | Technical Lead | Added [AI Environmental Impact Information Session](2026-07-04-ai-environmental-impact-information-session.md) with researched energy/water anchors, right-sizing formulas, novice/intermediate/heavy-user scenarios, scale framing, source caveats, and safe claim language. This is an internal draft, not public marketing copy or release approval. |
 | Desktop Chunk D13 Cloudflare production launch smoke | task complete, web/PWA link-ready | 2026-07-05T07:22:04-06:00 | Technical Lead | Added [Cloudflare Production Launch Smoke](2026-07-05-cloudflare-production-launch-smoke.md), selected `https://ai-task-router.pages.dev/` as the first canonical online app URL, accepted Wrangler direct upload for this production web chunk, deployed branch `main` from source `af2b367`, reran local and hosted web/PWA gates, and kept Old Skool AI page publication, social launch, custom domains, GitHub Releases, and public desktop downloads gated. |
+| Desktop Chunk D14 public hub and cross-site link smoke | task complete, public web doorway live | 2026-07-05T07:57:15-06:00 | Technical Lead | Added [Public Hub And Cross-Site Link Smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md), published the Old Skool AI `AI Task Router` hub at `https://oldskoolai.com/ai-task-router/`, added the public security route at `https://oldskoolai.com/security/`, linked Guided AI Labs and Guided AI Journey to the hub, and smoked public desktop/mobile pages while keeping social posts and desktop downloads gated. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -3284,10 +3285,71 @@ Stop condition:
 
 Stop if the production URL fails hosted E2E, serves missing PWA assets, registers an unexpected service-worker scope, makes unexpected external requests on load, or if the chunk starts to include DNS, social launch, desktop downloads, GitHub Releases, signing, or website edits.
 
+## Desktop Chunk D14 - Public Hub And Cross-Site Link Smoke
+
+Status: task complete, public web doorway live
+Status Updated: 2026-07-05T07:57:15-06:00
+
+Completion target: Task complete
+
+Budget class: Medium
+
+Objective:
+
+Publish and smoke the public Old Skool AI doorway for AI Task Router, add the Guided AI Labs and Guided AI Journey cross-site links, and keep social/desktop release gates separate.
+
+User outcome:
+
+Public users can find the AI Task Router hub from Old Skool AI, Guided AI Labs, and Guided AI Journey, then launch the browser/PWA app from the smoked Cloudflare Pages URL.
+
+Allowed files or folders:
+
+- `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md`
+- `docs/2026-07-04-public-launch-master-plan.md`
+- `docs/2026-07-04-old-skool-ai-hub-handoff.md`
+- `docs/2026-07-03-current-pathway.md`
+- `docs/deployment-guide.md`
+- `docs/runbook.md`
+- `docs/risks/risk-register.md`
+- `docs/CHANGELOG.md`
+- `START_HERE.md`
+- public website repos named in the D12/D14 handoff
+
+Non-goals:
+
+- no social launch posts
+- no public desktop download buttons
+- no custom app domain or DNS change
+- no public GitHub Release
+- no desktop signing workflow
+- no macOS notarization workflow
+- no provider connections, telemetry, backend storage, lead capture, or execution workflow
+
+Implementation:
+
+- Updated `oldskoolai.com` so `/ai-task-router/` links to `https://ai-task-router.pages.dev/`.
+- Added `https://oldskoolai.com/security/` as a public support/security route.
+- Added a Guided AI Labs footer link to `https://oldskoolai.com/ai-task-router/`.
+- Added a Guided AI Journey footer link to `https://oldskoolai.com/ai-task-router/` through an isolated worktree based on `origin/main`, so pre-existing local unpushed commit `236fd7e` was not published.
+- Deployed Guided AI Journey production through the correct Vercel project and smoked the live alias.
+
+Release decision:
+
+The public web doorway is live. Social launch remains held for a separate owner-approved copy/review chunk. Public desktop downloads remain held until desktop trust gates pass.
+
+Rollback or recovery:
+
+Revert `oldskoolai.com` commit `8be9b86`, Guided AI Labs commit `dc370e5`, and/or Guided AI Journey commit `610438b`, then let Vercel redeploy or manually promote a previous Guided AI Journey deployment. If the Cloudflare app URL fails, remove or disable the Old Skool AI online-app target until D13 rollback is complete.
+
+Stop condition:
+
+Stop if public pages point at the D9 preview alias, expose desktop artifacts, imply browser local discovery, fail desktop/mobile smoke, or if the chunk starts creating social posts, DNS/custom-domain changes, GitHub Releases, signing, or desktop downloads.
+
 ## Validation Log
 
 | Timestamp | Command | Result | Notes |
 |-----------|---------|--------|-------|
+| 2026-07-05T07:57:15-06:00 | Old Skool AI, Guided AI Labs, and Guided AI Journey site validation; public HTTP smoke; desktop/mobile Chromium smoke; public boundary sweep | passed | D14 validation passed. Old Skool AI typecheck/lint/build passed; Guided AI Labs lint/build passed before and after rebase over remote; Guided AI Journey isolated temp worktree clean install/typecheck/lint/build passed with the existing repo-local env loaded for build. Public URLs returned 200; desktop/mobile Chromium confirmed expected text and links with 0 horizontal overflow; HTML sweep found no D9 preview alias or public desktop artifact strings. |
 | 2026-07-05T07:30:44-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; release-boundary `rg` scans | passed | Final D13 documentation close-out validation passed. Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; scans found no stale canonical-URL-pending, preview-command, premature desktop-download, or install-safety wording in active release docs. |
 | 2026-07-05T07:22:04-06:00 | `npm ci`; `npm audit --audit-level=moderate`; `npm run test:scripts`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test`; `bash scripts/governance-preflight.sh`; Cloudflare production deploy; hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test`; hosted asset checks; Windows `curl.exe`; PowerShell `Invoke-WebRequest`; Chromium metadata/network smoke | passed with existing build warning | D13 validation passed. Clean install, audit, script tests, unit tests, production build, web RC scan, local Playwright, and governance preflight passed; build retained the existing 519.84 kB Vite warning. Wrangler direct-upload deployed production branch `main` from source `af2b367`; `https://ai-task-router.pages.dev/` plus manifest, service worker, and PWA icons returned 200; hosted Playwright passed 6 Chromium tests; Windows `curl.exe` and PowerShell returned 200; Chromium smoke found title `AI Task Router | Guided AI Labs`, first heading `AI Task Router`, manifest `/manifest.webmanifest`, service-worker scope at the production root, and 0 observed external requests. |
 | 2026-07-04T23:38:12-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; claim-boundary `rg` scan | passed | AI environmental impact information-session draft validation passed. Governance preflight reported 0 warnings; whitespace check passed; scan confirmed the new document frames fixed savings, exact savings, and public proof as caveats rather than promises. No app/runtime tests were run because this changed documentation only. |
@@ -3428,8 +3490,8 @@ Stop if the production URL fails hosted E2E, serves missing PWA assets, register
 
 ## Next Handoff
 
-D13 is task complete. The public launch master plan is [docs/2026-07-04-public-launch-master-plan.md](2026-07-04-public-launch-master-plan.md), the Old Skool AI hub handoff package is [docs/2026-07-04-old-skool-ai-hub-handoff.md](2026-07-04-old-skool-ai-hub-handoff.md), and the Cloudflare production evidence packet is [docs/2026-07-05-cloudflare-production-launch-smoke.md](2026-07-05-cloudflare-production-launch-smoke.md). The web/PWA app is live and link-ready at `https://ai-task-router.pages.dev/`. Do not point public users at the D9 preview alias. Do not publish or share unsigned/unnotarized desktop artifacts with non-technical users. Do not create public GitHub Releases, custom-domain/DNS changes, public desktop downloads, social launch posts, updater flows, or signing workflows without a separate approved chunk and release gate evidence.
+D14 is task complete. The public launch master plan is [docs/2026-07-04-public-launch-master-plan.md](2026-07-04-public-launch-master-plan.md), the Old Skool AI hub handoff package is [docs/2026-07-04-old-skool-ai-hub-handoff.md](2026-07-04-old-skool-ai-hub-handoff.md), the Cloudflare production evidence packet is [docs/2026-07-05-cloudflare-production-launch-smoke.md](2026-07-05-cloudflare-production-launch-smoke.md), and the public hub evidence packet is [docs/2026-07-05-public-hub-and-cross-site-link-smoke.md](2026-07-05-public-hub-and-cross-site-link-smoke.md). The web/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, and the public security route is live at `https://oldskoolai.com/security/`. Do not point public users at the D9 preview alias. Do not publish or share unsigned/unnotarized desktop artifacts with non-technical users. Do not create public GitHub Releases, custom-domain/DNS changes, public desktop downloads, social launch posts, updater flows, or signing workflows without a separate approved chunk and release gate evidence.
 
-Recommended next sequence: publish or update the Old Skool AI `AI Task Router` hub page using the D12 copy and the D13 app URL, confirm the public support/security route, add the Guided AI Labs and Guided AI Journey cross-site links, smoke the public pages on desktop and mobile, and only then decide whether to create YouTube, Facebook, or LinkedIn launch posts. Keep desktop download buttons hidden or disabled until signing and safety checks pass. Resolve the Windows Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness.
+Recommended next sequence: run an owner-approved social launch copy/review chunk for YouTube, Facebook, and/or LinkedIn, or switch to a separate desktop trust/signing chunk. Keep desktop download buttons hidden or disabled until signing and safety checks pass. Resolve the Windows Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness.
 
 Preserve the conversational UX direction now covered by E2E: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, optional desktop-only `Check this computer`, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options, Decision Card, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not expand local discovery into broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, packaging, signing, updater, or execution workflows without a separate approved chunk.
