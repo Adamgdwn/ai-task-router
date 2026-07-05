@@ -3,11 +3,15 @@ import {
   serializePromptPackageMarkdown,
   serializeRouteCardMarkdown,
 } from "../../domain/export/exportImport";
+import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import type { PromptPackage, PromptStep, RouteCard, RouteOption, RouteStep } from "../../domain/types";
 import type { RouteArtifactsController } from "../state/useRouteArtifacts";
+import { ImpactInsightPanel } from "./ImpactInsightPanel";
 import { ScreenHeader } from "./SetupScreens";
 import type { ScreenDefinition } from "./screenDefinitions";
 import { StageGuidancePanel } from "./StageGuidancePanel";
+
+const publicImpactSnapshot = buildDefaultPublicImpactSnapshot();
 
 type RouteArtifactScreenProps = {
   definition: ScreenDefinition;
@@ -18,6 +22,7 @@ type RouteArtifactScreenProps = {
 export function SavedRouteCardScreen({ definition, artifacts, onOpenTaskIntake }: RouteArtifactScreenProps) {
   const routeCard = artifacts.selectedRouteCard;
   const promptPackage = artifacts.selectedPromptPackage;
+  const recommendedRoute = routeCard ? recommendedOptionFor(routeCard) : null;
   const routeCardMarkdown = useMemo(() => {
     if (!routeCard || !promptPackage) {
       return "";
@@ -35,15 +40,18 @@ export function SavedRouteCardScreen({ definition, artifacts, onOpenTaskIntake }
 
       {routeCard && promptPackage ? (
         <div className="artifactStack">
+          <RouteReportHeader routeCard={routeCard} />
           <RouteCardSummary routeCard={routeCard} />
           <StageGuidancePanel
             stages={routeCard.stageGuidance}
             lead="These rough stages were saved with the decision card so the route stays easy to follow later."
           />
+          <ImpactInsightPanel recommended={recommendedRoute ?? undefined} snapshot={publicImpactSnapshot} />
           <MarkdownExportPanel
             copyLabel="Route card Markdown"
             downloadName={artifactFileName("route-card", routeCard.title, routeCard.id)}
             markdown={routeCardMarkdown}
+            onPrintReport={printRouteReport}
             previewLabel="Prepared route card Markdown"
             artifacts={artifacts}
           />
@@ -84,6 +92,16 @@ export function SavedPromptPackageScreen({ definition, artifacts, onOpenTaskInta
         </div>
       ) : null}
     </article>
+  );
+}
+
+function RouteReportHeader({ routeCard }: { routeCard: RouteCard }) {
+  return (
+    <section aria-hidden="true" className="printOnly routeReportHeader">
+      <p>AI Task Router report</p>
+      <h2>{routeCard.title}</h2>
+      <span>Prepared locally on this device. No provider calls were made by this app.</span>
+    </section>
   );
 }
 
@@ -247,12 +265,14 @@ function MarkdownExportPanel({
   copyLabel,
   downloadName,
   markdown,
+  onPrintReport,
   previewLabel,
 }: {
   artifacts: RouteArtifactsController;
   copyLabel: string;
   downloadName: string;
   markdown: string;
+  onPrintReport?: () => void;
   previewLabel: string;
 }) {
   return (
@@ -272,6 +292,11 @@ function MarkdownExportPanel({
         <a download={downloadName} href={markdownDownloadHref(markdown)}>
           Download Markdown
         </a>
+        {onPrintReport ? (
+          <button disabled={!markdown} onClick={onPrintReport} type="button">
+            Save PDF report
+          </button>
+        ) : null}
       </div>
       <span aria-live="polite" role="status">
         {artifacts.copyMessage}
@@ -476,8 +501,8 @@ function ArtifactList({ emptyLabel, items }: { emptyLabel: string; items: string
 
   return (
     <ul>
-      {items.map((item) => (
-        <li key={item}>{item}</li>
+      {items.map((item, itemIndex) => (
+        <li key={`${item}-${itemIndex}`}>{item}</li>
       ))}
     </ul>
   );
@@ -512,6 +537,12 @@ function artifactFileName(prefix: string, title: string, id: string) {
     .slice(0, 60);
 
   return `${prefix}-${safeLabel || id}.md`;
+}
+
+function printRouteReport() {
+  if (typeof window.print === "function") {
+    window.print();
+  }
 }
 
 function inlineList(values: readonly string[]) {

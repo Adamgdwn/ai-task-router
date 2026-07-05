@@ -82,6 +82,10 @@ img {
   max-width: 100%;
 }
 
+.printOnly {
+  display: none;
+}
+
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
@@ -2235,5 +2239,137 @@ button:focus-visible {
 
   .setupRecord {
     padding: 12px;
+  }
+}
+
+@media print {
+  @page {
+    margin: 0.55in;
+  }
+
+  :root,
+  body {
+    background: #ffffff;
+    color: #111820;
+  }
+
+  body {
+    min-width: 0;
+  }
+
+  .appShell,
+  .workspace,
+  .screenPanel,
+  .artifactPanel,
+  .artifactStack {
+    background: #ffffff;
+    display: block;
+    min-height: auto;
+    padding: 0;
+  }
+
+  .sideRail,
+  .boundaryStrip,
+  .artifactToolbar,
+  .localExportPanel,
+  .artifactPanel > .screenKicker,
+  .artifactPanel > #screen-title,
+  .artifactPanel > .screenSummary {
+    display: none !important;
+  }
+
+  .printOnly {
+    display: block !important;
+  }
+
+  .routeReportHeader {
+    border-bottom: 2px solid #111820;
+    margin: 0 0 16px;
+    padding: 0 0 12px;
+  }
+
+  .routeReportHeader p {
+    color: #0b6f8f;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    margin: 0 0 4px;
+    text-transform: uppercase;
+  }
+
+  .routeReportHeader h2 {
+    color: #111820;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    margin: 0 0 6px;
+  }
+
+  .routeReportHeader span {
+    color: #3f4e59;
+    display: block;
+    line-height: 1.4;
+  }
+
+  .artifactSummaryBand,
+  .stageGuidanceList li,
+  .impactSection,
+  .artifactRouteOption,
+  .routingSection,
+  .warningList,
+  .blockedList {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .artifactSummaryBand,
+  .stageGuidanceList li,
+  .artifactRouteOption {
+    box-shadow: none;
+  }
+
+  .artifactSummaryBand,
+  .resultSummaryBand {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+
+  .routingSection,
+  .impactSection {
+    border-color: #9eacb6;
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+
+  .impactSection {
+    grid-template-columns: 1fr;
+  }
+
+  .stageGuidanceList,
+  .impactMetricGrid,
+  .artifactMetricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .artifactTwoColumn {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .routeCardHeader span,
+  .stageGuidanceList dd,
+  .approvalRequiredPill,
+  .approvalNotRequiredPill {
+    border-radius: 4px;
+  }
+
+  .impactDetails:not([open]) > :not(summary) {
+    display: block;
+  }
+
+  .impactSourceLinks {
+    columns: 1;
+  }
+
+  a {
+    color: #111820;
+    text-decoration: none;
   }
 }

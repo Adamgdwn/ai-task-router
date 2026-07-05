@@ -531,7 +531,12 @@ describe("App", () => {
   it("shows saved route cards with local copy and Markdown download preparation", async () => {
     const user = userEvent.setup();
     const clipboardWriteText = vi.fn().mockResolvedValue(undefined);
+    const printReport = vi.fn();
     installClipboardMock(clipboardWriteText);
+    Object.defineProperty(window, "print", {
+      configurable: true,
+      value: printReport,
+    });
 
     render(<App store={await buildRouteReadyTestStore()} />);
 
@@ -546,6 +551,8 @@ describe("App", () => {
     expect(screen.getByText("Options and tradeoffs")).toBeInTheDocument();
     expect(screen.getByText("Left out for safety")).toBeInTheDocument();
     expect(screen.getByText("Warnings")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Every task is a chance to build better AI judgment." })).toBeInTheDocument();
+    expect(screen.getByText("100k-token example")).toBeInTheDocument();
 
     const markdownPreview = screen.getByLabelText("Prepared route card Markdown") as HTMLTextAreaElement;
     expect(markdownPreview.value).toContain("# Route card: Draft public-facing copy");
@@ -556,6 +563,9 @@ describe("App", () => {
     const downloadLink = screen.getByRole("link", { name: "Download Markdown" });
     expect(downloadLink).toHaveAttribute("download", expect.stringMatching(/^route-card-.*\.md$/));
     expect(downloadLink.getAttribute("href")).toContain("data:text/markdown;charset=utf-8");
+
+    await user.click(screen.getByRole("button", { name: "Save PDF report" }));
+    expect(printReport).toHaveBeenCalledTimes(1);
 
     await user.click(screen.getByRole("button", { name: "Copy Route card Markdown" }));
 
