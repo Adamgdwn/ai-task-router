@@ -1,15 +1,15 @@
 # 2026-07-04 - Public Launch Master Plan
 
 Document ID: PATH-ENG-005
-Version: 0.1.0
+Version: 0.2.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before public Old Skool AI links, canonical-domain DNS work, public GitHub Releases, or desktop download buttons
-Last Updated: 2026-07-04T22:10:36-06:00
-Status Updated: 2026-07-04T22:10:36-06:00
+Last Updated: 2026-07-04T22:30:30-06:00
+Status Updated: 2026-07-04T22:30:30-06:00
 
 ## Purpose
 
@@ -31,6 +31,7 @@ As of 2026-07-04T22:10:36-06:00:
 - macOS and Linux technical-preview artifact workflows are ready, but remote artifacts have not been generated in this repo yet.
 - Public desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner approval pass.
 - The owner preference is one Old Skool AI public hub/tab, with `guidedailabs.com` and `guidedaijourney.com` linking to that hub.
+- D12 adds the [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md), including page structure, plain-language copy, cross-site link instructions, held desktop-download copy, and rollback notes.
 
 ## Launch Principles
 
@@ -89,6 +90,8 @@ Completion target:
 
 ### Phase 1 - Old Skool AI Hub Handoff
 
+Status: complete as of D12; see [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md).
+
 Goal:
 
 Prepare the Linux-side website instructions for the Old Skool AI product tab/page and cross-site links.
@@ -112,10 +115,10 @@ Out of scope:
 
 Acceptance criteria:
 
-- Old Skool AI page content distinguishes online app from future desktop app.
-- Copy says the browser version does not check the user's computer.
-- Desktop download area says downloads are coming after signing and safety checks, unless a separate owner-approved technical-preview exception is recorded.
-- The other two sites link to the Old Skool AI hub rather than hosting separate copies.
+- [x] Old Skool AI page content distinguishes online app from future desktop app.
+- [x] Copy says the browser version does not check the user's computer.
+- [x] Desktop download area says downloads are coming after signing and safety checks, unless a separate owner-approved technical-preview exception is recorded.
+- [x] The other two sites link to the Old Skool AI hub rather than hosting separate copies.
 
 ### Phase 2 - Cloudflare Production Path Decision
 
@@ -316,12 +319,12 @@ It should not say:
 
 | Gate | Owner | Status | Evidence needed |
 |---|---|---|---|
-| Old Skool AI hub route chosen | Project Owner | pending | Owner confirms page/tab and link structure |
+| Old Skool AI hub route chosen | Project Owner | partial | D12 recommends `/ai-task-router/`; owner or Linux-side site builder must confirm actual route before publication |
 | Canonical online app URL chosen | Project Owner | pending | URL decision and hosted smoke |
 | Cloudflare release process chosen | Technical Lead / Project Owner | pending | GitHub-connected Pages or direct-upload release process |
 | Web/PWA release gate | Technical Lead | pending | D8/D9 checks rerun against final URL |
-| Public copy review | Project Owner | pending | Hub copy and app boundary copy approved |
-| Support/security route | Project Owner / Technical Lead | partial | `SECURITY.md` exists; public support copy still needed |
+| Public copy review | Project Owner | partial | D12 supplies ready-to-use hub copy; owner must approve before publication |
+| Support/security route | Project Owner / Technical Lead | partial | `SECURITY.md` exists; public support URL/contact still needed for the hub |
 | Desktop product name | Project Owner | pending | Name recorded before signing |
 | Desktop legal publisher | Project Owner | pending | Publisher identity recorded before signing |
 | Windows trust path | Project Owner / Technical Lead | pending | Store/MSIX or signed installer decision |
@@ -332,23 +335,25 @@ It should not say:
 
 ## Immediate Next Chunk Recommendation
 
-Run D12 as the Old Skool AI hub handoff package:
+Run D13 as the canonical online app URL and Cloudflare production-path decision:
 
-- create the exact page/tab instructions for the Linux-side website
-- provide approved placeholder copy for online use and held desktop downloads
-- document where `guidedailabs.com` and `guidedaijourney.com` should link
-- keep the desktop download buttons hidden or explicitly "coming after signing and safety checks"
-- do not make DNS, Cloudflare production, GitHub Release, or public desktop artifact changes in the same chunk
+- choose the first public app destination linked from the Old Skool AI hub
+- decide between Cloudflare Pages GitHub integration and documented Wrangler direct-upload production release
+- promote or deploy to the chosen destination only after the decision is recorded
+- rerun the web/PWA release gate against the final URL
+- keep desktop download buttons hidden or disabled until desktop gates pass
+- do not create public GitHub Releases, social launch posts, or public desktop artifact links in the same chunk
 
 ## Validation
 
 | Timestamp | Check | Result | Notes |
 |---|---|---|---|
+| 2026-07-04T22:30:30-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; release-boundary `rg` scans; D12 handoff presence scan | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; scans found no stale D12-not-created wording and only historical or negative-boundary references for preview URLs, unconfirmed app subdomain, and premature desktop-download claims; D12 handoff doc exists and names D13 as the next release-engineering chunk. No app/runtime tests were run because D12 changed documentation and release-control notes only. |
 | 2026-07-04T22:10:36-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; text scan for unconfirmed URL and premature desktop-download claims | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; text scan found only correction/negative-boundary references for `app.oldskoolai.com`, "public desktop downloads are ready", and "safe to install". |
 | 2026-07-04T22:03:36-06:00 | `bash scripts/governance-preflight.sh` | passed | Governance preflight reported 0 warnings before D11 planning work. |
 
 ## Handoff
 
-D11 creates the public launch master plan only. It does not launch the app publicly, change DNS, connect Cloudflare production to GitHub, create GitHub Releases, run desktop technical-preview workflows, sign installers, notarize macOS artifacts, or add public desktop download links.
+D12 creates the Old Skool AI hub handoff package only. It does not publish the website page, launch the app publicly, change DNS, connect Cloudflare production to GitHub, create GitHub Releases, run desktop technical-preview workflows, sign installers, notarize macOS artifacts, or add public desktop download links.
 
-The next safest execution chunk is D12 Old Skool AI hub handoff. Public web launch should wait until the canonical URL and Cloudflare production path are chosen and smoked. Public desktop downloads should wait until platform trust gates pass or a separately documented technical-preview exception is approved.
+The next safest execution chunk is D13 canonical online app URL and Cloudflare production-path decision. Public web launch should wait until the final URL is selected, deployed/promoted, and smoked. Public desktop downloads should wait until platform trust gates pass or a separately documented technical-preview exception is approved.

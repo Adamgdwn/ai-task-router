@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.12.0
+Version: 0.13.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before public website download links, signing work, or controlled desktop beta work
-Last Updated: 2026-07-04T22:10:36-06:00
-Status Updated: 2026-07-04T22:10:36-06:00
+Last Updated: 2026-07-04T22:23:04-06:00
+Status Updated: 2026-07-04T22:23:04-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence. D9 creates and smokes the Cloudflare Pages hosted preview. D10 adds a manual GitHub Actions technical-preview artifact lane for Windows, macOS, and Linux, plus checksum generation, and locally verifies the Windows technical-preview NSIS package while holding public desktop downloads until signing/notarization and smoke gates pass. D11 adds the public launch master plan so Old Skool AI hub work, hosted web/PWA release, desktop trust gates, cybersecurity checks, support/withdrawal needs, and go/no-go decisions are controlled before public distribution. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence. D9 creates and smokes the Cloudflare Pages hosted preview. D10 adds a manual GitHub Actions technical-preview artifact lane for Windows, macOS, and Linux, plus checksum generation, and locally verifies the Windows technical-preview NSIS package while holding public desktop downloads until signing/notarization and smoke gates pass. D11 adds the public launch master plan so Old Skool AI hub work, hosted web/PWA release, desktop trust gates, cybersecurity checks, support/withdrawal needs, and go/no-go decisions are controlled before public distribution. D12 adds the Old Skool AI hub handoff package with web page copy, cross-site link instructions, held desktop-download copy, and rollback notes. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
 
 ## Purpose
 
@@ -1280,12 +1280,35 @@ D11 result:
 - Kept public desktop downloads held until signing/notarization, checksum, platform smoke, support/withdrawal copy, and owner launch approval pass.
 - Recommended D12 as the Old Skool AI hub handoff package, not a DNS, GitHub Release, social launch, or desktop download chunk.
 
+### Desktop Chunk D12 - Old Skool AI Hub Handoff Package
+
+Status: task complete, release hold
+
+Status Updated: 2026-07-04T22:23:04-06:00
+
+Decision packet:
+
+- [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md)
+
+D12 result:
+
+- Prepared the Linux-side Old Skool AI page/tab handoff for `AI Task Router`.
+- Recommended `/ai-task-router/` as the Old Skool AI hub route, subject to the existing site router.
+- Supplied public copy for the hero, online tool, trust notes, desktop hold state, SEO metadata, and cross-site links from Guided AI Labs and Guided AI Journey.
+- Blocked use of the D9 preview alias as a public destination.
+- Kept Windows, Mac, and Linux desktop downloads hidden or disabled until platform trust gates pass.
+- Added rollback/removal instructions for the hub page and cross-site links.
+
+D12 release decision:
+
+Hold public launch. The page package is ready for Linux-side implementation, but publication still waits for canonical app URL selection, hosted smoke, support route confirmation, copy approval, and owner launch approval. Desktop download buttons remain held until signing/notarization, checksum, smoke, support/withdrawal, and owner desktop approval pass.
+
 ## Open Decisions
 
-- Canonical public hub: owner preference is an Old Skool AI tab/page that links from the other two sites and eventually contains both "use online" and desktop download choices.
+- Canonical public hub: D12 recommends an Old Skool AI page/tab at `/ai-task-router/`; the Linux-side site builder or owner must confirm the actual route before publication.
 - Hosted app placement from the Old Skool AI hub: pending; choose subpath embed/link, Cloudflare Pages default URL, or a newly created subdomain under an owned domain.
 - Cloudflare production release path: decide whether to connect the Pages project to GitHub before production or accept a documented Wrangler direct-upload release process.
-- Whether to run the D10 manual workflow now for internal technical-preview artifacts.
+- Whether to run the D10 manual workflow now for internal technical-preview artifacts only.
 - Whether the owner wants to explicitly accept a technical-preview exception before public signing/notarization gates, or keep downloads internal until the gates pass.
 - Canonical product name for the desktop app.
 - Legal publisher name for signing.
@@ -1320,8 +1343,8 @@ D11 result:
 
 Choose the next lane deliberately:
 
-- For public hub work, run D12 Old Skool AI hub handoff package: page/tab instructions, online-app copy, held desktop-download copy, cross-site link instructions, and rollback/removal notes.
-- For hosted release engineering, choose the canonical public URL, decide whether Cloudflare Pages should be GitHub-connected before production or use a documented direct-upload release process, then smoke the canonical/custom domain before adding public links.
+- For hosted release engineering, run D13: choose the canonical public URL, decide whether Cloudflare Pages should be GitHub-connected before production or use a documented direct-upload release process, deploy or promote to the selected destination, then smoke the canonical/custom URL before adding public links.
+- For public hub work on the Linux side, use D12 as the handoff package; keep the online button held until D13 supplies a smoked URL.
 - For product completion, run Chunk Sixteen MVP polish and documentation if the owner wants docs tightened before public launch.
 - For the desktop lane, resolve the Windows lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke tests or creating a controlled desktop beta.
 

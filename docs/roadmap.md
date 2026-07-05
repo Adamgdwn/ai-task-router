@@ -1,7 +1,7 @@
 # 2026-07-03T11:49:34-06:00 - Roadmap
 
 Document status: draft baseline
-Status Updated: 2026-07-04T22:10:36-06:00
+Status Updated: 2026-07-04T22:23:04-06:00
 
 ## Now
 
@@ -36,9 +36,9 @@ Status Updated: 2026-07-04T22:10:36-06:00
 - Plan a separate signed desktop app for Windows, macOS, and Linux when local machine discovery is ready.
 - Use [public launch master plan](2026-07-04-public-launch-master-plan.md) as the controlling release map and [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) as the baseline for desktop trust, signing, and release work.
 - Desktop Chunk D0 is confirmed for planning, and Desktop Chunk D1 selected Tauri for the first desktop shell spike.
-- Desktop Chunks D2 through D11 now cover the Tauri shell, trust boundary, permissioned local discovery, PWA install path, an opt-in unsigned internal Windows package artifact for evidence, release/security readiness, web release-candidate evidence, Cloudflare Pages hosted preview smoke, technical-preview desktop artifact lane, and public launch master plan. Public desktop release, signing, updater, provider connections, credentials, telemetry, broad folder access, and file indexing are not approved.
+- Desktop Chunks D2 through D12 now cover the Tauri shell, trust boundary, permissioned local discovery, PWA install path, an opt-in unsigned internal Windows package artifact for evidence, release/security readiness, web release-candidate evidence, Cloudflare Pages hosted preview smoke, technical-preview desktop artifact lane, public launch master plan, and Old Skool AI hub handoff package. Public desktop release, signing, updater, provider connections, credentials, telemetry, broad folder access, and file indexing are not approved.
 - Chunk Fifteen added 22 fixture tasks and Playwright E2E coverage for setup, routing, export preparation, feedback, no-execution controls, and narrow-viewport overflow.
-- Desktop Chunk D8 completed local web/PWA release-candidate security evidence and added `npm run scan:web-rc`; Desktop Chunk D9 created a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev` and passed hosted E2E; Desktop Chunk D10 added the manual desktop technical-preview artifact lane; Desktop Chunk D11 added the public launch master plan. Public launch still waits for D12 Old Skool AI hub handoff, canonical URL confirmation, custom-domain smoke if used, Cloudflare GitHub-integration/direct-upload decision, and owner launch decision.
+- Desktop Chunk D8 completed local web/PWA release-candidate security evidence and added `npm run scan:web-rc`; Desktop Chunk D9 created a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev` and passed hosted E2E; Desktop Chunk D10 added the manual desktop technical-preview artifact lane; Desktop Chunk D11 added the public launch master plan; Desktop Chunk D12 added the Old Skool AI hub handoff package. Public launch still waits for canonical URL confirmation, custom-domain smoke if used, Cloudflare GitHub-integration/direct-upload decision, hosted smoke against the final URL, and owner launch decision.
 - Run an owner governance review before desktop implementation because local machine inspection is a higher-trust surface than the v0.2 browser app.
 
 ## Explicitly Deferred

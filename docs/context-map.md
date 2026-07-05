@@ -2,7 +2,7 @@
 
 Document type: project context routing map
 Status: draft
-Status Updated: 2026-07-04T22:10:36-06:00
+Status Updated: 2026-07-04T22:23:04-06:00
 Owner: Technical Lead
 Audience: coding agents, human coders, reviewers, and project owners
 
@@ -35,7 +35,7 @@ Keep these files compact. They should route to durable docs, not duplicate them.
 | Controlled docs, pathway notes, ADRs, registers, validation logs, audits, or handoffs | `docs/standards/document-control-standard.md` |
 | Architecture decisions or system shape | `docs/architecture.md` and relevant ADRs |
 | Domain terms or naming | `docs/domain-language.md` |
-| Deployment, release, rollback, public launch, or environment changes | `docs/2026-07-04-public-launch-master-plan.md`, `docs/deployment-guide.md`, `docs/runbook.md`, and release standards |
+| Deployment, release, rollback, public launch, or environment changes | `docs/2026-07-04-public-launch-master-plan.md`, `docs/2026-07-04-old-skool-ai-hub-handoff.md`, `docs/deployment-guide.md`, `docs/runbook.md`, and release standards |
 | Agent autonomy, tools, prompts, models, or permissions | `docs/agent-inventory.md`, `docs/model-registry.md`, `docs/prompt-register.md`, and `docs/tool-permission-matrix.md` |
 
 ## Search Before Loading

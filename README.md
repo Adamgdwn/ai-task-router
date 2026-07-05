@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA release-candidate lane, with Desktop Chunk D11 public launch master plan added; public release remains on hold pending Old Skool AI hub handoff, canonical URL, custom-domain/GitHub-integration decision, signing, and trust gates
-Status Updated: 2026-07-04T22:10:36-06:00
+Status: v0.2 browser/PWA release-candidate lane, with Desktop Chunk D12 Old Skool AI hub handoff package added; public release remains on hold pending canonical URL, custom-domain/GitHub-integration decision, final hosted smoke, signing, and trust gates
+Status Updated: 2026-07-04T22:23:04-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -154,7 +154,7 @@ npm run desktop:checksums
 
 Windows can be built on this Windows lab. macOS and Linux packages should be built on matching OS runners, using the manual GitHub Actions workflow `Desktop Technical Preview Artifacts`. These artifacts are for owner/developer inspection only until signing, notarization, checksums, install/launch/uninstall smoke, support/withdrawal copy, and owner launch approval pass.
 
-Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The current product direction is one Old Skool AI hub/tab linking to the online tool and future downloads, with `guidedailabs.com` and `guidedaijourney.com` linking there. D11 adds the [public launch master plan](docs/2026-07-04-public-launch-master-plan.md) as the controlling release map. D9 created a Cloudflare Pages test preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`; it is not the selected canonical public URL yet.
+Public web distribution is planned for GitHub plus Cloudflare after the release/security gate passes. The current product direction is one Old Skool AI hub/tab linking to the online tool and future downloads, with `guidedailabs.com` and `guidedaijourney.com` linking there. D11 adds the [public launch master plan](docs/2026-07-04-public-launch-master-plan.md) as the controlling release map, and D12 adds the [Old Skool AI hub handoff package](docs/2026-07-04-old-skool-ai-hub-handoff.md) for Linux-side page copy, cross-site links, held desktop-download copy, and rollback notes. D9 created a Cloudflare Pages test preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`; it is not the selected canonical public URL yet.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -199,6 +199,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Desktop trust and distribution plan](docs/2026-07-04-desktop-trust-distribution-plan.md)
 - [Desktop packaging and signing spike](docs/2026-07-04-desktop-packaging-signing-spike.md)
 - [Public launch master plan](docs/2026-07-04-public-launch-master-plan.md)
+- [Old Skool AI hub handoff package](docs/2026-07-04-old-skool-ai-hub-handoff.md)
 - [Release and security readiness packet](docs/2026-07-04-release-security-readiness-packet.md)
 - [Web release candidate security pass](docs/2026-07-04-web-release-candidate-security-pass.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)

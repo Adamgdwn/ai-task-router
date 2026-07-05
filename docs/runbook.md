@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-04T22:10:36-06:00
+Last Updated: 2026-07-04T22:23:04-06:00
 Status: active
 Owner: Technical Lead
 
@@ -46,16 +46,18 @@ Troubleshooting:
 
 ### Public Web Release Readiness
 
-As of 2026-07-04T22:10:36-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, and D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md):
+As of 2026-07-04T22:23:04-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), and D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md):
 
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
 - Current test preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev`.
-- Use one canonical app URL and link to it from `oldskoolai.com`, `guidedailabs.com`, and `guidedaijourney.com`; the owner has not confirmed `https://app.oldskoolai.com/`, so choose root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain before public launch.
+- Use one canonical app URL and link to it from the Old Skool AI hub; D12 recommends the hub route `/ai-task-router/`, pending Linux-side route confirmation.
+- Link `guidedailabs.com` and `guidedaijourney.com` to the Old Skool AI hub rather than separate app copies.
+- The owner has not confirmed `https://app.oldskoolai.com/`, so choose root, subpath, Cloudflare Pages default URL, or a newly created subdomain under an owned domain before public launch.
 - YouTube, Facebook, and LinkedIn links should wait until the web/PWA release gate passes.
 - D8 added `npm run scan:web-rc` for production artifact checks.
 - D9 added hosted Playwright support through `PLAYWRIGHT_BASE_URL`.
-- D11 recommends D12 as the Old Skool AI hub handoff package before public site links, DNS, GitHub Releases, social launch, or desktop download buttons.
+- D12 is the Old Skool AI hub handoff package. The next release step is canonical app URL and Cloudflare production-path selection, followed by hosted smoke before public links, DNS, GitHub Releases, social launch, or desktop download buttons.
 
 Minimum pre-public checks:
 
@@ -82,11 +84,13 @@ Release troubleshooting:
 - If Windows `curl.exe` or PowerShell `Invoke-WebRequest` fails TLS against the Cloudflare preview alias, retest with Chromium/normal browsers and the final custom domain before launch. D9 saw this curl/PowerShell issue while Node and Chromium succeeded.
 - Do not launch from social channels until the production preview and security checks pass.
 - Do not create three independent app deployments unless the service-worker scope, cache, support, and rollback plan are explicit.
+- Do not point public users at the D9 preview alias.
 - If the owner chooses a subpath instead of a root app domain/subdomain, update Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links first.
 - Confirm public copy says the browser/PWA app cannot check the computer.
 - Use [release and security readiness packet](2026-07-04-release-security-readiness-packet.md) as the D7 gate.
 - Use [web release candidate security pass](2026-07-04-web-release-candidate-security-pass.md) as the D8 local evidence packet.
 - Use [public launch master plan](2026-07-04-public-launch-master-plan.md) as the controlling release map.
+- Use [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md) for website page copy, cross-site links, desktop hold copy, and rollback notes.
 
 ### Desktop Technical-Preview Artifacts
 

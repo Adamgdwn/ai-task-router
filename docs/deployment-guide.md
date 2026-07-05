@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-04T22:10:36-06:00
+Status Updated: 2026-07-04T22:23:04-06:00
 
 ## Current Release State
 
 AI Task Router is not publicly launched yet.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Public release remains on hold until the Old Skool AI hub handoff, canonical URL decision, custom-domain smoke if used, GitHub integration or direct-upload release process decision, owner launch decision, and desktop signing/trust gates pass where applicable.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Public release remains on hold until the canonical URL decision, custom-domain smoke if used, GitHub integration or direct-upload release process decision, owner launch decision, and desktop signing/trust gates pass where applicable.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -40,32 +40,33 @@ Future public hosting decision:
 - primary host: Cloudflare Pages
 - public source/release hub: GitHub
 - current hosted preview: `https://preview-20260704-0c7b253.ai-task-router.pages.dev`
-- canonical public hub: owner preference is an Old Skool AI tab/page with "use online" and future download choices
+- canonical public hub: D12 recommends an Old Skool AI page/tab at `/ai-task-router/` with "use online" and future download choices, pending Linux-side route confirmation
 - canonical app URL: not selected yet; choose whether the Old Skool AI hub links to a Cloudflare Pages URL, a subpath, or a newly created subdomain under an owned domain
 - planned link sources: `oldskoolai.com` as the main hub, with `guidedailabs.com` and `guidedaijourney.com` linking there
 - planned social link sources after release gate: YouTube, Facebook, and LinkedIn
 
-The canonical public URL still needs owner confirmation before public launch. Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies. Use the [public launch master plan](2026-07-04-public-launch-master-plan.md) as the controlling release map before adding public links.
+The canonical public URL still needs owner confirmation before public launch. Prefer one app/tool destination linked from the Old Skool AI hub instead of three independent app copies. Use the [public launch master plan](2026-07-04-public-launch-master-plan.md) and [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md) as the controlling release map before adding public links.
 
 ## Deployment Steps
 
-D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. No custom domain, DNS change, public website link, social launch post, public GitHub Release, or public desktop download has been created.
+D9 created a Cloudflare Pages direct-upload preview for smoke testing. D10 adds technical-preview desktop artifact build machinery. D12 adds the Old Skool AI website handoff package. No custom domain, DNS change, public website link, social launch post, public GitHub Release, or public desktop download has been created.
 
 Future hosted web/PWA release should use this shape:
 
 1. Use the D11 public launch master plan as the release map.
-2. Prepare the D12 Old Skool AI hub handoff before adding public links.
+2. Use the D12 Old Skool AI hub handoff for page copy, cross-site links, desktop hold copy, and rollback language.
 3. Use the D8 evidence packet as the local release-candidate baseline.
 4. Use the D9 hosted preview packet as the first Cloudflare Pages smoke baseline.
 5. Decide whether production uses Cloudflare Pages GitHub integration or a documented Wrangler direct-upload release process.
-6. Use build command `npm ci && npm run build`.
-7. Use output directory `dist`.
-8. Confirm the manifest, 192px and 512px icons, service worker, and install copy are present over HTTPS.
-9. Confirm no provider calls, credentials, telemetry, hidden uploads, or browser-based desktop-discovery claims are present in the hosted web build.
-10. Confirm HTTPS and canonical URL behavior.
-11. Smoke test primary flows on desktop and mobile browsers.
-12. Confirm rollback to a previous Pages production deployment before public launch.
-13. Add public website and social links only after the preview and custom-domain smoke pass.
+6. Choose the canonical app URL linked by the Old Skool AI hub.
+7. Use build command `npm ci && npm run build`.
+8. Use output directory `dist`.
+9. Confirm the manifest, 192px and 512px icons, service worker, and install copy are present over HTTPS.
+10. Confirm no provider calls, credentials, telemetry, hidden uploads, or browser-based desktop-discovery claims are present in the hosted web build.
+11. Confirm HTTPS and canonical URL behavior.
+12. Smoke test primary flows on desktop and mobile browsers.
+13. Confirm rollback to a previous Pages production deployment before public launch.
+14. Add public website and social links only after the final URL smoke and owner approval pass.
 
 Local production preview command:
 
