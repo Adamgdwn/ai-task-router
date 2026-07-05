@@ -1,15 +1,15 @@
 # 2026-07-04 - Public Launch Master Plan
 
 Document ID: PATH-ENG-005
-Version: 0.4.0
+Version: 0.5.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before social launch posts, canonical-domain DNS work, public GitHub Releases, or desktop download buttons
-Last Updated: 2026-07-05T10:07:48-06:00
-Status Updated: 2026-07-05T10:07:48-06:00
+Last Updated: 2026-07-05T10:49:02-06:00
+Status Updated: 2026-07-05T10:49:02-06:00
 
 ## Purpose
 
@@ -33,6 +33,7 @@ As of 2026-07-05T10:07:48-06:00:
 - Windows technical-preview packaging was locally verified, but the installer and executable are unsigned.
 - macOS and Linux technical-preview artifact workflows are ready, but remote artifacts have not been generated in this repo yet.
 - D17 adds [Desktop Download Readiness Gate](2026-07-05-desktop-download-readiness-gate.md), making artifact/checksum checks repeatable and making the public desktop gate fail until trust evidence exists.
+- D18 adds [Public Stage Guidance Cloudflare Update](2026-07-05-public-stage-guidance-cloudflare-update.md), adding compact suggested stages with recommended help beside each stage to the public app and redeploying Cloudflare Pages production.
 - Public desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner approval pass.
 - The owner preference is one Old Skool AI public hub/tab, with `guidedailabs.com` and `guidedaijourney.com` linking to that hub.
 - D12 adds the [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md), including page structure, plain-language copy, cross-site link instructions, held desktop-download copy, and rollback notes.
@@ -360,6 +361,7 @@ Keep desktop download buttons hidden or disabled until desktop gates pass. Do no
 | Timestamp | Check | Result | Notes |
 |---|---|---|---|
 | 2026-07-05T10:07:48-06:00 | D17 desktop download readiness gate | passed with public download hold | Added artifact/checksum gate scripts, tests, and workflow step; fresh Windows technical-preview package passed artifact hygiene with SHA-256 `F7086F7F4D87379111F81FC9F839C88C566B46C3F1E931280DBE1E18E4CD80B4`; public desktop gate failed as expected until platform trust evidence exists. |
+| 2026-07-05T10:49:02-06:00 | D18 public suggested-stage guidance | passed | Added route-card stage guidance, Best Options and Decision Card UI, Markdown export, tests, local/hosted smoke, and Cloudflare production deployment `98a58ca6` from source `9d3154d`. |
 | 2026-07-05T07:57:15-06:00 | D14 public hub and cross-site link smoke | passed | Old Skool AI hub, public security route, Guided AI Labs link, and Guided AI Journey link were published and smoked on desktop/mobile; public pages returned 200 and no D9 preview alias or public desktop artifact strings were found. |
 | 2026-07-05T07:22:04-06:00 | D13 local and hosted web/PWA release gate | passed | Cloudflare Pages production URL `https://ai-task-router.pages.dev/` was deployed and smoked; local and hosted Playwright passed; production assets returned 200; Windows `curl.exe` and PowerShell returned 200; Chromium smoke found service-worker scope at the production root and 0 observed external requests. |
 | 2026-07-04T22:30:30-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; release-boundary `rg` scans; D12 handoff presence scan | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; scans found no stale D12-not-created wording and only historical or negative-boundary references for preview URLs, unconfirmed app subdomain, and premature desktop-download claims; D12 handoff doc exists and names D13 as the next release-engineering chunk. No app/runtime tests were run because D12 changed documentation and release-control notes only. |
@@ -368,6 +370,6 @@ Keep desktop download buttons hidden or disabled until desktop gates pass. Do no
 
 ## Handoff
 
-D14 has deployed and smoked the browser/PWA production app plus the public Old Skool AI hub and cross-site links. D17 adds a desktop artifact readiness gate for technical-preview builds. These chunks did not change DNS, connect Cloudflare production to GitHub, create GitHub Releases, sign installers, notarize macOS artifacts, create social posts, or add public desktop download links.
+D14 has deployed and smoked the browser/PWA production app plus the public Old Skool AI hub and cross-site links. D16 and D18 redeployed the production app with impact and suggested-stage guidance. D17 adds a desktop artifact readiness gate for technical-preview builds. These chunks did not change DNS, connect Cloudflare production to GitHub, create GitHub Releases, sign installers, notarize macOS artifacts, create social posts, or add public desktop download links.
 
 The next safest execution chunk is social launch copy/review or desktop trust/signing readiness, depending on owner priority. Public desktop downloads should wait until platform trust gates pass or a separately documented technical-preview exception is approved.

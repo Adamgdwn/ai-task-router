@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D16 public impact insight UI is deployed; D17 desktop download readiness gate is in place; social launch, custom domains, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
-Status Updated: 2026-07-05T09:34:16-06:00
+Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D18 public suggested-stage guidance is deployed; D17 desktop download readiness gate is in place; social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
+Status Updated: 2026-07-05T10:49:02-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -171,7 +171,7 @@ npm run desktop:gate:public
 
 That command should fail until platform trust evidence exists.
 
-Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). Do not use the D9 preview alias in public links.
+Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). D18 added and deployed suggested stage guidance in [Public Stage Guidance Cloudflare Update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md). Do not use the D9 preview alias in public links.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -220,6 +220,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Cloudflare production launch smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md)
 - [Public hub and cross-site link smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md)
 - [Public impact insight Cloudflare update](docs/2026-07-05-public-impact-insight-cloudflare-update.md)
+- [Public stage guidance Cloudflare update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md)
 - [Release and security readiness packet](docs/2026-07-04-release-security-readiness-packet.md)
 - [Web release candidate security pass](docs/2026-07-04-web-release-candidate-security-pass.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)

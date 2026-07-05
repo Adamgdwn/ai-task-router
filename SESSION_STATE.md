@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-05T10:07:48-06:00
-Status: d17-desktop-download-readiness-gate
-Status Updated: 2026-07-05T10:07:48-06:00
+Last Updated: 2026-07-05T10:49:02-06:00
+Status: d18-public-stage-guidance-cloudflare-update
+Status Updated: 2026-07-05T10:49:02-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop download readiness gate after D16 public impact insight UI.
+Public suggested-stage guidance after D17 desktop download readiness gate.
 
-Current result: D17 desktop download readiness gate is task complete with public download hold. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. D15 added a reviewed-source calculation backbone for 100k-token pricing examples, right-sizing cost savings, and scenario-based energy/water ranges. D16 wires that safe story into Best Options with caveats and official source links, plus a Start Here skill-building cue. D17 adds `scripts/desktop-release-gate.mjs`, npm desktop gate commands, tests, and a technical-preview workflow gate step. Public desktop downloads, social launch posts, custom-domain/DNS work, live pricing fetches, live pricing tables, exact public savings claims, provider connections, and GitHub Releases remain held for separate approved chunks.
+Current result: D18 public suggested-stage guidance is task complete and deployed. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. D15 added a reviewed-source calculation backbone for 100k-token pricing examples, right-sizing cost savings, and scenario-based energy/water ranges. D16 wires that safe story into Best Options with caveats and official source links, plus a Start Here skill-building cue. D17 adds `scripts/desktop-release-gate.mjs`, npm desktop gate commands, tests, and a technical-preview workflow gate step. D18 adds compact suggested stages with recommended help beside each stage in Best Options, saved Decision Cards, and route-card Markdown exports. Public desktop downloads, social launch posts, custom-domain/DNS work, live pricing/model fetches, live pricing tables, exact public savings claims, provider connections, and GitHub Releases remain held for separate approved chunks.
 
 ## Files Changed In This Session
 
@@ -68,6 +68,9 @@ Current result: D17 desktop download readiness gate is task complete with public
 - `scripts/desktop-release-gate.mjs`
 - `scripts/desktop-release-gate.node-test.mjs`
 - `docs/2026-07-05-desktop-download-readiness-gate.md`
+- `src/domain/routing/stageGuidance.ts`
+- `src/ui/screens/StageGuidancePanel.tsx`
+- `docs/2026-07-05-public-stage-guidance-cloudflare-update.md`
 
 Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
@@ -223,6 +226,7 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D9 final validation passed: `npm audit --audit-level=moderate`, `npm run test:scripts`, `npm run test`, `npm run build`, and `npm run scan:web-rc`. Build retained the existing Vite chunk-size warning only.
 - D16 validation passed: governance preflight 0 warnings; focused impact/App tests; full Vitest 13 files and 95 tests; production build with existing Vite chunk-size warning; web RC scan; local Playwright 6 Chromium tests; desktop/mobile visual smoke with no horizontal overflow; source-details-open mobile smoke; Cloudflare production deploy `cd2c5112` from source `b4daec6`; hosted asset checks; hosted Playwright 6 Chromium tests; hosted impact smoke with visible caveat, 0 initial external requests, and no desktop overflow.
 - D17 validation passed: governance preflight 0 warnings; official Tauri/Microsoft/Apple signing and pipeline source review; `node --check` for the gate script and tests; `npm run test:scripts` with 8 Node tests; workflow YAML lint; full Vitest 13 files and 95 tests; production build with existing Vite chunk-size warning; web RC scan; audit 0 vulnerabilities; Windows technical-preview package hash `F7086F7F4D87379111F81FC9F839C88C566B46C3F1E931280DBE1E18E4CD80B4`; technical-preview gate passed; public gate failed as expected; installer/executable `NotSigned`.
+- D18 validation passed: focused TypeScript/schema/generator/export/App tests; full Vitest 13 files and 96 tests; production build with existing Vite chunk-size warning; web RC scan; audit 0 vulnerabilities; governance preflight 0 warnings; local Playwright 6 Chromium tests; local desktop/mobile visual smoke with no horizontal overflow; Cloudflare production deploy `98a58ca6` from source `9d3154d`; hosted asset checks; hosted Playwright 6 Chromium tests; hosted stage-guidance smoke with 4 stage cards, 0 initial external requests, and no desktop overflow.
 
 ## Known Gaps
 
@@ -235,13 +239,14 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
 - D17 `npm run desktop:gate:public` is expected to fail until platform trust evidence exists.
-- Cloudflare Pages production URL exists at `https://ai-task-router.pages.dev/`.
+- Cloudflare Pages production URL exists at `https://ai-task-router.pages.dev/` and includes the D18 suggested-stage guidance.
 - Cloudflare Pages project is not connected to GitHub yet; D13 accepted direct upload for the first production web release.
 - Old Skool AI public hub and support/security routes are live; Guided AI Labs and Guided AI Journey now link to the hub.
 - Guided AI Journey local `main` still has the pre-existing unpushed commit `236fd7e` and is intentionally ahead/behind `origin/main`; D14 was safely pushed from a temporary worktree based on `origin/main` as commit `610438b`.
 - A first Vercel deploy attempt from the temporary Journey worktree targeted an accidental temporary Vercel project before `.vercel/project.json` was copied from the real repo. The correct production deployment succeeded and is aliased to `https://www.guidedaijourney.com/`; cleanup of the accidental temporary provider object remains a follow-up if desired.
 - Public social launch links have not been created.
 - D16 public impact insight is deployed, but it is not an opt-in user-specific savings calculator and is not approved as exact public savings claims.
+- D18 suggested-stage guidance is deployed, but it is not a full project plan, live model lookup, provider entitlement check, or automation workflow.
 - Provider pricing and environmental anchors must be refreshed before future public exact impact claims because prices, model routing, infrastructure, and provider disclosures can change.
 - Custom-domain/DNS work has not been done.
 - Windows `curl.exe` and PowerShell `Invoke-WebRequest` passed against the production Pages URL; the D9 preview alias remains historical only.
@@ -250,4 +255,4 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
 ## Next Handoff
 
-Resume by choosing the next bounded release lane: owner-reviewed social/video launch copy using the now-public safe impact language, a reviewed public methodology page, an opt-in local estimator UI, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved chunk. For desktop downloads, choose Windows Store/MSIX versus direct signing, confirm publisher identity, and resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D17 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, live pricing fetches, exact public savings claims, or external actions without a separately approved chunk.
+Resume by choosing the next bounded release lane: owner-reviewed social/video launch copy using the now-public safe impact and stage-guidance language, a reviewed public methodology page, an opt-in local estimator UI, desktop trust/signing readiness, Cloudflare/GitHub/custom-domain automation, or another explicitly approved chunk. For desktop downloads, choose Windows Store/MSIX versus direct signing, confirm publisher identity, and resolve the lab Application Control/signing/trusted-path blocker before claiming interactive desktop discovery smoke or controlled desktop beta readiness. Keep post-D18 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, live pricing/model fetches, exact public savings claims, or external actions without a separately approved chunk.
