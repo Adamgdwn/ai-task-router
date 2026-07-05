@@ -1,8 +1,8 @@
 # 2026-07-04T15:35:38-06:00 - Implementation Status
 
-Last Updated: 2026-07-04T22:30:30-06:00
-Status: d12-old-skool-ai-hub-handoff-task-complete-release-hold
-Status Updated: 2026-07-04T22:30:30-06:00
+Last Updated: 2026-07-04T22:43:52-06:00
+Status: d12-night-closeout-release-hold
+Status Updated: 2026-07-04T22:43:52-06:00
 Owner: Technical Lead
 
 ## Completed Work
@@ -11,7 +11,7 @@ Desktop Chunk D12 Old Skool AI hub handoff package, building on D11 public launc
 
 Completion target: Task complete, release hold.
 
-Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, and D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package. Public desktop downloads are still held. The browser/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`, but that preview is not the public URL. The next public-release step is D13 canonical app URL and Cloudflare production-path decision, then hosted smoke against the final URL, support route confirmation, desktop signing/trust work where applicable, and owner launch decision before public website links, desktop downloads, or social launch.
+Current state: D11 adds `docs/2026-07-04-public-launch-master-plan.md` as the controlling release map, and D12 adds `docs/2026-07-04-old-skool-ai-hub-handoff.md` as the Linux-side Old Skool AI hub package. The D12 handoff was also sent through DirectLink on 2026-07-04 at 22:38 MDT, with the working assumption that Adam will make sure Linux reads that handoff before applying Old Skool AI site changes. Public desktop downloads are still held. The browser/PWA artifact has local release-candidate evidence and a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev`, but that preview is not the public URL. The next public-release step is D13 canonical app URL and Cloudflare production-path decision, then hosted smoke against the final URL, support route confirmation, desktop signing/trust work where applicable, and owner launch decision before public website links, desktop downloads, or social launch.
 
 ## Scope
 
@@ -242,6 +242,7 @@ The desktop commands `get_desktop_discovery_options` and `run_desktop_discovery`
 - Browser install prompts depend on browser support, HTTPS or local preview, and browser-specific engagement rules.
 - If the hosted app is deployed under a subpath rather than a domain root, Vite `base`, manifest `start_url`/`scope`, service-worker cache URLs, and public links must be reviewed before release.
 - The Old Skool AI hub package exists, but the Linux-side site page has not been published from this repo.
+- DirectLink handoff has been sent; resume assumes Adam will ensure Linux reads it before acting on site changes.
 - The public support/security contact URL for ordinary website users still needs owner confirmation.
 
 ## Next Chunk

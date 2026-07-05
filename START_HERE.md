@@ -1,8 +1,8 @@
 # 2026-07-03T11:49:34-06:00 - Start Here
 
-Last Updated: 2026-07-04T11:28:22-06:00
+Last Updated: 2026-07-04T22:43:52-06:00
 Status: draft
-Status Updated: 2026-07-04T11:28:22-06:00
+Status Updated: 2026-07-04T22:43:52-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -55,6 +55,10 @@ For material or risk-triggering changes:
 Risk-triggering work includes production, deployment, authentication, authorization, payments, secrets, sensitive data, database migrations, customer communications, external side effects, infrastructure or provider settings, destructive actions, autonomous tool use, risk classification, governance policy changes, or release readiness.
 
 ## Agent Handoff
+
+D12 is boxed for the night. The Old Skool AI hub handoff package is complete in `docs/2026-07-04-old-skool-ai-hub-handoff.md`, commit `de02ded` was pushed, and a DirectLink handoff was appended to `X:\DIRECTLINK_CURRENT.md` for the Linux side. Working assumption for the next session: Adam will make sure the Linux side reads that DirectLink handoff before applying Old Skool AI site changes.
+
+D13 is intentionally paused. Do not start canonical app URL, DNS/custom-domain, GitHub Release, public desktop download, social launch, or public-link work until the next approved chunk.
 
 Update this file only when the top-level plan or handoff point changes. Put detailed step-by-step progress in the active plan named above.
 
