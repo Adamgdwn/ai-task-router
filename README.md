@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D19 PDF-ready Decision Card reports are deployed; D20 selected a Windows Store/MSIX-first desktop distribution lane and added a public desktop evidence gate; social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
-Status Updated: 2026-07-06T13:39:30-06:00
+Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D19 PDF-ready Decision Card reports are deployed; D21 added a Windows MSIX proof package path and workflow support; social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
+Status Updated: 2026-07-06T14:08:49-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -163,6 +163,15 @@ npm run desktop:gate:technical-preview
 
 Windows can be built on this Windows lab. macOS and Linux packages should be built on matching OS runners, using the manual GitHub Actions workflow `Desktop Technical Preview Artifacts`. The technical-preview gate verifies generated artifacts and checksums, then keeps public downloads held. These artifacts are for owner/developer inspection only until signing, notarization, install/launch/uninstall smoke, support/withdrawal copy, and owner launch approval pass.
 
+Build a Windows MSIX proof package for owner/developer inspection:
+
+```bash
+npm run desktop:package:windows:msix-proof
+npm run desktop:gate:technical-preview
+```
+
+The MSIX proof uses Microsoft WinApp CLI and a local self-signed development certificate under ignored build output. It proves the package mechanics and can be uploaded by the manual technical-preview workflow, but it is not public-download ready because the signer is not trusted by ordinary Windows machines.
+
 Public desktop download readiness is intentionally stricter:
 
 ```bash
@@ -171,7 +180,7 @@ npm run desktop:gate:public
 
 That command should fail until real platform trust evidence exists in `docs/release/desktop-public-release-evidence.json`.
 
-Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). D18 added and deployed suggested stage guidance in [Public Stage Guidance Cloudflare Update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md). D19 added and deployed PDF-ready saved Decision Card reports in [Public PDF Report Cloudflare Update](docs/2026-07-05-public-pdf-report-cloudflare-update.md). D20 selected the Windows Store/MSIX-first public desktop lane and tightened the public evidence gate in [Desktop Public Distribution Decision](docs/2026-07-06-desktop-public-distribution-decision.md). Do not use the D9 preview alias in public links.
+Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). D18 added and deployed suggested stage guidance in [Public Stage Guidance Cloudflare Update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md). D19 added and deployed PDF-ready saved Decision Card reports in [Public PDF Report Cloudflare Update](docs/2026-07-05-public-pdf-report-cloudflare-update.md). D20 selected the Windows Store/MSIX-first public desktop lane and tightened the public evidence gate in [Desktop Public Distribution Decision](docs/2026-07-06-desktop-public-distribution-decision.md). D21 added the Windows MSIX proof in [Windows MSIX Proof](docs/2026-07-06-windows-msix-proof.md). Do not use the D9 preview alias in public links.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -180,6 +189,7 @@ Desktop prerequisites installed on this Windows machine:
 - MSVC `14.44.35207`
 - Windows SDK `10.0.26100.0`
 - WebView2 `149.0.4022.98`
+- Microsoft WinApp CLI `0.4.0` for the local MSIX proof path
 
 The desktop app is still an internal prototype. It now has a desktop-only `Check this computer` flow for selected local AI tools and a manual technical-preview artifact lane, but it does not add public download approval, signing, updater, provider connections, telemetry, credentials, file indexing, arbitrary folder inspection, or external actions.
 
@@ -222,6 +232,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Public impact insight Cloudflare update](docs/2026-07-05-public-impact-insight-cloudflare-update.md)
 - [Public stage guidance Cloudflare update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md)
 - [Public PDF report Cloudflare update](docs/2026-07-05-public-pdf-report-cloudflare-update.md)
+- [Windows MSIX proof](docs/2026-07-06-windows-msix-proof.md)
 - [Release and security readiness packet](docs/2026-07-04-release-security-readiness-packet.md)
 - [Web release candidate security pass](docs/2026-07-04-web-release-candidate-security-pass.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)

@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-05T09:34:16-06:00
+Status Updated: 2026-07-06T14:08:49-06:00
 
 ## Current Release State
 
-AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`. D16 updated the production app with the public impact insight panel. D17 added the desktop download readiness gate.
+AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`. D16 updated the production app with the public impact insight panel, D17 added the desktop download readiness gate, D20 selected Windows Store/MSIX first, and D21 added a self-signed Windows MSIX proof path.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 records the [public impact insight Cloudflare update](2026-07-05-public-impact-insight-cloudflare-update.md). D17 records the [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md). Social launch, custom-domain work, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 records the [public impact insight Cloudflare update](2026-07-05-public-impact-insight-cloudflare-update.md). D17 records the [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md). D20 records the [desktop public distribution decision](2026-07-06-desktop-public-distribution-decision.md). D21 records the [Windows MSIX proof](2026-07-06-windows-msix-proof.md). Social launch, custom-domain work, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -102,13 +102,14 @@ Technical-preview desktop artifact commands:
 
 ```bash
 npm run desktop:package:windows:technical-preview
+npm run desktop:package:windows:msix-proof
 npm run desktop:package:macos:technical-preview
 npm run desktop:package:linux:technical-preview
 npm run desktop:checksums
 npm run desktop:gate:technical-preview
 ```
 
-Use `.github/workflows/desktop-technical-preview.yml` for macOS and Linux artifacts because they should be built on matching OS runners. These artifacts are not public release downloads. Run `npm run desktop:gate:public` only as a public-release blocker check; it should fail until platform trust evidence exists.
+Use `.github/workflows/desktop-technical-preview.yml` for Windows MSIX proof plus macOS and Linux artifacts because they should be built on matching OS runners. These artifacts are not public release downloads. Run `npm run desktop:gate:public` only as a public-release blocker check; it should fail until platform trust evidence exists.
 
 ## Rollback
 
@@ -145,6 +146,7 @@ Before any public web release:
 Before any public desktop release:
 
 - complete the desktop trust plan phases through signing/public trust readiness
+- replace the self-signed MSIX proof with Microsoft Store/Partner Center evidence or another trusted signing path
 - install, launch, local discovery, clear-results, and uninstall smoke tests on each advertised OS
 - signed or notarized artifacts where platform trust requires them
 - checksums and release notes

@@ -1,15 +1,15 @@
 # 2026-07-04T15:35:38-06:00 - Session State
 
-Last Updated: 2026-07-06T13:55:02-06:00
-Status: d20-desktop-public-distribution-decision
-Status Updated: 2026-07-06T13:55:02-06:00
+Last Updated: 2026-07-06T14:08:49-06:00
+Status: d21-windows-msix-proof
+Status Updated: 2026-07-06T14:08:49-06:00
 Owner: Technical Lead
 
 ## Current Objective
 
-Desktop public distribution decision and public evidence gate after D19 PDF-ready saved Decision Card reports.
+Windows MSIX proof packaging after D20 desktop public distribution decision.
 
-Current result: D20 desktop public distribution decision is task complete with public desktop downloads still held. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. D15 added a reviewed-source calculation backbone for 100k-token pricing examples, right-sizing cost savings, and scenario-based energy/water ranges. D16 wires that safe story into Best Options with caveats and official source links, plus a Start Here skill-building cue. D17 adds `scripts/desktop-release-gate.mjs`, npm desktop gate commands, tests, and a technical-preview workflow gate step. D18 adds compact suggested stages with recommended help beside each stage in Best Options, saved Decision Cards, and route-card Markdown exports. D19 adds impact context and a local browser print/save-PDF report path to saved Decision Cards. D20 recommends Windows Store/MSIX first for ordinary-user Windows desktop distribution, keeps direct signed installer as fallback, and updates public gate mode so it requires real platform trust evidence at `docs/release/desktop-public-release-evidence.json`. Public desktop downloads, social launch posts, custom-domain/DNS work, live pricing/model fetches, live pricing tables, exact public savings claims, provider connections, signing workflows, Store submission, and GitHub Releases remain held for separate approved chunks.
+Current result: D21 Windows MSIX proof is task complete with public desktop downloads still held. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, public support/security copy is live at `https://oldskoolai.com/security/`, and Guided AI Labs plus Guided AI Journey now link to the hub. D15 added a reviewed-source calculation backbone for 100k-token pricing examples, right-sizing cost savings, and scenario-based energy/water ranges. D16 wires that safe story into Best Options with caveats and official source links, plus a Start Here skill-building cue. D17 adds `scripts/desktop-release-gate.mjs`, npm desktop gate commands, tests, and a technical-preview workflow gate step. D18 adds compact suggested stages with recommended help beside each stage in Best Options, saved Decision Cards, and route-card Markdown exports. D19 adds impact context and a local browser print/save-PDF report path to saved Decision Cards. D20 recommends Windows Store/MSIX first for ordinary-user Windows desktop distribution, keeps direct signed installer as fallback, and updates public gate mode so it requires real platform trust evidence at `docs/release/desktop-public-release-evidence.json`. D21 adds WinApp CLI MSIX manifest/assets, a repeatable self-signed MSIX proof packaging script, and workflow support for a Windows MSIX proof artifact. Public desktop downloads, social launch posts, custom-domain/DNS work, live pricing/model fetches, live pricing tables, exact public savings claims, provider connections, signing workflows, Store submission, and GitHub Releases remain held for separate approved chunks.
 
 ## Files Changed In This Session
 
@@ -73,6 +73,11 @@ Current result: D20 desktop public distribution decision is task complete with p
 - `docs/2026-07-05-public-stage-guidance-cloudflare-update.md`
 - `docs/2026-07-06-desktop-public-distribution-decision.md`
 - `docs/release/desktop-public-release-evidence.template.json`
+- `docs/2026-07-06-windows-msix-proof.md`
+- `scripts/package-windows-msix-proof.mjs`
+- `scripts/package-windows-msix-proof.node-test.mjs`
+- `src-tauri/windows-msix/`
+- `.github/workflows/desktop-technical-preview.yml`
 - `docs/2026-07-04-public-launch-master-plan.md`
 - `docs/2026-07-04-desktop-trust-distribution-plan.md`
 
@@ -233,6 +238,7 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D18 validation passed: focused TypeScript/schema/generator/export/App tests; full Vitest 13 files and 96 tests; production build with existing Vite chunk-size warning; web RC scan; audit 0 vulnerabilities; governance preflight 0 warnings; local Playwright 6 Chromium tests; local desktop/mobile visual smoke with no horizontal overflow; Cloudflare production deploy `98a58ca6` from source `9d3154d`; hosted asset checks; hosted Playwright 6 Chromium tests; hosted stage-guidance smoke with 4 stage cards, 0 initial external requests, and no desktop overflow.
 - D19 validation passed: focused TypeScript/App tests; full Vitest 13 files and 96 tests; production build with existing Vite chunk-size warning; web RC scan; audit 0 vulnerabilities; governance preflight 0 warnings; local Playwright 6 Chromium tests; local and hosted PDF-report smokes with no desktop/mobile overflow; hosted smoke observed 0 external requests; Cloudflare production deploy `49d21829` from source `9c870ce`; hosted asset checks; hosted Playwright 6 Chromium tests.
 - D20 validation passed with intended public hold: governance preflight 0 warnings; official Microsoft/Apple/Tauri source refresh; `node --check` for desktop gate script and tests; `npm run test:scripts` with 10 Node tests; `npm run test` with 13 files and 96 tests; `npm run build` with the existing Vite chunk-size warning; `npm audit --audit-level=moderate` with 0 vulnerabilities; `npm run desktop:gate:technical-preview` passed artifact hygiene; `npm run desktop:gate:public` failed as expected because no real `docs/release/desktop-public-release-evidence.json` exists and Windows trust evidence remains incomplete; `git diff --check` reported only normal Windows LF-to-CRLF notices.
+- D21 validation passed with intended public hold: governance preflight 0 warnings; official Microsoft WinApp/Tauri and Tauri Windows source review; WinApp CLI `0.4.0` installed locally through Winget; MSIX manifest/assets generated; `node --check` and `npm run test:scripts` passed with 13 Node tests; local MSIX proof package generated with SHA-256 `6668983AE21279E918F1DE6A34E37369E0A6B0BF3E78D0827CF0C0A6AD80EDCD`; technical-preview gate passed; public gate failed as expected; signature check showed local `CN=Guided AI Labs Ltd` signer with untrusted root.
 
 ## Known Gaps
 
@@ -245,6 +251,8 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 - D4 native local discovery is implemented, but interactive desktop launch smoke remains blocked by Windows Application Control.
 - The D6 NSIS installer is unsigned internal evidence only and must not be published or shared with non-technical users.
 - D20 `npm run desktop:gate:public` is expected to fail until real platform trust evidence exists at `docs/release/desktop-public-release-evidence.json`.
+- The D21 MSIX proof is signed with a local self-signed development certificate only; it is not public-download ready.
+- The D21 manual workflow support has not been run remotely yet, so no GitHub Actions MSIX proof artifact currently exists from this chunk.
 - D20 recommends Windows Store/MSIX first, but legal publisher identity, Microsoft Partner Center/MSIX packaging, Application Control smoke, WebView2 runtime handling, and install/launch/local-discovery/uninstall smoke remain unresolved.
 - Cloudflare Pages production URL exists at `https://ai-task-router.pages.dev/` and includes the D19 PDF-ready saved Decision Card report path.
 - Cloudflare Pages project is not connected to GitHub yet; D13 accepted direct upload for the first production web release.
@@ -263,4 +271,4 @@ Earlier D2/D3 scaffold and trust-boundary files remain in place.
 
 ## Next Handoff
 
-Resume by choosing the next bounded release lane: owner-reviewed social/video launch copy using the now-public safe impact, stage-guidance, and PDF-report language; a reviewed public methodology page; an opt-in local estimator UI; a Windows MSIX proof slice; Cloudflare/GitHub/custom-domain automation; or another explicitly approved chunk. For desktop downloads, D20 recommends Windows Store/MSIX first with direct signed installer as fallback. Next desktop work should confirm legal publisher identity and Microsoft Partner Center/MSIX packaging before ordinary-user beta. Keep post-D20 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, social launch links, public installer publishing, code signing, updater, GitHub Release artifacts, live pricing/model fetches, exact public savings claims, or external actions without a separately approved chunk.
+Resume by choosing the next bounded release lane: owner-reviewed social/video launch copy using the now-public safe impact, stage-guidance, and PDF-report language; a reviewed public methodology page; an opt-in local estimator UI; the next Windows trusted-release slice; Cloudflare/GitHub/custom-domain automation; or another explicitly approved chunk. For desktop downloads, D20/D21 recommend Windows Store/MSIX first with direct signed installer as fallback. Next desktop work should confirm legal publisher identity, Microsoft Partner Center package identity, and Store submission/trusted signing evidence before ordinary-user beta. Keep post-D21 work bounded: no broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider connections, telemetry, credentials, file indexing, DNS changes, social launch links, public installer publishing, public trusted code signing, updater, GitHub Release artifacts, live pricing/model fetches, exact public savings claims, or external actions without a separately approved chunk.

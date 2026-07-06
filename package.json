@@ -11,6 +11,7 @@
     "desktop:build": "tauri build --no-bundle",
     "desktop:package:windows:internal": "tauri build --bundles nsis --no-sign --ci --config src-tauri/tauri.internal-windows.conf.json",
     "desktop:package:windows:technical-preview": "tauri build --bundles nsis --no-sign --ci --config src-tauri/tauri.technical-preview.conf.json",
+    "desktop:package:windows:msix-proof": "node scripts/package-windows-msix-proof.mjs",
     "desktop:package:macos:technical-preview": "tauri build --bundles dmg --ci --config src-tauri/tauri.technical-preview.conf.json",
     "desktop:package:linux:technical-preview": "tauri build --bundles appimage,deb --ci --config src-tauri/tauri.technical-preview.conf.json",
     "desktop:artifacts": "node scripts/inspect-desktop-artifacts.mjs",

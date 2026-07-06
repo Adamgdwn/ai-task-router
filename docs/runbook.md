@@ -1,6 +1,6 @@
 # 2026-07-03T11:49:34-06:00 - Runbook
 
-Last Updated: 2026-07-06T13:39:30-06:00
+Last Updated: 2026-07-06T14:08:49-06:00
 Status: active
 Owner: Technical Lead
 
@@ -46,7 +46,7 @@ Troubleshooting:
 
 ### Public Web Release Readiness
 
-As of 2026-07-06T13:39:30-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), D13 deployed the production web/PWA app, D14 published the public hub/cross-site links, D16 redeployed the production app with the public impact insight panel, D17 added the [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md), D18 redeployed the production app with [public suggested-stage guidance](2026-07-05-public-stage-guidance-cloudflare-update.md), D19 redeployed the production app with [PDF-ready Decision Card reports](2026-07-05-public-pdf-report-cloudflare-update.md), and D20 added the [desktop public distribution decision](2026-07-06-desktop-public-distribution-decision.md):
+As of 2026-07-06T14:08:49-06:00, D7 selected the intended free distribution path, D8 completed local web/PWA release-candidate evidence, D9 created the first Cloudflare Pages hosted preview, D10 added the desktop technical-preview artifact lane, D11 added the [public launch master plan](2026-07-04-public-launch-master-plan.md), D12 added the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md), D13 deployed the production web/PWA app, D14 published the public hub/cross-site links, D16 redeployed the production app with the public impact insight panel, D17 added the [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md), D18 redeployed the production app with [public suggested-stage guidance](2026-07-05-public-stage-guidance-cloudflare-update.md), D19 redeployed the production app with [PDF-ready Decision Card reports](2026-07-05-public-pdf-report-cloudflare-update.md), D20 added the [desktop public distribution decision](2026-07-06-desktop-public-distribution-decision.md), and D21 added the [Windows MSIX proof](2026-07-06-windows-msix-proof.md):
 
 - GitHub remains the public source/release hub.
 - Cloudflare Pages is the preferred public host.
@@ -61,7 +61,7 @@ As of 2026-07-06T13:39:30-06:00, D7 selected the intended free distribution path
 - Exact public savings, carbon, water, or bill-reduction claims should wait for a separate source-refresh and owner-review chunk.
 - D8 added `npm run scan:web-rc` for production artifact checks.
 - D9 added hosted Playwright support through `PLAYWRIGHT_BASE_URL`.
-- D13 is the Cloudflare production launch smoke packet. D14 is the public hub and cross-site link smoke packet. D16 is the public impact insight Cloudflare update packet. D17 is the desktop download readiness gate. D18 is the public stage guidance Cloudflare update packet. D19 is the public PDF report Cloudflare update packet. D20 is the desktop public distribution decision and evidence-gate packet. The next release step is owner approval for social/video launch copy, a reviewed methodology page, opt-in local estimator UI, or a Windows MSIX proof chunk.
+- D13 is the Cloudflare production launch smoke packet. D14 is the public hub and cross-site link smoke packet. D16 is the public impact insight Cloudflare update packet. D17 is the desktop download readiness gate. D18 is the public stage guidance Cloudflare update packet. D19 is the public PDF report Cloudflare update packet. D20 is the desktop public distribution decision and evidence-gate packet. D21 is the Windows MSIX proof packet. The next release step is owner approval for social/video launch copy, a reviewed methodology page, opt-in local estimator UI, or the next Windows trust slice.
 
 Saved Decision Card report smoke:
 
@@ -113,7 +113,7 @@ GitHub -> Actions -> Desktop Technical Preview Artifacts -> Run workflow
 
 Expected workflow artifacts:
 
-- `ai-task-router-windows-x64-unsigned-nsis`
+- `ai-task-router-windows-x64-unsigned-nsis` with unsigned NSIS and self-signed MSIX proof artifacts
 - `ai-task-router-macos-aarch64-unsigned-dmg`
 - `ai-task-router-macos-x64-unsigned-dmg`
 - `ai-task-router-linux-x64-appimage-deb`
@@ -122,6 +122,7 @@ Local commands:
 
 ```bash
 npm run desktop:package:windows:technical-preview
+npm run desktop:package:windows:msix-proof
 npm run desktop:package:macos:technical-preview
 npm run desktop:package:linux:technical-preview
 npm run desktop:checksums
@@ -131,6 +132,7 @@ npm run desktop:gate:technical-preview
 Notes:
 
 - Build macOS and Linux packages on matching GitHub runners or matching local machines.
+- The Windows MSIX proof requires Microsoft WinApp CLI. The local script opts out of WinApp CLI telemetry and generates a local development certificate under `src-tauri/target/msix-proof`.
 - Do not add these artifacts to public Old Skool AI download buttons yet.
 - Do not create public GitHub Releases from these artifacts until signing/notarization, smoke tests, support/withdrawal copy, and owner launch approval pass.
 - Each generated bundle directory should include `SHA256SUMS.txt` after `npm run desktop:checksums`.
@@ -138,6 +140,7 @@ Notes:
 - `npm run desktop:gate:public` should fail until real platform trust evidence exists at `docs/release/desktop-public-release-evidence.json`.
 - `docs/release/desktop-public-release-evidence.template.json` is only a hold-state template. Do not rename or copy it to the live evidence path unless the evidence fields are true and owner-approved.
 - Latest local Windows technical-preview installer hash from D17: `F7086F7F4D87379111F81FC9F839C88C566B46C3F1E931280DBE1E18E4CD80B4`; installer and executable both reported `NotSigned`.
+- Latest local Windows MSIX proof hash from D21: `6668983AE21279E918F1DE6A34E37369E0A6B0BF3E78D0827CF0C0A6AD80EDCD`; `Get-AuthenticodeSignature` reports a local `CN=Guided AI Labs Ltd` signer but an untrusted root, so this is owner/developer-only proof evidence.
 
 ### Desktop Build Toolchain
 
