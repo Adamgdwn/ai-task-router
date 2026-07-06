@@ -1,15 +1,15 @@
 # 2026-07-04 - Public Launch Master Plan
 
 Document ID: PATH-ENG-005
-Version: 0.6.0
+Version: 0.7.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before social launch posts, canonical-domain DNS work, public GitHub Releases, or desktop download buttons
-Last Updated: 2026-07-05T11:12:24-06:00
-Status Updated: 2026-07-05T11:12:24-06:00
+Last Updated: 2026-07-06T13:39:30-06:00
+Status Updated: 2026-07-06T13:39:30-06:00
 
 ## Purpose
 
@@ -19,7 +19,7 @@ It exists to prevent improvised launch work. The public release should move thro
 
 ## Current State
 
-As of 2026-07-05T11:12:24-06:00:
+As of 2026-07-06T13:39:30-06:00:
 
 - The browser/PWA MVP is live and link-ready at `https://ai-task-router.pages.dev/`.
 - The Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`.
@@ -35,6 +35,7 @@ As of 2026-07-05T11:12:24-06:00:
 - D17 adds [Desktop Download Readiness Gate](2026-07-05-desktop-download-readiness-gate.md), making artifact/checksum checks repeatable and making the public desktop gate fail until trust evidence exists.
 - D18 adds [Public Stage Guidance Cloudflare Update](2026-07-05-public-stage-guidance-cloudflare-update.md), adding compact suggested stages with recommended help beside each stage to the public app and redeploying Cloudflare Pages production.
 - D19 adds [Public PDF Report Cloudflare Update](2026-07-05-public-pdf-report-cloudflare-update.md), adding PDF-ready saved Decision Card reports to the public app and redeploying Cloudflare Pages production.
+- D20 adds [Desktop Public Distribution Decision](2026-07-06-desktop-public-distribution-decision.md), recommending Windows Store/MSIX first and tightening the public desktop gate around a real evidence manifest.
 - Public desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner approval pass.
 - The owner preference is one Old Skool AI public hub/tab, with `guidedailabs.com` and `guidedaijourney.com` linking to that hub.
 - D12 adds the [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md), including page structure, plain-language copy, cross-site link instructions, held desktop-download copy, and rollback notes.
@@ -74,7 +75,7 @@ Recommended app URL decision for first public release:
 |---|---|---|---|
 | Public hub | Live and smoked on Old Skool AI | Old Skool AI page/tab explains the tool and links to the online app | Complete for web doorway; social remains separate |
 | Hosted web/PWA | Production URL deployed and smoked | People can use the tool online for free | Complete for Cloudflare Pages default URL; custom domain remains separate |
-| Windows desktop | Local unsigned NSIS technical preview exists | Signed installer or Store/MSIX download | Publisher identity, signing path, install/launch/uninstall smoke |
+| Windows desktop | Local unsigned NSIS technical preview exists; D20 recommends Store/MSIX first | Store/MSIX download first, direct signed installer as fallback | Publisher identity, Partner Center/MSIX path, package identity, Store/signing evidence, Application Control smoke, install/launch/uninstall smoke |
 | macOS desktop | Workflow-ready, not generated | Signed and notarized DMG | Apple Developer ID, notarization, smoke |
 | Linux desktop | Workflow-ready, not generated | AppImage and/or `.deb` download | Linux smoke, checksum/signature decision, dependency notes |
 | Public support | Public security page exists on Old Skool AI | Users know where to report security/support issues | Complete for web doorway; withdrawal plan remains in D12/D14 rollback notes |
@@ -202,13 +203,18 @@ Shared desktop prerequisites:
 - checksum policy
 - `npm run desktop:gate:technical-preview` and `npm run desktop:gate:public` evidence
 - public release notes
+- public release evidence at `docs/release/desktop-public-release-evidence.json`
 
 Windows gates:
 
-- choose Microsoft Store/MSIX, direct signed installer, or both
+- use Microsoft Store/MSIX first unless the owner deliberately switches to direct signing
+- confirm Microsoft Partner Center and legal publisher identity
+- create or generate a reviewable MSIX package identity
+- verify package type matches the selected Windows lane
 - obtain or configure code-signing path
 - sign installer and executable
 - verify signature
+- document WebView2 runtime handling
 - pass install/launch/uninstall smoke on target Windows machine
 - resolve lab Application Control/trusted-path blocker before claiming interactive desktop smoke
 
@@ -338,12 +344,12 @@ It should not say:
 | Web/PWA release gate | Technical Lead | passed for Pages URL | D13 reran local and hosted checks against `https://ai-task-router.pages.dev/` |
 | Public copy review | Project Owner | complete for web doorway | D14 published the D12 copy with the D13 app URL and public smoke passed |
 | Support/security route | Project Owner / Technical Lead | complete for web doorway | D14 published and linked `https://oldskoolai.com/security/`; repo `SECURITY.md` remains the code/reporting policy |
-| Desktop product name | Project Owner | pending | Name recorded before signing |
+| Desktop product name | Project Owner | working default | D20 keeps `AI Task Router`; owner can still change before signing |
 | Desktop legal publisher | Project Owner | pending | Publisher identity recorded before signing |
-| Windows trust path | Project Owner / Technical Lead | pending | Store/MSIX or signed installer decision |
+| Windows trust path | Project Owner / Technical Lead | Store/MSIX-first selected | D20 recommends Store/MSIX first; direct signed installer remains fallback |
 | macOS trust path | Project Owner / Technical Lead | pending | Developer ID/notarization path |
 | Linux trust path | Technical Lead | pending | artifact set, checksums/signature, smoke |
-| Desktop artifact gate | Technical Lead | technical-preview gate added | D17 validates artifacts/checksums and keeps public mode blocking until trust evidence exists |
+| Desktop artifact gate | Technical Lead | public evidence gate added | D17 validates artifacts/checksums; D20 requires real public release evidence before public mode can pass |
 | Social launch | Project Owner | next decision | Web doorway is live and smoked; social copy/review remains a separate owner-approved chunk |
 | Public desktop downloads | Project Owner | held | Only after desktop gates pass |
 
@@ -364,6 +370,7 @@ Keep desktop download buttons hidden or disabled until desktop gates pass. Do no
 | 2026-07-05T10:07:48-06:00 | D17 desktop download readiness gate | passed with public download hold | Added artifact/checksum gate scripts, tests, and workflow step; fresh Windows technical-preview package passed artifact hygiene with SHA-256 `F7086F7F4D87379111F81FC9F839C88C566B46C3F1E931280DBE1E18E4CD80B4`; public desktop gate failed as expected until platform trust evidence exists. |
 | 2026-07-05T10:49:02-06:00 | D18 public suggested-stage guidance | passed | Added route-card stage guidance, Best Options and Decision Card UI, Markdown export, tests, local/hosted smoke, and Cloudflare production deployment `98a58ca6` from source `9d3154d`. |
 | 2026-07-05T11:12:24-06:00 | D19 public PDF reports | passed | Added shared impact panel, saved Decision Card impact context, `Save PDF report`, print CSS, focused/full tests, local/hosted PDF-report smoke, and Cloudflare production deployment `49d21829` from source `9c870ce`. |
+| 2026-07-06T13:55:02-06:00 | D20 desktop public distribution decision | passed with public download hold and existing build warning | Refreshed Microsoft, Apple, and Tauri source basis; selected Windows Store/MSIX-first as the recommended first trusted Windows lane; added a hold-state public release evidence template; tightened `npm run desktop:gate:public` so it fails until real platform trust evidence exists; full close-out validation passed with 10 Node script tests, 13 Vitest files and 96 tests, production build, 0 audit vulnerabilities, 0 governance warnings, technical-preview gate pass, expected public gate failure, and whitespace check notices only for normal Windows LF-to-CRLF conversion. |
 | 2026-07-05T07:57:15-06:00 | D14 public hub and cross-site link smoke | passed | Old Skool AI hub, public security route, Guided AI Labs link, and Guided AI Journey link were published and smoked on desktop/mobile; public pages returned 200 and no D9 preview alias or public desktop artifact strings were found. |
 | 2026-07-05T07:22:04-06:00 | D13 local and hosted web/PWA release gate | passed | Cloudflare Pages production URL `https://ai-task-router.pages.dev/` was deployed and smoked; local and hosted Playwright passed; production assets returned 200; Windows `curl.exe` and PowerShell returned 200; Chromium smoke found service-worker scope at the production root and 0 observed external requests. |
 | 2026-07-04T22:30:30-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; release-boundary `rg` scans; D12 handoff presence scan | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices; scans found no stale D12-not-created wording and only historical or negative-boundary references for preview URLs, unconfirmed app subdomain, and premature desktop-download claims; D12 handoff doc exists and names D13 as the next release-engineering chunk. No app/runtime tests were run because D12 changed documentation and release-control notes only. |
@@ -372,6 +379,6 @@ Keep desktop download buttons hidden or disabled until desktop gates pass. Do no
 
 ## Handoff
 
-D14 has deployed and smoked the browser/PWA production app plus the public Old Skool AI hub and cross-site links. D16, D18, and D19 redeployed the production app with impact, suggested-stage guidance, and PDF-ready saved Decision Card reports. D17 adds a desktop artifact readiness gate for technical-preview builds. These chunks did not change DNS, connect Cloudflare production to GitHub, create GitHub Releases, sign installers, notarize macOS artifacts, create social posts, add provider connections, or add public desktop download links.
+D14 has deployed and smoked the browser/PWA production app plus the public Old Skool AI hub and cross-site links. D16, D18, and D19 redeployed the production app with impact, suggested-stage guidance, and PDF-ready saved Decision Card reports. D17 adds a desktop artifact readiness gate for technical-preview builds. D20 selects Windows Store/MSIX first and adds a real public evidence gate for desktop downloads. These chunks did not change DNS, connect Cloudflare production to GitHub, create GitHub Releases, sign installers, notarize macOS artifacts, create social posts, add provider connections, or add public desktop download links.
 
-The next safest execution chunk is social launch copy/review or desktop trust/signing readiness, depending on owner priority. Public desktop downloads should wait until platform trust gates pass or a separately documented technical-preview exception is approved.
+The next safest execution chunk is social launch copy/review, a reviewed methodology/estimator chunk, or a Windows MSIX proof slice. Public desktop downloads should wait until platform trust gates pass or a separately documented technical-preview exception is approved.

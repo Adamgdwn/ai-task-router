@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "productName": "AI Task Router",
+  "legalPublisher": "TO_BE_CONFIRMED_BEFORE_SIGNING",
+  "ownerApproval": {
+    "status": "hold",
+    "timestamp": "",
+    "approver": "Project Owner",
+    "notes": "Set status to approved only after platform trust, smoke, support, privacy, withdrawal, and release notes are complete."
+  },
+  "support": {
+    "supportUrl": "https://oldskoolai.com/security/",
+    "withdrawalPlan": ""
+  },
+  "privacy": {
+    "localAccessUrl": ""
+  },
+  "platforms": {
+    "windows": {
+      "status": "hold",
+      "distributionLane": "microsoft-store-msix",
+      "storeOrSigningEvidence": "",
+      "signatureVerification": "",
+      "checksumPublished": false,
+      "installSmoke": "not-run",
+      "launchSmoke": "not-run",
+      "localDiscoverySmoke": "not-run",
+      "uninstallSmoke": "not-run",
+      "applicationControlSmoke": "not-run",
+      "webView2RuntimePlan": ""
+    },
+    "macos": {
+      "status": "hold",
+      "distributionLane": "developer-id-dmg",
+      "developerIdSigningEvidence": "",
+      "notarizationEvidence": "",
+      "checksumPublished": false,
+      "installSmoke": "not-run",
+      "launchSmoke": "not-run",
+      "localDiscoverySmoke": "not-run",
+      "uninstallSmoke": "not-run",
+      "gatekeeperSmoke": "not-run"
+    },
+    "linux": {
+      "status": "hold",
+      "distributionLane": "appimage",
+      "checksumSignatureDecision": "",
+      "dependencyNotes": "",
+      "checksumPublished": false,
+      "installSmoke": "not-run",
+      "launchSmoke": "not-run",
+      "localDiscoverySmoke": "not-run",
+      "uninstallSmoke": "not-run"
+    }
+  }
+}

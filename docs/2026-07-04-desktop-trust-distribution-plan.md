@@ -1,17 +1,17 @@
 # 2026-07-04 - Desktop Trust And Distribution Plan
 
 Document ID: PATH-ENG-002
-Version: 0.13.0
+Version: 0.14.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-04
 Last Reviewed: 2026-07-04
 Next Review: Before public website download links, signing work, or controlled desktop beta work
-Last Updated: 2026-07-04T22:43:52-06:00
-Status Updated: 2026-07-04T22:43:52-06:00
+Last Updated: 2026-07-06T13:39:30-06:00
+Status Updated: 2026-07-06T13:39:30-06:00
 
-Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence. D9 creates and smokes the Cloudflare Pages hosted preview. D10 adds a manual GitHub Actions technical-preview artifact lane for Windows, macOS, and Linux, plus checksum generation, and locally verifies the Windows technical-preview NSIS package while holding public desktop downloads until signing/notarization and smoke gates pass. D11 adds the public launch master plan so Old Skool AI hub work, hosted web/PWA release, desktop trust gates, cybersecurity checks, support/withdrawal needs, and go/no-go decisions are controlled before public distribution. D12 adds the Old Skool AI hub handoff package with web page copy, cross-site link instructions, held desktop-download copy, and rollback notes. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
+Planning state: Desktop Chunk D0 confirmed and Desktop Chunk D1 ADR accepted for a Tauri shell spike. Desktop Chunk D2 has the repo-local Tauri shell scaffold, branded icon assets, desktop npm scripts, installed Windows build prerequisites, a passing no-bundle desktop build, and a previously verified release executable launch. Desktop Chunk D3 defined the frontend/native trust boundary, command contracts, user permission flow, local data handling, response schemas, and CSP hardening. Desktop Chunk D4 implements the first permissioned local AI tool discovery prototype with custom Rust commands, frontend schema validation, a user-started `Check this computer` flow, no broad Tauri plugin permissions, no paths returned, no startup/background scanning, and build-only desktop validation. Desktop Chunk D5 implements the hosted/browser PWA install path with manifest, 192px/512px branded icons, production-only service-worker registration, Start Here install copy, and explicit browser-vs-desktop local-discovery boundaries. Desktop Chunk D6 adds an opt-in internal Windows NSIS package build, artifact checksum inspection, and signing requirements documentation while keeping public release blocked. Desktop Chunk D7 records the release/security readiness packet, selecting Cloudflare Pages plus GitHub as the intended free distribution path. D8 records the web/PWA release-candidate security pass, adds repeatable artifact scanning, and verifies local clean install/audit/tests/build/E2E/production-preview evidence. D9 creates and smokes the Cloudflare Pages hosted preview. D10 adds a manual GitHub Actions technical-preview artifact lane for Windows, macOS, and Linux, plus checksum generation, and locally verifies the Windows technical-preview NSIS package while holding public desktop downloads until signing/notarization and smoke gates pass. D11 adds the public launch master plan so Old Skool AI hub work, hosted web/PWA release, desktop trust gates, cybersecurity checks, support/withdrawal needs, and go/no-go decisions are controlled before public distribution. D12 adds the Old Skool AI hub handoff package with web page copy, cross-site link instructions, held desktop-download copy, and rollback notes. D20 recommends Windows Store/MSIX first for ordinary-user Windows distribution, keeps direct signed installer as fallback, and updates the public desktop gate so it requires real release evidence at `docs/release/desktop-public-release-evidence.json`. Dev mode remains blocked by Windows Application Control when Cargo tries to run a generated debug build script; the current rebuilt unsigned release executable and generated release test executable launch remain blocked until the lab policy/signing/trusted-path issue is resolved.
 
 ## Purpose
 
@@ -141,8 +141,10 @@ Current official references:
 - Tauri Windows signing docs: https://v2.tauri.app/distribute/sign/windows/
 - Tauri macOS signing docs: https://v2.tauri.app/distribute/sign/macos/
 - Microsoft Windows app code signing options: https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options
+- Microsoft winapp CLI Tauri MSIX guide: https://learn.microsoft.com/is-is/windows/apps/dev-tools/winapp-cli/guides/tauri
 - Apple notarization docs: https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution
 - Desktop Chunk D6 packaging/signing spike: [docs/2026-07-04-desktop-packaging-signing-spike.md](2026-07-04-desktop-packaging-signing-spike.md)
+- Desktop Chunk D20 public distribution decision: [docs/2026-07-06-desktop-public-distribution-decision.md](2026-07-06-desktop-public-distribution-decision.md)
 
 Desktop Chunk D1 selected Tauri for the first desktop shell spike. See [ADR-0001: Desktop Wrapper Choice For Trusted Local Discovery](decisions/adr-0001-desktop-wrapper.md). Tauri is accepted for the D2 spike only; the project can still fall back to Electron if D2 produces evidence that Tauri is a poor fit.
 
@@ -314,7 +316,7 @@ Preferred public trust path:
 
 1. Internal unsigned development builds only for local testing.
 2. Signed beta build before any non-technical users download it.
-3. Microsoft Store MSIX path should be evaluated first because Store MSIX packages are re-signed by Microsoft.
+3. Microsoft Store MSIX path should be used first unless the owner deliberately switches lanes because Store MSIX packages are re-signed by Microsoft.
 4. If distributing directly, use a recognized signing path and expect SmartScreen reputation to build over time.
 
 Release artifacts to evaluate:
@@ -325,11 +327,13 @@ Release artifacts to evaluate:
 
 Required before public Windows download:
 
-- signed installer or Store package
+- Store/MSIX trust evidence or direct signed installer evidence
 - publisher identity matches the brand/legal entity
 - checksum published
 - release notes
 - uninstall path verified
+- WebView2 runtime handling recorded
+- Windows Application Control behavior documented and reviewed
 - SmartScreen behavior documented and reviewed
 
 ### macOS Desktop Release
@@ -384,7 +388,7 @@ Questions to answer:
 - Should the desktop app inspect user-selected folders in the first release, or defer that?
 - Is the brand/publisher name Guided AI Labs Ltd, OldSkoolAI, or another legal name?
 - Which OS is the first desktop target: Windows first, then macOS/Linux, or all three together?
-- Should Windows public release prefer Microsoft Store, direct download, or both?
+- Windows public release now prefers Microsoft Store/MSIX first; direct signed download remains the fallback if Store/MSIX is rejected or intentionally deferred.
 - Should macOS public release require notarization before any external beta?
 - Should the governance level stay as-is for planning and rise only before implementation?
 
@@ -1312,7 +1316,7 @@ Hold public launch. The page package is ready for Linux-side implementation, and
 - Whether the owner wants to explicitly accept a technical-preview exception before public signing/notarization gates, or keep downloads internal until the gates pass.
 - Canonical product name for the desktop app.
 - Legal publisher name for signing.
-- Windows distribution path: Microsoft Store/MSIX, direct signed installer, or both.
+- Windows distribution path: Microsoft Store/MSIX first; direct signed installer fallback remains available.
 - macOS distribution path and Apple Developer account ownership.
 - Linux artifact set: AppImage only first, or AppImage plus `.deb`.
 - Whether a later separately reviewed prototype should include user-selected folder inspection.

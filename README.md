@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D19 PDF-ready Decision Card reports are deployed; D17 desktop download readiness gate is in place; social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
-Status Updated: 2026-07-05T11:12:24-06:00
+Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D19 PDF-ready Decision Card reports are deployed; D20 selected a Windows Store/MSIX-first desktop distribution lane and added a public desktop evidence gate; social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
+Status Updated: 2026-07-06T13:39:30-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -169,9 +169,9 @@ Public desktop download readiness is intentionally stricter:
 npm run desktop:gate:public
 ```
 
-That command should fail until platform trust evidence exists.
+That command should fail until real platform trust evidence exists in `docs/release/desktop-public-release-evidence.json`.
 
-Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). D18 added and deployed suggested stage guidance in [Public Stage Guidance Cloudflare Update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md). D19 added and deployed PDF-ready saved Decision Card reports in [Public PDF Report Cloudflare Update](docs/2026-07-05-public-pdf-report-cloudflare-update.md). Do not use the D9 preview alias in public links.
+Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). D18 added and deployed suggested stage guidance in [Public Stage Guidance Cloudflare Update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md). D19 added and deployed PDF-ready saved Decision Card reports in [Public PDF Report Cloudflare Update](docs/2026-07-05-public-pdf-report-cloudflare-update.md). D20 selected the Windows Store/MSIX-first public desktop lane and tightened the public evidence gate in [Desktop Public Distribution Decision](docs/2026-07-06-desktop-public-distribution-decision.md). Do not use the D9 preview alias in public links.
 
 Desktop prerequisites installed on this Windows machine:
 
