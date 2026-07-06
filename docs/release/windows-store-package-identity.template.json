@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "template",
+  "productName": "AI Task Router",
+  "legalPublisher": "TO_BE_CONFIRMED_BEFORE_PARTNER_CENTER",
+  "partnerCenter": {
+    "accountType": "company-or-individual",
+    "reservedAppName": "AI Task Router",
+    "productIdentityPage": "",
+    "notes": "Copy this file to docs/release/windows-store-package-identity.json only after the app is reserved in Partner Center. Set status to partner-center-confirmed and paste the exact identity values from Partner Center."
+  },
+  "msix": {
+    "identityName": "<Partner Center Package/Identity/Name>",
+    "publisher": "<Partner Center Publisher exactly as shown, often CN=...>",
+    "publisherDisplayName": "Guided AI Labs Ltd",
+    "version": "0.2.0.0",
+    "applicationId": "App",
+    "displayName": "AI Task Router",
+    "description": "AI Task Router helps people choose right-sized AI help for a task."
+  },
+  "ownerConfirmation": {
+    "status": "hold",
+    "timestamp": "",
+    "notes": "Confirm the legal publisher and Partner Center account before this template becomes a real identity file."
+  }
+}

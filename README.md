@@ -29,8 +29,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D19 PDF-ready Decision Card reports are deployed; D21 added a Windows MSIX proof package path and workflow support; social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
-Status Updated: 2026-07-06T14:08:49-06:00
+Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D19 PDF-ready Decision Card reports are deployed; D21 added a Windows MSIX proof package path and workflow support; D22 added Windows Store/MSIX trust prep for Partner Center identity values; social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
+Status Updated: 2026-07-06T15:24:36.2422654-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -172,6 +172,15 @@ npm run desktop:gate:technical-preview
 
 The MSIX proof uses Microsoft WinApp CLI and a local self-signed development certificate under ignored build output. It proves the package mechanics and can be uploaded by the manual technical-preview workflow, but it is not public-download ready because the signer is not trusted by ordinary Windows machines.
 
+Prepare the Windows MSIX manifest after the app is reserved in Microsoft Partner Center:
+
+```bash
+npm run desktop:prepare:windows-store-manifest
+npm run desktop:prepare:windows-store-manifest -- --write
+```
+
+The first command should fail until `docs/release/windows-store-package-identity.json` exists with real Partner Center values copied from `docs/release/windows-store-package-identity.template.json`. Do not commit government ID, tax, banking, account secrets, or private Partner Center screenshots.
+
 Public desktop download readiness is intentionally stricter:
 
 ```bash
@@ -180,7 +189,7 @@ npm run desktop:gate:public
 
 That command should fail until real platform trust evidence exists in `docs/release/desktop-public-release-evidence.json`.
 
-Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). D18 added and deployed suggested stage guidance in [Public Stage Guidance Cloudflare Update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md). D19 added and deployed PDF-ready saved Decision Card reports in [Public PDF Report Cloudflare Update](docs/2026-07-05-public-pdf-report-cloudflare-update.md). D20 selected the Windows Store/MSIX-first public desktop lane and tightened the public evidence gate in [Desktop Public Distribution Decision](docs/2026-07-06-desktop-public-distribution-decision.md). D21 added the Windows MSIX proof in [Windows MSIX Proof](docs/2026-07-06-windows-msix-proof.md). Do not use the D9 preview alias in public links.
+Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). D18 added and deployed suggested stage guidance in [Public Stage Guidance Cloudflare Update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md). D19 added and deployed PDF-ready saved Decision Card reports in [Public PDF Report Cloudflare Update](docs/2026-07-05-public-pdf-report-cloudflare-update.md). D20 selected the Windows Store/MSIX-first public desktop lane and tightened the public evidence gate in [Desktop Public Distribution Decision](docs/2026-07-06-desktop-public-distribution-decision.md). D21 added the Windows MSIX proof in [Windows MSIX Proof](docs/2026-07-06-windows-msix-proof.md). D22 added the [Windows Store Trust Prep](docs/2026-07-06-windows-store-trust-prep.md) identity template and manifest-prep command. Do not use the D9 preview alias in public links.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -233,6 +242,7 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Public stage guidance Cloudflare update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md)
 - [Public PDF report Cloudflare update](docs/2026-07-05-public-pdf-report-cloudflare-update.md)
 - [Windows MSIX proof](docs/2026-07-06-windows-msix-proof.md)
+- [Windows Store trust prep](docs/2026-07-06-windows-store-trust-prep.md)
 - [Release and security readiness packet](docs/2026-07-04-release-security-readiness-packet.md)
 - [Web release candidate security pass](docs/2026-07-04-web-release-candidate-security-pass.md)
 - [Desktop wrapper ADR](docs/decisions/adr-0001-desktop-wrapper.md)

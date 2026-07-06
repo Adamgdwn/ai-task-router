@@ -1,12 +1,12 @@
 # 2026-07-03T11:49:34-06:00 - Deployment Guide
 
-Status Updated: 2026-07-06T14:08:49-06:00
+Status Updated: 2026-07-06T15:24:36.2422654-06:00
 
 ## Current Release State
 
-AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`. D16 updated the production app with the public impact insight panel, D17 added the desktop download readiness gate, D20 selected Windows Store/MSIX first, and D21 added a self-signed Windows MSIX proof path.
+AI Task Router's browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the public Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`. D16 updated the production app with the public impact insight panel, D17 added the desktop download readiness gate, D20 selected Windows Store/MSIX first, D21 added a self-signed Windows MSIX proof path, and D22 added the Partner Center identity template plus guarded Store manifest-prep command.
 
-Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 records the [public impact insight Cloudflare update](2026-07-05-public-impact-insight-cloudflare-update.md). D17 records the [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md). D20 records the [desktop public distribution decision](2026-07-06-desktop-public-distribution-decision.md). D21 records the [Windows MSIX proof](2026-07-06-windows-msix-proof.md). Social launch, custom-domain work, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
+Desktop Chunk D7 records the release/security readiness packet. Desktop Chunk D8 records the local web/PWA release-candidate security pass. Desktop Chunk D9 records the first Cloudflare Pages hosted preview smoke. Desktop Chunk D10 adds a manual desktop technical-preview artifact lane. Desktop Chunk D11 records the [public launch master plan](2026-07-04-public-launch-master-plan.md). Desktop Chunk D12 records the [Old Skool AI hub handoff package](2026-07-04-old-skool-ai-hub-handoff.md). Desktop Chunk D13 records the [Cloudflare production launch smoke](2026-07-05-cloudflare-production-launch-smoke.md). Desktop Chunk D14 records the [public hub and cross-site link smoke](2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 records the [public impact insight Cloudflare update](2026-07-05-public-impact-insight-cloudflare-update.md). D17 records the [desktop download readiness gate](2026-07-05-desktop-download-readiness-gate.md). D20 records the [desktop public distribution decision](2026-07-06-desktop-public-distribution-decision.md). D21 records the [Windows MSIX proof](2026-07-06-windows-msix-proof.md). D22 records the [Windows Store trust prep](2026-07-06-windows-store-trust-prep.md). Social launch, custom-domain work, live pricing fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
 
 The current app is a local-first Vite/React static web app with a PWA install path. A production web artifact can be
 created with:
@@ -110,6 +110,15 @@ npm run desktop:gate:technical-preview
 ```
 
 Use `.github/workflows/desktop-technical-preview.yml` for Windows MSIX proof plus macOS and Linux artifacts because they should be built on matching OS runners. These artifacts are not public release downloads. Run `npm run desktop:gate:public` only as a public-release blocker check; it should fail until platform trust evidence exists.
+
+After the owner reserves the app in Microsoft Partner Center, copy `docs/release/windows-store-package-identity.template.json` to `docs/release/windows-store-package-identity.json`, paste only non-secret package identity values, then run:
+
+```bash
+npm run desktop:prepare:windows-store-manifest
+npm run desktop:prepare:windows-store-manifest -- --write
+```
+
+The first command is expected to fail until the real identity file exists and `status` is `partner-center-confirmed`.
 
 ## Rollback
 
