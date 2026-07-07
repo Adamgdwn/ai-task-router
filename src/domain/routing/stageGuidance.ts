@@ -16,7 +16,6 @@ import {
 import {
   decomposeTask,
   requestedDeliverableLabels,
-  requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
   taskNeedsEvidenceCheck,
@@ -287,6 +286,7 @@ function buildStageWorkItems(input: {
   return targets.map((targetDeliverables, index) => {
     const deliverableIds = targetDeliverables.map((deliverable) => deliverable.id);
     const label = workItemLabel(task, workRole, targetDeliverables, stage);
+    const setupGapLabel = manualSetupGapLabel(task, workRole, routeStep);
 
     return {
       id: `stage-${task.id}-${stage}-${workRole}-${index + 1}`,
@@ -294,13 +294,17 @@ function buildStageWorkItems(input: {
       deliverableIds,
       label,
       expectedOutput: expectedOutputForWorkItem(task, workRole, targetDeliverables),
-      recommendedModelLabel: recommendedLabelForWorkItem(routeStep, modelById, manualReviewModel, fallbackModelLabel),
+      recommendedModelLabel:
+        setupGapLabel ??
+        recommendedLabelForWorkItem(routeStep, modelById, manualReviewModel, fallbackModelLabel),
       ...(routeStep?.modelId ? { recommendedModelId: routeStep.modelId } : {}),
       ...(routeStep?.modeId ? { modeId: routeStep.modeId } : {}),
       ...(routeStep?.modeLabel ? { modeLabel: routeStep.modeLabel } : {}),
       selectionReasons: routeStep?.selectionReasons?.length
         ? routeStep.selectionReasons
-        : ["This stage follows the selected route and the user's allowed tools."],
+        : setupGapLabel
+          ? ["A research-only or manual setup cannot execute this build stage; add or select a build-capable AI helper before relying on the route."]
+          : ["This stage follows the selected route and the user's allowed tools."],
       reviewChecks: reviewChecksForWorkItem(task, workRole, targetDeliverables),
       upgradeTrigger: upgradeTriggerForWorkItem(task, workRole),
       ...(perItemCost !== undefined ? { estimatedCostUsd: roundEstimate(perItemCost) } : {}),
@@ -346,7 +350,7 @@ function expectedOutputForWorkItem(
   workRole: WorkRole,
   deliverables: readonly TaskDeliverable[],
 ) {
-  const deliverableText = inlineList(deliverables.map((deliverable) => deliverable.label));
+  const deliverableText = compactDeliverableText(deliverables);
 
   switch (workRole) {
     case "evidence-check":
@@ -371,7 +375,7 @@ function reviewChecksForWorkItem(
   workRole: WorkRole,
   deliverables: readonly TaskDeliverable[],
 ) {
-  const deliverableText = inlineList(deliverables.map((deliverable) => deliverable.label));
+  const deliverableText = compactDeliverableText(deliverables);
 
   switch (workRole) {
     case "evidence-check":
@@ -439,7 +443,7 @@ function frameStageActions(task: TaskIntake) {
   return [
     "Restate the task in one plain sentence.",
     `Name the finished output: ${friendlyOutputName(task.outputType)}.`,
-    `Split the request into visible deliverables: ${requestedDeliverableSummary(task)}.`,
+    `Split the request into visible deliverables: ${compactTaskDeliverableSummary(task)}.`,
     "List the information you will use and anything that is off limits.",
     "Decide what good enough looks like before opening a helper.",
   ];
@@ -611,7 +615,7 @@ function createStageActions(task: TaskIntake) {
   if (needsFullBuildPlan(task)) {
     return [
       "Ask the highest-level model or reasoning mode you own to create the master prompt before any lower-mode execution run.",
-      `Make one prompt cover the whole request: ${requestedDeliverableSummary(task)}.`,
+      `Make one prompt cover the main deliverables: ${compactTaskDeliverableSummary(task)}.`,
       `Require the prompt to produce the actual build path: ${buildPlanCoverageSummary(task)}.`,
       "Include Plan-Do-Check-Act or light DMAIC, privacy limits, acceptance checks, exact execution mode, and upgrade trigger.",
     ];
@@ -645,7 +649,7 @@ function createStageActions(task: TaskIntake) {
   if (task.knowledgeWorkType === "planning" || task.outputType === "plan") {
     return [
       "Ask for a master prompt, not the finished output yet.",
-      `Make the prompt cover every requested piece: ${requestedDeliverableSummary(task)}.`,
+      `Make the prompt cover every main deliverable: ${compactTaskDeliverableSummary(task)}.`,
       "Make it require Plan-Do-Check-Act, or light DMAIC when useful.",
       "Require the prompt to name the minimum execution model or mode and what would justify upgrading.",
     ];
@@ -766,7 +770,7 @@ function packageStageActions(task: TaskIntake) {
       actions.splice(
         2,
         0,
-        `Make the output explicitly cover: ${requestedDeliverableSummary(task)}.`,
+        `Make the output explicitly cover: ${compactTaskDeliverableSummary(task)}.`,
       );
       return actions.slice(0, 5);
     }
@@ -873,7 +877,7 @@ function reviewStageActions(task: TaskIntake) {
   if (needsFullBuildPlan(task)) {
     return [
       "Read the master prompt and execution result together.",
-      `Confirm the result covers: ${requestedDeliverableSummary(task)}.`,
+      `Confirm the result covers: ${compactTaskDeliverableSummary(task)}.`,
       "Check that the model choice, data flow, privacy limits, cost, energy, and acceptance checks are explicit.",
       "Mark any unclear build step, missing input, unsupported claim, or upgrade trigger.",
       "Decide whether the same prompt can be reused or needs one stronger prompt-design pass.",
@@ -887,7 +891,7 @@ function reviewStageActions(task: TaskIntake) {
   ];
 
   if (requestedDeliverableLabels(task).length > 0) {
-    actions.splice(1, 0, `Check that the result covers: ${requestedDeliverableSummary(task)}.`);
+    actions.splice(1, 0, `Check that the result covers: ${compactTaskDeliverableSummary(task)}.`);
   }
 
   if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
@@ -992,12 +996,35 @@ function buildPlanCoverageSummary(task: TaskIntake) {
     deliverables.includes("month-over-month tracking") ? "month-over-month tracking view" : null,
     deliverables.includes("improvement and strength insights") ? "improvement and strength signals" : null,
     deliverables.includes("model/tool choice for execution") ? "model and tool choice for execution" : null,
-    deliverables.includes("privacy check for financial data") ? "financial-data privacy limits" : null,
+    deliverables.includes("privacy check for sensitive data") ? "sensitive-data privacy limits" : null,
     deliverables.includes("cost, savings, or energy comparison") ? "cost, savings, and energy comparison" : null,
     taskHasBuildIntent(task) ? "first usable build slice" : null,
   ].filter((item): item is string => item !== null);
 
-  return inlineList(uniqueLabels(coverage.length ? coverage : deliverables));
+  return inlineList(uniqueLabels(coverage.length ? coverage : compactDeliverableLabels(decomposeTask(task).deliverables)));
+}
+
+function compactTaskDeliverableSummary(task: TaskIntake) {
+  return inlineList(compactDeliverableLabels(decomposeTask(task).deliverables));
+}
+
+function compactDeliverableText(deliverables: readonly TaskDeliverable[]) {
+  return inlineList(compactDeliverableLabels(deliverables));
+}
+
+function compactDeliverableLabels(deliverables: readonly TaskDeliverable[]) {
+  const specificLabels = deliverables
+    .filter((deliverable) => deliverable.kind !== "generic")
+    .map((deliverable) => deliverable.label);
+  const labels = uniqueLabels(specificLabels.length ? specificLabels : deliverables.map((deliverable) => deliverable.label));
+  const omittedGeneric = specificLabels.length > 0 && deliverables.some((deliverable) => deliverable.kind === "generic");
+  const visibleLabels = labels.slice(0, 6);
+
+  if (labels.length > visibleLabels.length || omittedGeneric) {
+    visibleLabels.push("remaining stated constraints");
+  }
+
+  return uniqueLabels(visibleLabels);
 }
 
 function friendlyOutputName(value: TaskIntake["outputType"]) {
@@ -1097,13 +1124,17 @@ function modelLabelForStageStep(
   stageMode: "prompt" | "execution",
 ) {
   if (step?.kind === "manual") {
-    return fallbackLabel;
+    return manualSetupGapLabel(task, stageMode === "prompt" ? "prompt-design" : "build-slice", step) ?? fallbackLabel;
   }
 
   if (step?.modelId) {
     const model = modelById.get(step.modelId);
     if (!model) {
       return step.modelId;
+    }
+
+    if (stageMode === "execution" && step.workRole === "build-slice" && step.modeLabel) {
+      return `${model.label} (execution ${step.modeLabel})`;
     }
 
     return stageMode === "prompt" ? modelLabelForPromptDesignForTask(model, task) : modelLabelForExecutionForTask(model, task);
@@ -1114,4 +1145,28 @@ function modelLabelForStageStep(
   }
 
   return fallbackLabel;
+}
+
+function manualSetupGapLabel(task: TaskIntake, workRole: WorkRole, step: RouteStep | undefined | null) {
+  if (step?.kind !== "manual") {
+    return null;
+  }
+
+  if (task.sensitivityClass !== "public" && task.sensitivityClass !== "internal") {
+    return null;
+  }
+
+  if (!(needsFullBuildPlan(task) || taskHasBuildIntent(task))) {
+    return null;
+  }
+
+  if (workRole === "prompt-design") {
+    return "Select a prompt-capable AI helper first (ChatGPT, Claude, Gemini, Grok, Poe, or similar)";
+  }
+
+  if (workRole === "execution" || workRole === "build-slice" || workRole === "artifact-package") {
+    return "Select a build or execution helper first (Claude Code, Cursor, Replit, Copilot, ChatGPT, Gemini, or Grok Build)";
+  }
+
+  return null;
 }

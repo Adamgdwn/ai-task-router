@@ -232,7 +232,7 @@ describe("route card generator", () => {
     expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
     expect(createStage?.actions.join(" ")).toContain("categorization rules");
     expect(createStage?.actions.join(" ")).toContain("month-over-month tracking");
-    expect(createStage?.actions.join(" ")).toContain("model/tool choice for execution");
+    expect(createStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage).toMatchObject({
       label: "Execute the build plan prompt",
       recommendedModelLabel: expect.stringContaining("execution GPT-5.5 Instant"),
@@ -249,6 +249,160 @@ describe("route card generator", () => {
     expect(reviewStage?.actions.join(" ")).toContain("improvement and strength insights");
     expect(reviewStage?.reviewChecks.join(" ")).toContain("full requested build path");
     expect(actStage?.reviewChecks.join(" ")).toContain("smallest useful build slice");
+  });
+
+  it("keeps least-resource public build guidance on concrete AI modes when ChatGPT Go is available", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-go",
+        providerId: "chatgpt",
+        accountId: "go",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-card-lean-chatgpt-build",
+      title: "Personal Finance Test Least Resource",
+      description:
+        "Build a prompt and plan for a tool that imports spreadsheet finances, categorizes expenses, tracks month over month trends, shows improvement opportunities, and chooses the best model to execute the mini application.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      costPreference: "minimize",
+      energyPreference: "minimize",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "least-resource", models);
+
+    const card = generateRouteCard({
+      task,
+      models,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+    const createStage = card.stageGuidance.find((stage) => stage.stage === "create");
+    const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
+
+    expectValidRouteCard(card);
+    expect(card.recommendedOptionId).toBe("route-task-card-lean-chatgpt-build-lean");
+    expect(createStage?.recommendedModelLabel).toContain("GPT-5.5 Thinking Medium");
+    expect(createStage?.recommendedModelLabel).not.toContain("You first");
+    expect(createStage?.actions.join(" ")).not.toContain("best model to execute the mini application");
+    expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
+    expect(packageStage?.recommendedModelLabel).toContain("GPT-5.5 Instant");
+    expect(packageStage?.recommendedModelLabel).not.toContain("You first");
+  });
+
+  it("uses SuperGrok submodes for prompt design and build execution instead of generic best-model wording", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "grok-super",
+        providerId: "grok",
+        accountId: "supergrok",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-card-supergrok-build",
+      title: "Plan a small finance app",
+      description:
+        "Research current model choices, build a master prompt, and create a first usable app slice that imports spreadsheet expenses, categorizes them, tracks trends, and shows improvement opportunities.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      costPreference: "minimize",
+      energyPreference: "minimize",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "least-resource", models);
+
+    const card = generateRouteCard({
+      task,
+      models,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+    const gatherStage = card.stageGuidance.find((stage) => stage.stage === "gather");
+    const createStage = card.stageGuidance.find((stage) => stage.stage === "create");
+    const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
+
+    expectValidRouteCard(card);
+    expect(gatherStage?.recommendedModelLabel).toContain("Perplexity Sonar");
+    expect(createStage?.recommendedModelLabel).toContain("Grok 4.3 with reasoning high");
+    expect(packageStage?.recommendedModelLabel).toContain("execution Grok Build 0.1");
+    expect(`${createStage?.recommendedModelLabel} ${packageStage?.recommendedModelLabel}`).not.toContain("best available model");
+  });
+
+  it("labels the setup gap when a complex build request only has a research helper", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-card-research-only-build",
+      title: "Plan a small finance app with only Perplexity",
+      description:
+        "Research current model choices, build a master prompt, and create a first usable app slice that imports spreadsheet expenses, categorizes them, tracks trends, and shows improvement opportunities.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      costPreference: "minimize",
+      energyPreference: "minimize",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "least-resource", models);
+
+    const card = generateRouteCard({
+      task,
+      models,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+    const createStage = card.stageGuidance.find((stage) => stage.stage === "create");
+    const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
+
+    expectValidRouteCard(card);
+    expect(createStage?.recommendedModelLabel).toContain("Select a prompt-capable AI helper first");
+    expect(packageStage?.recommendedModelLabel).toContain("Select a build or execution helper first");
+    expect(createStage?.recommendedModelLabel).not.toBe("You first");
+    expect(packageStage?.recommendedModelLabel).not.toBe("You first");
   });
 
   it("treats Claude Code as a build surface from the selected Claude subscription", () => {
@@ -394,10 +548,12 @@ describe("route card generator", () => {
     ] satisfies ModelInventoryItem[];
     const task = buildTask({
       id: "task-card-chatgpt-go-perplexity-free",
-      title: "Plan a finance app with current facts",
-      knowledgeWorkType: "planning",
-      outputType: "plan",
+      title: "Research current AI model choices",
+      description: "Research current model availability and summarize the practical evidence for a novice.",
+      knowledgeWorkType: "research",
+      outputType: "answer",
       requiresCurrentFacts: true,
+      requiresCitations: true,
       requestedSourceIds: [],
     });
     const { hardGateResult, scoringResult } = generatePipeline(task, "balanced", models);

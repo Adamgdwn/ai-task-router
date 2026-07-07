@@ -881,12 +881,32 @@ function selectLeastResourceAdequateMode(
     return sortLeastResourceModes(zeroMarginalModes, role, task)[0] ?? zeroMarginalModes[0] ?? null;
   }
 
+  if (shouldPreferAiOverManualLeanMode(task, role) && nonManualModes.length > 0) {
+    return sortLeastResourceModes(nonManualModes, role, task)[0] ?? nonManualModes[0] ?? null;
+  }
+
   const manualMode = eligibleModes.find((mode) => mode.modeKind === "manual");
   if (manualMode) {
     return manualMode;
   }
 
   return sortLeastResourceModes(nonManualModes.length ? nonManualModes : eligibleModes, role, task)[0] ?? null;
+}
+
+function shouldPreferAiOverManualLeanMode(task: TaskIntake, role: WorkRole) {
+  if (task.sensitivityClass !== "public" && task.sensitivityClass !== "internal") {
+    return false;
+  }
+
+  if (role === "prompt-design" && (taskNeedsFullBuildPlan(task) || taskHasBuildIntent(task))) {
+    return true;
+  }
+
+  if ((role === "execution" || role === "build-slice") && taskHasBuildIntent(task)) {
+    return true;
+  }
+
+  return false;
 }
 
 function sortLeastResourceModes(
