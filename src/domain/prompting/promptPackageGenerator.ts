@@ -176,11 +176,14 @@ function promptTextForStep(input: {
     `Sensitivity class: ${task.sensitivityClass}`,
     `Use only these source IDs for this step: ${sourceRefs}.`,
     ...factAndCitationPromptLines(task),
-    "First evaluate the task in plain language:",
+    "First build a master prompt before creating the final output:",
     "- Restate the goal and the finished deliverable.",
+    "- Name the allowed inputs, constraints, output format, review checks, and stop conditions.",
+    "- Include the minimum helper/model needed for execution and the trigger for upgrading to stronger help.",
+    "Then use that master prompt to create the first usable result:",
     "- Identify the main assumptions, missing information, and review risks.",
     "- Say whether a lighter, everyday, or premium helper is enough for this task.",
-    "Then create a novice-friendly project plan:",
+    "Create a novice-friendly project plan:",
     "- Use a light DMAIC structure when it fits: Define, Measure, Analyze, Improve, Control.",
     "- At minimum, make the steps follow Plan, Do, Check, Act.",
     "- For each step, name the method phase, what I should do, what helper to use, and what good enough looks like.",
@@ -260,14 +263,14 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
     case "manual":
       return `A manually prepared ${task.outputType} for "${task.title}" with task evaluation, ordered steps, review checks, and a savings recommendation.`;
     case "model":
-      return `A ${task.outputType} for "${task.title}" that evaluates the task, gives a novice-friendly plan, respects source limits, and recommends where to save or upgrade.`;
+      return `A master prompt plus a ${task.outputType} for "${task.title}" that evaluates the task, gives a novice-friendly plan, respects source limits, and recommends where to save or upgrade.`;
   }
 }
 
 function promptStepTitle(routeStep: RouteStep, routeStepIndex: number) {
   const actionByKind: Record<RouteStep["kind"], string> = {
     research: "Check Research",
-    model: "Draft Output",
+    model: "Build Prompt And Output",
     artifact: "Package Output",
     "human review": "Approve Before Use",
     manual: "Prepare Manually",

@@ -18,13 +18,6 @@ type StageDraft = {
   fallbackModelLabel: string;
 };
 
-const artifactOutputTypes = new Set<TaskIntake["outputType"]>([
-  "table",
-  "slide outline",
-  "route card",
-  "prompt package",
-]);
-
 export function buildProjectStageGuidance({
   task,
   recommendedOption,
@@ -64,7 +57,7 @@ export function buildProjectStageGuidance({
 
   stages.push({
     stage: "create",
-    methodLabel: "Do - Analyze/Improve",
+    methodLabel: "Plan - Analyze",
     label: createStageLabel(task),
     purpose: createStagePurpose(task),
     actions: createStageActions(task),
@@ -204,7 +197,7 @@ function gatherStageActions(task: TaskIntake) {
 
   if (task.requiresCurrentFacts) {
     return [
-      "Check the newest allowed source before drafting.",
+      "Check the newest allowed source before prompt design or execution.",
       "Write down what changed and what still looks stable.",
       "Mark anything that should be verified again later.",
     ];
@@ -214,7 +207,7 @@ function gatherStageActions(task: TaskIntake) {
     return [
       "Collect source notes for any claim that matters.",
       "Keep citation details beside the fact they support.",
-      "Leave unsupported claims out of the first draft.",
+      "Leave unsupported claims out of the prompt and first output.",
     ];
   }
 
@@ -242,149 +235,171 @@ function gatherStageChecks(task: TaskIntake) {
 function createStageLabel(task: TaskIntake) {
   switch (task.outputType) {
     case "answer":
-      return "Draft the answer";
+      return "Build the answer prompt";
     case "brief":
-      return "Draft the brief";
+      return "Build the brief prompt";
     case "plan":
-      return "Build the working plan";
+      return "Build the master prompt";
     case "draft":
-      return "Create the first draft";
+      return "Build the drafting prompt";
     case "code":
-      return "Build or inspect the code";
+      return "Build the coding prompt";
     case "table":
-      return "Shape the table";
+      return "Build the table prompt";
     case "slide outline":
-      return "Outline the slides";
+      return "Build the slide prompt";
     case "route card":
-      return "Draft the decision card";
+      return "Build the route-card prompt";
     case "prompt package":
-      return "Draft the prompts";
+      return "Build the prompt package";
   }
 }
 
 function createStagePurpose(task: TaskIntake) {
   if (task.knowledgeWorkType === "coding") {
-    return "Use the recommended helper to turn the goal into a build plan, first version, or code-review checklist.";
+    return "Use the recommended helper for the thinking-heavy part first: write a precise build prompt before asking anything to make the tool.";
   }
 
   if (task.knowledgeWorkType === "review") {
-    return "Use the recommended helper to surface issues, gaps, improvement options, and the safest next step.";
+    return "Turn the review job into a clear prompt with criteria, evidence limits, issue categories, and a decision rule.";
   }
 
   if (task.knowledgeWorkType === "analysis") {
-    return "Use the recommended helper to compare options, reason through tradeoffs, and recommend what to do next.";
+    return "Turn the analysis job into a prompt that asks for options, tradeoffs, assumptions, and a recommendation.";
   }
 
   if (task.knowledgeWorkType === "planning" || task.outputType === "plan") {
-    return "Ask for a beginner-friendly plan with ordered steps, tool choices, review checks, and savings or upgrade points.";
+    return "Create the master prompt that will later produce the plan, including phases, measures, risks, review checks, and upgrade triggers.";
   }
 
-  return "Use the recommended helper to create the requested output from the allowed inputs.";
+  return "Write the prompt before the output: define the role, inputs, constraints, format, review checks, and when to upgrade.";
 }
 
 function createStageActions(task: TaskIntake) {
   if (task.knowledgeWorkType === "coding") {
     return [
-      "Ask for the smallest safe build or review plan first.",
-      "Name files, constraints, and test expectations before implementing.",
-      "Keep risky changes separate from obvious cleanup.",
+      "Ask for a master build prompt, not the finished app yet.",
+      "Make the prompt name the smallest usable version, data flow, screens, files, tests, and acceptance checks.",
+      "Include what to avoid, what to ask before building, and what can wait for a later version.",
+      "Ask which execution helper is the minimum safe choice and what would justify upgrading.",
     ];
   }
 
   if (task.knowledgeWorkType === "review") {
     return [
-      "Ask the helper to find issues, missing context, and improvement options.",
-      "Sort the feedback into must-fix, nice-to-have, and questions.",
-      "Keep the final decision with you.",
+      "Ask for a review prompt with categories for defects, risks, missing context, and improvement options.",
+      "Require the prompt to separate must-fix items, nice-to-have ideas, and open questions.",
+      "Add a human decision rule for approve, revise, stop, or reroute.",
     ];
   }
 
   if (task.knowledgeWorkType === "analysis") {
     return [
-      "Ask for options, tradeoffs, and a recommendation.",
-      "Make the helper show assumptions and unknowns.",
-      "Keep a short decision note beside the result.",
+      "Ask for a prompt that compares options, tradeoffs, assumptions, unknowns, and a recommendation.",
+      "Require a short decision table or ranked list if that would make the result easier to inspect.",
+      "Add a check for unsupported claims or stale information.",
     ];
   }
 
   if (task.knowledgeWorkType === "planning" || task.outputType === "plan") {
     return [
-      "Ask for goals, milestones, dependencies, and risks.",
-      "Request beginner-friendly steps with a clear order.",
-      "Ask for tool choices, review points, and upgrade triggers.",
-      "Keep the first action small enough to start immediately.",
+      "Ask for a master prompt that will create a beginner-friendly plan later.",
+      "Make it require Plan-Do-Check-Act, or light DMAIC when useful.",
+      "Include goals, measures, dependencies, risks, first action, review points, and upgrade triggers.",
+      "Require a savings note that compares the lean route with heavier premium use.",
     ];
   }
 
   return [
-    "Ask for a first usable version, not a perfect final answer.",
-    "Include the allowed inputs and the finish line from stage 1.",
-    "Ask the helper to flag assumptions or missing information.",
+    "Ask for the exact prompt you should run next, not the final answer yet.",
+    "Include the allowed inputs, finish line, output format, tone, and constraints from stage 1.",
+    "Require checks for assumptions, missing information, and when to use stronger help.",
   ];
 }
 
 function createStageChecks(task: TaskIntake) {
-  const checks = ["The output answers the original task in the requested format."];
+  const checks = ["The prompt is specific enough that another helper could execute it without guessing."];
 
   if (task.qualityBar === "high" || task.qualityBar === "critical") {
-    checks.push("Weak claims, vague steps, and unsupported recommendations are marked for review.");
+    checks.push("The prompt includes acceptance checks, stop conditions, and an upgrade trigger.");
   }
 
   return checks;
 }
 
 function shouldAddPackageStage(
-  task: TaskIntake,
-  artifactStep: RouteStep | null,
+  _task: TaskIntake,
+  _artifactStep: RouteStep | null,
 ) {
-  return (
-    task.knowledgeWorkType === "packaging" ||
-    task.outputType === "plan" ||
-    artifactOutputTypes.has(task.outputType) ||
-    Boolean(artifactStep)
-  );
+  return true;
 }
 
 function packageStageLabel(task: TaskIntake) {
-  if (task.outputType === "plan") {
-    return "Turn it into a checklist";
+  if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
+    return "Build the first slice";
   }
 
-  return "Package the result";
+  if (task.outputType === "plan") {
+    return "Run the prompt for the plan";
+  }
+
+  if (task.outputType === "prompt package") {
+    return "Package the prompts";
+  }
+
+  if (task.outputType === "route card") {
+    return "Create the decision card";
+  }
+
+  return "Run the prompt";
 }
 
 function packageStagePurpose(task: TaskIntake) {
+  if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
+    return "Use the master prompt to build the smallest useful version first, then leave bigger features for later passes.";
+  }
+
   if (task.outputType === "plan") {
-    return "Turn the plan into a short checklist with the first action, dependencies, review points, and upgrade triggers.";
+    return "Paste the master prompt into the lightest adequate execution helper and produce the actual working plan.";
   }
 
   if (task.outputType === "table") {
-    return "Turn the useful parts into rows, columns, and labels that can be checked quickly.";
+    return "Run the prompt to produce rows, columns, labels, and review notes that can be checked quickly.";
   }
 
   if (task.outputType === "slide outline") {
-    return "Turn the draft into slide-sized sections with clear headings and talking points.";
+    return "Run the prompt to produce slide-sized sections with clear headings and talking points.";
   }
 
   if (task.outputType === "route card" || task.outputType === "prompt package") {
-    return "Convert the work into copy-ready guidance that can be saved or shared locally.";
+    return "Run the prompt and convert the result into copy-ready guidance that can be saved locally.";
   }
 
-  return "Clean up the result so it matches the format you actually need.";
+  return "Use the prompt to create the requested output with the smallest helper that can pass the checks.";
 }
 
 function packageStageActions(task: TaskIntake) {
+  if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
+    return [
+      "Paste the master prompt into the selected execution helper.",
+      "Build only the first useful slice before adding polish or extra features.",
+      "Ask for the files, components, tests, and manual checks needed for that slice.",
+      "Stop and upgrade only if the build plan is confused, unsafe, or repeatedly failing review.",
+    ];
+  }
+
   if (task.outputType === "plan") {
     return [
-      "Turn the draft into phases or numbered steps.",
-      "Add the first action, needed inputs, blockers, and review points.",
-      "Mark when to stay lightweight and when to upgrade to stronger help.",
+      "Paste the master prompt into the selected execution helper.",
+      "Create the ordered plan with phases or numbered steps.",
+      "Add owners or first actions, needed inputs, blockers, measures, and review points.",
+      "Mark when to stay lightweight and when a stronger helper would be worth it.",
     ];
   }
 
   if (task.outputType === "table") {
     return [
-      "Convert useful details into clear rows and columns.",
+      "Paste the prompt and produce clear rows and columns.",
       "Use labels that a non-expert can scan quickly.",
       "Leave unknown values blank or marked for review.",
     ];
@@ -392,7 +407,7 @@ function packageStageActions(task: TaskIntake) {
 
   if (task.outputType === "slide outline") {
     return [
-      "Break the result into slide-sized sections.",
+      "Paste the prompt and break the result into slide-sized sections.",
       "Give each slide one job and a short talking point.",
       "Move extra detail into notes instead of crowding the outline.",
     ];
@@ -400,25 +415,30 @@ function packageStageActions(task: TaskIntake) {
 
   if (task.outputType === "route card" || task.outputType === "prompt package") {
     return [
-      "Convert the result into copy-ready instructions.",
+      "Paste the prompt and convert the result into copy-ready instructions.",
       "Keep inputs, constraints, review checks, and stop points visible.",
       "Remove anything you would not actually paste or follow.",
     ];
   }
 
   return [
-    "Trim the result into the format you need.",
+    "Paste the master prompt into the selected execution helper.",
+    "Create the first usable version before asking for polish.",
     "Put the most useful part first.",
     "Add any missing labels, next steps, or review notes.",
   ];
 }
 
 function packageStageChecks(task: TaskIntake) {
-  if (task.outputType === "plan") {
-    return ["A novice can see what to do first and what to check before moving on."];
+  if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
+    return ["The first slice works well enough to review before more features are added."];
   }
 
-  return ["The package is easy to scan and ready for your next manual action."];
+  if (task.outputType === "plan") {
+    return ["A novice can see the first action, the sequence, the measure, and the next review point."];
+  }
+
+  return ["The result follows the master prompt and is ready for review before outside use."];
 }
 
 function reviewStageLabel(task: TaskIntake) {
@@ -450,13 +470,13 @@ function reviewStagePurpose(task: TaskIntake) {
     return "Compare the result against the goal and tighten anything weak or unsupported.";
   }
 
-  return "Confirm the result is clear, useful, and safe enough before deciding what to do next.";
+  return "Compare the executed result against the master prompt, acceptance checks, and original task before deciding what to do next.";
 }
 
 function reviewStageActions(task: TaskIntake) {
   const actions = [
-    "Read the result from the perspective of the person who has to use it.",
-    "Fix unclear steps, unsupported claims, or missing context.",
+    "Read the prompt and the result together, from the perspective of the person who has to use it.",
+    "Fix unclear steps, unsupported claims, missing context, or places where the helper ignored the prompt.",
     "Mark anything that needs one more pass before action.",
   ];
 
@@ -468,7 +488,7 @@ function reviewStageActions(task: TaskIntake) {
 }
 
 function reviewStageChecks(task: TaskIntake) {
-  const checks = ["The result is clear enough to act on without guessing."];
+  const checks = ["The result matches the prompt, the original task, and the promised output format."];
 
   if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
     checks.push("Nothing public leaves your hands without human approval.");
@@ -495,14 +515,14 @@ function actStageLabel(task: TaskIntake) {
 
 function actStagePurpose(task: TaskIntake) {
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
-    return "Pick the smallest next step, decide what to measure, and note when the plan should loop back for another check.";
+    return "Pick the smallest next step, decide what to measure, and note whether the prompt should be reused, tightened, or rerun with stronger help.";
   }
 
   if (task.qualityBar === "critical" || task.publicFacing) {
     return "Use the review result to proceed, revise, or upgrade the route before anything important depends on it.";
   }
 
-  return "Use what you learned to proceed, save the route if it worked, or adjust the setup for next time.";
+  return "Use what you learned to proceed, save the route if it worked, or adjust the prompt and setup for next time.";
 }
 
 function actStageActions(task: TaskIntake) {
@@ -510,14 +530,14 @@ function actStageActions(task: TaskIntake) {
     return [
       "Choose one first action that can be started today.",
       "Name the measure that will show whether the plan helped.",
-      "Decide the trigger for looping back to Plan or upgrading the helper.",
+      "Decide the trigger for looping back to the prompt or upgrading the helper.",
     ];
   }
 
   return [
     "Decide whether to use, edit, or reject the result.",
     "Save the recommendation if you followed it.",
-    "Carry one lesson into the next similar task.",
+    "Carry one prompt or routing lesson into the next similar task.",
   ];
 }
 

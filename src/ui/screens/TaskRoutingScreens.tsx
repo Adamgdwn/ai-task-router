@@ -631,7 +631,7 @@ function taskEvaluationSummary(task: TaskIntake, recommended: RouteOption | unde
   const quality = friendlyTaskOptionLabel(task.qualityBar).toLowerCase();
   const sourceNeed =
     task.requiresCurrentFacts || task.requiresCitations
-      ? "a safe current-facts or citation check before drafting"
+      ? "a safe current-facts or citation check before prompt design and execution"
       : task.requestedSourceIds.length > 0
         ? "specific information you selected"
         : "the task description and anything you intentionally add later";

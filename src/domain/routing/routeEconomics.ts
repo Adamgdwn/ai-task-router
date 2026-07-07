@@ -26,9 +26,13 @@ export function attachRouteEconomics(
   models: readonly ModelInventoryItem[],
 ): RouteOption[] {
   const modelById = new Map(models.map((model) => [model.id, model]));
+  const premiumBenchmarkCostUsd = estimatePricingAnchorCost("openai-premium-text-anchor", defaultHundredThousandTokenRun);
   const optionCosts = options.map((option) => ({
     option,
-    costUsd: estimateRouteCostUsd(option, modelById),
+    costUsd:
+      option.strategy === "premium"
+        ? Math.max(estimateRouteCostUsd(option, modelById), premiumBenchmarkCostUsd)
+        : estimateRouteCostUsd(option, modelById),
   }));
   const baseline = optionCosts.reduce(
     (currentBaseline, candidate) =>
@@ -37,7 +41,6 @@ export function attachRouteEconomics(
         : currentBaseline,
     { costUsd: 0, label: "the heaviest safe option" },
   );
-  const premiumBenchmarkCostUsd = estimatePricingAnchorCost("openai-premium-text-anchor", defaultHundredThousandTokenRun);
   const usesPremiumBenchmark = baseline.costUsd < premiumBenchmarkCostUsd;
   const comparedWithLabel = usesPremiumBenchmark ? "premium API-equivalent help" : baseline.label;
   const comparedWithCostUsd = usesPremiumBenchmark ? premiumBenchmarkCostUsd : baseline.costUsd;

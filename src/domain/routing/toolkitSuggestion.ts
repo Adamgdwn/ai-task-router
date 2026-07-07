@@ -271,7 +271,7 @@ function toolkitRole(
   }
 
   if (task.requiresCurrentFacts || task.requiresCitations || task.knowledgeWorkType === "research") {
-    return accountOption.capabilityScores.research >= 5 ? "Current-facts checker" : "General drafting helper";
+    return accountOption.capabilityScores.research >= 5 ? "Current-facts checker" : "General writing helper";
   }
 
   if (task.outputType === "code" || task.knowledgeWorkType === "coding") {
@@ -279,7 +279,7 @@ function toolkitRole(
   }
 
   if (task.outputType === "table" || task.outputType === "slide outline" || task.knowledgeWorkType === "packaging") {
-    return accountOption.capabilityScores.packaging >= 5 ? "Packaging helper" : "General drafting helper";
+    return accountOption.capabilityScores.packaging >= 5 ? "Packaging helper" : "General writing helper";
   }
 
   return "General planning helper";
@@ -340,7 +340,7 @@ function toolkitSummary(
       : "paid upgrades only if the task deserves them";
 
   if (task.requiresCurrentFacts || task.requiresCitations) {
-    return `For ${routeLabel}, build around ${starterText} plus ${upgradeText}, with at least one source-checking helper before drafting.`;
+    return `For ${routeLabel}, build around ${starterText} plus ${upgradeText}, with at least one source-checking helper before prompt design and execution.`;
   }
 
   return `For ${routeLabel}, start with ${starterText} that can get near the needed quality, then keep ${upgradeText} for risk, polish, or repeated work.`;

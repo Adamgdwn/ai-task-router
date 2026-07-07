@@ -73,6 +73,10 @@ type ToolInventoryScreenProps = SetupScreenProps & {
   onNextStep: () => void;
 };
 
+type PolicySettingsScreenProps = SetupScreenProps & {
+  onNextStep: () => void;
+};
+
 export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps) {
   return (
     <article className="screenPanel pathPanel">
@@ -246,8 +250,16 @@ function formatCatalogReviewDate(timestamp: string) {
   }).format(new Date(timestamp));
 }
 
-export function PolicySettingsScreen({ definition, setup }: SetupScreenProps) {
+export function PolicySettingsScreen({ definition, setup, onNextStep }: PolicySettingsScreenProps) {
   const policies = setup.configuration?.policySettings ?? [];
+
+  async function continueToNextStep() {
+    if (setup.dirty) {
+      await setup.saveChanges();
+    }
+
+    onNextStep();
+  }
 
   return (
     <SetupScreenLayout definition={definition} setup={setup}>
@@ -292,6 +304,17 @@ export function PolicySettingsScreen({ definition, setup }: SetupScreenProps) {
             />
           ))
         )}
+      </div>
+
+      <div className="setupNavigationActions">
+        <button
+          className="nextStepButton"
+          disabled={setup.status === "loading" || setup.status === "saving"}
+          onClick={() => void continueToNextStep()}
+          type="button"
+        >
+          Next step
+        </button>
       </div>
     </SetupScreenLayout>
   );

@@ -212,7 +212,7 @@ describe("route candidate generation", () => {
     expect(lean.steps[0]?.label).not.toContain("minimum Perplexity Sonar Pro");
   });
 
-  it("does not treat a research-only tool as the premium drafting helper", () => {
+  it("uses Perplexity for evidence and keeps premium visible as a comparison benchmark", () => {
     const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
     if (!manualReviewModel) {
       throw new Error("Manual review model is required for this test.");
@@ -250,15 +250,18 @@ describe("route candidate generation", () => {
         expect.objectContaining({ kind: "model", modelId: "chatgpt-go" }),
       ]),
     );
-    expect(candidateResult.candidates.map((candidate) => candidate.strategy)).not.toContain("premium");
-    expect(candidateResult.unavailable).toEqual(
+    const premium = requireCandidate(candidateResult, "premium");
+    expect(premium.steps).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          strategy: "premium",
-          reasonCode: "no-safe-premium-path",
-        }),
+        expect.objectContaining({ kind: "research", modelId: "perplexity-free" }),
+        expect.objectContaining({ kind: "model", modelId: "chatgpt-go" }),
       ]),
     );
+    expect(premium.summary).toContain("premium benchmark");
+    expect(premium.warnings).toContain(
+      "No premium-capacity helper is saved for this task, so the premium route is shown as a comparison benchmark using the strongest safe helper currently selected.",
+    );
+    expect(candidateResult.unavailable.map((candidate) => candidate.strategy)).not.toContain("premium");
   });
 
   it("adds a premium artifact step for packaging-shaped outputs when the artifact tool is allowed", () => {

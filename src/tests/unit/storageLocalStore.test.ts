@@ -235,7 +235,7 @@ function buildPromptPackage(): PromptPackage {
     steps: [
       {
         id: "prompt-step-storage-fixture",
-        title: "Step 1: Draft Output",
+        title: "Step 1: Build Prompt And Output",
         instruction: "Use this local prompt fixture manually. The app does not call tools.",
         inputRefs: ["task-storage-fixture", "web"],
         expectedOutput: "A local draft fixture for storage tests.",
@@ -292,11 +292,11 @@ function buildRouteCard(): RouteCard {
       {
         id: "stage-task-storage-fixture-create",
         stage: "create",
-        methodLabel: "Do - Improve",
-        label: "Create the first draft",
-        purpose: "Use the recommended tool to create the requested output.",
-        actions: ["Use the recommended tool to create the requested output."],
-        reviewChecks: ["The draft answers the task."],
+        methodLabel: "Plan - Analyze",
+        label: "Build the drafting prompt",
+        purpose: "Write the prompt before creating the requested output.",
+        actions: ["Build the master prompt, then execute it manually."],
+        reviewChecks: ["The prompt and result answer the task."],
         recommendedModelId: "user-mid-synthesis-model",
         recommendedModelLabel: "ChatGPT",
         routeStepId: "route-storage-fixture-balanced-step",

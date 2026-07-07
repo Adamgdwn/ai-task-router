@@ -92,7 +92,11 @@ export function App({ store = browserLocalStore }: AppProps) {
           />
         ) : null}
         {activeScreen.id === "policy-settings" ? (
-          <PolicySettingsScreen definition={activeScreen} setup={setup} />
+          <PolicySettingsScreen
+            definition={activeScreen}
+            onNextStep={() => setActiveScreenId("task-intake")}
+            setup={setup}
+          />
         ) : null}
         {activeScreen.id === "task-intake" ? (
           <TaskIntakeScreen

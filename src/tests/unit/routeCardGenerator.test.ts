@@ -135,18 +135,29 @@ describe("route card generator", () => {
     expect(card.options.find((option) => option.id === card.recommendedOptionId)?.score).toBe(
       scoringResult.recommendedCandidate?.score,
     );
-    expect(card.stageGuidance.map((stage) => stage.stage)).toEqual(["frame", "gather", "create", "review", "act"]);
+    expect(card.stageGuidance.map((stage) => stage.stage)).toEqual([
+      "frame",
+      "gather",
+      "create",
+      "package",
+      "review",
+      "act",
+    ]);
     expect(card.stageGuidance[0]).toMatchObject({
       methodLabel: "Plan - Define",
       actions: expect.arrayContaining(["Restate the task in one plain sentence."]),
       reviewChecks: expect.arrayContaining(["The goal, audience, inputs, and finish line are clear."]),
     });
     expect(card.stageGuidance.find((stage) => stage.stage === "create")).toMatchObject({
-      label: "Create the first draft",
-      methodLabel: "Do - Analyze/Improve",
+      label: "Build the drafting prompt",
+      methodLabel: "Plan - Analyze",
       recommendedModelLabel: expect.stringMatching(/Gemini|ChatGPT|Claude/),
     });
     expect(card.stageGuidance.find((stage) => stage.stage === "create")?.recommendedModelLabel).toContain("minimum");
+    expect(card.stageGuidance.find((stage) => stage.stage === "package")).toMatchObject({
+      label: "Run the prompt",
+      methodLabel: "Do - Improve",
+    });
   });
 
   it("preserves hard-gate warnings and blocked reasons on the route card", () => {

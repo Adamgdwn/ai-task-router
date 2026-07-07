@@ -21,7 +21,7 @@ export function StageGuidancePanel({
       </div>
       <ol className="stageGuidanceList">
         {stages.map((stage, stageIndex) => (
-          <li key={stage.id}>
+          <li className={`stageGuidanceItem stage-${stage.stage}`} key={stage.id}>
             <div>
               <span>Stage {stageIndex + 1}</span>
               {stage.methodLabel ? <strong className="methodPill">{stage.methodLabel}</strong> : null}

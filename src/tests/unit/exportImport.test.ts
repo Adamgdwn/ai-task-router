@@ -64,7 +64,7 @@ describe("export and import utilities", () => {
     expect(routeCardMarkdown).toContain("## Quick Project Plan");
     expect(routeCardMarkdown).toContain("Method: Plan - Define");
     expect(routeCardMarkdown).toContain("Recommended help: Local export model");
-    expect(routeCardMarkdown).toContain("Do this: Use the recommended tool to create the first pass.");
+    expect(routeCardMarkdown).toContain("Do this: Build the master prompt, then execute it manually.");
     expect(routeCardMarkdown).toContain("## Route Options");
     expect(routeCardMarkdown).toContain("### 1. Balanced route");
     expect(routeCardMarkdown).toContain("## Prompt package: Export fixture");
@@ -228,7 +228,7 @@ function buildPromptPackage(): PromptPackage {
     steps: [
       {
         id: "prompt-step-export-fixture",
-        title: "Step 1: Draft Output",
+        title: "Step 1: Build Prompt And Output",
         instruction: "Use this local prompt fixture manually. The app does not call tools.",
         inputRefs: ["task-export-fixture", "web-export-source"],
         expectedOutput: "A local draft fixture for export/import tests.",
@@ -285,11 +285,11 @@ function buildRouteCard(): RouteCard {
       {
         id: "stage-task-export-fixture-create",
         stage: "create",
-        methodLabel: "Do - Improve",
-        label: "Draft the brief",
-        purpose: "Use the recommended tool to create the first pass.",
-        actions: ["Use the recommended tool to create the first pass."],
-        reviewChecks: ["The draft answers the task."],
+        methodLabel: "Plan - Analyze",
+        label: "Build the brief prompt",
+        purpose: "Write the prompt before creating the first pass.",
+        actions: ["Build the master prompt, then execute it manually."],
+        reviewChecks: ["The prompt and result answer the task."],
         recommendedModelId: "local-export-model",
         recommendedModelLabel: "Local export model",
         routeStepId: "route-export-fixture-balanced-step",

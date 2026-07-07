@@ -99,6 +99,8 @@ const strategyDefinitions: Record<RouteCandidateStrategy, StrategyDefinition> = 
 };
 
 const artifactOutputTypes = new Set(["table", "slide outline", "route card", "prompt package"]);
+const premiumBenchmarkWarning =
+  "No premium-capacity helper is saved for this task, so the premium route is shown as a comparison benchmark using the strongest safe helper currently selected.";
 
 export function generateRouteCandidates({
   task,
@@ -173,9 +175,13 @@ function buildStrategyCandidate(input: {
   }
 
   const primaryModel = selectPreferredModel(context.allowedModels, primaryModelTiersForStrategy(strategy, task, definition));
-  const usesManualPrimaryStep = primaryModel?.tier === "human";
+  const premiumBenchmarkModel =
+    strategy === "premium" && !primaryModel ? selectPremiumBenchmarkModel(context.allowedModels, task) : null;
+  const resolvedPrimaryModel = primaryModel ?? premiumBenchmarkModel;
+  const usesPremiumBenchmark = strategy === "premium" && !primaryModel && premiumBenchmarkModel !== null;
+  const usesManualPrimaryStep = resolvedPrimaryModel?.tier === "human";
 
-  if (!primaryModel) {
+  if (!resolvedPrimaryModel) {
     return unavailableCandidate({
       taskId: task.id,
       strategy,
@@ -192,9 +198,9 @@ function buildStrategyCandidate(input: {
     steps.push(researchStep);
   }
 
-  steps.push(buildPrimaryStep({ routeId, strategy, task, model: primaryModel, context }));
+  steps.push(buildPrimaryStep({ routeId, strategy, task, model: resolvedPrimaryModel, context, usesPremiumBenchmark }));
 
-  const artifactStep = buildArtifactStep({ routeId, task, primaryModel, context });
+  const artifactStep = buildArtifactStep({ routeId, task, primaryModel: resolvedPrimaryModel, context });
   if (strategy === "premium" && artifactStep) {
     steps.push(artifactStep);
   }
@@ -212,6 +218,7 @@ function buildStrategyCandidate(input: {
       definition,
       policy,
       usesManualPrimaryStep,
+      usesPremiumBenchmark,
       hasResearchStep: researchStep !== null,
       hasArtifactStep: strategy === "premium" && artifactStep !== null,
       requiresHumanApproval: hardGateResult.requiresHumanApproval,
@@ -219,7 +226,7 @@ function buildStrategyCandidate(input: {
     estimatedCostLevel: definition.estimatedCostLevel,
     estimatedEffortLevel: usesManualPrimaryStep ? "high" : definition.estimatedEffortLevel,
     steps,
-    warnings: context.warnings,
+    warnings: usesPremiumBenchmark ? uniqueMessages([...context.warnings, premiumBenchmarkWarning]) : context.warnings,
   };
 }
 
@@ -284,6 +291,23 @@ function primaryModelTiersForStrategy(
   return premiumTiers;
 }
 
+function selectPremiumBenchmarkModel(
+  allowedModels: ModelInventoryItem[],
+  task: TaskIntake,
+): ModelInventoryItem | null {
+  const safeAiModels = allowedModels.filter((model) => model.tier !== "human");
+  const fallbackTiers: ModelInventoryItem["tier"][] = ["frontier", "mid", "small", "artifact"];
+
+  if (
+    task.knowledgeWorkType === "research" ||
+    (task.outputType === "answer" && (task.requiresCurrentFacts || task.requiresCitations))
+  ) {
+    fallbackTiers.splice(1, 0, "research");
+  }
+
+  return selectPreferredModel(safeAiModels, fallbackTiers);
+}
+
 function buildResearchStep(input: {
   routeId: string;
   task: TaskIntake;
@@ -335,8 +359,9 @@ function buildPrimaryStep(input: {
   task: TaskIntake;
   model: ModelInventoryItem;
   context: CandidateContext;
+  usesPremiumBenchmark?: boolean;
 }): RouteStep {
-  const { routeId, strategy, task, model, context } = input;
+  const { routeId, strategy, task, model, context, usesPremiumBenchmark = false } = input;
   const sourceText = formatSourceIds(context.allowedSourceIds);
 
   if (model.tier === "human") {
@@ -344,7 +369,7 @@ function buildPrimaryStep(input: {
       id: `${routeId}-manual`,
       kind: "manual",
       label: "You-first project plan",
-      instruction: `Evaluate the task manually, write a short beginner-friendly plan, note what would justify using an AI helper, and prepare the ${task.outputType} from allowed source IDs (${sourceText}). Treat this app as a planning record only.`,
+      instruction: `Evaluate the task manually, write the master prompt first, then prepare the ${task.outputType} from allowed source IDs (${sourceText}). Note what would justify using an AI helper or premium route. Treat this app as a planning record only.`,
       requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
       modelId: model.id,
       sourceIds: context.allowedSourceIds,
@@ -357,8 +382,8 @@ function buildPrimaryStep(input: {
   return {
     id: `${routeId}-${strategy === "premium" && model.tier === "artifact" ? "artifact" : "synthesis"}`,
     kind,
-    label: `${modelLabelWithMinimum(model)}: ${primaryActionLabel(task, kind)}`,
-    instruction: `Use ${model.label} manually outside the app to evaluate the task, prepare a beginner-friendly ${task.outputType}, and call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidance(
+    label: `${modelLabelWithMinimum(model)}: ${primaryActionLabel(task, kind, usesPremiumBenchmark)}`,
+    instruction: `${usesPremiumBenchmark ? "Premium comparison route: if you choose this path, use the strongest paid or premium mode you actually have access to; otherwise treat it as a cost and effort benchmark. " : ""}Use ${model.label} manually outside the app to evaluate the task, build the master prompt first, execute that prompt into a beginner-friendly ${task.outputType}, and call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidance(
       model,
     )} The app does not send task data to the model.`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
@@ -368,24 +393,28 @@ function buildPrimaryStep(input: {
   };
 }
 
-function primaryActionLabel(task: TaskIntake, kind: RouteStep["kind"]) {
+function primaryActionLabel(task: TaskIntake, kind: RouteStep["kind"], usesPremiumBenchmark = false) {
+  if (usesPremiumBenchmark) {
+    return "premium comparison pass";
+  }
+
   if (kind === "artifact") {
     return "package the result";
   }
 
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
-    return "build the plan";
+    return "design and run the plan prompt";
   }
 
   if (task.knowledgeWorkType === "coding") {
-    return "plan the build";
+    return "design the build prompt";
   }
 
   if (task.knowledgeWorkType === "analysis" || task.knowledgeWorkType === "review") {
-    return "evaluate and recommend";
+    return "design the evaluation prompt";
   }
 
-  return "draft the output";
+  return "build and run the prompt";
 }
 
 function buildArtifactStep(input: {
@@ -434,6 +463,7 @@ function buildCandidateSummary(input: {
   definition: StrategyDefinition;
   policy: PolicyDefault;
   usesManualPrimaryStep: boolean;
+  usesPremiumBenchmark: boolean;
   hasResearchStep: boolean;
   hasArtifactStep: boolean;
   requiresHumanApproval: boolean;
@@ -444,7 +474,10 @@ function buildCandidateSummary(input: {
     input.usesManualPrimaryStep
       ? "Because no lighter AI helper is selected for this route, the work stays with you and should be treated as higher effort."
       : null,
-    input.hasResearchStep ? "It includes a current-facts check before drafting." : null,
+    input.usesPremiumBenchmark
+      ? "It stays visible as a premium benchmark so the lower-cost route can be compared with heavier premium-style use."
+      : null,
+    input.hasResearchStep ? "It includes a current-facts check before prompt design and execution." : null,
     input.hasArtifactStep ? "It includes a packaging step for the requested artifact shape." : null,
     input.requiresHumanApproval ? "It ends with human approval before anything important is used." : null,
     "It uses only the helpers and information allowed by your choices.",

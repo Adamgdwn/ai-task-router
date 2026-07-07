@@ -685,11 +685,16 @@ button:focus-visible {
   padding: 16px;
 }
 
-.toolInventoryActions {
+.toolInventoryActions,
+.setupNavigationActions {
   align-items: center;
   display: grid;
   gap: 12px;
   grid-template-columns: minmax(190px, 1fr) minmax(180px, 1fr) minmax(160px, 1fr);
+}
+
+.setupNavigationActions .nextStepButton {
+  grid-column: 3;
 }
 
 .addToolButton,
@@ -1377,16 +1382,68 @@ button:focus-visible {
   padding: 0;
 }
 
-.stageGuidanceList li {
+.stageGuidanceItem {
+  --stage-accent: var(--brand-teal);
+  --stage-accent-end: #12a5a0;
+  --stage-tint: #f7fcfd;
   background: var(--panel);
+  background:
+    linear-gradient(180deg, var(--stage-tint) 0%, #ffffff 62%),
+    var(--panel);
   border: 1px solid var(--line);
-  border-left: 4px solid var(--brand-teal);
+  border-left: 4px solid var(--stage-accent);
   border-radius: 8px;
   box-shadow: 0 10px 24px rgba(15, 23, 32, 0.05);
   display: grid;
   gap: 10px;
   min-width: 0;
+  overflow: hidden;
   padding: 12px;
+  position: relative;
+}
+
+.stageGuidanceItem::before {
+  background: linear-gradient(90deg, var(--stage-accent), var(--stage-accent-end));
+  content: "";
+  height: 4px;
+  inset: 0 0 auto;
+  position: absolute;
+}
+
+.stage-frame {
+  --stage-accent: #087fa0;
+  --stage-accent-end: #12a5a0;
+  --stage-tint: #f1fbfd;
+}
+
+.stage-gather {
+  --stage-accent: #0a9185;
+  --stage-accent-end: #5fac61;
+  --stage-tint: #f1fbf7;
+}
+
+.stage-create {
+  --stage-accent: #3b9953;
+  --stage-accent-end: #b8992f;
+  --stage-tint: #f7fbf2;
+}
+
+.stage-package {
+  --stage-accent: #a8791c;
+  --stage-accent-end: #c76640;
+  --stage-tint: #fff8eb;
+}
+
+.stage-review {
+  --stage-accent: #b95d35;
+  --stage-accent-end: #8760a7;
+  --stage-tint: #fff5ef;
+}
+
+.stage-act {
+  --stage-accent: #685aa5;
+  --stage-accent-end: #0d6e8a;
+  --stage-tint: #f5f3fc;
 }
 
 .stageGuidanceList li > div {
@@ -1396,7 +1453,7 @@ button:focus-visible {
 }
 
 .stageGuidanceList li > div > span {
-  color: var(--brand-teal);
+  color: var(--stage-accent);
   font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -1411,8 +1468,8 @@ button:focus-visible {
 }
 
 .methodPill {
-  background: #eef8fb;
-  border: 1px solid #cdeaf2;
+  background: var(--stage-tint);
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 26%, #ffffff);
   border-radius: 999px;
   color: var(--brand-navy);
   display: inline-block;
@@ -2477,8 +2534,13 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
 
-  .toolInventoryActions {
+  .toolInventoryActions,
+  .setupNavigationActions {
     grid-template-columns: 1fr;
+  }
+
+  .setupNavigationActions .nextStepButton {
+    grid-column: auto;
   }
 
   .addToolButton,

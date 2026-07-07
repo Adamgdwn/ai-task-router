@@ -113,7 +113,7 @@ describe("prompt package generator", () => {
     expect(promptPackage.steps).toHaveLength(selectedRoute.steps.length);
     expect(promptPackage.steps[0]).toMatchObject({
       id: "prompt-step-route-task-prompt-public-writing-lean-route-task-prompt-public-writing-lean-synthesis",
-      title: "Step 1: Draft Output",
+      title: "Step 1: Build Prompt And Output",
       requiresHumanApproval: false,
     });
     expect(promptPackage.steps[0]?.inputRefs).toEqual(
@@ -121,6 +121,7 @@ describe("prompt package generator", () => {
     );
     expect(promptPackage.steps[0]?.instruction).toContain("Use this prompt package as manual guidance only.");
     expect(promptPackage.steps[0]?.instruction).toContain("Work type: writing. Output type: draft.");
+    expect(promptPackage.steps[0]?.instruction).toContain("First build a master prompt before creating the final output");
     expect(promptPackage.steps[0]?.instruction).toContain(
       "Use only these allowed source IDs for this step: web (Websites or web search), github (GitHub or repo pages).",
     );

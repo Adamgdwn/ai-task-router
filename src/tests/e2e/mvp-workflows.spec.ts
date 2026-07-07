@@ -48,6 +48,12 @@ test("first-run setup stays guided and has no standalone include or execution wo
   await expect(page.getByRole("button", { name: "What To Include" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Choose what to include" })).toHaveCount(0);
   await expectNoExecutionControls(page);
+
+  await page.getByRole("button", { name: "How To Choose", exact: true }).click();
+  const howToChooseNextStep = page.locator(".setupNavigationActions").getByRole("button", { name: "Next step" });
+  await expect(howToChooseNextStep).toBeVisible();
+  await howToChooseNextStep.click();
+  await expect(page.getByRole("heading", { name: "My Task", level: 2 })).toBeVisible();
 });
 
 test("My AI Tools uses one manual selector, tailored account choices, local models, remove, and stable layout", async ({
@@ -150,6 +156,9 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByRole("heading", { name: "What this route can save" })).toBeVisible();
   await expect(page.locator("dt").filter({ hasText: "100k-token example" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Suggested AI toolkit" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Build the drafting prompt" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Run the prompt" })).toBeVisible();
+  await expect(page.locator(".stageGuidanceItem.stage-create")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lean route", level: 4 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Balanced route", level: 4 })).toBeVisible();
