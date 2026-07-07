@@ -58,6 +58,7 @@ type ComponentScore = {
 type CapabilityKey = keyof CapabilityScores;
 
 const ambiguousScoreThreshold = 2;
+const policyStrategyPreferenceThreshold = 12;
 
 const costPreferenceScores: Record<TaskIntake["costPreference"], Record<RouteCandidateCostLevel, number>> = {
   minimize: { low: 100, medium: 60, high: 25 },
@@ -113,7 +114,7 @@ export function scoreRouteCandidates({
       normalizedWeights,
     }),
   );
-  const selection = selectRecommendedCandidate(scoredCandidates);
+  const selection = selectRecommendedCandidate(scoredCandidates, policy);
 
   return {
     selectedPolicyId: policy.id,
@@ -348,7 +349,7 @@ function warningPenaltyFor(candidate: RouteCandidate) {
   return Math.min(candidate.warnings.length * 8, 24);
 }
 
-function selectRecommendedCandidate(scoredCandidates: ScoredRouteCandidate[]) {
+function selectRecommendedCandidate(scoredCandidates: ScoredRouteCandidate[], policy: PolicyDefault) {
   if (scoredCandidates.length === 0) {
     return {
       recommendedCandidate: null,
@@ -357,8 +358,28 @@ function selectRecommendedCandidate(scoredCandidates: ScoredRouteCandidate[]) {
   }
 
   const bestScore = Math.max(...scoredCandidates.map((candidate) => candidate.score));
+  const bestCandidate = scoredCandidates.find((candidate) => candidate.score === bestScore) ?? scoredCandidates[0];
+  const policyStrategyCandidate = [...scoredCandidates]
+    .filter((candidate) => candidate.strategy === policy.strategy)
+    .sort((left, right) => right.score - left.score)[0];
   const closeCandidates = scoredCandidates.filter((candidate) => bestScore - candidate.score <= ambiguousScoreThreshold);
   const tieBreakersApplied: string[] = [];
+
+  if (
+    policyStrategyCandidate &&
+    bestCandidate &&
+    policyStrategyCandidate.id !== bestCandidate.id &&
+    bestScore - policyStrategyCandidate.score <= policyStrategyPreferenceThreshold
+  ) {
+    tieBreakersApplied.push(
+      `The selected deciding style is ${policy.label}, so the ${policyStrategyCandidate.label} wins when it is within ${policyStrategyPreferenceThreshold} points of the top score.`,
+    );
+
+    return {
+      recommendedCandidate: policyStrategyCandidate,
+      tieBreakersApplied,
+    };
+  }
 
   if (closeCandidates.length > 1) {
     tieBreakersApplied.push(

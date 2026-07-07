@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-07T07:08:03-06:00
-Status Updated: 2026-07-07T07:08:03-06:00
+Last Updated: 2026-07-07T07:35:14-06:00
+Status Updated: 2026-07-07T07:35:14-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -136,6 +136,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Windows Store trust prep | task complete, public download hold | 2026-07-06T15:24:36.2422654-06:00 | Technical Lead | Added [Windows Store Trust Prep](2026-07-06-windows-store-trust-prep.md), `docs/release/windows-store-package-identity.template.json`, `scripts/prepare-windows-store-manifest.mjs`, Node tests, and `npm run desktop:prepare:windows-store-manifest`. Store/MSIX remains the first trusted Windows path; public desktop downloads remain held until owner-controlled Partner Center identity, Store certification or equivalent trust evidence, smoke checks, and owner approval exist. |
 | Structural routing hardening | task complete | 2026-07-06T23:26:17-06:00 | Technical Lead | Replaced one-primary-helper routing with deterministic task decomposition, stage-aware tool/mode catalog selection, role-based route steps, nested PDCA/light-DMAIC work items, mode-aware cost/energy estimates, full-plan prompt/export support, and added regression coverage for finance tracker, CRM/dashboard, policy memo, public copy, code review, ChatGPT Go plus Perplexity Free, and ChatGPT Pro plus Claude Max/Claude Code plus Perplexity Pro. Validation passed: governance preflight, focused unit tests, full `npm test -- --run`, `npm run build`, Playwright e2e against this app on `127.0.0.1:5179` because `5173` was occupied by another repo, and `git diff --check`. |
 | Provider-mode and plan-layout hardening | task complete | 2026-07-07T07:08:03-06:00 | Technical Lead | Added shared provider mode profiles for ChatGPT, Claude, Gemini, Perplexity, and Grok; made Grok/SuperGrok route through Grok 4.3 reasoning and Grok Build where appropriate; replaced known long-tail generic wording with provider-specific surfaces for tools such as Canva, Poe, Copilot, Cursor, Replit, NotebookLM, Genspark, DeepSeek, Qwen, Kimi, and Mistral; made decomposed research intent trigger evidence steps; and changed Quick project plan stages from vertical card lanes to stacked horizontal rows. Validation passed: governance preflight, focused route/card/catalog tests, full `npm test -- --run`, `npm run build`, Playwright e2e on `127.0.0.1:5179`, and `git diff --check`. |
+| Compact routing judgment correction | task complete | 2026-07-07T07:35:14-06:00 | Technical Lead | Corrected an over-detailed planning swing by grouping complex deliverables into one stage work pack per phase, keeping the visible plan compact with progressive routing details, using evidence/model-availability intent to imply web research sources, allowing Perplexity/research tools to appear from typed research intent, making selected deciding style win near-tie recommendations, and using AI review support where available instead of showing human judgment as every stage. Validation passed: governance preflight, focused route/card/decomposition tests, full `npm test -- --run`, `npm run build`, and Playwright e2e on `127.0.0.1:5179`; the existing Vite chunk-size warning remains unchanged. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline

@@ -1449,7 +1449,8 @@ button:focus-visible {
 
 .stageOverview,
 .stageActionGrid,
-.stageGuidanceList li > div {
+.stageGuidanceList li > div,
+.stageGuidanceList li > details {
   display: grid;
   gap: 5px;
   min-width: 0;
@@ -1528,10 +1529,21 @@ button:focus-visible {
   padding-left: 14px;
 }
 
-.stageWorkItems > strong {
+.stageWorkItems > summary {
   color: #334b5a;
+  cursor: pointer;
   font-size: 0.72rem;
+  font-weight: 800;
+  list-style-position: inside;
   text-transform: uppercase;
+}
+
+.stageWorkItems > summary::marker {
+  color: var(--stage-accent);
+}
+
+.stageWorkItems[open] > summary {
+  margin-bottom: 4px;
 }
 
 .stageWorkItems > ol {

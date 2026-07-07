@@ -213,6 +213,7 @@ describe("route card generator", () => {
     const actStage = card.stageGuidance.find((stage) => stage.stage === "act");
 
     expectValidRouteCard(card);
+    expect(card.recommendedOptionId).toBe("route-task-card-finance-prompt-build-balanced");
     expect(gatherStage).toMatchObject({
       recommendedModelLabel: expect.stringContaining("Perplexity Sonar"),
     });
@@ -221,6 +222,13 @@ describe("route card generator", () => {
       recommendedModelLabel: expect.stringContaining("GPT-5.5 Thinking Medium"),
     });
     expect(createStage?.recommendedModelLabel).not.toContain("Instant first");
+    expect(createStage?.workItems).toHaveLength(1);
+    expect(createStage?.workItems[0]).toMatchObject({
+      label: "Build one master prompt",
+      recommendedModelLabel: expect.stringContaining("GPT-5.5 Thinking Medium"),
+    });
+    expect(createStage?.workItems.map((item) => item.label).join(" ")).not.toContain("Prompt section");
+    expect(createStage?.workItems[0]?.expectedOutput).toContain("One master prompt");
     expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
     expect(createStage?.actions.join(" ")).toContain("categorization rules");
     expect(createStage?.actions.join(" ")).toContain("month-over-month tracking");
@@ -229,9 +237,15 @@ describe("route card generator", () => {
       label: "Execute the build plan prompt",
       recommendedModelLabel: expect.stringContaining("execution GPT-5.5 Instant"),
     });
+    expect(packageStage?.workItems).toHaveLength(1);
+    expect(packageStage?.workItems[0]).toMatchObject({
+      label: "Create the first usable build slice",
+      recommendedModelLabel: expect.stringContaining("GPT-5.5 Instant"),
+    });
     expect(packageStage?.actions.join(" ")).toContain("actual plan or build brief");
     expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");
+    expect(reviewStage?.recommendedModelLabel).toContain("GPT-5.5 Thinking Medium");
     expect(reviewStage?.actions.join(" ")).toContain("improvement and strength insights");
     expect(reviewStage?.reviewChecks.join(" ")).toContain("full requested build path");
     expect(actStage?.reviewChecks.join(" ")).toContain("smallest useful build slice");

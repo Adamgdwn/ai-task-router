@@ -1,4 +1,5 @@
 import type { ModelInventoryItem, SourcePermission, TaskIntake } from "../types";
+import { taskNeedsEvidenceCheck } from "./taskDecomposition";
 
 export type HardGateBlockKind = "model" | "source";
 export type HardGateBlockReason =
@@ -67,7 +68,7 @@ export function evaluateHardGates({ task, models }: EvaluateHardGatesInput): Har
 function sourceIdsRequestedOrImpliedByTask(task: TaskIntake) {
   const requestedSourceIds = new Set(task.requestedSourceIds);
 
-  if (task.requiresCurrentFacts || task.requiresCitations) {
+  if (taskNeedsEvidenceCheck(task)) {
     for (const source of task.sourcePermissions) {
       if (source.sourceType === "web") {
         requestedSourceIds.add(source.id);
@@ -162,7 +163,7 @@ function evaluateModels(task: TaskIntake, models: ModelInventoryItem[], required
 function evaluateWarnings(task: TaskIntake, allowedSources: SourcePermission[], allowedModels: ModelInventoryItem[]) {
   const warnings: HardGateWarning[] = [];
 
-  if (task.requiresCurrentFacts || task.requiresCitations) {
+  if (taskNeedsEvidenceCheck(task)) {
     const hasAllowedResearchSource = allowedSources.some((source) => source.sourceType === "web");
     const hasAllowedResearchModel = allowedModels.some(
       (model) => model.tier === "research" || model.capabilityScores.research >= 4,

@@ -57,8 +57,8 @@ export function StageGuidancePanel({
               ) : null}
             </div>
             {stage.workItems.length ? (
-              <div className="stageWorkItems" aria-label={`${stage.label} work items`}>
-                <strong>Work items</strong>
+              <details className="stageWorkItems" aria-label={`${stage.label} routing detail`}>
+                <summary>Routing detail</summary>
                 <ol>
                   {stage.workItems.map((item) => (
                     <li key={item.id}>
@@ -94,7 +94,7 @@ export function StageGuidancePanel({
                     </li>
                   ))}
                 </ol>
-              </div>
+              </details>
             ) : null}
           </li>
         ))}

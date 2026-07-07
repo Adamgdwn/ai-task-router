@@ -13,6 +13,7 @@ import {
   requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
+  taskNeedsEvidenceCheck,
   type TaskDecomposition,
 } from "./taskDecomposition";
 import {
@@ -795,20 +796,19 @@ function buildCandidateSummary(input: {
 }
 
 function shouldAddEvidenceStep(task: TaskIntake, context: Pick<CandidateContext, "decomposition">) {
-  return (
-    task.requiresCurrentFacts ||
-    task.requiresCitations ||
-    taskHasModelSelectionIntent(task) ||
-    context.decomposition.deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
-  );
+  return taskNeedsEvidenceCheckFromDecomposition(task, context.decomposition);
 }
 
 function taskNeedsEvidenceFromDecomposition(task: TaskIntake) {
+  return taskNeedsEvidenceCheck(task);
+}
+
+function taskNeedsEvidenceCheckFromDecomposition(task: TaskIntake, decomposition: TaskDecomposition) {
   return (
     task.requiresCurrentFacts ||
     task.requiresCitations ||
     taskHasModelSelectionIntent(task) ||
-    decomposeTask(task).deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
+    decomposition.deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
   );
 }
 

@@ -135,6 +135,15 @@ export function taskHasModelSelectionIntent(task: TaskIntake): boolean {
   );
 }
 
+export function taskNeedsEvidenceCheck(task: TaskIntake): boolean {
+  return (
+    task.requiresCurrentFacts ||
+    task.requiresCitations ||
+    taskHasModelSelectionIntent(task) ||
+    decomposeTask(task).deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
+  );
+}
+
 export function decomposeTask(task: TaskIntake): TaskDecomposition {
   const text = normalizedTaskText(task);
   const matched: TaskDeliverable[] = [];

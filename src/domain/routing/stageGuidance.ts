@@ -19,6 +19,7 @@ import {
   requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
+  taskNeedsEvidenceCheck,
   taskNeedsFullBuildPlan,
   type TaskDecomposition,
   type TaskDeliverable,
@@ -60,7 +61,8 @@ export function buildProjectStageGuidance({
     firstStepOfWorkRole(recommendedOption, "execution") ??
     primaryWorkStep(recommendedOption);
   const artifactStep = firstStepOfKind(recommendedOption, "artifact");
-  const reviewStep = firstStepOfKind(recommendedOption, "human review");
+  const humanApprovalStep = firstStepOfKind(recommendedOption, "human review");
+  const reviewSupportStep = firstStepOfWorkRole(recommendedOption, "quality-review") ?? aiReviewSupportStep(task, promptStep);
   const promptBuilderModelLabel = modelLabelForStageStep(
     task,
     promptStep,
@@ -169,14 +171,17 @@ export function buildProjectStageGuidance({
     purpose: reviewStagePurpose(task),
     actions: reviewStageActions(task),
     reviewChecks: reviewStageChecks(task),
-    routeStep: reviewStep ?? undefined,
+    routeStep: reviewSupportStep ?? humanApprovalStep ?? undefined,
     fallbackModelLabel: manualReviewModel?.label ?? "Your review",
+    recommendedModelLabel: reviewSupportStep
+      ? recommendedLabelForWorkItem(reviewSupportStep, modelById, manualReviewModel, manualReviewModel?.label ?? "Your review")
+      : undefined,
     workItems: buildStageWorkItems({
       task,
       decomposition,
       stage: "review",
       workRole: "quality-review",
-      routeStep: reviewStep ?? undefined,
+      routeStep: reviewSupportStep ?? undefined,
       modelById,
       manualReviewModel,
       fallbackModelLabel: manualReviewModel?.label ?? "Your review",
@@ -273,11 +278,7 @@ function buildStageWorkItems(input: {
 }): ProjectStageWorkItem[] {
   const { task, decomposition, stage, workRole, routeStep, modelById, manualReviewModel, fallbackModelLabel } = input;
   const deliverables = deliverablesForStageRole(decomposition, workRole);
-  const splitByDeliverable =
-    decomposition.complexBuildPlan &&
-    (stage === "create" || stage === "package") &&
-    deliverables.length > 1;
-  const targets = splitByDeliverable ? deliverables.slice(0, 8).map((deliverable) => [deliverable]) : [deliverables];
+  const targets = [deliverables];
   const estimatedCostUsd = routeStep ? estimateRouteStepCostUsd(routeStep, modelById) : undefined;
   const estimatedEnergyWh = routeStep ? estimateRouteStepEnergyWh(routeStep, modelById) : undefined;
   const perItemCost = estimatedCostUsd !== undefined ? estimatedCostUsd / targets.length : undefined;
@@ -285,7 +286,7 @@ function buildStageWorkItems(input: {
 
   return targets.map((targetDeliverables, index) => {
     const deliverableIds = targetDeliverables.map((deliverable) => deliverable.id);
-    const label = workItemLabel(workRole, targetDeliverables, stage);
+    const label = workItemLabel(task, workRole, targetDeliverables, stage);
 
     return {
       id: `stage-${task.id}-${stage}-${workRole}-${index + 1}`,
@@ -315,6 +316,7 @@ function deliverablesForStageRole(decomposition: TaskDecomposition, workRole: Wo
 }
 
 function workItemLabel(
+  task: TaskIntake,
   workRole: WorkRole,
   deliverables: readonly TaskDeliverable[],
   stage: ProjectStageGuidance["stage"],
@@ -323,17 +325,17 @@ function workItemLabel(
 
   switch (workRole) {
     case "evidence-check":
-      return `Check evidence for ${deliverableLabel}`;
+      return taskHasModelSelectionIntent(task) ? "Check evidence and model availability" : `Check evidence for ${deliverableLabel}`;
     case "prompt-design":
-      return `Prompt section for ${deliverableLabel}`;
+      return deliverables.length > 1 || needsFullBuildPlan(task) ? "Build one master prompt" : `Build the prompt for ${deliverableLabel}`;
     case "execution":
-      return `Execute ${deliverableLabel}`;
+      return deliverables.length > 1 ? "Run the finished prompt" : `Execute ${deliverableLabel}`;
     case "build-slice":
-      return `Build-plan slice for ${deliverableLabel}`;
+      return "Create the first usable build slice";
     case "artifact-package":
       return `Package ${deliverableLabel}`;
     case "quality-review":
-      return `Review ${deliverableLabel ?? "the result"}`;
+      return "Review the result";
     case "next-action":
       return stage === "act" ? "Pick the first action" : "Confirm scope";
   }
@@ -348,13 +350,13 @@ function expectedOutputForWorkItem(
 
   switch (workRole) {
     case "evidence-check":
-      return `Current facts, source notes, model availability, and privacy notes for ${deliverableText}.`;
+      return `Current facts, source notes, model availability, and privacy notes that affect ${deliverableText}.`;
     case "prompt-design":
-      return `A master-prompt section that makes ${deliverableText} explicit and testable before execution.`;
+      return `One master prompt that covers ${deliverableText}, names the execution helper or mode, and includes privacy limits, checks, and upgrade triggers.`;
     case "execution":
       return `The first usable ${task.outputType} output for ${deliverableText}.`;
     case "build-slice":
-      return `A concrete build-plan slice for ${deliverableText}, including data flow, screens or files, tests, and deferred work.`;
+      return `The actual build plan or first usable slice for ${deliverableText}, including data flow, screens or files, tests, and deferred work.`;
     case "artifact-package":
       return `A saved or copy-ready ${task.outputType} package with warnings, checks, and next action visible.`;
     case "quality-review":
@@ -379,7 +381,7 @@ function reviewChecksForWorkItem(
       ];
     case "prompt-design":
       return [
-        `The prompt explicitly covers ${deliverableText}.`,
+        `One prompt, not separate prompt chores, explicitly covers ${deliverableText}.`,
         "The prompt names the execution mode, checks, privacy limits, and upgrade trigger.",
       ];
     case "execution":
@@ -456,10 +458,7 @@ function frameStageChecks(task: TaskIntake) {
 function shouldAddGatherStage(task: TaskIntake) {
   return (
     task.requestedSourceIds.length > 0 ||
-    task.requiresCurrentFacts ||
-    task.requiresCitations ||
-    taskHasModelSelectionIntent(task) ||
-    decomposeTask(task).deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
+    taskNeedsEvidenceCheck(task)
   );
 }
 
@@ -612,10 +611,9 @@ function createStageActions(task: TaskIntake) {
   if (needsFullBuildPlan(task)) {
     return [
       "Ask the highest-level model or reasoning mode you own to create the master prompt before any lower-mode execution run.",
-      `Make the prompt cover every requested output: ${requestedDeliverableSummary(task)}.`,
-      `Force the prompt to plan the actual build path: ${buildPlanCoverageSummary(task)}.`,
-      "Require Plan-Do-Check-Act or light DMAIC, acceptance checks, privacy limits, and upgrade triggers.",
-      "Have it name the lowest execution model or mode to run the finished prompt, plus the fallback if that mode fails.",
+      `Make one prompt cover the whole request: ${requestedDeliverableSummary(task)}.`,
+      `Require the prompt to produce the actual build path: ${buildPlanCoverageSummary(task)}.`,
+      "Include Plan-Do-Check-Act or light DMAIC, privacy limits, acceptance checks, exact execution mode, and upgrade trigger.",
     ];
   }
 
@@ -650,7 +648,6 @@ function createStageActions(task: TaskIntake) {
       `Make the prompt cover every requested piece: ${requestedDeliverableSummary(task)}.`,
       "Make it require Plan-Do-Check-Act, or light DMAIC when useful.",
       "Require the prompt to name the minimum execution model or mode and what would justify upgrading.",
-      "Require goals, measures, dependencies, risks, first action, review points, and a savings note.",
     ];
   }
 
@@ -744,7 +741,6 @@ function packageStageActions(task: TaskIntake) {
       "Paste the approved master prompt into the chosen lighter execution model or mode.",
       `Generate the actual plan or build brief, not more prompt advice: ${buildPlanCoverageSummary(task)}.`,
       "Require data flow, screens or files, acceptance tests, and what can wait for a later pass.",
-      "Name the exact execution model or mode for the first implementation pass and when to upgrade.",
       "Stop after the first usable slice is clear enough for a human review.",
     ];
   }
@@ -1051,6 +1047,23 @@ function firstStepOfKind(recommendedOption: RouteOption, kind: RouteStep["kind"]
 
 function firstStepOfWorkRole(recommendedOption: RouteOption, workRole: WorkRole): RouteStep | null {
   return recommendedOption.steps.find((step) => step.workRole === workRole) ?? null;
+}
+
+function aiReviewSupportStep(task: TaskIntake, promptStep: RouteStep | undefined | null): RouteStep | null {
+  if (!promptStep || promptStep.kind === "manual") {
+    return null;
+  }
+
+  if (
+    needsFullBuildPlan(task) ||
+    task.qualityBar === "high" ||
+    task.qualityBar === "critical" ||
+    task.publicFacing
+  ) {
+    return promptStep;
+  }
+
+  return null;
 }
 
 function modelLabelForStep(

@@ -384,12 +384,13 @@ describe("route candidate generation", () => {
       outputType: "brief",
       requiresCurrentFacts: false,
       requiresCitations: false,
-      requestedSourceIds: ["web"],
+      requestedSourceIds: [],
     });
 
-    const { candidateResult } = generateForTask(task, models);
+    const { hardGateResult, candidateResult } = generateForTask(task, models);
     const balanced = requireCandidate(candidateResult, "balanced");
 
+    expect(hardGateResult.allowedSourceIds).toContain("web");
     expect(balanced.steps[0]).toMatchObject({
       kind: "research",
       modelId: "perplexity-free",
