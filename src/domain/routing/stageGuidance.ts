@@ -1,5 +1,9 @@
 import type { ModelInventoryItem, ProjectStageGuidance, RouteOption, RouteStep, TaskIntake } from "../types";
-import { modelLabelForExecution, modelLabelForPromptDesign, modelLabelWithMinimum } from "./modelGuidance";
+import {
+  modelLabelForExecutionForTask,
+  modelLabelForPromptDesignForTask,
+  modelLabelWithMinimum,
+} from "./modelGuidance";
 import {
   requestedDeliverableLabels,
   requestedDeliverableSummary,
@@ -37,9 +41,17 @@ export function buildProjectStageGuidance({
   const primaryStep = primaryWorkStep(recommendedOption);
   const artifactStep = firstStepOfKind(recommendedOption, "artifact");
   const reviewStep = firstStepOfKind(recommendedOption, "human review");
-  const promptBuilderModelLabel = modelLabelForStageStep(primaryStep, modelById, manualReviewModel, "You first", "prompt");
+  const promptBuilderModelLabel = modelLabelForStageStep(
+    task,
+    primaryStep,
+    modelById,
+    manualReviewModel,
+    "You first",
+    "prompt",
+  );
   const executionStep = artifactStep ?? primaryStep;
   const executionModelLabel = modelLabelForStageStep(
+    task,
     executionStep,
     modelById,
     manualReviewModel,
@@ -667,6 +679,7 @@ function modelLabelForStep(
 }
 
 function modelLabelForStageStep(
+  task: TaskIntake,
   step: RouteStep | undefined | null,
   modelById: Map<string, ModelInventoryItem>,
   manualReviewModel: ModelInventoryItem | undefined,
@@ -683,7 +696,7 @@ function modelLabelForStageStep(
       return step.modelId;
     }
 
-    return stageMode === "prompt" ? modelLabelForPromptDesign(model) : modelLabelForExecution(model);
+    return stageMode === "prompt" ? modelLabelForPromptDesignForTask(model, task) : modelLabelForExecutionForTask(model, task);
   }
 
   if (step?.kind === "human review") {

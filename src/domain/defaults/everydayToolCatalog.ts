@@ -261,7 +261,7 @@ const claudeAccountOptions = [
     tier: "mid",
     capabilityScores: balancedGeneralScores,
     maxPermissionLevel: 2,
-    note: "Good for regular writing, planning, and analysis.",
+    note: "Good for regular writing, planning, analysis, and Claude Code access through the same Claude subscription when supported.",
   },
   {
     id: "max-5x",
@@ -269,7 +269,7 @@ const claudeAccountOptions = [
     tier: "frontier",
     capabilityScores: strongGeneralScores,
     maxPermissionLevel: 2,
-    note: "Use when you have the higher-capacity Max tier for frequent work.",
+    note: "Use when you have the higher-capacity Max tier for frequent Claude and Claude Code work.",
   },
   {
     id: "max-20x",
@@ -277,7 +277,7 @@ const claudeAccountOptions = [
     tier: "frontier",
     capabilityScores: strongGeneralScores,
     maxPermissionLevel: 2,
-    note: "Use for the heaviest personal Claude usage.",
+    note: "Use for the heaviest personal Claude usage, including Claude Code build work through the same subscription.",
   },
   {
     id: "team",
@@ -1808,7 +1808,7 @@ function claudeProvider(): EverydayToolProvider {
   return provider({
     id: "claude",
     label: "Claude",
-    summary: "Use this if Claude is one of the AI apps you already know.",
+    summary: "Use this if Claude, including Claude Code through a Claude subscription, is one of the AI tools you already know.",
     defaultAccountId: "pro",
     defaultFrequencyId: "daily",
     accountOptions: claudeAccountOptions,

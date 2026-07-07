@@ -2,7 +2,12 @@ import { defaultFinalApprovalRouteStep } from "../defaults/defaultPolicies";
 import { everydayToolFrequencyRank } from "../defaults/everydayToolCatalog";
 import type { HardGateResult } from "./hardGates";
 import type { ModelInventoryItem, PermissionLevel, PolicyDefault, RouteStep, SourcePermission, TaskIntake } from "../types";
-import { modelInstructionGuidance, modelLabelWithMinimum } from "./modelGuidance";
+import {
+  modelInstructionGuidance,
+  modelInstructionGuidanceForTask,
+  modelLabelWithMinimum,
+  modelLabelWithMinimumForTask,
+} from "./modelGuidance";
 import { requestedDeliverableSummary, taskHasBuildIntent, taskHasModelSelectionIntent } from "./taskDecomposition";
 
 export const routeCandidateStrategies = ["lean", "balanced", "premium"] as const;
@@ -383,11 +388,12 @@ function buildPrimaryStep(input: {
   return {
     id: `${routeId}-${strategy === "premium" && model.tier === "artifact" ? "artifact" : "synthesis"}`,
     kind,
-    label: `${modelLabelWithMinimum(model)}: ${primaryActionLabel(task, kind, usesPremiumBenchmark)}`,
+    label: `${modelLabelWithMinimumForTask(model, task)}: ${primaryActionLabel(task, kind, usesPremiumBenchmark)}`,
     instruction: `${usesPremiumBenchmark ? "Premium comparison route: if you choose this path, use the strongest paid or premium mode you actually have access to; otherwise treat it as a cost and effort benchmark. " : ""}Use ${model.label} manually outside the app in two passes: first create the master prompt with the prompt-building mode, then run that prompt with the execution mode. The result must cover ${requestedDeliverableSummary(
       task,
-    )}. ${taskHasBuildIntent(task) ? "For build-shaped work, include the first usable slice, data flow, acceptance checks, and what can wait. " : ""}${taskHasModelSelectionIntent(task) ? "Name the minimum execution model or mode and the upgrade trigger. " : ""}Call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidance(
+    )}. ${taskHasBuildIntent(task) ? "For build-shaped work, include the first usable slice, data flow, acceptance checks, and what can wait. " : ""}${taskHasModelSelectionIntent(task) ? "Name the minimum execution model or mode and the upgrade trigger. " : ""}Call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidanceForTask(
       model,
+      task,
     )} The app does not send task data to the model.`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
     modelId: model.id,
@@ -440,10 +446,10 @@ function buildArtifactStep(input: {
   return {
     id: `${routeId}-artifact`,
     kind: "artifact",
-    label: `${modelLabelWithMinimum(artifactModel)}: artifact packaging`,
+    label: `${modelLabelWithMinimumForTask(artifactModel, task)}: artifact packaging`,
     instruction: `Use ${artifactModel.label} manually outside the app to package the draft as a ${task.outputType}. Do not add sources beyond the allowed source IDs (${formatSourceIds(
       context.allowedSourceIds,
-    )}). ${modelInstructionGuidance(artifactModel)}`,
+    )}). ${modelInstructionGuidanceForTask(artifactModel, task)}`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
     modelId: artifactModel.id,
     sourceIds: context.allowedSourceIds,

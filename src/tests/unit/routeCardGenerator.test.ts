@@ -233,6 +233,53 @@ describe("route card generator", () => {
     expect(actStage?.reviewChecks.join(" ")).toContain("smallest useful build slice");
   });
 
+  it("treats Claude Code as a build surface from the selected Claude subscription", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "claude-max-build",
+        providerId: "claude",
+        accountId: "max-20x",
+        frequencyId: "daily",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-card-claude-code-build",
+      title: "Build a finance tracker app",
+      description:
+        "Plan and build a small app that imports spreadsheet expenses, categorizes them, tracks month over month trends, and shows improvement opportunities.",
+      knowledgeWorkType: "coding",
+      outputType: "code",
+      qualityBar: "high",
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "quality-first", models);
+
+    const card = generateRouteCard({
+      task,
+      models,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+    const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
+    const claudeStepText = card.options
+      .flatMap((option) => option.steps)
+      .filter((step) => step.modelId === "claude-max-build")
+      .map((step) => `${step.label} ${step.instruction}`)
+      .join(" ");
+
+    expectValidRouteCard(card);
+    expect(packageStage?.recommendedModelLabel).toContain("Claude Code via this Claude subscription");
+    expect(claudeStepText).toContain("Claude Code note");
+    expect(claudeStepText).toContain("do not model it as a separate subscription");
+  });
+
   it("preserves hard-gate warnings and blocked reasons on the route card", () => {
     const task = buildTask({
       id: "task-card-confidential-citations",

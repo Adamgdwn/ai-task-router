@@ -4,7 +4,8 @@ import {
   type EverydayToolAccountId,
   type EverydayToolProviderId,
 } from "../defaults/everydayToolCatalog";
-import type { ModelInventoryItem } from "../types";
+import type { ModelInventoryItem, TaskIntake } from "../types";
+import { taskHasBuildIntent } from "./taskDecomposition";
 
 export type ModelUseGuidance = {
   minimumModelLabel: string;
@@ -47,6 +48,10 @@ export function modelLabelWithMinimum(model: ModelInventoryItem): string {
   return `${model.label} (minimum ${modelUseGuidance(model).minimumModelLabel})`;
 }
 
+export function modelLabelWithMinimumForTask(model: ModelInventoryItem, task: TaskIntake): string {
+  return appendTaskSurfaceLabel(modelLabelWithMinimum(model), model, task);
+}
+
 export function modelLabelForPromptDesign(model: ModelInventoryItem): string {
   if (model.tier === "human") {
     return model.label;
@@ -54,6 +59,10 @@ export function modelLabelForPromptDesign(model: ModelInventoryItem): string {
 
   const guidance = modelUseGuidance(model);
   return `${model.label} (minimum ${guidance.minimumModelLabel}; prompt builder ${guidance.promptBuilderModelLabel})`;
+}
+
+export function modelLabelForPromptDesignForTask(model: ModelInventoryItem, task: TaskIntake): string {
+  return appendTaskSurfaceLabel(modelLabelForPromptDesign(model), model, task);
 }
 
 export function modelLabelForExecution(model: ModelInventoryItem): string {
@@ -65,6 +74,10 @@ export function modelLabelForExecution(model: ModelInventoryItem): string {
   return `${model.label} (execution ${guidance.executionModelLabel}; upgrade ${guidance.upgradeModelLabel})`;
 }
 
+export function modelLabelForExecutionForTask(model: ModelInventoryItem, task: TaskIntake): string {
+  return appendTaskSurfaceLabel(modelLabelForExecution(model), model, task);
+}
+
 export function modelInstructionGuidance(model: ModelInventoryItem): string {
   const guidance = modelUseGuidance(model);
 
@@ -73,6 +86,13 @@ export function modelInstructionGuidance(model: ModelInventoryItem): string {
   }
 
   return `Minimum model/version: ${guidance.minimumModelLabel}. Prompt-building mode: ${guidance.promptBuilderModelLabel}. Execution mode: ${guidance.executionModelLabel}. Upgrade trigger: use ${guidance.upgradeModelLabel} if the checks find weak reasoning, missing facts, or too much rework.`;
+}
+
+export function modelInstructionGuidanceForTask(model: ModelInventoryItem, task: TaskIntake): string {
+  const baseGuidance = modelInstructionGuidance(model);
+  const surfaceNote = claudeCodeSubscriptionSurfaceNote(model, task);
+
+  return surfaceNote ? `${baseGuidance} ${surfaceNote}` : baseGuidance;
 }
 
 export function pricingAnchorIdForModel(model: ModelInventoryItem): string | null {
@@ -98,6 +118,42 @@ function hasZeroMarginalCostAccount(model: ModelInventoryItem) {
   const accountLabel = accountOption?.label ?? selection.accountId;
 
   return selection.accountId === "basic" || /\bfree\b|\bbasic\b/i.test(accountLabel);
+}
+
+function appendTaskSurfaceLabel(label: string, model: ModelInventoryItem, task: TaskIntake): string {
+  const surfaceLabel = claudeCodeSubscriptionSurfaceLabel(model, task);
+
+  return surfaceLabel ? `${label}; ${surfaceLabel}` : label;
+}
+
+function claudeCodeSubscriptionSurfaceLabel(model: ModelInventoryItem, task: TaskIntake): string | null {
+  if (!usesClaudeSubscriptionBuildSurface(model, task)) {
+    return null;
+  }
+
+  return "Claude Code via this Claude subscription for build execution";
+}
+
+function claudeCodeSubscriptionSurfaceNote(model: ModelInventoryItem, task: TaskIntake): string | null {
+  if (!usesClaudeSubscriptionBuildSurface(model, task)) {
+    return null;
+  }
+
+  return "Claude Code note: for coding or app-build execution, treat Claude Code as the build surface available through the saved Claude subscription when installed and authenticated; do not model it as a separate subscription or unrelated paid tool.";
+}
+
+function usesClaudeSubscriptionBuildSurface(model: ModelInventoryItem, task: TaskIntake): boolean {
+  if (model.tier === "human" || model.localOnly) {
+    return false;
+  }
+
+  const selection = inferEverydayToolSelection(model);
+
+  return selection.providerId === "claude" && isCodeOrBuildTask(task);
+}
+
+function isCodeOrBuildTask(task: TaskIntake): boolean {
+  return task.knowledgeWorkType === "coding" || task.outputType === "code" || taskHasBuildIntent(task);
 }
 
 function guidanceForProvider(
