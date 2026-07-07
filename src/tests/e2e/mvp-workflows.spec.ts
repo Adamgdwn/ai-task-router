@@ -45,6 +45,9 @@ test("first-run setup stays guided and has no standalone include or execution wo
   await expect(page.getByRole("button", { name: "Describe my task" })).toBeVisible();
   await expect(page.getByText("Your browser only")).toBeVisible();
   await expect(page.getByText("No hidden AI calls or telemetry")).toBeVisible();
+  await expect(page.getByText(/uses your browser storage to remember your AI tools/)).toBeVisible();
+  await page.getByRole("button", { name: "Learn more" }).click();
+  await expect(page.getByText(/does not use tracking cookies, analytics, or hidden uploads/)).toBeVisible();
   await expect(page.getByRole("button", { name: "What To Include" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Choose what to include" })).toHaveCount(0);
   await expectNoExecutionControls(page);

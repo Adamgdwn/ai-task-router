@@ -82,6 +82,8 @@ export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps
     <article className="screenPanel pathPanel">
       <ScreenHeader definition={definition} />
 
+      <BrowserStorageNotice />
+
       <section className="marketPath" aria-label="Guided setup path">
         {shoppingPathSteps.map((step) => (
           <section className="pathStep" key={step.screenId} aria-labelledby={`${step.screenId}-path-heading`}>
@@ -101,11 +103,57 @@ export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps
         <ul>
           <li>It helps choose a sensible AI path before you paste anything into a tool.</li>
           <li>It helps build judgment about when a smaller route is enough, reducing waste in the right scenario.</li>
-          <li>It keeps choices and saved plans in this browser.</li>
+          <li>It uses your browser storage for choices and saved plans.</li>
           <li>It does not log in, connect accounts, search files, send prompts, or run AI for you.</li>
         </ul>
       </section>
     </article>
+  );
+}
+
+function BrowserStorageNotice() {
+  const [dismissed, setDismissed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  if (dismissed) {
+    return null;
+  }
+
+  return (
+    <section className="browserStorageNotice" aria-labelledby="browser-storage-notice-heading">
+      <div>
+        <p className="screenKicker">Browser storage</p>
+        <h3 id="browser-storage-notice-heading">How saved choices work</h3>
+        <p>
+          This app uses your browser storage to remember your AI tools, saved plans, ratings, and Past Choices on this
+          device.
+        </p>
+      </div>
+
+      <div className="browserStorageActions">
+        <button onClick={() => setDismissed(true)} type="button">
+          Got it
+        </button>
+        <button
+          aria-controls="browser-storage-details"
+          aria-expanded={expanded}
+          className="secondaryActionButton"
+          onClick={() => setExpanded((current) => !current)}
+          type="button"
+        >
+          Learn more
+        </button>
+      </div>
+
+      {expanded ? (
+        <div className="browserStorageDetails" id="browser-storage-details">
+          <p>
+            The app does not use tracking cookies, analytics, or hidden uploads. Saved records stay in this browser
+            unless you choose to export them, and clearing site data removes them.
+          </p>
+        </div>
+      ) : null}
+    </section>
   );
 }
 

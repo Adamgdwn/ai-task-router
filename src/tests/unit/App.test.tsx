@@ -51,6 +51,9 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Choose my tools" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Install the browser version", level: 3 })).toBeInTheDocument();
     expect(screen.getByText(/Computer checking still needs the desktop app/)).toBeInTheDocument();
+    expect(screen.getByText(/uses your browser storage to remember your AI tools/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Learn more" }));
+    expect(screen.getByText(/does not use tracking cookies, analytics, or hidden uploads/)).toBeInTheDocument();
     expect(screen.getByText(/when a smaller route is enough/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "What To Include" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Choose what to include" })).not.toBeInTheDocument();
