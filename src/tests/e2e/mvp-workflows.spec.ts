@@ -41,7 +41,7 @@ test("first-run setup stays guided and has no standalone include or execution wo
 
   await expect(page.getByRole("heading", { name: "Start Here", level: 2 })).toBeVisible();
   await expect(page.getByRole("button", { name: "Choose my tools" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Pick choosing style" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Pick how to choose" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Describe my task" })).toBeVisible();
   await expect(page.getByText("Your browser only")).toBeVisible();
   await expect(page.getByText("No hidden AI calls or telemetry")).toBeVisible();
@@ -57,6 +57,10 @@ test("My AI Tools uses one manual selector, tailored account choices, local mode
   await page.getByRole("button", { name: "My AI Tools", exact: true }).click();
 
   await expect(page.getByText("0 selected")).toBeVisible();
+  await expect(page.getByText("How this treats tools, models, and privacy")).toBeVisible();
+  await page.getByText("How this treats tools, models, and privacy").click();
+  await expect(page.getByText(/does not read live provider model menus/)).toBeVisible();
+  await expect(page.getByText(/Catalog last reviewed/)).toBeVisible();
   await expect(toolRows(page)).toHaveCount(1);
 
   const firstToolRow = toolRows(page).first();

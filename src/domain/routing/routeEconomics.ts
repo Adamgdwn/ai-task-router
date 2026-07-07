@@ -37,7 +37,7 @@ export function attachRouteEconomics(
         : currentBaseline,
     { costUsd: 0, label: "the heaviest safe option" },
   );
-  const premiumBenchmarkCostUsd = estimatePricingAnchorCost("openai-gpt-5-5", defaultHundredThousandTokenRun);
+  const premiumBenchmarkCostUsd = estimatePricingAnchorCost("openai-premium-text-anchor", defaultHundredThousandTokenRun);
   const usesPremiumBenchmark = baseline.costUsd < premiumBenchmarkCostUsd;
   const comparedWithLabel = usesPremiumBenchmark ? "premium API-equivalent help" : baseline.label;
   const comparedWithCostUsd = usesPremiumBenchmark ? premiumBenchmarkCostUsd : baseline.costUsd;
@@ -89,7 +89,7 @@ function attachEconomicsToOption(option: RouteOption, basis: RouteCostBasis): Ro
     estimatedSavingsPercent: roundPercent(estimatedSavingsPercent),
     savingsComparedWith: basis.comparedWithLabel,
     costEstimateBasis:
-      "100k-token API-equivalent estimate using reviewed public pricing; subscriptions, free tiers, search add-ons, taxes, caching, and provider limits can change the real bill.",
+      "100k-token API-equivalent estimate using representative pricing anchors reviewed from public sources; subscriptions, free tiers, search add-ons, taxes, caching, and provider limits can change the real bill.",
   };
 }
 

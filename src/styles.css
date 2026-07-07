@@ -489,6 +489,34 @@ button:focus-visible {
   padding: 16px;
 }
 
+.toolMethodCard {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--brand-teal);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 32, 0.05);
+  color: var(--muted-ink);
+  line-height: 1.52;
+  padding: 14px 16px;
+}
+
+.toolMethodCard summary {
+  color: var(--brand-navy);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.toolMethodCard ul {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+.toolMethodCard p {
+  margin: 12px 0 0;
+}
+
 .setupBoundaryNote {
   background: #eef8fb;
   border: 1px solid #cdeaf2;
@@ -2447,6 +2475,17 @@ button:focus-visible {
   .desktopDiscoveryResult,
   .feedbackFormGrid {
     grid-template-columns: 1fr;
+  }
+
+  .toolInventoryActions {
+    grid-template-columns: 1fr;
+  }
+
+  .addToolButton,
+  .saveToolChoicesButton,
+  .nextStepButton {
+    justify-self: stretch;
+    width: 100%;
   }
 
   .setupToolbar,

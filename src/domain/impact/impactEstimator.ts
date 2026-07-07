@@ -143,22 +143,22 @@ export const pricingSources = [
 ] satisfies PricingSource[];
 
 export const modelPricingAnchors = [
-  anchor("openai-gpt-5-4-nano", "OpenAI", "gpt-5.4-nano", "openai-pricing-2026-07-05", 0.2, 1.25, 0.02),
-  anchor("openai-gpt-5-5", "OpenAI", "gpt-5.5", "openai-pricing-2026-07-05", 5, 30, 0.5),
-  anchor("openai-gpt-5-5-pro", "OpenAI", "gpt-5.5-pro", "openai-pricing-2026-07-05", 30, 180),
-  anchor("anthropic-haiku-4-5", "Anthropic", "Haiku 4.5", "anthropic-pricing-2026-07-05", 1, 5, 0.1),
-  anchor("anthropic-sonnet-5", "Anthropic", "Sonnet 5", "anthropic-pricing-2026-07-05", 2, 10, 0.2),
-  anchor("anthropic-opus-4-8", "Anthropic", "Opus 4.8", "anthropic-pricing-2026-07-05", 5, 25, 0.5),
-  anchor("anthropic-fable-5", "Anthropic", "Fable 5", "anthropic-pricing-2026-07-05", 10, 50, 1),
-  anchor("google-gemini-3-1-flash-lite", "Google", "Gemini 3.1 Flash-Lite", "google-gemini-pricing-2026-07-05", 0.25, 1.5, 0.025),
-  anchor("google-gemini-3-1-pro-preview", "Google", "Gemini 3.1 Pro Preview", "google-gemini-pricing-2026-07-05", 2, 12, 0.2),
+  anchor("openai-low-cost-text-anchor", "OpenAI", "low-cost text API anchor", "openai-pricing-2026-07-05", 0.2, 1.25, 0.02),
+  anchor("openai-premium-text-anchor", "OpenAI", "premium text API anchor", "openai-pricing-2026-07-05", 5, 30, 0.5),
+  anchor("openai-frontier-reasoning-anchor", "OpenAI", "frontier reasoning API anchor", "openai-pricing-2026-07-05", 30, 180),
+  anchor("anthropic-low-cost-text-anchor", "Anthropic", "low-cost text API anchor", "anthropic-pricing-2026-07-05", 1, 5, 0.1),
+  anchor("anthropic-premium-text-anchor", "Anthropic", "premium text API anchor", "anthropic-pricing-2026-07-05", 2, 10, 0.2),
+  anchor("anthropic-frontier-text-anchor", "Anthropic", "frontier text API anchor", "anthropic-pricing-2026-07-05", 5, 25, 0.5),
+  anchor("anthropic-highest-cost-anchor", "Anthropic", "highest-cost text API anchor", "anthropic-pricing-2026-07-05", 10, 50, 1),
+  anchor("google-low-cost-text-anchor", "Google", "low-cost text API anchor", "google-gemini-pricing-2026-07-05", 0.25, 1.5, 0.025),
+  anchor("google-premium-text-anchor", "Google", "premium text API anchor", "google-gemini-pricing-2026-07-05", 2, 12, 0.2),
   anchor("perplexity-sonar", "Perplexity", "Sonar", "perplexity-pricing-2026-07-05", 1, 1),
   anchor("perplexity-sonar-pro", "Perplexity", "Sonar Pro", "perplexity-pricing-2026-07-05", 3, 15),
-  anchor("xai-grok-build-0-1", "xAI", "Grok Build 0.1", "xai-pricing-2026-07-05", 1, 2),
-  anchor("xai-grok-4-3", "xAI", "Grok 4.3", "xai-pricing-2026-07-05", 1.25, 2.5),
+  anchor("xai-low-cost-text-anchor", "xAI", "low-cost text API anchor", "xai-pricing-2026-07-05", 1, 2),
+  anchor("xai-premium-text-anchor", "xAI", "premium text API anchor", "xai-pricing-2026-07-05", 1.25, 2.5),
   anchor("mistral-large", "Mistral AI", "Mistral Large", "mistral-pricing-2026-07-05", 2, 6),
-  anchor("deepseek-v4-flash-cache-miss", "DeepSeek", "DeepSeek V4 Flash", "deepseek-pricing-2026-07-05", 0.14, 0.28, 0.0028),
-  anchor("deepseek-v4-pro-cache-miss", "DeepSeek", "DeepSeek V4 Pro", "deepseek-pricing-2026-07-05", 0.435, 0.87, 0.003625),
+  anchor("deepseek-low-cost-text-anchor", "DeepSeek", "low-cost text API anchor", "deepseek-pricing-2026-07-05", 0.14, 0.28, 0.0028),
+  anchor("deepseek-premium-text-anchor", "DeepSeek", "premium text API anchor", "deepseek-pricing-2026-07-05", 0.435, 0.87, 0.003625),
 ] satisfies ModelPricingAnchor[];
 
 export const energySources = [
@@ -315,7 +315,8 @@ function anchor(
     inputUsdPerMillionTokens,
     outputUsdPerMillionTokens,
     cachedInputUsdPerMillionTokens,
-    notes: "API pricing anchor for scenario estimates. Consumer subscriptions, regional uplifts, add-on tools, taxes, free tiers, and rate limits may differ.",
+    notes:
+      "Representative API pricing anchor for scenario estimates. Consumer subscriptions, model menus, regional uplifts, add-on tools, taxes, free tiers, and rate limits may differ.",
   };
 }
 

@@ -79,6 +79,8 @@ const emptyEverydayToolSelection = {
   frequencyId: "not-selected",
 } satisfies EverydayToolSelection;
 
+export const everydayToolCatalogReviewedAt = "2026-07-05T08:52:38-06:00";
+
 const capabilityKeys = ["reasoning", "writing", "coding", "research", "packaging"] as const;
 
 const emptyScores = scores({

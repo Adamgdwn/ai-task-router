@@ -6,6 +6,7 @@ import {
 } from "../../desktop/desktopDiscovery";
 import {
   applyEverydayToolSelection,
+  everydayToolCatalogReviewedAt,
   everydayToolFrequencyRank,
   everydayToolProviders,
   everydayToolSummary,
@@ -200,6 +201,8 @@ export function ToolInventoryScreen({ definition, setup, onNextStep }: ToolInven
         </p>
       </section>
 
+      <ToolCatalogMethodNote />
+
       <InventoryGroup
         models={setup.configuration?.modelInventory ?? []}
         onNextStep={onNextStep}
@@ -208,6 +211,39 @@ export function ToolInventoryScreen({ definition, setup, onNextStep }: ToolInven
       />
     </SetupScreenLayout>
   );
+}
+
+function ToolCatalogMethodNote() {
+  return (
+    <details className="toolMethodCard">
+      <summary>How this treats tools, models, and privacy</summary>
+      <ul>
+        <li>
+          Each saved app becomes a simple profile: account level, use frequency, capability fit, research fit, and
+          privacy ceiling.
+        </li>
+        <li>
+          The app does not read live provider model menus. Model labels are minimum capability guidance, with an upgrade
+          trigger when review finds weak reasoning, missing facts, or rework.
+        </li>
+        <li>
+          Current-facts tools, including Perplexity, are used for evidence stages when the task asks for current facts or
+          citations and web research is allowed by the privacy setting.
+        </li>
+        <li>
+          Confidential and restricted work is gated before scoring. Highly restricted work stays manual or local/private
+          because outside AI accounts are blocked.
+        </li>
+      </ul>
+      <p>Catalog last reviewed {formatCatalogReviewDate(everydayToolCatalogReviewedAt)}.</p>
+    </details>
+  );
+}
+
+function formatCatalogReviewDate(timestamp: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+  }).format(new Date(timestamp));
 }
 
 export function PolicySettingsScreen({ definition, setup }: SetupScreenProps) {

@@ -70,21 +70,24 @@ function guidanceForProvider(
       return perplexityGuidance(accountId);
     case "grok":
       return {
-        minimumModelLabel: "Grok fast/default model",
-        upgradeModelLabel: "Grok's strongest reasoning model",
-        pricingAnchorId: "xai-grok-4-3",
+        minimumModelLabel: "the fast/default Grok mode included in this account",
+        upgradeModelLabel: "the strongest Grok reasoning mode available in this account",
+        pricingAnchorId: "xai-premium-text-anchor",
       };
     case "mistral":
       return {
-        minimumModelLabel: "Mistral Large or the smallest available Mistral model that passes review",
-        upgradeModelLabel: "Mistral's strongest available model",
+        minimumModelLabel: "the smallest available Mistral model that passes review",
+        upgradeModelLabel: "the strongest available Mistral model",
         pricingAnchorId: "mistral-large",
       };
     case "deepseek":
       return {
-        minimumModelLabel: model.tier === "frontier" ? "DeepSeek V4 Pro" : "DeepSeek V4 Flash",
-        upgradeModelLabel: "DeepSeek V4 Pro",
-        pricingAnchorId: model.tier === "frontier" ? "deepseek-v4-pro-cache-miss" : "deepseek-v4-flash-cache-miss",
+        minimumModelLabel:
+          model.tier === "frontier"
+            ? "the stronger DeepSeek reasoning/API model available in this account"
+            : "the fast/default DeepSeek model available in this account",
+        upgradeModelLabel: "the stronger DeepSeek reasoning/API model available in this account",
+        pricingAnchorId: model.tier === "frontier" ? "deepseek-premium-text-anchor" : "deepseek-low-cost-text-anchor",
       };
     default:
       return genericProviderGuidance(model);
@@ -94,56 +97,64 @@ function guidanceForProvider(
 function chatGptGuidance(accountId: EverydayToolAccountId): ModelUseGuidance {
   if (accountId === "pro" || accountId === "business" || accountId === "enterprise") {
     return {
-      minimumModelLabel: "OpenAI gpt-5.5 equivalent",
-      upgradeModelLabel: "OpenAI gpt-5.5-pro equivalent for hard reasoning",
-      pricingAnchorId: "openai-gpt-5-5",
+      minimumModelLabel: "the strongest general ChatGPT model included in this account",
+      upgradeModelLabel: "ChatGPT's highest reasoning mode available in this account",
+      pricingAnchorId: "openai-premium-text-anchor",
+    };
+  }
+
+  if (accountId === "plus") {
+    return {
+      minimumModelLabel: "the default paid ChatGPT model included in Plus",
+      upgradeModelLabel: "a stronger ChatGPT reasoning mode when the first plan fails review",
+      pricingAnchorId: "openai-low-cost-text-anchor",
     };
   }
 
   return {
-    minimumModelLabel: "OpenAI gpt-5.4-nano equivalent",
-    upgradeModelLabel: "OpenAI gpt-5.5 equivalent when the first plan fails review",
-    pricingAnchorId: "openai-gpt-5-4-nano",
+    minimumModelLabel: "the fast/default ChatGPT model included in this account",
+    upgradeModelLabel: "a stronger ChatGPT plan or reasoning mode when the first plan fails review",
+    pricingAnchorId: "openai-low-cost-text-anchor",
   };
 }
 
 function claudeGuidance(accountId: EverydayToolAccountId): ModelUseGuidance {
   if (accountId === "max-5x" || accountId === "max-20x" || accountId === "team" || accountId === "enterprise") {
     return {
-      minimumModelLabel: "Claude Sonnet 5 equivalent",
-      upgradeModelLabel: "Claude Opus 4.8 equivalent for the highest-risk pass",
-      pricingAnchorId: "anthropic-opus-4-8",
+      minimumModelLabel: "the strongest everyday Claude model included in this account",
+      upgradeModelLabel: "Claude's strongest available model for the highest-risk pass",
+      pricingAnchorId: "anthropic-frontier-text-anchor",
     };
   }
 
   if (accountId === "pro") {
     return {
-      minimumModelLabel: "Claude Sonnet 5 equivalent",
-      upgradeModelLabel: "Claude Opus 4.8 equivalent when quality checks fail",
-      pricingAnchorId: "anthropic-sonnet-5",
+      minimumModelLabel: "the default paid Claude model included in Pro",
+      upgradeModelLabel: "Claude's strongest available model when quality checks fail",
+      pricingAnchorId: "anthropic-premium-text-anchor",
     };
   }
 
   return {
-    minimumModelLabel: "Claude Haiku 4.5 equivalent",
-    upgradeModelLabel: "Claude Sonnet 5 equivalent",
-    pricingAnchorId: "anthropic-haiku-4-5",
+    minimumModelLabel: "the fast/default Claude model included in this account",
+    upgradeModelLabel: "the default paid Claude model or strongest available Claude model",
+    pricingAnchorId: "anthropic-low-cost-text-anchor",
   };
 }
 
 function geminiGuidance(accountId: EverydayToolAccountId): ModelUseGuidance {
   if (accountId === "google-ai-pro" || accountId === "google-ai-ultra" || accountId === "team" || accountId === "enterprise") {
     return {
-      minimumModelLabel: "Gemini 3.1 Pro equivalent",
+      minimumModelLabel: "the default paid Gemini model included in this account",
       upgradeModelLabel: "the strongest available Gemini Pro/Ultra model",
-      pricingAnchorId: "google-gemini-3-1-pro-preview",
+      pricingAnchorId: "google-premium-text-anchor",
     };
   }
 
   return {
-    minimumModelLabel: "Gemini 3.1 Flash-Lite equivalent",
-    upgradeModelLabel: "Gemini 3.1 Pro equivalent",
-    pricingAnchorId: "google-gemini-3-1-flash-lite",
+    minimumModelLabel: "the fast/default Gemini model included in this account",
+    upgradeModelLabel: "the default paid Gemini model",
+    pricingAnchorId: "google-low-cost-text-anchor",
   };
 }
 
@@ -168,7 +179,7 @@ function genericProviderGuidance(model: ModelInventoryItem): ModelUseGuidance {
     return {
       minimumModelLabel: "the strongest model included in this account",
       upgradeModelLabel: "human review or a specialist model",
-      pricingAnchorId: "openai-gpt-5-5",
+      pricingAnchorId: "openai-premium-text-anchor",
     };
   }
 
@@ -184,14 +195,14 @@ function genericProviderGuidance(model: ModelInventoryItem): ModelUseGuidance {
     return {
       minimumModelLabel: "the fast/free model",
       upgradeModelLabel: "the paid everyday model",
-      pricingAnchorId: "openai-gpt-5-4-nano",
+      pricingAnchorId: "openai-low-cost-text-anchor",
     };
   }
 
   return {
     minimumModelLabel: "the everyday/default model",
     upgradeModelLabel: "the strongest available model for this provider",
-    pricingAnchorId: "openai-gpt-5-4-nano",
+    pricingAnchorId: "openai-low-cost-text-anchor",
   };
 }
 

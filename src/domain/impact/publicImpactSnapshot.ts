@@ -41,8 +41,8 @@ export type PublicImpactSnapshot = {
 };
 
 export function buildDefaultPublicImpactSnapshot(): PublicImpactSnapshot {
-  const lowerCostModel = requirePricingAnchor("openai-gpt-5-4-nano");
-  const comparisonModel = requirePricingAnchor("openai-gpt-5-5");
+  const lowerCostModel = requirePricingAnchor("openai-low-cost-text-anchor");
+  const comparisonModel = requirePricingAnchor("openai-premium-text-anchor");
   const rightSizingEstimate = estimateRightSizingCostSavings({
     baselineModelId: comparisonModel.id,
     routedModelId: lowerCostModel.id,

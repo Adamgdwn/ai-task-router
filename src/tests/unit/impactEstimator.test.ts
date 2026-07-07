@@ -14,18 +14,18 @@ import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpa
 
 describe("impact estimator", () => {
   it("calculates 100k-token benchmark costs from per-million-token pricing", () => {
-    const gpt55 = requirePricingAnchor("openai-gpt-5-5");
-    const gpt54Nano = requirePricingAnchor("openai-gpt-5-4-nano");
+    const premiumAnchor = requirePricingAnchor("openai-premium-text-anchor");
+    const lowCostAnchor = requirePricingAnchor("openai-low-cost-text-anchor");
 
-    expect(estimateHundredThousandTokenCostUsd(gpt55)).toBeCloseTo(1.125);
-    expect(estimateHundredThousandTokenCostUsd(gpt54Nano)).toBeCloseTo(0.04625);
+    expect(estimateHundredThousandTokenCostUsd(premiumAnchor)).toBeCloseTo(1.125);
+    expect(estimateHundredThousandTokenCostUsd(lowCostAnchor)).toBeCloseTo(0.04625);
   });
 
   it("applies cached-input rates only to cached input tokens", () => {
-    const gpt55 = requirePricingAnchor("openai-gpt-5-5");
+    const premiumAnchor = requirePricingAnchor("openai-premium-text-anchor");
 
     expect(
-      estimateTokenRunCostUsd(gpt55, {
+      estimateTokenRunCostUsd(premiumAnchor, {
         inputTokens: 75_000,
         cachedInputTokens: 50_000,
         outputTokens: 25_000,
@@ -35,14 +35,14 @@ describe("impact estimator", () => {
 
   it("estimates right-sizing savings while subtracting induced extra use", () => {
     const estimate = estimateRightSizingCostSavings({
-      baselineModelId: "openai-gpt-5-5",
-      routedModelId: "openai-gpt-5-4-nano",
+      baselineModelId: "openai-premium-text-anchor",
+      routedModelId: "openai-low-cost-text-anchor",
       tokenRun: defaultHundredThousandTokenRun,
       taskCount: 100,
       successfulRoutingRate: 0.8,
       inducedExtraRuns: [
         {
-          modelId: "openai-gpt-5-4-nano",
+          modelId: "openai-low-cost-text-anchor",
           tokenRun: defaultHundredThousandTokenRun,
           count: 10,
         },
