@@ -159,7 +159,7 @@ describe("route card generator", () => {
       methodLabel: "Plan - Analyze",
       recommendedModelLabel: expect.stringMatching(/Gemini|ChatGPT|Claude/),
     });
-    expect(card.stageGuidance.find((stage) => stage.stage === "create")?.recommendedModelLabel).toContain("minimum");
+    expect(card.stageGuidance.find((stage) => stage.stage === "create")?.recommendedModelLabel).toContain("prompt builder");
     expect(card.stageGuidance.find((stage) => stage.stage === "package")).toMatchObject({
       label: "Run the prompt",
       methodLabel: "Do - Improve",
@@ -218,18 +218,22 @@ describe("route card generator", () => {
     });
     expect(createStage).toMatchObject({
       label: "Build the master prompt",
-      recommendedModelLabel: expect.stringContaining("GPT-5.5 Instant"),
+      recommendedModelLabel: expect.stringContaining("strongest reasoning mode included in this account"),
     });
+    expect(createStage?.recommendedModelLabel).not.toContain("Instant first");
     expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
     expect(createStage?.actions.join(" ")).toContain("categorization rules");
     expect(createStage?.actions.join(" ")).toContain("month-over-month tracking");
     expect(createStage?.actions.join(" ")).toContain("model/tool choice for execution");
     expect(packageStage).toMatchObject({
-      label: "Run the prompt for the first build",
+      label: "Execute the build plan prompt",
       recommendedModelLabel: expect.stringContaining("execution GPT-5.5 Instant"),
     });
+    expect(packageStage?.actions.join(" ")).toContain("actual plan or build brief");
+    expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");
     expect(reviewStage?.actions.join(" ")).toContain("improvement and strength insights");
+    expect(reviewStage?.reviewChecks.join(" ")).toContain("full requested build path");
     expect(actStage?.reviewChecks.join(" ")).toContain("smallest useful build slice");
   });
 

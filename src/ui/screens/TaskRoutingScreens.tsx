@@ -759,20 +759,20 @@ function RouteTrustPanel({
 }
 
 function RouteHundredUseComparison({ options }: { options: readonly RouteOption[] }) {
-  const series = routeStrategies
-    .map((strategy) => options.find((option) => option.strategy === strategy))
-    .filter((option): option is RouteOption => option !== undefined)
-    .map((option) => ({
-      color: routeChartColor(option.strategy),
-      costPerUse: numericChartValue(option.estimatedCostUsd),
-      energyPerUse: numericChartValue(option.estimatedEnergyWh),
-      id: option.id,
-      label: option.label,
-    }));
+  const optionByStrategy = new Map(options.map((option) => [option.strategy, option]));
+  const series = routeStrategies.map((strategy) => {
+    const option = optionByStrategy.get(strategy);
 
-  if (series.length === 0) {
-    return null;
-  }
+    return {
+      color: routeChartColor(strategy),
+      costPerUse: numericChartValue(option?.estimatedCostUsd),
+      energyPerUse: numericChartValue(option?.estimatedEnergyWh),
+      id: option?.id ?? `${strategy}-route-unavailable-chart-series`,
+      label: option?.label ?? `${optionLabel(strategy)} route`,
+      strategy,
+      unavailable: option === undefined,
+    };
+  });
 
   const usageTicks = [0, 25, 50, 75, 100];
   const maxCost = maxChartValue(series.map((item) => item.costPerUse));
@@ -783,8 +783,8 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
   const energyTop = 124;
   const plotHeight = 42;
   const xForUse = (uses: number) => xStart + ((xEnd - xStart) * uses) / 100;
-  const yForValue = (value: number, maxValue: number, top: number) =>
-    top + plotHeight - linearChartRatio(value, maxValue) * plotHeight;
+  const yForValue = (value: number, maxValue: number, top: number, showZeroFloor = false) =>
+    top + plotHeight - linearChartRatio(value, maxValue, showZeroFloor) * plotHeight;
 
   return (
     <div className="routeHundredUseChart" aria-label="100 use route cost and energy comparison">
@@ -837,6 +837,7 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
             maxValue={maxCost}
             perUseValue={item.costPerUse}
             plotTop={costTop}
+            showZeroFloor
             usageTicks={usageTicks}
             xForUse={xForUse}
             yForValue={yForValue}
@@ -861,7 +862,7 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
             <g key={item.id} transform={`translate(${720 + index * 138} 16)`}>
               <line stroke={item.color} strokeLinecap="round" strokeWidth="4" x1="0" x2="22" y1="0" y2="0" />
               <text x="30" y="5">
-                {item.label.replace(" route", "")}
+                {item.unavailable ? `${item.label.replace(" route", "")} blocked` : item.label.replace(" route", "")}
               </text>
             </g>
           ))}
@@ -870,14 +871,16 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
       <div className="routeHundredUseKey" aria-label="comparison chart key">
         <span>Solid: cost</span>
         <span>Dashed: energy</span>
-        <span>Zero dollars still draws on the cost floor</span>
+        <span>Zero-dollar routes draw on a visible floor</span>
       </div>
       <div className="routeHundredUseTotals" aria-label="100 use totals">
         {series.map((item) => (
           <div key={item.id}>
             <strong>{item.label}</strong>
             <span>
-              {chartCostTotalLabel(item.costPerUse)} and {chartEnergyTotalLabel(item.energyPerUse)}
+              {item.unavailable
+                ? "not available for the current setup"
+                : `${chartCostTotalLabel(item.costPerUse)} and ${chartEnergyTotalLabel(item.energyPerUse)}`}
             </span>
           </div>
         ))}
@@ -892,6 +895,7 @@ function ChartTrendLine({
   maxValue,
   perUseValue,
   plotTop,
+  showZeroFloor = false,
   usageTicks,
   xForUse,
   yForValue,
@@ -901,16 +905,20 @@ function ChartTrendLine({
   maxValue: number;
   perUseValue: number | null;
   plotTop: number;
+  showZeroFloor?: boolean;
   usageTicks: readonly number[];
   xForUse: (uses: number) => number;
-  yForValue: (value: number, maxValue: number, top: number) => number;
+  yForValue: (value: number, maxValue: number, top: number, showZeroFloor?: boolean) => number;
 }) {
   if (perUseValue === null) {
     return null;
   }
 
-  const points = usageTicks.map((tick) => `${xForUse(tick)},${yForValue(perUseValue * tick, maxValue, plotTop)}`).join(" ");
-  const endY = yForValue(perUseValue * 100, maxValue, plotTop);
+  const shouldUseZeroFloor = showZeroFloor && perUseValue === 0;
+  const points = usageTicks
+    .map((tick) => `${xForUse(tick)},${yForValue(perUseValue * tick, maxValue, plotTop, shouldUseZeroFloor)}`)
+    .join(" ");
+  const endY = yForValue(perUseValue * 100, maxValue, plotTop, shouldUseZeroFloor);
   const lineClassName = dashed ? "chartSeriesLine chartSeriesLineDashed" : "chartSeriesLine";
 
   return (
@@ -933,7 +941,11 @@ function maxChartValue(values: Array<number | null>) {
   return Math.max(0.01, ...hundredUseValues);
 }
 
-function linearChartRatio(value: number, maxValue: number) {
+function linearChartRatio(value: number, maxValue: number, showZeroFloor = false) {
+  if (value === 0 && showZeroFloor && maxValue > 0) {
+    return 0.055;
+  }
+
   if (value <= 0 || maxValue <= 0) {
     return 0;
   }

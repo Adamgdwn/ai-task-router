@@ -58,7 +58,7 @@ export function modelLabelForPromptDesign(model: ModelInventoryItem): string {
   }
 
   const guidance = modelUseGuidance(model);
-  return `${model.label} (minimum ${guidance.minimumModelLabel}; prompt builder ${guidance.promptBuilderModelLabel})`;
+  return `${model.label} (prompt builder ${guidance.promptBuilderModelLabel}; run later with ${guidance.executionModelLabel})`;
 }
 
 export function modelLabelForPromptDesignForTask(model: ModelInventoryItem, task: TaskIntake): string {
@@ -71,7 +71,7 @@ export function modelLabelForExecution(model: ModelInventoryItem): string {
   }
 
   const guidance = modelUseGuidance(model);
-  return `${model.label} (execution ${guidance.executionModelLabel}; upgrade ${guidance.upgradeModelLabel})`;
+  return `${model.label} (execution ${guidance.executionModelLabel}; upgrade only to ${guidance.upgradeModelLabel})`;
 }
 
 export function modelLabelForExecutionForTask(model: ModelInventoryItem, task: TaskIntake): string {
@@ -209,26 +209,26 @@ function chatGptGuidance(accountId: EverydayToolAccountId): ModelUseGuidance {
   if (accountId === "pro" || accountId === "business" || accountId === "enterprise") {
     return {
       minimumModelLabel: "GPT-5.5 Instant or the account's current Instant mode",
-      promptBuilderModelLabel: "GPT-5.5 Thinking High/Extra High or Pro mode for the master prompt when stakes justify it",
-      executionModelLabel: "GPT-5.5 Instant after the master prompt is clear",
-      upgradeModelLabel: "ChatGPT's highest reasoning or Pro mode available in this account",
+      promptBuilderModelLabel: "the highest reasoning or Pro mode you own in this account for the master prompt",
+      executionModelLabel: "GPT-5.5 Instant or the fastest adequate lower-cost GPT-5.x/mini mode after the master prompt is clear",
+      upgradeModelLabel: "the highest reasoning or Pro mode available in this account",
       pricingAnchorId: "openai-premium-text-anchor",
     };
   }
 
   if (accountId === "plus" || accountId === "go") {
     return {
-      minimumModelLabel: "GPT-5.5 Instant",
-      promptBuilderModelLabel: "GPT-5.5 Instant first; switch on Thinking Medium only if the master prompt fails review",
-      executionModelLabel: "GPT-5.5 Instant, or the mini fallback when limits require it, once the prompt is clear",
-      upgradeModelLabel: "GPT-5.5 Thinking Medium/High when the first plan fails review",
+      minimumModelLabel: "GPT-5.5 Instant or the account's current fast mode",
+      promptBuilderModelLabel: "the strongest reasoning mode included in this account for the master prompt",
+      executionModelLabel: "GPT-5.5 Instant or the fastest adequate lower-cost GPT-5.x/mini mode once the prompt is clear",
+      upgradeModelLabel: "the strongest reasoning mode included in this account",
       pricingAnchorId: "openai-low-cost-text-anchor",
     };
   }
 
   return {
     minimumModelLabel: "GPT-5.5 when available in the Free account",
-    promptBuilderModelLabel: "the current Free ChatGPT model; keep the prompt small and upgrade if it cannot follow the brief",
+    promptBuilderModelLabel: "the strongest Free ChatGPT mode available for the master prompt; keep the scope small",
     executionModelLabel: "the current Free ChatGPT model or mini fallback after the prompt is clear",
     upgradeModelLabel: "a paid ChatGPT reasoning mode when the first plan fails review",
     pricingAnchorId: "openai-low-cost-text-anchor",

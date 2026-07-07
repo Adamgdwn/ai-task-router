@@ -297,6 +297,10 @@ function createStageLabel(task: TaskIntake) {
 }
 
 function createStagePurpose(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return "Use the highest-level helper or reasoning mode you already own for the thinking-heavy part: create the master prompt before any lower-cost execution run.";
+  }
+
   if (task.knowledgeWorkType === "coding") {
     return "Use the recommended helper for the thinking-heavy part first: write a precise build prompt before asking anything to make the tool.";
   }
@@ -321,6 +325,16 @@ function createStagePurpose(task: TaskIntake) {
 }
 
 function createStageActions(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return [
+      "Ask the highest-level model or reasoning mode you own to create the master prompt before any lower-mode execution run.",
+      `Make the prompt cover every requested output: ${requestedDeliverableSummary(task)}.`,
+      `Force the prompt to plan the actual build path: ${buildPlanCoverageSummary(task)}.`,
+      "Require Plan-Do-Check-Act or light DMAIC, acceptance checks, privacy limits, and upgrade triggers.",
+      "Have it name the lowest execution model or mode to run the finished prompt, plus the fallback if that mode fails.",
+    ];
+  }
+
   if (task.knowledgeWorkType === "coding") {
     return [
       "Ask for a master build prompt, not the finished app yet.",
@@ -385,8 +399,12 @@ function packageStageLabel(task: TaskIntake) {
     return "Build the first slice";
   }
 
+  if (needsFullBuildPlan(task)) {
+    return "Execute the build plan prompt";
+  }
+
   if (taskHasBuildIntent(task)) {
-    return "Run the prompt for the first build";
+    return "Run the build prompt";
   }
 
   if (task.outputType === "plan") {
@@ -405,6 +423,10 @@ function packageStageLabel(task: TaskIntake) {
 }
 
 function packageStagePurpose(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return "Paste the approved master prompt into the lightest adequate execution mode and make it produce the actual build plan, model choice, and first usable slice.";
+  }
+
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return "Use the master prompt to build the smallest useful version first, then leave bigger features for later passes.";
   }
@@ -433,6 +455,16 @@ function packageStagePurpose(task: TaskIntake) {
 }
 
 function packageStageActions(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return [
+      "Paste the approved master prompt into the chosen lighter execution model or mode.",
+      `Generate the actual plan or build brief, not more prompt advice: ${buildPlanCoverageSummary(task)}.`,
+      "Require data flow, screens or files, acceptance tests, and what can wait for a later pass.",
+      "Name the exact execution model or mode for the first implementation pass and when to upgrade.",
+      "Stop after the first usable slice is clear enough for a human review.",
+    ];
+  }
+
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return [
       "Paste the master prompt into the selected execution helper.",
@@ -499,6 +531,13 @@ function packageStageChecks(task: TaskIntake) {
     return ["The first slice works well enough to review before more features are added."];
   }
 
+  if (needsFullBuildPlan(task)) {
+    return [
+      "The output includes the master prompt, execution model choice, build sequence, checks, privacy limits, and savings comparison.",
+      "The first build slice is small enough to start without trying to build the whole product at once.",
+    ];
+  }
+
   if (taskHasBuildIntent(task)) {
     return ["The plan names the first build slice, execution model, data flow, checks, and what can wait."];
   }
@@ -511,6 +550,10 @@ function packageStageChecks(task: TaskIntake) {
 }
 
 function reviewStageLabel(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return "Review the full build plan";
+  }
+
   if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
     return "Review before sharing";
   }
@@ -527,6 +570,10 @@ function reviewStageLabel(task: TaskIntake) {
 }
 
 function reviewStagePurpose(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return "Check the result against the original request, the master prompt, and the expected deliverables before spending more tool time.";
+  }
+
   if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
     return "Check facts, tone, permissions, and risk before anything leaves your hands.";
   }
@@ -543,6 +590,16 @@ function reviewStagePurpose(task: TaskIntake) {
 }
 
 function reviewStageActions(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return [
+      "Read the master prompt and execution result together.",
+      `Confirm the result covers: ${requestedDeliverableSummary(task)}.`,
+      "Check that the model choice, data flow, privacy limits, cost, energy, and acceptance checks are explicit.",
+      "Mark any unclear build step, missing input, unsupported claim, or upgrade trigger.",
+      "Decide whether the same prompt can be reused or needs one stronger prompt-design pass.",
+    ];
+  }
+
   const actions = [
     "Read the prompt and the result together, from the perspective of the person who has to use it.",
     "Fix unclear steps, unsupported claims, missing context, or places where the helper ignored the prompt.",
@@ -562,6 +619,10 @@ function reviewStageActions(task: TaskIntake) {
 
 function reviewStageChecks(task: TaskIntake) {
   const checks = ["The result matches the prompt, the original task, and the promised output format."];
+
+  if (needsFullBuildPlan(task)) {
+    checks.push("The plan covers the full requested build path, not only the prompt-writing setup.");
+  }
 
   if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
     checks.push("Nothing public leaves your hands without human approval.");
@@ -587,6 +648,10 @@ function actStageLabel(task: TaskIntake) {
 }
 
 function actStagePurpose(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return "Choose the smallest build action, save the prompt, and decide the measure that will prove the route saved time, cost, or energy.";
+  }
+
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
     return "Pick the smallest next step, decide what to measure, and note whether the prompt should be reused, tightened, or rerun with stronger help.";
   }
@@ -599,6 +664,14 @@ function actStagePurpose(task: TaskIntake) {
 }
 
 function actStageActions(task: TaskIntake) {
+  if (needsFullBuildPlan(task)) {
+    return [
+      "Choose one first build action, such as the spreadsheet import, category rules, or first tracking view.",
+      "Save the master prompt and the execution model choice beside the plan.",
+      "Record the expected cost, energy, or rework savings so the route can be learned from later.",
+    ];
+  }
+
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
     return [
       "Choose one first action that can be started today.",
@@ -627,6 +700,33 @@ function actStageChecks(task: TaskIntake) {
   return checks;
 }
 
+function needsFullBuildPlan(task: TaskIntake) {
+  return (
+    taskHasBuildIntent(task) &&
+    (task.knowledgeWorkType === "coding" ||
+      task.knowledgeWorkType === "planning" ||
+      task.outputType === "code" ||
+      task.outputType === "plan" ||
+      taskHasModelSelectionIntent(task))
+  );
+}
+
+function buildPlanCoverageSummary(task: TaskIntake) {
+  const deliverables = requestedDeliverableLabels(task);
+  const coverage = [
+    deliverables.includes("spreadsheet import or paste-in data flow") ? "spreadsheet import or paste-in data flow" : null,
+    deliverables.includes("categorization rules") ? "category rules" : null,
+    deliverables.includes("month-over-month tracking") ? "month-over-month tracking view" : null,
+    deliverables.includes("improvement and strength insights") ? "improvement and strength signals" : null,
+    deliverables.includes("model/tool choice for execution") ? "model and tool choice for execution" : null,
+    deliverables.includes("privacy check for financial data") ? "financial-data privacy limits" : null,
+    deliverables.includes("cost, savings, or energy comparison") ? "cost, savings, and energy comparison" : null,
+    taskHasBuildIntent(task) ? "first usable build slice" : null,
+  ].filter((item): item is string => item !== null);
+
+  return inlineList(uniqueLabels(coverage.length ? coverage : deliverables));
+}
+
 function friendlyOutputName(value: TaskIntake["outputType"]) {
   const labels: Record<TaskIntake["outputType"], string> = {
     answer: "a direct answer",
@@ -641,6 +741,22 @@ function friendlyOutputName(value: TaskIntake["outputType"]) {
   };
 
   return labels[value];
+}
+
+function uniqueLabels(labels: readonly string[]) {
+  return [...new Set(labels)];
+}
+
+function inlineList(items: readonly string[]) {
+  if (items.length === 0) {
+    return "the requested output";
+  }
+
+  if (items.length === 1) {
+    return items[0] ?? "the requested output";
+  }
+
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
 function primaryWorkStep(recommendedOption: RouteOption): RouteStep | undefined {
