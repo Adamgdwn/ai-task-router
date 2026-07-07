@@ -139,17 +139,6 @@ button:focus-visible {
   line-height: 1.2;
 }
 
-.versionTag {
-  align-self: start;
-  background: rgba(11, 130, 166, 0.18);
-  border: 1px solid rgba(17, 161, 194, 0.68);
-  border-radius: 999px;
-  color: #d9f5fb;
-  font-size: 0.75rem;
-  padding: 4px 9px;
-  width: fit-content;
-}
-
 .brandBlock h1 {
   color: #ffffff;
   font-size: 2rem;

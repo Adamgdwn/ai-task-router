@@ -53,7 +53,6 @@ export function App({ store = browserLocalStore }: AppProps) {
           <img alt="Guided AI Labs" className="brandLogo" src={guidedAiLabsLogo} />
           <div className="brandMeta">
             <span className="brandName">Guided AI Labs</span>
-            <span className="versionTag">v0.2 local MVP</span>
           </div>
           <h1>AI Task Router</h1>
           <p>A guided aisle map for choosing the right AI path before you paste anything anywhere.</p>
