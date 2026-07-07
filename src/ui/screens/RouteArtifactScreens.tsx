@@ -44,7 +44,7 @@ export function SavedRouteCardScreen({ definition, artifacts, onOpenTaskIntake }
           <RouteCardSummary routeCard={routeCard} />
           <StageGuidancePanel
             stages={routeCard.stageGuidance}
-            lead="These rough stages were saved with the decision card so the route stays easy to follow later."
+            lead="This quick project plan was saved with the decision card so the route stays easy to follow later."
           />
           <ImpactInsightPanel recommended={recommendedRoute ?? undefined} snapshot={publicImpactSnapshot} />
           <MarkdownExportPanel

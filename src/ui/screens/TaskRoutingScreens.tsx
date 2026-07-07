@@ -122,7 +122,7 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
         <section className="routingSection" aria-labelledby="task-context-heading">
           <div className="sectionHeading">
             <h3 id="task-context-heading">A few quick questions</h3>
-            <p>These choices keep the recommendation practical without turning this into a project plan.</p>
+            <p>These choices help evaluate the task, shape a simple plan, and point out where lighter help may save effort.</p>
           </div>
 
           <div className="formGrid">
@@ -437,36 +437,37 @@ function GeneratedResults({
 
       <section className="resultSummaryBand" aria-labelledby="result-summary-heading">
         <div>
-          <p className="screenKicker">Best fit</p>
-          <h3 id="result-summary-heading">{recommended?.label ?? "Manual review required"}</h3>
-          <p>{plainRouteSummary(recommended?.summary ?? "Review what was left out before deciding what to do outside the app.")}</p>
+          <p className="screenKicker">Task evaluation</p>
+          <h3 id="result-summary-heading">{recommendationHeading(recommended)}</h3>
+          <p>{taskEvaluationSummary(result.task, recommended)}</p>
+          <p>{nextActionSummary(result, recommended)}</p>
         </div>
         <dl>
           <div>
-            <dt>Style</dt>
-            <dd>{friendlyPolicyName(result.scoringResult.selectedPolicyId, setup.activePolicy?.label ?? result.scoringResult.selectedPolicyLabel)}</dd>
+            <dt>Kind of work</dt>
+            <dd>{friendlyTaskOptionLabel(result.task.knowledgeWorkType)}</dd>
           </div>
           <div>
-            <dt>Fit</dt>
-            <dd>{recommended ? fitLabel(recommended.score) : "Needs review"}</dd>
+            <dt>Deliverable</dt>
+            <dd>{friendlyTaskOptionLabel(result.task.outputType)}</dd>
           </div>
           <div>
-            <dt>Prompt steps</dt>
-            <dd>{result.promptPackage.steps.length}</dd>
+            <dt>Best helper</dt>
+            <dd>{primaryHelperLabel(recommended)}</dd>
           </div>
           <div>
-            <dt>Generated</dt>
-            <dd>{formatTimestamp(result.generatedAt)}</dd>
+            <dt>Savings aim</dt>
+            <dd>{savingsAimLabel(recommended)}</dd>
           </div>
         </dl>
       </section>
 
       <StageGuidancePanel
         stages={result.routeCard.stageGuidance}
-        lead="A rough path only, with the recommended help beside each stage. Use it to stay organized without turning this into a full project plan."
+        lead="Follow these stages as a simple project plan. Each stage shows who or what should help, and where to review before moving on."
       />
 
-      <ImpactInsightPanel recommended={recommended} snapshot={publicImpactSnapshot} />
+      <ImpactInsightPanel recommended={recommended} snapshot={publicImpactSnapshot} task={result.task} />
 
       <section className="routingSection" aria-labelledby="route-comparison-heading">
         <div className="sectionHeading">
@@ -493,7 +494,7 @@ function GeneratedResults({
         <ListSection
           className="blockedList"
           heading="Left out for safety"
-          items={result.routeCard.blockedRoutes.map((blockedRoute) => userFacingRouteMessage(blockedRoute.reason))}
+          items={uniqueMessages(result.routeCard.blockedRoutes.map((blockedRoute) => userFacingRouteMessage(blockedRoute.reason)))}
           lead="These ingredients or helpers were removed because they do not fit what you chose to include."
         />
       ) : null}
@@ -525,6 +526,67 @@ function GeneratedResults({
       </section>
     </div>
   );
+}
+
+function recommendationHeading(recommended: RouteOption | undefined) {
+  return recommended ? `Start with: ${recommended.label}` : "Pause before using a helper";
+}
+
+function taskEvaluationSummary(task: TaskIntake, recommended: RouteOption | undefined) {
+  const workType = friendlyTaskOptionLabel(task.knowledgeWorkType).toLowerCase();
+  const deliverable = friendlyTaskOptionLabel(task.outputType).toLowerCase();
+  const quality = friendlyTaskOptionLabel(task.qualityBar).toLowerCase();
+  const sourceNeed =
+    task.requestedSourceIds.length > 0
+      ? "specific information you selected"
+      : "the task description and anything you intentionally add later";
+
+  if (!recommended) {
+    return `This looks like a ${workType} job that should end in ${deliverable}, but the current setup does not leave a safe route. Adjust the helper or information choices before pasting the task into another tool.`;
+  }
+
+  return `This looks like a ${workType} job that should end in ${deliverable} at ${quality}. Use ${sourceNeed}, then follow the plan below to get a first usable result before upgrading to heavier help.`;
+}
+
+function nextActionSummary(result: GeneratedRouteResult, recommended: RouteOption | undefined) {
+  const firstStage = result.routeCard.stageGuidance[0];
+  const firstWorkStep = recommended?.steps.find((step) => step.kind !== "human review");
+
+  if (!recommended || !firstStage) {
+    return "First action: review what was left out, then change the task setup or use manual review only.";
+  }
+
+  return `First action: ${firstStage.purpose} Main helper: ${firstWorkStep?.label ?? firstStage.recommendedModelLabel}.`;
+}
+
+function primaryHelperLabel(recommended: RouteOption | undefined) {
+  const firstWorkStep = recommended?.steps.find((step) => step.kind !== "human review");
+
+  if (!firstWorkStep) {
+    return "Review setup first";
+  }
+
+  if (firstWorkStep.kind === "manual") {
+    return "You first";
+  }
+
+  return firstWorkStep.label;
+}
+
+function savingsAimLabel(recommended: RouteOption | undefined) {
+  if (!recommended) {
+    return "Avoid unsafe rework";
+  }
+
+  if (recommended.estimatedCostLevel === "low") {
+    return recommended.estimatedEffortLevel === "high" ? "Save tool cost" : "Save paid-tool use";
+  }
+
+  if (recommended.estimatedCostLevel === "medium") {
+    return "Save rework";
+  }
+
+  return "Reduce risk";
 }
 
 function RouteStrategyCard({
@@ -661,6 +723,10 @@ function plainRouteSummary(summary: string) {
 }
 
 function userFacingRouteMessage(message: string) {
+  if (message === "Add an AI app is disabled in the user's inventory.") {
+    return "Unused AI app slots are disabled in setup.";
+  }
+
   const noAccessMatch = message.match(/^(.*) is set to no access and cannot be used in a route\.$/);
 
   if (noAccessMatch?.[1]) {
@@ -680,6 +746,10 @@ function userFacingRouteMessage(message: string) {
   }
 
   return plainRouteSummary(message);
+}
+
+function uniqueMessages(messages: string[]) {
+  return [...new Set(messages)];
 }
 
 function routeStepKindLabel(kind: RouteOption["steps"][number]["kind"]) {
@@ -705,12 +775,12 @@ function friendlyTaskOptionLabel(value: string) {
     analysis: "Analyze or compare",
     writing: "Write or rewrite",
     coding: "Code or technical review",
-    planning: "Make a rough plan",
+    planning: "Planning",
     review: "Review or critique",
     packaging: "Package into a usable format",
     answer: "A direct answer",
     brief: "A short brief",
-    plan: "A rough structure",
+    plan: "A working plan",
     draft: "A draft",
     code: "Code",
     table: "A table",

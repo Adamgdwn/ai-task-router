@@ -74,7 +74,7 @@ const strategyDefinitions: Record<RouteCandidateStrategy, StrategyDefinition> = 
     primaryModelTiers: ["small", "human"],
     unavailableReasonCode: "no-safe-lean-path",
     unavailableReason: "No safe small or manual route remains after hard gates.",
-    posture: "Keeps the route small and uses the lightest safe path before any premium tooling.",
+    posture: "Start small: get a usable first pass before spending time or money on heavier tools.",
   },
   balanced: {
     label: "Balanced route",
@@ -83,7 +83,7 @@ const strategyDefinitions: Record<RouteCandidateStrategy, StrategyDefinition> = 
     primaryModelTiers: ["mid", "frontier"],
     unavailableReasonCode: "no-safe-balanced-path",
     unavailableReason: "No safe mid-tier or synthesis route remains after hard gates.",
-    posture: "Uses a synthesis-oriented path for everyday quality without choosing a final recommendation.",
+    posture: "Use an everyday AI helper for a clearer first draft without jumping to the heaviest option.",
   },
   premium: {
     label: "Premium route",
@@ -92,7 +92,7 @@ const strategyDefinitions: Record<RouteCandidateStrategy, StrategyDefinition> = 
     primaryModelTiers: ["frontier", "research", "artifact"],
     unavailableReasonCode: "no-safe-premium-path",
     unavailableReason: "No safe frontier, research, or artifact route remains after hard gates.",
-    posture: "Uses the strongest safe route components when quality or review cost matters.",
+    posture: "Use the strongest helper when quality, uncertainty, or rework cost matters.",
   },
 };
 
@@ -171,6 +171,7 @@ function buildStrategyCandidate(input: {
   }
 
   const primaryModel = selectPreferredModel(context.allowedModels, definition.primaryModelTiers);
+  const usesManualPrimaryStep = primaryModel?.tier === "human";
 
   if (!primaryModel) {
     return unavailableCandidate({
@@ -208,13 +209,13 @@ function buildStrategyCandidate(input: {
     summary: buildCandidateSummary({
       definition,
       policy,
-      usesManualPrimaryStep: primaryModel.tier === "human",
+      usesManualPrimaryStep,
       hasResearchStep: researchStep !== null,
       hasArtifactStep: strategy === "premium" && artifactStep !== null,
       requiresHumanApproval: hardGateResult.requiresHumanApproval,
     }),
     estimatedCostLevel: definition.estimatedCostLevel,
-    estimatedEffortLevel: definition.estimatedEffortLevel,
+    estimatedEffortLevel: usesManualPrimaryStep ? "high" : definition.estimatedEffortLevel,
     steps,
     warnings: context.warnings,
   };
@@ -314,8 +315,8 @@ function buildPrimaryStep(input: {
     return {
       id: `${routeId}-manual`,
       kind: "manual",
-      label: "Manual route preparation",
-      instruction: `Review the task and allowed source IDs (${sourceText}) manually, then prepare the ${task.outputType}. Treat this app as a planning record only.`,
+      label: "You-first project plan",
+      instruction: `Evaluate the task manually, write a short beginner-friendly plan, note what would justify using an AI helper, and prepare the ${task.outputType} from allowed source IDs (${sourceText}). Treat this app as a planning record only.`,
       requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
       modelId: model.id,
       sourceIds: context.allowedSourceIds,
@@ -328,13 +329,33 @@ function buildPrimaryStep(input: {
   return {
     id: `${routeId}-${strategy === "premium" && model.tier === "artifact" ? "artifact" : "synthesis"}`,
     kind,
-    label: `${model.label} ${kind === "artifact" ? "artifact preparation" : "synthesis"}`,
-    instruction: `Use ${model.label} manually outside the app to prepare the ${task.outputType} for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). The app does not send task data to the model.`,
+    label: `${model.label}: ${primaryActionLabel(task, kind)}`,
+    instruction: `Use ${model.label} manually outside the app to evaluate the task, prepare a beginner-friendly ${task.outputType}, and call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). The app does not send task data to the model.`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
     modelId: model.id,
     sourceIds: context.allowedSourceIds,
     warnings: [],
   };
+}
+
+function primaryActionLabel(task: TaskIntake, kind: RouteStep["kind"]) {
+  if (kind === "artifact") {
+    return "package the result";
+  }
+
+  if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
+    return "build the plan";
+  }
+
+  if (task.knowledgeWorkType === "coding") {
+    return "plan the build";
+  }
+
+  if (task.knowledgeWorkType === "analysis" || task.knowledgeWorkType === "review") {
+    return "evaluate and recommend";
+  }
+
+  return "draft the output";
 }
 
 function buildArtifactStep(input: {
@@ -390,11 +411,13 @@ function buildCandidateSummary(input: {
   const routeParts = [
     input.definition.posture,
     input.policy.description,
-    input.usesManualPrimaryStep ? "It stays manual because hard gates removed the lighter model path." : null,
-    input.hasResearchStep ? "It includes a manual research step for current facts or citations." : null,
+    input.usesManualPrimaryStep
+      ? "Because no lighter AI helper is selected for this route, the work stays with you and should be treated as higher effort."
+      : null,
+    input.hasResearchStep ? "It includes a current-facts check before drafting." : null,
     input.hasArtifactStep ? "It includes a packaging step for the requested artifact shape." : null,
-    input.requiresHumanApproval ? "It ends with human approval before use." : null,
-    "It uses only hard-gate-allowed models and sources.",
+    input.requiresHumanApproval ? "It ends with human approval before anything important is used." : null,
+    "It uses only the helpers and information allowed by your choices.",
   ].filter((part): part is string => part !== null);
 
   return routeParts.join(" ");

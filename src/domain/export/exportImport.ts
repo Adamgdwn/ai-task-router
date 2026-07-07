@@ -237,7 +237,7 @@ export function serializeRouteCardMarkdown(routeCard: RouteCard, promptPackage: 
     "## Summary",
     recommendedOption?.summary ?? "No recommended route summary is available.",
     "",
-    "## Suggested Stages",
+    "## Quick Project Plan",
     stageGuidanceMarkdown(validRouteCard),
     "",
     "## Warnings",

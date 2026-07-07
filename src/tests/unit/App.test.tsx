@@ -412,11 +412,14 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Lean route", level: 4 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Balanced route", level: 4 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Premium route", level: 4 })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Suggested stages" })).toBeInTheDocument();
-    expect(screen.getByText("Frame the job")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Start with: Balanced route" })).toBeInTheDocument();
+    expect(screen.getByText(/This looks like a write or rewrite job/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Quick project plan" })).toBeInTheDocument();
+    expect(screen.getByText("Frame the outcome")).toBeInTheDocument();
     expect(screen.getAllByText("Recommended help").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Best fit").length).toBeGreaterThan(0);
-    expect(screen.getByRole("heading", { name: "Every task is a chance to build better AI judgment." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What this route can save" })).toBeInTheDocument();
+    expect(screen.getByText("Savings recommendation")).toBeInTheDocument();
     expect(screen.getByText("100k-token example")).toBeInTheDocument();
     expect(screen.getByText(/not your bill, and they are not a guarantee/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Warnings" })).toBeInTheDocument();
@@ -547,16 +550,16 @@ describe("App", () => {
     expect((screen.getByRole("combobox", { name: "Saved decision card" }) as HTMLSelectElement).value).toMatch(
       /^route-card-/,
     );
-    expect(screen.getByRole("heading", { name: "Suggested stages" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Quick project plan" })).toBeInTheDocument();
     expect(screen.getByText("Options and tradeoffs")).toBeInTheDocument();
     expect(screen.getByText("Left out for safety")).toBeInTheDocument();
     expect(screen.getByText("Warnings")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Every task is a chance to build better AI judgment." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What this route can save" })).toBeInTheDocument();
     expect(screen.getByText("100k-token example")).toBeInTheDocument();
 
     const markdownPreview = screen.getByLabelText("Prepared route card Markdown") as HTMLTextAreaElement;
     expect(markdownPreview.value).toContain("# Route card: Draft public-facing copy");
-    expect(markdownPreview.value).toContain("## Suggested Stages");
+    expect(markdownPreview.value).toContain("## Quick Project Plan");
     expect(markdownPreview.value).toContain("Recommended help:");
     expect(markdownPreview.value).toContain("## Route Options");
 

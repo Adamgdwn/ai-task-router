@@ -36,8 +36,8 @@ export function buildProjectStageGuidance({
   const stages: StageDraft[] = [
     {
       stage: "frame",
-      label: "Frame the job",
-      purpose: "Name the goal, audience, constraints, and what good enough looks like before opening an AI tool.",
+      label: "Frame the outcome",
+      purpose: "Write down the goal, who will use the result, what inputs are allowed, and what done looks like.",
       fallbackModelLabel: "You first",
     },
   ];
@@ -63,7 +63,7 @@ export function buildProjectStageGuidance({
   if (shouldAddPackageStage(task, artifactStep)) {
     stages.push({
       stage: "package",
-      label: "Package the result",
+      label: packageStageLabel(task),
       purpose: packageStagePurpose(task),
       routeStep: artifactStep ?? primaryStep,
       fallbackModelLabel: modelLabelForStep(primaryStep, modelById, manualReviewModel, "You first"),
@@ -127,18 +127,18 @@ function gatherStageLabel(task: TaskIntake) {
 
 function gatherStagePurpose(task: TaskIntake) {
   if (task.requiresCurrentFacts && task.requiresCitations) {
-    return "Collect current facts and citation notes before asking for synthesis.";
+    return "Collect current facts and citation notes before asking any helper to make a recommendation.";
   }
 
   if (task.requiresCurrentFacts) {
-    return "Check what has changed recently before drafting an answer.";
+    return "Check what has changed recently so the plan is not based on stale assumptions.";
   }
 
   if (task.requiresCitations) {
-    return "Collect source notes so claims can be traced before drafting.";
+    return "Collect source notes so important claims can be checked before you rely on them.";
   }
 
-  return "Keep only the information you intend to use, then move it into the chosen tool yourself.";
+  return "Gather only the information you intend to use, then move it into the chosen helper yourself.";
 }
 
 function createStageLabel(task: TaskIntake) {
@@ -148,7 +148,7 @@ function createStageLabel(task: TaskIntake) {
     case "brief":
       return "Draft the brief";
     case "plan":
-      return "Sketch the plan";
+      return "Build the working plan";
     case "draft":
       return "Create the first draft";
     case "code":
@@ -166,18 +166,22 @@ function createStageLabel(task: TaskIntake) {
 
 function createStagePurpose(task: TaskIntake) {
   if (task.knowledgeWorkType === "coding") {
-    return "Use the recommended tool for the technical pass, then inspect the result yourself.";
+    return "Use the recommended helper to turn the goal into a build plan, first version, or code-review checklist.";
   }
 
   if (task.knowledgeWorkType === "review") {
-    return "Use the recommended tool to surface issues, gaps, and possible improvements.";
+    return "Use the recommended helper to surface issues, gaps, improvement options, and the safest next step.";
   }
 
   if (task.knowledgeWorkType === "analysis") {
-    return "Use the recommended tool to compare, reason through, and summarize the important tradeoffs.";
+    return "Use the recommended helper to compare options, reason through tradeoffs, and recommend what to do next.";
   }
 
-  return "Use the recommended tool to create the requested output from the allowed inputs.";
+  if (task.knowledgeWorkType === "planning" || task.outputType === "plan") {
+    return "Ask for a beginner-friendly plan with ordered steps, tool choices, review checks, and savings or upgrade points.";
+  }
+
+  return "Use the recommended helper to create the requested output from the allowed inputs.";
 }
 
 function shouldAddPackageStage(
@@ -186,12 +190,25 @@ function shouldAddPackageStage(
 ) {
   return (
     task.knowledgeWorkType === "packaging" ||
+    task.outputType === "plan" ||
     artifactOutputTypes.has(task.outputType) ||
     Boolean(artifactStep)
   );
 }
 
+function packageStageLabel(task: TaskIntake) {
+  if (task.outputType === "plan") {
+    return "Turn it into a checklist";
+  }
+
+  return "Package the result";
+}
+
 function packageStagePurpose(task: TaskIntake) {
+  if (task.outputType === "plan") {
+    return "Turn the plan into a short checklist with the first action, dependencies, review points, and upgrade triggers.";
+  }
+
   if (task.outputType === "table") {
     return "Turn the useful parts into rows, columns, and labels that can be checked quickly.";
   }
@@ -216,6 +233,10 @@ function reviewStageLabel(task: TaskIntake) {
     return "Review for quality";
   }
 
+  if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
+    return "Review and choose next action";
+  }
+
   return "Check and learn";
 }
 
@@ -232,7 +253,7 @@ function reviewStagePurpose(task: TaskIntake) {
     return "Compare the result against the goal and tighten anything weak or unsupported.";
   }
 
-  return "Notice whether this route was enough, then use that lesson to choose faster next time.";
+  return "Confirm the plan is clear enough to follow, then choose the first action or upgrade the helper if it is not.";
 }
 
 function primaryWorkStep(recommendedOption: RouteOption): RouteStep | undefined {
@@ -254,6 +275,10 @@ function modelLabelForStep(
   manualReviewModel: ModelInventoryItem | undefined,
   fallbackLabel: string,
 ) {
+  if (step?.kind === "manual") {
+    return fallbackLabel;
+  }
+
   if (step?.modelId) {
     return modelById.get(step.modelId)?.label ?? step.modelId;
   }

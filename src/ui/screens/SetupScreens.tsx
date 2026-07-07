@@ -602,7 +602,7 @@ function DesktopDiscoveryPanel({
     return (
       <section className="desktopDiscoveryCard" aria-labelledby="desktop-discovery-heading">
         <div>
-          <p className="screenKicker">Desktop app</p>
+          <p className="screenKicker">Desktop app - Coming Soon!</p>
           <h4 id="desktop-discovery-heading">Check this computer</h4>
         </div>
         <p>
@@ -616,7 +616,7 @@ function DesktopDiscoveryPanel({
     <section className="desktopDiscoveryCard" aria-labelledby="desktop-discovery-heading">
       <div className="desktopDiscoveryHeader">
         <div>
-          <p className="screenKicker">Desktop app</p>
+          <p className="screenKicker">Desktop app - Coming Soon!</p>
           <h4 id="desktop-discovery-heading">Check this computer</h4>
         </div>
         <span>Local only</span>

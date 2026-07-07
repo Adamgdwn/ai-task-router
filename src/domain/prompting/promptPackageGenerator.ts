@@ -176,6 +176,15 @@ function promptTextForStep(input: {
     `Sensitivity class: ${task.sensitivityClass}`,
     `Use only these source IDs for this step: ${sourceRefs}.`,
     ...factAndCitationPromptLines(task),
+    "First evaluate the task in plain language:",
+    "- Restate the goal and the finished deliverable.",
+    "- Identify the main assumptions, missing information, and review risks.",
+    "- Say whether a lighter, everyday, or premium helper is enough for this task.",
+    "Then create a novice-friendly project plan:",
+    "- Give 3 to 6 ordered steps.",
+    "- For each step, name what I should do, what helper to use, and what good enough looks like.",
+    "- Include a short savings recommendation: where this route saves time, cost, or rework, and when I should upgrade.",
+    "- End with the first action I should take next.",
     `Expected output: ${expectedOutput}`,
   ].join("\n");
 }
@@ -244,13 +253,13 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
         ? `A concise research note for "${task.title}" with current facts, source citations, and unresolved uncertainty.`
         : `A concise research note for "${task.title}" with current facts and unresolved uncertainty.`;
     case "artifact":
-      return `A packaged ${task.outputType} for "${task.title}" that is ready for human review before use.`;
+      return `A packaged ${task.outputType} for "${task.title}" with a clear plan, review checks, and savings or upgrade notes.`;
     case "human review":
       return `A human approval decision for "${task.title}" with any required revisions or stop/reroute notes.`;
     case "manual":
-      return `A manually prepared ${task.outputType} for "${task.title}" that respects the route warnings and source limits.`;
+      return `A manually prepared ${task.outputType} for "${task.title}" with task evaluation, ordered steps, review checks, and a savings recommendation.`;
     case "model":
-      return `A ${task.outputType} for "${task.title}" that reflects the ${task.knowledgeWorkType} task, source limits, and quality bar.`;
+      return `A ${task.outputType} for "${task.title}" that evaluates the task, gives a novice-friendly plan, respects source limits, and recommends where to save or upgrade.`;
   }
 }
 

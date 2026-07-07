@@ -61,7 +61,7 @@ describe("export and import utilities", () => {
     const routeCardMarkdown = serializeRouteCardMarkdown(routeCard);
 
     expect(routeCardMarkdown).toContain("# Route card: Export fixture");
-    expect(routeCardMarkdown).toContain("## Suggested Stages");
+    expect(routeCardMarkdown).toContain("## Quick Project Plan");
     expect(routeCardMarkdown).toContain("Recommended help: Local export model");
     expect(routeCardMarkdown).toContain("## Route Options");
     expect(routeCardMarkdown).toContain("### 1. Balanced route");
