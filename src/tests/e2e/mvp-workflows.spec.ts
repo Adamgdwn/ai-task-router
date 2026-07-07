@@ -145,6 +145,7 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByRole("heading", { name: "Best Options", level: 2 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "What this route can save" })).toBeVisible();
   await expect(page.locator("dt").filter({ hasText: "100k-token example" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Suggested AI toolkit" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lean route", level: 4 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Balanced route", level: 4 })).toBeVisible();

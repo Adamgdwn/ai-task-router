@@ -44,7 +44,7 @@ export const routeStrategies = ["lean", "balanced", "premium"] as const;
 
 export const routeStepKinds = ["model", "research", "artifact", "human review", "manual"] as const;
 
-export const projectStageKinds = ["frame", "gather", "create", "package", "review"] as const;
+export const projectStageKinds = ["frame", "gather", "create", "package", "review", "act"] as const;
 
 export const policyDefaultIds = ["least-resource", "balanced", "quality-first"] as const;
 
@@ -250,8 +250,11 @@ export const projectStageGuidanceSchema = z
   .object({
     id: nonEmptyIdSchema,
     stage: z.enum(projectStageKinds),
+    methodLabel: nonEmptyTextSchema.optional(),
     label: nonEmptyTextSchema,
     purpose: nonEmptyTextSchema,
+    actions: z.array(nonEmptyTextSchema).max(5).default([]),
+    reviewChecks: z.array(nonEmptyTextSchema).max(4).default([]),
     recommendedModelLabel: nonEmptyTextSchema,
     recommendedModelId: nonEmptyIdSchema.optional(),
     routeStepId: nonEmptyIdSchema.optional(),

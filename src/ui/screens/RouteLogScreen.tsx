@@ -7,6 +7,7 @@ import type { ScreenDefinition } from "./screenDefinitions";
 type RouteLogScreenProps = {
   definition: ScreenDefinition;
   store: LocalStore;
+  onImpactChanged?: () => void;
   onOpenRouteCard: (routeCardId: string) => void;
   onOpenTaskIntake: () => void;
 };
@@ -60,6 +61,7 @@ const ratingOptions: Array<{ value: RatingDraft; label: string }> = [
 export function RouteLogScreen({
   definition,
   store,
+  onImpactChanged,
   onOpenRouteCard,
   onOpenTaskIntake,
 }: RouteLogScreenProps) {
@@ -195,6 +197,7 @@ export function RouteLogScreen({
         ),
       }));
       setSelectedEntryId(updatedEntry.id);
+      onImpactChanged?.();
       if (outcomeFilter !== "all" && outcomeFilter !== updatedEntry.outcome) {
         setOutcomeFilter(updatedEntry.outcome);
       }

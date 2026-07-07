@@ -489,8 +489,11 @@ function stageGuidanceMarkdown(routeCard: RouteCard): string {
     .map((stage, stageIndex) =>
       [
         `${stageIndex + 1}. **${stage.label}**`,
+        ...(stage.methodLabel ? [`   - Method: ${stage.methodLabel}`] : []),
         `   - Recommended help: ${stage.recommendedModelLabel}`,
         `   - Purpose: ${stage.purpose}`,
+        `   - Do this: ${inlineList(stage.actions)}`,
+        `   - Check: ${inlineList(stage.reviewChecks)}`,
       ].join("\n"),
     )
     .join("\n");

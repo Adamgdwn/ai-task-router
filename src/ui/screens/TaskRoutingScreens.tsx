@@ -1,5 +1,10 @@
-import type { FormEvent, ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
+import {
+  buildSuggestedToolkit,
+  type SuggestedToolkit,
+  type SuggestedToolkitItem,
+} from "../../domain/routing/toolkitSuggestion";
 import {
   knowledgeWorkTypes,
   outputTypes,
@@ -14,6 +19,7 @@ import type {
   TaskRoutingErrorField,
 } from "../state/useTaskRouting";
 import type { SetupConfigurationController } from "../state/useSetupConfiguration";
+import type { ImpactCounterController } from "../state/useImpactCounter";
 import { ImpactInsightPanel } from "./ImpactInsightPanel";
 import { ScreenHeader } from "./SetupScreens";
 import type { ScreenDefinition } from "./screenDefinitions";
@@ -23,6 +29,7 @@ const publicImpactSnapshot = buildDefaultPublicImpactSnapshot();
 
 type TaskRoutingScreenProps = {
   definition: ScreenDefinition;
+  impactCounter?: ImpactCounterController;
   routing: TaskRoutingController;
   setup: SetupConfigurationController;
 };
@@ -249,7 +256,13 @@ export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated 
   );
 }
 
-export function RouteResultsScreen({ definition, routing, setup, onOpenTaskIntake }: RouteResultsScreenProps) {
+export function RouteResultsScreen({
+  definition,
+  impactCounter,
+  routing,
+  setup,
+  onOpenTaskIntake,
+}: RouteResultsScreenProps) {
   const result = routing.routeResult;
 
   return (
@@ -265,7 +278,7 @@ export function RouteResultsScreen({ definition, routing, setup, onOpenTaskIntak
       {!result ? (
         <EmptyResultsState routing={routing} onOpenTaskIntake={onOpenTaskIntake} />
       ) : (
-        <GeneratedResults result={result} routing={routing} setup={setup} />
+        <GeneratedResults impactCounter={impactCounter} result={result} routing={routing} setup={setup} />
       )}
     </article>
   );
@@ -418,14 +431,24 @@ function TaskStructurePreview({
 
 function GeneratedResults({
   result,
+  impactCounter,
   routing,
   setup,
 }: {
   result: GeneratedRouteResult;
+  impactCounter?: ImpactCounterController;
   routing: TaskRoutingController;
   setup: SetupConfigurationController;
 }) {
   const recommended = result.routeCard.options.find((option) => option.id === result.routeCard.recommendedOptionId);
+  const [selectedStrategy, setSelectedStrategy] = useState<RouteOption["strategy"]>(
+    recommended?.strategy ?? result.routeCard.options[0]?.strategy ?? "lean",
+  );
+  const suggestedToolkit = buildSuggestedToolkit({
+    task: result.task,
+    models: setup.configuration?.modelInventory ?? [],
+    recommended,
+  });
 
   return (
     <div className="resultsStack">
@@ -467,7 +490,15 @@ function GeneratedResults({
         lead="Follow these stages as a simple project plan. Each stage shows who or what should help, and where to review before moving on."
       />
 
-      <ImpactInsightPanel recommended={recommended} snapshot={publicImpactSnapshot} task={result.task} />
+      <ImpactInsightPanel
+        recommended={recommended}
+        snapshot={publicImpactSnapshot}
+        task={result.task}
+        trackedImpact={impactCounter?.summary}
+        trackedImpactMessage={impactCounter?.message}
+      />
+
+      <ToolkitSuggestionPanel toolkit={suggestedToolkit} />
 
       <section className="routingSection" aria-labelledby="route-comparison-heading">
         <div className="sectionHeading">
@@ -476,7 +507,13 @@ function GeneratedResults({
         </div>
         <div className="routeComparisonGrid">
           {routeStrategies.map((strategy) => (
-            <RouteStrategyCard key={strategy} result={result} strategy={strategy} />
+            <RouteStrategyCard
+              key={strategy}
+              onSelect={setSelectedStrategy}
+              result={result}
+              selected={selectedStrategy === strategy}
+              strategy={strategy}
+            />
           ))}
         </div>
       </section>
@@ -525,6 +562,62 @@ function GeneratedResults({
         </span>
       </section>
     </div>
+  );
+}
+
+function ToolkitSuggestionPanel({ toolkit }: { toolkit: SuggestedToolkit }) {
+  return (
+    <section className="routingSection toolkitSuggestionSection" aria-labelledby="toolkit-suggestion-heading">
+      <div className="sectionHeading">
+        <h3 id="toolkit-suggestion-heading">Suggested AI toolkit</h3>
+        <p>{toolkit.summary}</p>
+      </div>
+
+      <div className="toolkitColumns">
+        <ToolkitColumn
+          heading="Close-enough starters"
+          lead="Try these first for many normal tasks before paying for heavier help."
+          items={toolkit.starters}
+        />
+        <ToolkitColumn
+          heading="Paid upgrades"
+          lead="Keep these for risk, polish, current research, or repeated work where rework would cost more."
+          items={toolkit.paidUpgrades}
+        />
+      </div>
+      <p className="toolkitBoundaryNote">
+        This is a planning suggestion only. The app does not subscribe, connect accounts, verify plans, or call these tools.
+      </p>
+    </section>
+  );
+}
+
+function ToolkitColumn({
+  heading,
+  items,
+  lead,
+}: {
+  heading: string;
+  items: readonly SuggestedToolkitItem[];
+  lead: string;
+}) {
+  return (
+    <section className="toolkitColumn" aria-labelledby={domIdFor(heading)}>
+      <h4 id={domIdFor(heading)}>{heading}</h4>
+      <p>{lead}</p>
+      <ol>
+        {items.map((item) => (
+          <li key={item.id}>
+            <div>
+              <strong>{item.label}</strong>
+              <span>{item.alreadySelected ? "Already in My AI Tools" : item.role}</span>
+            </div>
+            <p>{item.reason}</p>
+            <small>{item.savingsAngle}</small>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 
@@ -590,10 +683,14 @@ function savingsAimLabel(recommended: RouteOption | undefined) {
 }
 
 function RouteStrategyCard({
+  onSelect,
   result,
+  selected,
   strategy,
 }: {
+  onSelect: (strategy: RouteOption["strategy"]) => void;
   result: GeneratedRouteResult;
+  selected: boolean;
   strategy: RouteOption["strategy"];
 }) {
   const candidate = result.scoringResult.scoredCandidates.find((routeCandidate) => routeCandidate.strategy === strategy);
@@ -608,12 +705,19 @@ function RouteStrategyCard({
           <span>Blocked</span>
         </div>
         <p>{plainRouteSummary(unavailable?.reason ?? "No safe route is available for this strategy.")}</p>
+        <p className="routeSavingsDetail">
+          Savings: this option is left out so the user does not spend time or money on a route that conflicts with the
+          current setup.
+        </p>
       </section>
     );
   }
 
   return (
-    <section className={recommended ? "routeResultCard recommendedRouteCard" : "routeResultCard"} aria-labelledby={`${strategy}-route-heading`}>
+    <section
+      className={routeCardClassName({ recommended, selected })}
+      aria-labelledby={`${strategy}-route-heading`}
+    >
       <div className="routeCardHeader">
         <h4 id={`${strategy}-route-heading`}>{candidate.label}</h4>
         <span>{recommended ? "Best fit" : fitLabel(candidate.score)}</span>
@@ -641,8 +745,63 @@ function RouteStrategyCard({
           </li>
         ))}
       </ol>
+      <button
+        aria-pressed={selected}
+        className="routeSelectButton"
+        onClick={() => onSelect(strategy)}
+        type="button"
+      >
+        {selected ? "Selected option" : "Compare cost and savings"}
+      </button>
+      {selected ? <RouteCostSavingsDetail candidate={candidate} recommended={recommended} /> : null}
     </section>
   );
+}
+
+function RouteCostSavingsDetail({
+  candidate,
+  recommended,
+}: {
+  candidate: RouteOption;
+  recommended: boolean;
+}) {
+  return (
+    <div className="routeSavingsDetail" aria-label={`${candidate.label} cost and savings detail`}>
+      <h5>Cost and savings</h5>
+      <dl>
+        <div>
+          <dt>Use this when</dt>
+          <dd>{routeUseCase(candidate)}</dd>
+        </div>
+        <div>
+          <dt>What it can save</dt>
+          <dd>{routeSavingsExplanation(candidate)}</dd>
+        </div>
+        <div>
+          <dt>Tradeoff</dt>
+          <dd>{routeTradeoff(candidate)}</dd>
+        </div>
+        <div>
+          <dt>{recommended ? "Why this is best fit" : "When to choose it instead"}</dt>
+          <dd>{routeSelectionCue(candidate, recommended)}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+function routeCardClassName({ recommended, selected }: { recommended: boolean; selected: boolean }) {
+  const classNames = ["routeResultCard"];
+
+  if (recommended) {
+    classNames.push("recommendedRouteCard");
+  }
+
+  if (selected) {
+    classNames.push("selectedRouteCard");
+  }
+
+  return classNames.join(" ");
 }
 
 function ListSection({
@@ -708,6 +867,60 @@ function fitLabel(score: number) {
   }
 
   return "Needs review";
+}
+
+function routeUseCase(candidate: RouteOption) {
+  if (candidate.estimatedCostLevel === "low") {
+    return "Use first for routine work, rough planning, or tasks where a human can quickly review the result.";
+  }
+
+  if (candidate.estimatedCostLevel === "medium") {
+    return "Use when the task needs a clearer first pass, better synthesis, or less back-and-forth than the lightest path.";
+  }
+
+  return "Use when risk, quality, visibility, or complexity makes mistakes more expensive than the extra helper cost.";
+}
+
+function routeSavingsExplanation(candidate: RouteOption) {
+  if (candidate.estimatedCostLevel === "low") {
+    return candidate.estimatedEffortLevel === "high"
+      ? "Provider spend stays low because you do more framing and review yourself."
+      : "Paid or premium use stays lower by starting with the smallest adequate helper.";
+  }
+
+  if (candidate.estimatedCostLevel === "medium") {
+    return "Time and rework may drop because the route uses enough help to produce a cleaner first plan.";
+  }
+
+  return "The savings are mostly risk savings: fewer expensive mistakes, missed checks, or weak public-facing outputs.";
+}
+
+function routeTradeoff(candidate: RouteOption) {
+  if (candidate.estimatedCostLevel === "low") {
+    return "You may need more patience, clearer instructions, and a stronger human review pass.";
+  }
+
+  if (candidate.estimatedCostLevel === "medium") {
+    return "It spends more tool capacity than the lean route, so it should earn that cost by reducing rework.";
+  }
+
+  return "It uses the most resource, so it should be reserved for tasks where quality or risk truly matters.";
+}
+
+function routeSelectionCue(candidate: RouteOption, recommended: boolean) {
+  if (recommended) {
+    return "It best matches the current task details, saved tools, and choosing style.";
+  }
+
+  if (candidate.strategy === "lean") {
+    return "Choose it if you want to test the lightest path first and are comfortable reviewing more yourself.";
+  }
+
+  if (candidate.strategy === "balanced") {
+    return "Choose it if the lean path feels too thin but premium help would be more than the task deserves.";
+  }
+
+  return "Choose it if the result will be public, critical, complex, or expensive to fix later.";
 }
 
 function plainRouteSummary(summary: string) {

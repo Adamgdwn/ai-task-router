@@ -11,6 +11,7 @@ import {
 import { RouteResultsScreen, TaskIntakeScreen } from "./ui/screens/TaskRoutingScreens";
 import { screenDefinitions } from "./ui/screens/screenDefinitions";
 import { useRouteArtifacts } from "./ui/state/useRouteArtifacts";
+import { useImpactCounter } from "./ui/state/useImpactCounter";
 import { useSetupConfiguration } from "./ui/state/useSetupConfiguration";
 import { useTaskRouting } from "./ui/state/useTaskRouting";
 
@@ -33,6 +34,7 @@ export function App({ store = browserLocalStore }: AppProps) {
   const setup = useSetupConfiguration(store);
   const taskRouting = useTaskRouting({ setup, store });
   const routeArtifacts = useRouteArtifacts({ store });
+  const impactCounter = useImpactCounter(store);
   const activeScreen = useMemo(
     () => screenDefinitions.find((screen) => screen.id === activeScreenId) ?? screenDefinitions[0],
     [activeScreenId],
@@ -83,7 +85,11 @@ export function App({ store = browserLocalStore }: AppProps) {
           <StartHereScreen definition={activeScreen} onNavigate={setActiveScreenId} />
         ) : null}
         {activeScreen.id === "tool-inventory" ? (
-          <ToolInventoryScreen definition={activeScreen} setup={setup} />
+          <ToolInventoryScreen
+            definition={activeScreen}
+            onNextStep={() => setActiveScreenId("policy-settings")}
+            setup={setup}
+          />
         ) : null}
         {activeScreen.id === "policy-settings" ? (
           <PolicySettingsScreen definition={activeScreen} setup={setup} />
@@ -99,6 +105,7 @@ export function App({ store = browserLocalStore }: AppProps) {
         {activeScreen.id === "route-results" ? (
           <RouteResultsScreen
             definition={activeScreen}
+            impactCounter={impactCounter}
             onOpenTaskIntake={() => setActiveScreenId("task-intake")}
             routing={taskRouting}
             setup={setup}
@@ -108,6 +115,7 @@ export function App({ store = browserLocalStore }: AppProps) {
           <SavedRouteCardScreen
             artifacts={routeArtifacts}
             definition={activeScreen}
+            impactCounter={impactCounter}
             onOpenTaskIntake={() => setActiveScreenId("task-intake")}
           />
         ) : null}
@@ -121,6 +129,7 @@ export function App({ store = browserLocalStore }: AppProps) {
         {activeScreen.id === "route-log" ? (
           <RouteLogScreen
             definition={activeScreen}
+            onImpactChanged={() => void impactCounter.refresh()}
             onOpenRouteCard={(routeCardId) => {
               routeArtifacts.selectRouteCard(routeCardId);
               setActiveScreenId("route-card");

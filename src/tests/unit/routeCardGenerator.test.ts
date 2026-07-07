@@ -132,9 +132,15 @@ describe("route card generator", () => {
     expect(card.options.find((option) => option.id === card.recommendedOptionId)?.score).toBe(
       scoringResult.recommendedCandidate?.score,
     );
-    expect(card.stageGuidance.map((stage) => stage.stage)).toEqual(["frame", "gather", "create", "review"]);
+    expect(card.stageGuidance.map((stage) => stage.stage)).toEqual(["frame", "gather", "create", "review", "act"]);
+    expect(card.stageGuidance[0]).toMatchObject({
+      methodLabel: "Plan - Define",
+      actions: expect.arrayContaining(["Restate the task in one plain sentence."]),
+      reviewChecks: expect.arrayContaining(["The goal, audience, inputs, and finish line are clear."]),
+    });
     expect(card.stageGuidance.find((stage) => stage.stage === "create")).toMatchObject({
       label: "Create the first draft",
+      methodLabel: "Do - Analyze/Improve",
       recommendedModelLabel: expect.stringMatching(/Gemini|ChatGPT|Claude/),
     });
   });
@@ -210,6 +216,7 @@ describe("route card generator", () => {
       recommendedModelLabel: expect.stringContaining("Perplexity"),
     });
     expect(card.stageGuidance.map((stage) => stage.stage)).toContain("review");
+    expect(card.stageGuidance.map((stage) => stage.stage)).toContain("act");
   });
 
   it("keeps human approval requirements visible on card and option records", () => {

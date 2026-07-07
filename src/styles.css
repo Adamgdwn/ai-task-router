@@ -657,16 +657,29 @@ button:focus-visible {
   padding: 16px;
 }
 
-.addToolButton {
+.toolInventoryActions {
   align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(190px, 1fr) minmax(180px, 1fr) minmax(160px, 1fr);
+}
+
+.addToolButton,
+.saveToolChoicesButton,
+.nextStepButton {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  min-height: 42px;
+  padding: 9px 14px;
+}
+
+.addToolButton {
   background: var(--brand-teal);
   border-color: var(--brand-teal);
   color: #ffffff;
-  display: inline-flex;
   gap: 10px;
   justify-self: start;
-  min-height: 42px;
-  padding: 9px 14px;
 }
 
 .addToolButton span {
@@ -687,6 +700,31 @@ button:focus-visible {
 .addToolButton:focus-visible:not(:disabled) {
   background: #096f8e;
   border-color: #096f8e;
+}
+
+.saveToolChoicesButton {
+  background: #ffffff;
+  border-color: var(--brand-teal);
+  color: var(--brand-navy);
+  justify-self: center;
+}
+
+.saveToolChoicesButton:hover:not(:disabled),
+.saveToolChoicesButton:focus-visible:not(:disabled) {
+  background: #eef8fb;
+}
+
+.nextStepButton {
+  background: var(--brand-navy);
+  border-color: var(--brand-navy);
+  color: #ffffff;
+  justify-self: end;
+}
+
+.nextStepButton:hover:not(:disabled),
+.nextStepButton:focus-visible:not(:disabled) {
+  background: #243442;
+  border-color: #243442;
 }
 
 .removeToolButton {
@@ -917,6 +955,16 @@ button:focus-visible {
   line-height: 1.4;
 }
 
+.policyPlainSummary {
+  background: #f7fbfd;
+  border: 1px solid #dbe7ee;
+  border-radius: 6px;
+  color: #334b5a;
+  line-height: 1.45;
+  margin: 0;
+  padding: 10px 12px;
+}
+
 .segmentedOption:has(input:checked) {
   background: #eef8fb;
   border-color: var(--brand-teal);
@@ -940,6 +988,11 @@ button:focus-visible {
 
 .advancedDrawer[open] {
   gap: 14px;
+}
+
+.weightGrid small {
+  color: var(--muted-ink);
+  line-height: 1.35;
 }
 
 .comingLaterControl {
@@ -1329,10 +1382,48 @@ button:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.methodPill {
+  background: #eef8fb;
+  border: 1px solid #cdeaf2;
+  border-radius: 999px;
+  color: var(--brand-navy);
+  display: inline-block;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  padding: 4px 8px;
+  width: fit-content;
+}
+
 .stageGuidanceList p {
   color: var(--muted-ink);
   line-height: 1.43;
   margin: 0;
+}
+
+.stageDetailBlock {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.stageDetailBlock > strong {
+  color: #334b5a;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.stageDetailBlock ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.stageDetailBlock li {
+  color: #2d3a44;
+  font-size: 0.86rem;
+  line-height: 1.38;
 }
 
 .stageGuidanceList dl {
@@ -1399,6 +1490,56 @@ button:focus-visible {
   margin: 0;
 }
 
+.impactCounterPanel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--brand-teal);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1fr);
+  padding: 14px;
+}
+
+.impactCounterPanel > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.impactCounterPanel span,
+.impactCounterPanel dt {
+  color: var(--muted-ink);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.impactCounterPanel strong {
+  color: var(--brand-navy);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.impactCounterPanel small,
+.impactCounterPanel dd {
+  color: var(--muted-ink);
+}
+
+.impactCounterPanel dl {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.impactCounterPanel dd {
+  color: var(--brand-navy);
+  font-weight: 900;
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
 .impactMetricGrid div {
   border-left: 3px solid var(--brand-teal);
   display: grid;
@@ -1462,6 +1603,82 @@ button:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.toolkitSuggestionSection {
+  border-top-color: #c7d5dd;
+}
+
+.toolkitColumns {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+}
+
+.toolkitColumn {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.toolkitColumn h4 {
+  color: var(--brand-navy);
+  margin: 0;
+}
+
+.toolkitColumn > p,
+.toolkitBoundaryNote {
+  color: var(--muted-ink);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.toolkitColumn ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.toolkitColumn li {
+  color: #2d3a44;
+  line-height: 1.4;
+}
+
+.toolkitColumn li > div {
+  display: grid;
+  gap: 2px;
+}
+
+.toolkitColumn strong {
+  color: var(--brand-navy);
+}
+
+.toolkitColumn span {
+  color: var(--brand-teal);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.toolkitColumn li p {
+  color: #2d3a44;
+  margin: 5px 0;
+}
+
+.toolkitColumn small {
+  color: var(--muted-ink);
+}
+
+.toolkitBoundaryNote {
+  background: #eef8fb;
+  border: 1px solid #cdeaf2;
+  border-left: 4px solid var(--brand-teal-bright);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
 .routeComparisonGrid {
   display: grid;
   gap: 12px;
@@ -1484,6 +1701,13 @@ button:focus-visible {
   box-shadow:
     inset 4px 0 0 var(--brand-teal),
     0 10px 24px rgba(15, 23, 32, 0.05);
+}
+
+.selectedRouteCard {
+  border-color: var(--brand-navy);
+  box-shadow:
+    inset 0 3px 0 var(--brand-navy),
+    0 12px 28px rgba(15, 23, 32, 0.08);
 }
 
 .blockedRouteCard {
@@ -1556,6 +1780,49 @@ button:focus-visible {
   color: var(--muted-ink);
   display: block;
   font-size: 0.82rem;
+}
+
+.routeSelectButton {
+  background: #ffffff;
+  border-color: var(--brand-teal);
+  color: var(--brand-navy);
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.routeSelectButton[aria-pressed="true"] {
+  background: var(--brand-navy);
+  border-color: var(--brand-navy);
+  color: #ffffff;
+}
+
+.routeSavingsDetail {
+  background: #f7fbfd;
+  border: 1px solid #dbe7ee;
+  border-radius: 6px;
+  display: grid;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.routeSavingsDetail h5 {
+  color: var(--brand-navy);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.routeSavingsDetail dl {
+  gap: 10px;
+}
+
+.routeSavingsDetail dt {
+  color: #334b5a;
+}
+
+.routeSavingsDetail dd {
+  color: #2d3a44;
+  font-weight: 500;
+  line-height: 1.42;
 }
 
 .warningList li,
@@ -2100,6 +2367,7 @@ button:focus-visible {
   .taskConversationGrid,
   .taskShortcutGrid,
   .impactSection,
+  .toolkitColumns,
   .routeComparisonGrid,
   .artifactToolbar,
   .artifactTwoColumn,
@@ -2159,6 +2427,9 @@ button:focus-visible {
   .taskShortcutGrid,
   .impactSection,
   .impactMetricGrid,
+  .impactCounterPanel,
+  .impactCounterPanel dl,
+  .toolkitColumns,
   .routeComparisonGrid,
   .resultSummaryBand,
   .saveRoutePanel,
@@ -2313,6 +2584,7 @@ button:focus-visible {
   .artifactSummaryBand,
   .stageGuidanceList li,
   .impactSection,
+  .impactCounterPanel,
   .artifactRouteOption,
   .routingSection,
   .warningList,

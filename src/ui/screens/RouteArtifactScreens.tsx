@@ -6,6 +6,7 @@ import {
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import type { PromptPackage, PromptStep, RouteCard, RouteOption, RouteStep } from "../../domain/types";
 import type { RouteArtifactsController } from "../state/useRouteArtifacts";
+import type { ImpactCounterController } from "../state/useImpactCounter";
 import { ImpactInsightPanel } from "./ImpactInsightPanel";
 import { ScreenHeader } from "./SetupScreens";
 import type { ScreenDefinition } from "./screenDefinitions";
@@ -16,10 +17,16 @@ const publicImpactSnapshot = buildDefaultPublicImpactSnapshot();
 type RouteArtifactScreenProps = {
   definition: ScreenDefinition;
   artifacts: RouteArtifactsController;
+  impactCounter?: ImpactCounterController;
   onOpenTaskIntake: () => void;
 };
 
-export function SavedRouteCardScreen({ definition, artifacts, onOpenTaskIntake }: RouteArtifactScreenProps) {
+export function SavedRouteCardScreen({
+  definition,
+  artifacts,
+  impactCounter,
+  onOpenTaskIntake,
+}: RouteArtifactScreenProps) {
   const routeCard = artifacts.selectedRouteCard;
   const promptPackage = artifacts.selectedPromptPackage;
   const recommendedRoute = routeCard ? recommendedOptionFor(routeCard) : null;
@@ -46,7 +53,12 @@ export function SavedRouteCardScreen({ definition, artifacts, onOpenTaskIntake }
             stages={routeCard.stageGuidance}
             lead="This quick project plan was saved with the decision card so the route stays easy to follow later."
           />
-          <ImpactInsightPanel recommended={recommendedRoute ?? undefined} snapshot={publicImpactSnapshot} />
+          <ImpactInsightPanel
+            recommended={recommendedRoute ?? undefined}
+            snapshot={publicImpactSnapshot}
+            trackedImpact={impactCounter?.summary}
+            trackedImpactMessage={impactCounter?.message}
+          />
           <MarkdownExportPanel
             copyLabel="Route card Markdown"
             downloadName={artifactFileName("route-card", routeCard.title, routeCard.id)}

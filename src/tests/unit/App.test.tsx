@@ -363,8 +363,9 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: /Nothing specific/ }));
     expect(screen.getByRole("button", { name: /Nothing specific/ })).toHaveAttribute("aria-pressed", "true");
 
-    await user.click(screen.getByRole("button", { name: "Choosing Style" }));
-    expect(screen.getByRole("checkbox", { name: /Suggest a full AI toolkit/ })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "How To Choose" }));
+    expect(screen.queryByRole("checkbox", { name: /Suggest a full AI toolkit/ })).not.toBeInTheDocument();
+    expect(screen.getByText(/whether to favor lower cost, everyday balance, or stronger quality/)).toBeInTheDocument();
 
     await user.click(await screen.findByRole("radio", { name: /Best quality when it matters/ }));
     await user.click(screen.getByRole("button", { name: "Save my choices" }));
@@ -374,7 +375,7 @@ describe("App", () => {
     unmount();
     render(<App store={store} />);
 
-    await user.click(screen.getByRole("button", { name: "Choosing Style" }));
+    await user.click(screen.getByRole("button", { name: "How To Choose" }));
     await waitFor(() => {
       expect(screen.getByRole("radio", { name: /Best quality when it matters/ })).toBeChecked();
     });
@@ -421,6 +422,9 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "What this route can save" })).toBeInTheDocument();
     expect(screen.getByText("Savings recommendation")).toBeInTheDocument();
     expect(screen.getByText("100k-token example")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Suggested AI toolkit" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Close-enough starters" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Paid upgrades" })).toBeInTheDocument();
     expect(screen.getByText(/not your bill, and they are not a guarantee/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Warnings" })).toBeInTheDocument();
     expect(screen.getByText(/Human approval is required before using public-facing/)).toBeInTheDocument();

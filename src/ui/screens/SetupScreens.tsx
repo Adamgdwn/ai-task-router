@@ -40,9 +40,9 @@ const shoppingPathSteps = [
   {
     screenId: "policy-settings",
     eyebrow: "Aisle 2",
-    title: "How should tradeoffs be handled?",
-    body: "Tell the app whether today is about speed, balance, or best quality when the stakes are higher.",
-    buttonLabel: "Pick choosing style",
+    title: "How should recommendations choose?",
+    body: "Tell the app whether to start light, stay balanced, or spend more effort when quality matters.",
+    buttonLabel: "Pick how to choose",
   },
   {
     screenId: "task-intake",
@@ -66,6 +66,10 @@ type StartHereScreenProps = {
 type SetupScreenProps = {
   definition: ScreenDefinition;
   setup: SetupConfigurationController;
+};
+
+type ToolInventoryScreenProps = SetupScreenProps & {
+  onNextStep: () => void;
 };
 
 export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps) {
@@ -176,9 +180,9 @@ function PwaInstallPanel() {
   );
 }
 
-export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
+export function ToolInventoryScreen({ definition, setup, onNextStep }: ToolInventoryScreenProps) {
   return (
-    <SetupScreenLayout definition={definition} setup={setup}>
+    <SetupScreenLayout definition={definition} setup={setup} showPrimarySaveAction={false}>
       <SetupBoundaryNote>
         Add one AI app at a time. Pick the app, the account level you use, and how often you reach for it. Use Add
         another tool only when you want another row. The app does not sign in, verify paid plans, call providers, or
@@ -198,6 +202,7 @@ export function ToolInventoryScreen({ definition, setup }: SetupScreenProps) {
 
       <InventoryGroup
         models={setup.configuration?.modelInventory ?? []}
+        onNextStep={onNextStep}
         setup={setup}
         title="AI apps on my screen"
       />
@@ -211,12 +216,12 @@ export function PolicySettingsScreen({ definition, setup }: SetupScreenProps) {
   return (
     <SetupScreenLayout definition={definition} setup={setup}>
       <SetupBoundaryNote>
-        Pick the kind of advice you want most often. This changes recommendations only; it does not buy, connect, verify,
-        or run any tool.
+        Pick how cautious the recommendation should be most of the time. This changes the route the app recommends; it
+        does not buy, connect, verify, or run any tool.
       </SetupBoundaryNote>
 
       <fieldset className="choiceCardGrid" disabled={setup.status === "saving"}>
-        <legend>What should matter most?</legend>
+        <legend>When the app compares options, what should it favor?</legend>
         {policies.map((policy) => (
           <label className="choiceCardOption" key={policy.id}>
             <input
@@ -237,14 +242,6 @@ export function PolicySettingsScreen({ definition, setup }: SetupScreenProps) {
           </label>
         ))}
       </fieldset>
-
-      <label className="comingLaterControl">
-        <input disabled type="checkbox" />
-        <span>
-          Suggest a full AI toolkit for me
-          <small>Coming later as recommendation-only planning. No subscriptions are purchased here.</small>
-        </span>
-      </label>
 
       <div className="setupRecordList">
         {policies.length === 0 ? (
@@ -284,7 +281,12 @@ export function PlaceholderScreen({ definition }: { definition: ScreenDefinition
   );
 }
 
-function SetupScreenLayout({ children, definition, setup }: SetupScreenProps & { children: ReactNode }) {
+function SetupScreenLayout({
+  children,
+  definition,
+  setup,
+  showPrimarySaveAction = true,
+}: SetupScreenProps & { children: ReactNode; showPrimarySaveAction?: boolean }) {
   const busy = setup.status === "loading" || setup.status === "saving";
 
   return (
@@ -305,9 +307,11 @@ function SetupScreenLayout({ children, definition, setup }: SetupScreenProps & {
           <button disabled={busy} onClick={() => void setup.restoreDefaults()} type="button">
             Restore starter choices
           </button>
-          <button disabled={!setup.dirty || busy} onClick={() => void setup.saveChanges()} type="button">
-            Save my choices
-          </button>
+          {showPrimarySaveAction ? (
+            <button disabled={!setup.dirty || busy} onClick={() => void setup.saveChanges()} type="button">
+              Save my choices
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -346,10 +350,12 @@ function SetupBoundaryNote({ children }: { children: ReactNode }) {
 
 function InventoryGroup({
   models,
+  onNextStep,
   setup,
   title,
 }: {
   models: ModelInventoryItem[];
+  onNextStep: () => void;
   setup: SetupConfigurationController;
   title: string;
 }) {
@@ -385,6 +391,14 @@ function InventoryGroup({
     }
 
     setExtraEmptyRows((currentRows) => currentRows + 1);
+  }
+
+  async function continueToNextStep() {
+    if (setup.dirty) {
+      await setup.saveChanges();
+    }
+
+    onNextStep();
   }
 
   function removeToolRow(model: ModelInventoryItem) {
@@ -480,15 +494,33 @@ function InventoryGroup({
         )}
       </div>
 
-      <button
-        className="addToolButton"
-        disabled={!canAddAnotherTool || setup.status === "saving"}
-        onClick={addToolRow}
-        type="button"
-      >
-        <span aria-hidden="true">+</span>
-        Add another tool
-      </button>
+      <div className="toolInventoryActions">
+        <button
+          className="addToolButton"
+          disabled={!canAddAnotherTool || setup.status === "saving"}
+          onClick={addToolRow}
+          type="button"
+        >
+          <span aria-hidden="true">+</span>
+          Add another tool
+        </button>
+        <button
+          className="saveToolChoicesButton"
+          disabled={!setup.dirty || setup.status === "loading" || setup.status === "saving"}
+          onClick={() => void setup.saveChanges()}
+          type="button"
+        >
+          Save my choices
+        </button>
+        <button
+          className="nextStepButton"
+          disabled={setup.status === "loading" || setup.status === "saving"}
+          onClick={() => void continueToNextStep()}
+          type="button"
+        >
+          Next step
+        </button>
+      </div>
     </section>
   );
 }
@@ -865,8 +897,14 @@ function PolicyCard({
         <span className="recordPill">{selected ? "Current style" : "Available"}</span>
       </div>
 
+      <p className="policyPlainSummary">{policyPlainLanguageSummary(policy)}</p>
+
       <details className="advancedDrawer">
-        <summary>Show extra settings</summary>
+        <summary>Fine-tune how this style chooses</summary>
+        <p className="advancedNote">
+          These sliders are optional. Low means the app pays less attention to that factor; high means it matters more
+          when routes are close.
+        </p>
 
         <div className="formGrid compactFormGrid">
           <label>
@@ -893,21 +931,24 @@ function PolicyCard({
               <span>{weightLabel(weightKey)}</span>
               <input
                 aria-label={`Weight ${weightKey} for ${policy.id}`}
-                max={1}
+                max={5}
                 min={0}
                 onChange={(event) =>
                   onChange({
                     ...policy,
                     scoringWeights: {
                       ...policy.scoringWeights,
-                      [weightKey]: boundedNumber(event, 0, 1),
+                      [weightKey]: boundedScaleValue(event),
                     },
                   })
                 }
-                step={0.01}
-                type="number"
-                value={policy.scoringWeights[weightKey]}
+                step={1}
+                type="range"
+                value={scaledWeightValue(policy.scoringWeights[weightKey])}
               />
+              <small>
+                {weightStrengthLabel(policy.scoringWeights[weightKey])}: {weightHelpText(weightKey)}
+              </small>
             </label>
           ))}
         </div>
@@ -942,6 +983,18 @@ function friendlyPolicyDescription(policy: PolicyDefault) {
   }
 
   return "Balance quality, speed, caution, and effort for normal work.";
+}
+
+function policyPlainLanguageSummary(policy: PolicyDefault) {
+  if (policy.id === "least-resource") {
+    return "Best when the task is routine, private experimentation is fine, or you want to avoid paying for heavy help before you know you need it.";
+  }
+
+  if (policy.id === "quality-first") {
+    return "Best when mistakes would be visible, expensive, hard to undo, or when a human will rely on the result.";
+  }
+
+  return "Best default for normal work: start practical, keep quality in view, and upgrade only when the task calls for it.";
 }
 
 function visibleToolRows(models: ModelInventoryItem[], emptyRowsToShow: number): ModelInventoryItem[] {
@@ -1065,22 +1118,76 @@ function boundedNumber(event: ChangeEvent<HTMLInputElement>, min: number, max: n
   return Math.min(max, Math.max(min, parsedValue));
 }
 
+function boundedScaleValue(event: ChangeEvent<HTMLInputElement>) {
+  return boundedNumber(event, 0, 5) / 5;
+}
+
+function scaledWeightValue(value: number) {
+  return Math.round(Math.min(1, Math.max(0, value)) * 5);
+}
+
 function domIdFor(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
 function weightLabel(weightKey: keyof ScoringWeights) {
   if (weightKey === "sourceFit") {
-    return "Source fit";
+    return "Uses my information";
   }
 
   if (weightKey === "sensitivityFit") {
-    return "Sensitivity fit";
+    return "Protects sensitive details";
   }
 
-  return capitalize(weightKey);
+  if (weightKey === "cost") {
+    return "Keeps cost low";
+  }
+
+  if (weightKey === "energy") {
+    return "Avoids waste";
+  }
+
+  if (weightKey === "quality") {
+    return "Best quality";
+  }
+
+  return "Faster result";
 }
 
-function capitalize(value: string) {
-  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+function weightHelpText(weightKey: keyof ScoringWeights) {
+  if (weightKey === "sourceFit") {
+    return "prefer routes that can use the information you selected.";
+  }
+
+  if (weightKey === "sensitivityFit") {
+    return "prefer routes that fit the privacy level of the task.";
+  }
+
+  if (weightKey === "cost") {
+    return "prefer lower-cost helpers before premium ones.";
+  }
+
+  if (weightKey === "energy") {
+    return "prefer lighter routes when they are good enough.";
+  }
+
+  if (weightKey === "quality") {
+    return "prefer stronger helpers and more review.";
+  }
+
+  return "prefer routes that should get to a usable answer sooner.";
+}
+
+function weightStrengthLabel(value: number) {
+  const scaledValue = scaledWeightValue(value);
+
+  if (scaledValue <= 1) {
+    return "Low";
+  }
+
+  if (scaledValue <= 3) {
+    return "Medium";
+  }
+
+  return "High";
 }

@@ -1,4 +1,5 @@
 import type { PublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
+import type { TrackedImpactSummary } from "../../domain/impact/impactCounter";
 import type { RouteOption, TaskIntake } from "../../domain/types";
 
 type ImpactInsightPanelProps = {
@@ -8,9 +9,17 @@ type ImpactInsightPanelProps = {
     TaskIntake,
     "costPreference" | "energyPreference" | "knowledgeWorkType" | "outputType" | "qualityBar"
   >;
+  trackedImpact?: TrackedImpactSummary;
+  trackedImpactMessage?: string;
 };
 
-export function ImpactInsightPanel({ recommended, snapshot, task }: ImpactInsightPanelProps) {
+export function ImpactInsightPanel({
+  recommended,
+  snapshot,
+  task,
+  trackedImpact,
+  trackedImpactMessage,
+}: ImpactInsightPanelProps) {
   return (
     <section className="impactSection" aria-labelledby="impact-insight-heading">
       <div className="impactLead">
@@ -22,6 +31,30 @@ export function ImpactInsightPanel({ recommended, snapshot, task }: ImpactInsigh
           a guarantee.
         </p>
       </div>
+
+      {trackedImpact ? (
+        <div className="impactCounterPanel" aria-label="Cumulative followed-route impact">
+          <div>
+            <span>Followed choices</span>
+            <strong>{formatInteger(trackedImpact.followedPlanCount)}</strong>
+            <small>{trackedImpactMessage ?? "Accepted or edited recommendations counted on this device."}</small>
+          </div>
+          <dl>
+            <div>
+              <dt>Estimated avoided cost</dt>
+              <dd>{formatUsd(trackedImpact.estimatedAvoidedCostUsd)}</dd>
+            </div>
+            <div>
+              <dt>Estimated avoided energy</dt>
+              <dd>{formatWattHours(trackedImpact.estimatedAvoidedWattHours)}</dd>
+            </div>
+            <div>
+              <dt>Saved plans</dt>
+              <dd>{formatInteger(trackedImpact.savedPlanCount)}</dd>
+            </div>
+          </dl>
+        </div>
+      ) : null}
 
       <dl className="impactMetricGrid">
         <div>
