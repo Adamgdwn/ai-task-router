@@ -162,7 +162,7 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
   await expect(page.getByLabel("100 use route cost and energy comparison")).toBeVisible();
   await expect(page.getByText("100-use scenario")).toBeVisible();
-  await expect(page.getByText("compressed scale; exact totals below")).toBeVisible();
+  await expect(page.getByText("linear scale; exact totals below")).toBeVisible();
   await expect(page.getByText("Solid: cost")).toBeVisible();
   await expect(page.getByText("Dashed: energy")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lean route", level: 4 })).toBeVisible();

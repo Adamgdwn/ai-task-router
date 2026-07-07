@@ -3,6 +3,7 @@ import { everydayToolFrequencyRank } from "../defaults/everydayToolCatalog";
 import type { HardGateResult } from "./hardGates";
 import type { ModelInventoryItem, PermissionLevel, PolicyDefault, RouteStep, SourcePermission, TaskIntake } from "../types";
 import { modelInstructionGuidance, modelLabelWithMinimum } from "./modelGuidance";
+import { requestedDeliverableSummary, taskHasBuildIntent, taskHasModelSelectionIntent } from "./taskDecomposition";
 
 export const routeCandidateStrategies = ["lean", "balanced", "premium"] as const;
 
@@ -383,7 +384,9 @@ function buildPrimaryStep(input: {
     id: `${routeId}-${strategy === "premium" && model.tier === "artifact" ? "artifact" : "synthesis"}`,
     kind,
     label: `${modelLabelWithMinimum(model)}: ${primaryActionLabel(task, kind, usesPremiumBenchmark)}`,
-    instruction: `${usesPremiumBenchmark ? "Premium comparison route: if you choose this path, use the strongest paid or premium mode you actually have access to; otherwise treat it as a cost and effort benchmark. " : ""}Use ${model.label} manually outside the app to evaluate the task, build the master prompt first, execute that prompt into a beginner-friendly ${task.outputType}, and call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidance(
+    instruction: `${usesPremiumBenchmark ? "Premium comparison route: if you choose this path, use the strongest paid or premium mode you actually have access to; otherwise treat it as a cost and effort benchmark. " : ""}Use ${model.label} manually outside the app in two passes: first create the master prompt with the prompt-building mode, then run that prompt with the execution mode. The result must cover ${requestedDeliverableSummary(
+      task,
+    )}. ${taskHasBuildIntent(task) ? "For build-shaped work, include the first usable slice, data flow, acceptance checks, and what can wait. " : ""}${taskHasModelSelectionIntent(task) ? "Name the minimum execution model or mode and the upgrade trigger. " : ""}Call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidance(
       model,
     )} The app does not send task data to the model.`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),

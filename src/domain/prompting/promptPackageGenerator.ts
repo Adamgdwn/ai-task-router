@@ -1,6 +1,11 @@
 import { promptPackageSchema } from "../schemas";
 import type { PromptPackage, PromptStep, RouteOption, RouteStep, SourcePermission, TaskIntake } from "../types";
 import type { HardGateResult } from "../routing/hardGates";
+import {
+  requestedDeliverableSummary,
+  taskHasBuildIntent,
+  taskHasModelSelectionIntent,
+} from "../routing/taskDecomposition";
 
 export type GeneratePromptPackageInput = {
   task: TaskIntake;
@@ -178,9 +183,16 @@ function promptTextForStep(input: {
     ...factAndCitationPromptLines(task),
     "First build a master prompt before creating the final output:",
     "- Restate the goal and the finished deliverable.",
+    `- Explicitly carry forward these requested pieces: ${requestedDeliverableSummary(task)}.`,
     "- Name the allowed inputs, constraints, output format, review checks, and stop conditions.",
     "- Include the minimum helper/model needed for execution and the trigger for upgrading to stronger help.",
     "Then use that master prompt to create the first usable result:",
+    taskHasBuildIntent(task)
+      ? "- For build-shaped work, produce the first usable slice, data flow, acceptance checks, and deferred features."
+      : "",
+    taskHasModelSelectionIntent(task)
+      ? "- Name the specific execution model or mode to start with, plus the upgrade trigger."
+      : "",
     "- Identify the main assumptions, missing information, and review risks.",
     "- Say whether a lighter, everyday, or premium helper is enough for this task.",
     "Create a novice-friendly project plan:",
@@ -190,7 +202,7 @@ function promptTextForStep(input: {
     "- Include a short savings recommendation: where this route saves time, cost, or rework, and when I should upgrade.",
     "- End with the first action I should take next.",
     `Expected output: ${expectedOutput}`,
-  ].join("\n");
+  ].filter((line) => line.length > 0).join("\n");
 }
 
 function buildAddedHumanApprovalStep(
@@ -263,14 +275,14 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
     case "manual":
       return `A manually prepared ${task.outputType} for "${task.title}" with task evaluation, ordered steps, review checks, and a savings recommendation.`;
     case "model":
-      return `A master prompt plus a ${task.outputType} for "${task.title}" that evaluates the task, gives a novice-friendly plan, respects source limits, and recommends where to save or upgrade.`;
+      return `A master prompt plus a ${task.outputType} for "${task.title}" that covers ${requestedDeliverableSummary(task)}, gives a novice-friendly plan, respects source limits, and recommends where to save or upgrade.`;
   }
 }
 
 function promptStepTitle(routeStep: RouteStep, routeStepIndex: number) {
   const actionByKind: Record<RouteStep["kind"], string> = {
     research: "Check Research",
-    model: "Build Prompt And Output",
+    model: "Build Master Prompt Then Execute",
     artifact: "Package Output",
     "human review": "Approve Before Use",
     manual: "Prepare Manually",

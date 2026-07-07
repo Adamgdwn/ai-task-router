@@ -113,7 +113,7 @@ describe("prompt package generator", () => {
     expect(promptPackage.steps).toHaveLength(selectedRoute.steps.length);
     expect(promptPackage.steps[0]).toMatchObject({
       id: "prompt-step-route-task-prompt-public-writing-lean-route-task-prompt-public-writing-lean-synthesis",
-      title: "Step 1: Build Prompt And Output",
+      title: "Step 1: Build Master Prompt Then Execute",
       requiresHumanApproval: false,
     });
     expect(promptPackage.steps[0]?.inputRefs).toEqual(
@@ -122,10 +122,38 @@ describe("prompt package generator", () => {
     expect(promptPackage.steps[0]?.instruction).toContain("Use this prompt package as manual guidance only.");
     expect(promptPackage.steps[0]?.instruction).toContain("Work type: writing. Output type: draft.");
     expect(promptPackage.steps[0]?.instruction).toContain("First build a master prompt before creating the final output");
+    expect(promptPackage.steps[0]?.instruction).toContain("Explicitly carry forward these requested pieces");
     expect(promptPackage.steps[0]?.instruction).toContain(
       "Use only these allowed source IDs for this step: web (Websites or web search), github (GitHub or repo pages).",
     );
     expect(promptPackage.steps[0]?.expectedOutput).toContain("draft");
+  });
+
+  it("carries prompt, model, and build deliverables into planning prompts", () => {
+    const task = buildTask({
+      id: "task-prompt-finance-build",
+      title: "Personal Finance Test 1",
+      description:
+        "I need to build a prompt that will build out a tool that will take my monthly finances from a spreadsheet, categorize them, track them month over month, show me where I need to improve and where I am doing well, then recommend the best model to execute and build this mini application.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task);
+    const selectedRoute = requireRecommendedRoute(scoringResult);
+
+    const promptPackage = generatePromptPackage({ task, selectedRoute, hardGateResult });
+    const modelStep = promptPackage.steps.find((step) => step.title.includes("Build Master Prompt"));
+    const instruction = modelStep?.instruction ?? "";
+
+    expectValidPromptPackage(promptPackage);
+    expect(instruction).toContain("copy-ready master prompt");
+    expect(instruction).toContain("spreadsheet import or paste-in data flow");
+    expect(instruction).toContain("categorization rules");
+    expect(instruction).toContain("month-over-month tracking");
+    expect(instruction).toContain("model/tool choice for execution");
+    expect(instruction).toContain("Name the specific execution model or mode to start with");
   });
 
   it("includes current-facts and citation reminders without implying the app searches", () => {

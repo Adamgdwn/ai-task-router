@@ -1,5 +1,11 @@
 import type { ModelInventoryItem, ProjectStageGuidance, RouteOption, RouteStep, TaskIntake } from "../types";
-import { modelLabelWithMinimum } from "./modelGuidance";
+import { modelLabelForExecution, modelLabelForPromptDesign, modelLabelWithMinimum } from "./modelGuidance";
+import {
+  requestedDeliverableLabels,
+  requestedDeliverableSummary,
+  taskHasBuildIntent,
+  taskHasModelSelectionIntent,
+} from "./taskDecomposition";
 
 export type BuildProjectStageGuidanceInput = {
   task: TaskIntake;
@@ -16,6 +22,8 @@ type StageDraft = {
   reviewChecks: string[];
   routeStep?: RouteStep;
   fallbackModelLabel: string;
+  recommendedModelLabel?: string;
+  recommendedModelId?: string;
 };
 
 export function buildProjectStageGuidance({
@@ -29,6 +37,15 @@ export function buildProjectStageGuidance({
   const primaryStep = primaryWorkStep(recommendedOption);
   const artifactStep = firstStepOfKind(recommendedOption, "artifact");
   const reviewStep = firstStepOfKind(recommendedOption, "human review");
+  const promptBuilderModelLabel = modelLabelForStageStep(primaryStep, modelById, manualReviewModel, "You first", "prompt");
+  const executionStep = artifactStep ?? primaryStep;
+  const executionModelLabel = modelLabelForStageStep(
+    executionStep,
+    modelById,
+    manualReviewModel,
+    modelLabelForStep(primaryStep, modelById, manualReviewModel, "You first"),
+    "execution",
+  );
 
   const stages: StageDraft[] = [
     {
@@ -64,6 +81,8 @@ export function buildProjectStageGuidance({
     reviewChecks: createStageChecks(task),
     routeStep: primaryStep,
     fallbackModelLabel: "You first",
+    recommendedModelLabel: promptBuilderModelLabel,
+    recommendedModelId: primaryStep?.modelId,
   });
 
   if (shouldAddPackageStage(task, artifactStep)) {
@@ -76,6 +95,8 @@ export function buildProjectStageGuidance({
       reviewChecks: packageStageChecks(task),
       routeStep: artifactStep ?? primaryStep,
       fallbackModelLabel: modelLabelForStep(primaryStep, modelById, manualReviewModel, "You first"),
+      recommendedModelLabel: executionModelLabel,
+      recommendedModelId: executionStep?.modelId,
     });
   }
 
@@ -123,6 +144,7 @@ function buildStageGuidance(input: {
     manualReviewModel,
     stageDraft.fallbackModelLabel,
   );
+  const recommendedModelId = stageDraft.recommendedModelId ?? stageDraft.routeStep?.modelId;
 
   return {
     id: `stage-${task.id}-${stageDraft.stage}`,
@@ -132,8 +154,8 @@ function buildStageGuidance(input: {
     purpose: stageDraft.purpose,
     actions: stageDraft.actions,
     reviewChecks: stageDraft.reviewChecks,
-    recommendedModelLabel,
-    ...(stageDraft.routeStep?.modelId ? { recommendedModelId: stageDraft.routeStep.modelId } : {}),
+    recommendedModelLabel: stageDraft.recommendedModelLabel ?? recommendedModelLabel,
+    ...(recommendedModelId ? { recommendedModelId } : {}),
     ...(stageDraft.routeStep?.id ? { routeStepId: stageDraft.routeStep.id } : {}),
   };
 }
@@ -142,6 +164,7 @@ function frameStageActions(task: TaskIntake) {
   return [
     "Restate the task in one plain sentence.",
     `Name the finished output: ${friendlyOutputName(task.outputType)}.`,
+    `Split the request into visible deliverables: ${requestedDeliverableSummary(task)}.`,
     "List the information you will use and anything that is off limits.",
     "Decide what good enough looks like before opening a helper.",
   ];
@@ -196,11 +219,17 @@ function gatherStageActions(task: TaskIntake) {
   }
 
   if (task.requiresCurrentFacts) {
-    return [
+    const actions = [
       "Check the newest allowed source before prompt design or execution.",
       "Write down what changed and what still looks stable.",
       "Mark anything that should be verified again later.",
     ];
+
+    if (taskHasModelSelectionIntent(task)) {
+      actions.push("Check current tool/model availability, limits, and privacy notes before choosing the execution model.");
+    }
+
+    return actions;
   }
 
   if (task.requiresCitations) {
@@ -260,6 +289,10 @@ function createStagePurpose(task: TaskIntake) {
     return "Use the recommended helper for the thinking-heavy part first: write a precise build prompt before asking anything to make the tool.";
   }
 
+  if (taskHasBuildIntent(task) && (task.knowledgeWorkType === "planning" || task.outputType === "plan")) {
+    return "Use the higher-thinking helper for the master prompt first, then hand that prompt to the lightest adequate execution mode for the actual build plan.";
+  }
+
   if (task.knowledgeWorkType === "review") {
     return "Turn the review job into a clear prompt with criteria, evidence limits, issue categories, and a decision rule.";
   }
@@ -269,7 +302,7 @@ function createStagePurpose(task: TaskIntake) {
   }
 
   if (task.knowledgeWorkType === "planning" || task.outputType === "plan") {
-    return "Create the master prompt that will later produce the plan, including phases, measures, risks, review checks, and upgrade triggers.";
+    return "Create the master prompt that will later produce the plan, including requested deliverables, phases, measures, risks, review checks, and upgrade triggers.";
   }
 
   return "Write the prompt before the output: define the role, inputs, constraints, format, review checks, and when to upgrade.";
@@ -303,10 +336,11 @@ function createStageActions(task: TaskIntake) {
 
   if (task.knowledgeWorkType === "planning" || task.outputType === "plan") {
     return [
-      "Ask for a master prompt that will create a beginner-friendly plan later.",
+      "Ask for a master prompt, not the finished output yet.",
+      `Make the prompt cover every requested piece: ${requestedDeliverableSummary(task)}.`,
       "Make it require Plan-Do-Check-Act, or light DMAIC when useful.",
-      "Include goals, measures, dependencies, risks, first action, review points, and upgrade triggers.",
-      "Require a savings note that compares the lean route with heavier premium use.",
+      "Require the prompt to name the minimum execution model or mode and what would justify upgrading.",
+      "Require goals, measures, dependencies, risks, first action, review points, and a savings note.",
     ];
   }
 
@@ -339,8 +373,12 @@ function packageStageLabel(task: TaskIntake) {
     return "Build the first slice";
   }
 
+  if (taskHasBuildIntent(task)) {
+    return "Run the prompt for the first build";
+  }
+
   if (task.outputType === "plan") {
-    return "Run the prompt for the plan";
+    return "Run the prompt on the execution model";
   }
 
   if (task.outputType === "prompt package") {
@@ -357,6 +395,10 @@ function packageStageLabel(task: TaskIntake) {
 function packageStagePurpose(task: TaskIntake) {
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return "Use the master prompt to build the smallest useful version first, then leave bigger features for later passes.";
+  }
+
+  if (taskHasBuildIntent(task) && (task.outputType === "plan" || task.knowledgeWorkType === "planning")) {
+    return "Use the master prompt with the lightest adequate execution model or mode to produce the actual build plan and first usable slice.";
   }
 
   if (task.outputType === "plan") {
@@ -389,12 +431,23 @@ function packageStageActions(task: TaskIntake) {
   }
 
   if (task.outputType === "plan") {
-    return [
+    const actions = [
       "Paste the master prompt into the selected execution helper.",
       "Create the ordered plan with phases or numbered steps.",
       "Add owners or first actions, needed inputs, blockers, measures, and review points.",
       "Mark when to stay lightweight and when a stronger helper would be worth it.",
     ];
+
+    if (taskHasBuildIntent(task) || requestedDeliverableLabels(task).length > 0) {
+      actions.splice(
+        2,
+        0,
+        `Make the output explicitly cover: ${requestedDeliverableSummary(task)}.`,
+      );
+      return actions.slice(0, 5);
+    }
+
+    return actions;
   }
 
   if (task.outputType === "table") {
@@ -432,6 +485,10 @@ function packageStageActions(task: TaskIntake) {
 function packageStageChecks(task: TaskIntake) {
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return ["The first slice works well enough to review before more features are added."];
+  }
+
+  if (taskHasBuildIntent(task)) {
+    return ["The plan names the first build slice, execution model, data flow, checks, and what can wait."];
   }
 
   if (task.outputType === "plan") {
@@ -480,11 +537,15 @@ function reviewStageActions(task: TaskIntake) {
     "Mark anything that needs one more pass before action.",
   ];
 
+  if (requestedDeliverableLabels(task).length > 0) {
+    actions.splice(1, 0, `Check that the result covers: ${requestedDeliverableSummary(task)}.`);
+  }
+
   if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
     actions.splice(1, 0, "Check tone, permissions, facts, and risk before sharing.");
   }
 
-  return actions;
+  return actions.slice(0, 5);
 }
 
 function reviewStageChecks(task: TaskIntake) {
@@ -546,6 +607,9 @@ function actStageChecks(task: TaskIntake) {
 
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
     checks.push("The plan says what to check after the first action.");
+    if (taskHasBuildIntent(task)) {
+      checks.push("The first action starts the smallest useful build slice, not the whole product at once.");
+    }
   }
 
   return checks;
@@ -593,6 +657,33 @@ function modelLabelForStep(
   if (step?.modelId) {
     const model = modelById.get(step.modelId);
     return model ? modelLabelWithMinimum(model) : step.modelId;
+  }
+
+  if (step?.kind === "human review") {
+    return manualReviewModel?.label ?? "Your review";
+  }
+
+  return fallbackLabel;
+}
+
+function modelLabelForStageStep(
+  step: RouteStep | undefined | null,
+  modelById: Map<string, ModelInventoryItem>,
+  manualReviewModel: ModelInventoryItem | undefined,
+  fallbackLabel: string,
+  stageMode: "prompt" | "execution",
+) {
+  if (step?.kind === "manual") {
+    return fallbackLabel;
+  }
+
+  if (step?.modelId) {
+    const model = modelById.get(step.modelId);
+    if (!model) {
+      return step.modelId;
+    }
+
+    return stageMode === "prompt" ? modelLabelForPromptDesign(model) : modelLabelForExecution(model);
   }
 
   if (step?.kind === "human review") {

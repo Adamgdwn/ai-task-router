@@ -166,6 +166,73 @@ describe("route card generator", () => {
     });
   });
 
+  it("expands prompt-first planning into requested deliverables, execution model, and first build slice", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-go",
+        providerId: "chatgpt",
+        accountId: "go",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-card-finance-prompt-build",
+      title: "Personal Finance Test 1",
+      description:
+        "I need to build a prompt that will build out a tool that will take my monthly finances from a spreadsheet, categorize them, track them month over month, and show me where I need to improve and where I'm doing really well. Then I need the best model to actually execute and build this mini application for me.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "balanced", models);
+
+    const card = generateRouteCard({
+      task,
+      models,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+    const gatherStage = card.stageGuidance.find((stage) => stage.stage === "gather");
+    const createStage = card.stageGuidance.find((stage) => stage.stage === "create");
+    const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
+    const reviewStage = card.stageGuidance.find((stage) => stage.stage === "review");
+    const actStage = card.stageGuidance.find((stage) => stage.stage === "act");
+
+    expectValidRouteCard(card);
+    expect(gatherStage).toMatchObject({
+      recommendedModelLabel: expect.stringContaining("Perplexity Sonar"),
+    });
+    expect(createStage).toMatchObject({
+      label: "Build the master prompt",
+      recommendedModelLabel: expect.stringContaining("GPT-5.5 Instant"),
+    });
+    expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
+    expect(createStage?.actions.join(" ")).toContain("categorization rules");
+    expect(createStage?.actions.join(" ")).toContain("month-over-month tracking");
+    expect(createStage?.actions.join(" ")).toContain("model/tool choice for execution");
+    expect(packageStage).toMatchObject({
+      label: "Run the prompt for the first build",
+      recommendedModelLabel: expect.stringContaining("execution GPT-5.5 Instant"),
+    });
+    expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");
+    expect(reviewStage?.actions.join(" ")).toContain("improvement and strength insights");
+    expect(actStage?.reviewChecks.join(" ")).toContain("smallest useful build slice");
+  });
+
   it("preserves hard-gate warnings and blocked reasons on the route card", () => {
     const task = buildTask({
       id: "task-card-confidential-citations",

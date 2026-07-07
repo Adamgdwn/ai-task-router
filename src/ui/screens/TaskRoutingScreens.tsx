@@ -784,7 +784,7 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
   const plotHeight = 42;
   const xForUse = (uses: number) => xStart + ((xEnd - xStart) * uses) / 100;
   const yForValue = (value: number, maxValue: number, top: number) =>
-    top + plotHeight - compressedChartRatio(value, maxValue) * plotHeight;
+    top + plotHeight - linearChartRatio(value, maxValue) * plotHeight;
 
   return (
     <div className="routeHundredUseChart" aria-label="100 use route cost and energy comparison">
@@ -792,13 +792,13 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
         <title id="route-chart-title">100-use comparison</title>
         <desc id="route-chart-desc">
           Compares cumulative estimated cost and energy for available lean, balanced, and premium routes from 0 to 100
-          uses on a compressed trend scale, with exact 100-use totals shown below.
+          uses on a linear cumulative scale, with exact 100-use totals shown below.
         </desc>
         <text className="chartTitle" x="76" y="20">
           100-use scenario
         </text>
         <text className="chartSubtitle" x="248" y="20">
-          compressed scale; exact totals below
+          linear scale; exact totals below
         </text>
 
         <ChartPanelAxes
@@ -933,12 +933,12 @@ function maxChartValue(values: Array<number | null>) {
   return Math.max(0.01, ...hundredUseValues);
 }
 
-function compressedChartRatio(value: number, maxValue: number) {
+function linearChartRatio(value: number, maxValue: number) {
   if (value <= 0 || maxValue <= 0) {
     return 0;
   }
 
-  return Math.sqrt(value / maxValue);
+  return Math.min(1, value / maxValue);
 }
 
 function chartCostTotalLabel(costPerUse: number | null) {
