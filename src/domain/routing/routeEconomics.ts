@@ -24,6 +24,8 @@ const stepCostMultipliers: Record<RouteStep["kind"], number> = {
   "human review": 0,
 };
 
+const minimumActionableRouteEnergyWh = 0.024;
+
 export function attachRouteEconomics(
   options: RouteOption[],
   models: readonly ModelInventoryItem[],
@@ -113,6 +115,10 @@ export function estimateRouteEnergyWh(
     return sum + estimateEnergyAnchorWh(energyAnchorId, stepCostMultipliers[step.kind]);
   }, 0);
 
+  if (option.steps.length > 0 && total === 0) {
+    return minimumActionableRouteEnergyWh;
+  }
+
   return roundWh(total);
 }
 
@@ -131,12 +137,12 @@ function attachEconomicsToOption(option: RouteOption, basis: RouteCostBasis): Ro
     estimatedSavingsPercent: roundPercent(estimatedSavingsPercent),
     savingsComparedWith: basis.comparedWithLabel,
     costEstimateBasis:
-      "100k-token API-equivalent estimate using representative pricing anchors reviewed from public sources; subscriptions, free tiers, search add-ons, taxes, caching, and provider limits can change the real bill.",
+      "Per-use estimate using zero marginal dollars for selected free/basic tools and 100k-token API-equivalent pricing anchors for paid or premium model-equivalent work; subscriptions, search add-ons, taxes, caching, and provider limits can change the real bill.",
     estimatedEnergyWh: roundWh(basis.energyWh),
     estimatedEnergySavingsWh: roundWh(estimatedEnergySavingsWh),
     estimatedEnergySavingsPercent: roundPercent(estimatedEnergySavingsPercent),
     energyEstimateBasis:
-      "Per-use compute-energy estimate using representative public inference energy anchors. Local device energy, provider routing, media generation, caching, data-center conditions, and repeated retries can change the real footprint.",
+      "Per-use compute-energy estimate using representative public inference energy anchors, with a small nonzero floor for manual or local routes because real device use is not zero. Local device energy, provider routing, media generation, caching, data-center conditions, and repeated retries can change the real footprint.",
   };
 }
 

@@ -764,8 +764,8 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
     .filter((option): option is RouteOption => option !== undefined)
     .map((option) => ({
       color: routeChartColor(option.strategy),
-      costPerUse: option.estimatedCostUsd ?? 0,
-      energyPerUse: option.estimatedEnergyWh ?? 0,
+      costPerUse: numericChartValue(option.estimatedCostUsd),
+      energyPerUse: numericChartValue(option.estimatedEnergyWh),
       id: option.id,
       label: option.label,
     }));
@@ -775,15 +775,16 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
   }
 
   const usageTicks = [0, 25, 50, 75, 100];
-  const maxCost = Math.max(0.01, ...series.map((item) => item.costPerUse * 100));
-  const maxEnergy = Math.max(0.01, ...series.map((item) => item.energyPerUse * 100));
+  const maxCost = maxChartValue(series.map((item) => item.costPerUse));
+  const maxEnergy = maxChartValue(series.map((item) => item.energyPerUse));
   const xStart = 76;
   const xEnd = 1134;
   const costTop = 48;
   const energyTop = 124;
   const plotHeight = 42;
   const xForUse = (uses: number) => xStart + ((xEnd - xStart) * uses) / 100;
-  const yForValue = (value: number, maxValue: number, top: number) => top + plotHeight - (value / maxValue) * plotHeight;
+  const yForValue = (value: number, maxValue: number, top: number) =>
+    top + plotHeight - compressedChartRatio(value, maxValue) * plotHeight;
 
   return (
     <div className="routeHundredUseChart" aria-label="100 use route cost and energy comparison">
@@ -791,13 +792,13 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
         <title id="route-chart-title">100-use comparison</title>
         <desc id="route-chart-desc">
           Compares cumulative estimated cost and energy for available lean, balanced, and premium routes from 0 to 100
-          uses.
+          uses on a compressed trend scale, with exact 100-use totals shown below.
         </desc>
         <text className="chartTitle" x="76" y="20">
           100-use scenario
         </text>
         <text className="chartSubtitle" x="248" y="20">
-          cumulative estimate, not a live provider quote
+          compressed scale; exact totals below
         </text>
 
         <ChartPanelAxes
@@ -830,30 +831,29 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
         </text>
 
         {series.map((item) => (
-          <g key={`${item.id}-cost`}>
-            <polyline
-              className="chartSeriesLine"
-              fill="none"
-              points={usageTicks
-                .map((tick) => `${xForUse(tick)},${yForValue(item.costPerUse * tick, maxCost, costTop)}`)
-                .join(" ")}
-              stroke={item.color}
-            />
-            <circle cx={xForUse(100)} cy={yForValue(item.costPerUse * 100, maxCost, costTop)} fill={item.color} r="4" />
-          </g>
+          <ChartTrendLine
+            key={`${item.id}-cost`}
+            color={item.color}
+            maxValue={maxCost}
+            perUseValue={item.costPerUse}
+            plotTop={costTop}
+            usageTicks={usageTicks}
+            xForUse={xForUse}
+            yForValue={yForValue}
+          />
         ))}
         {series.map((item) => (
-          <g key={`${item.id}-energy`}>
-            <polyline
-              className="chartSeriesLine"
-              fill="none"
-              points={usageTicks
-                .map((tick) => `${xForUse(tick)},${yForValue(item.energyPerUse * tick, maxEnergy, energyTop)}`)
-                .join(" ")}
-              stroke={item.color}
-            />
-            <circle cx={xForUse(100)} cy={yForValue(item.energyPerUse * 100, maxEnergy, energyTop)} fill={item.color} r="4" />
-          </g>
+          <ChartTrendLine
+            dashed
+            key={`${item.id}-energy`}
+            color={item.color}
+            maxValue={maxEnergy}
+            perUseValue={item.energyPerUse}
+            plotTop={energyTop}
+            usageTicks={usageTicks}
+            xForUse={xForUse}
+            yForValue={yForValue}
+          />
         ))}
 
         <g className="chartLegend">
@@ -867,18 +867,86 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
           ))}
         </g>
       </svg>
+      <div className="routeHundredUseKey" aria-label="comparison chart key">
+        <span>Solid: cost</span>
+        <span>Dashed: energy</span>
+        <span>Zero dollars still draws on the cost floor</span>
+      </div>
       <div className="routeHundredUseTotals" aria-label="100 use totals">
         {series.map((item) => (
           <div key={item.id}>
             <strong>{item.label}</strong>
             <span>
-              {formatUsd(item.costPerUse * 100)} and {formatWattHours(item.energyPerUse * 100)}
+              {chartCostTotalLabel(item.costPerUse)} and {chartEnergyTotalLabel(item.energyPerUse)}
             </span>
           </div>
         ))}
       </div>
     </div>
   );
+}
+
+function ChartTrendLine({
+  color,
+  dashed = false,
+  maxValue,
+  perUseValue,
+  plotTop,
+  usageTicks,
+  xForUse,
+  yForValue,
+}: {
+  color: string;
+  dashed?: boolean;
+  maxValue: number;
+  perUseValue: number | null;
+  plotTop: number;
+  usageTicks: readonly number[];
+  xForUse: (uses: number) => number;
+  yForValue: (value: number, maxValue: number, top: number) => number;
+}) {
+  if (perUseValue === null) {
+    return null;
+  }
+
+  const points = usageTicks.map((tick) => `${xForUse(tick)},${yForValue(perUseValue * tick, maxValue, plotTop)}`).join(" ");
+  const endY = yForValue(perUseValue * 100, maxValue, plotTop);
+  const lineClassName = dashed ? "chartSeriesLine chartSeriesLineDashed" : "chartSeriesLine";
+
+  return (
+    <g>
+      <polyline className="chartSeriesHalo" fill="none" points={points} />
+      <polyline className={lineClassName} fill="none" points={points} stroke={color} />
+      <circle className="chartSeriesEndpointHalo" cx={xForUse(100)} cy={endY} r="5.5" />
+      <circle cx={xForUse(100)} cy={endY} fill={color} r="4" />
+    </g>
+  );
+}
+
+function numericChartValue(value: number | undefined) {
+  return value === undefined || !Number.isFinite(value) ? null : Math.max(0, value);
+}
+
+function maxChartValue(values: Array<number | null>) {
+  const hundredUseValues = values.filter((value): value is number => value !== null).map((value) => value * 100);
+
+  return Math.max(0.01, ...hundredUseValues);
+}
+
+function compressedChartRatio(value: number, maxValue: number) {
+  if (value <= 0 || maxValue <= 0) {
+    return 0;
+  }
+
+  return Math.sqrt(value / maxValue);
+}
+
+function chartCostTotalLabel(costPerUse: number | null) {
+  return costPerUse === null ? "cost not estimated" : formatUsd(costPerUse * 100);
+}
+
+function chartEnergyTotalLabel(energyPerUse: number | null) {
+  return energyPerUse === null ? "energy not estimated" : formatWattHours(energyPerUse * 100);
 }
 
 function ChartPanelAxes({

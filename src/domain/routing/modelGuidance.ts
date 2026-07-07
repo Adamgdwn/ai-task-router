@@ -1,4 +1,5 @@
 import {
+  getEverydayToolProvider,
   inferEverydayToolSelection,
   type EverydayToolAccountId,
   type EverydayToolProviderId,
@@ -51,7 +52,28 @@ export function modelInstructionGuidance(model: ModelInventoryItem): string {
 }
 
 export function pricingAnchorIdForModel(model: ModelInventoryItem): string | null {
+  if (hasZeroMarginalCostAccount(model)) {
+    return null;
+  }
+
   return modelUseGuidance(model).pricingAnchorId;
+}
+
+function hasZeroMarginalCostAccount(model: ModelInventoryItem) {
+  if (model.localOnly || model.tier === "human") {
+    return false;
+  }
+
+  const selection = inferEverydayToolSelection(model);
+  if (selection.providerId === "none") {
+    return false;
+  }
+
+  const provider = getEverydayToolProvider(selection.providerId);
+  const accountOption = provider.accountOptions.find((option) => option.id === selection.accountId);
+  const accountLabel = accountOption?.label ?? selection.accountId;
+
+  return selection.accountId === "basic" || /\bfree\b|\bbasic\b/i.test(accountLabel);
 }
 
 function guidanceForProvider(

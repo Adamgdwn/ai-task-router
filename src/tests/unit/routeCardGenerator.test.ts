@@ -1,11 +1,12 @@
 import { defaultFinalApprovalRouteStep, defaultPolicies } from "../../domain/defaults/defaultPolicies";
+import { createEverydayToolModel } from "../../domain/defaults/everydayToolCatalog";
 import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generateRouteCandidates, type RouteCandidateGenerationResult } from "../../domain/routing/candidateGeneration";
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
 import { generateRouteCard } from "../../domain/routing/routeCardGenerator";
 import { scoreRouteCandidates, type RouteScoringResult } from "../../domain/routing/scoring";
 import { routeCardSchema } from "../../domain/schemas";
-import type { PolicyDefault, PromptPackage, SourcePermission, TaskIntake } from "../../domain/types";
+import type { ModelInventoryItem, PolicyDefault, PromptPackage, SourcePermission, TaskIntake } from "../../domain/types";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
 
 const taskCreatedAt = "2026-07-03T14:52:37-06:00";
@@ -58,15 +59,16 @@ function buildPromptPackage(task: TaskIntake, overrides: Partial<PromptPackage> 
 function generatePipeline(
   task: TaskIntake,
   policyId: PolicyDefault["id"] = "balanced",
+  models: ModelInventoryItem[] = routeReadyModels,
 ): {
   hardGateResult: HardGateResult;
   candidateResult: RouteCandidateGenerationResult;
   scoringResult: RouteScoringResult;
 } {
-  const hardGateResult = evaluateHardGates({ task, models: routeReadyModels });
+  const hardGateResult = evaluateHardGates({ task, models });
   const candidateResult = generateRouteCandidates({
     task,
-    models: routeReadyModels,
+    models,
     policies: defaultPolicies,
     hardGateResult,
     finalApprovalRouteStep: defaultFinalApprovalRouteStep,
@@ -74,7 +76,7 @@ function generatePipeline(
   const scoringResult = scoreRouteCandidates({
     task,
     candidateResult,
-    models: routeReadyModels,
+    models,
     policy: policyById(policyId),
   });
 
@@ -133,6 +135,7 @@ describe("route card generator", () => {
     expect(card.options.every((option) => option.estimatedSavingsUsd !== undefined)).toBe(true);
     expect(card.options.every((option) => option.costEstimateBasis?.includes("100k-token API-equivalent"))).toBe(true);
     expect(card.options.every((option) => option.estimatedEnergyWh !== undefined)).toBe(true);
+    expect(card.options.every((option) => (option.estimatedEnergyWh ?? 0) > 0)).toBe(true);
     expect(card.options.every((option) => option.estimatedEnergySavingsWh !== undefined)).toBe(true);
     expect(card.options.every((option) => option.energyEstimateBasis?.includes("compute-energy estimate"))).toBe(true);
     expect(card.options.find((option) => option.id === card.recommendedOptionId)?.score).toBe(
@@ -235,6 +238,57 @@ describe("route card generator", () => {
     });
     expect(card.stageGuidance.map((stage) => stage.stage)).toContain("review");
     expect(card.stageGuidance.map((stage) => stage.stage)).toContain("act");
+  });
+
+  it("keeps a free research lean route at zero dollars while energy remains nonzero", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-go",
+        providerId: "chatgpt",
+        accountId: "go",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-card-chatgpt-go-perplexity-free",
+      title: "Plan a finance app with current facts",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "balanced", models);
+
+    const card = generateRouteCard({
+      task,
+      models,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+    const lean = card.options.find((option) => option.strategy === "lean");
+    const balanced = card.options.find((option) => option.strategy === "balanced");
+    const premium = card.options.find((option) => option.strategy === "premium");
+
+    expectValidRouteCard(card);
+    expect(lean?.estimatedCostUsd).toBe(0);
+    expect(lean?.estimatedEnergyWh).toBeGreaterThan(0);
+    expect(balanced?.estimatedCostUsd).toBeGreaterThan(lean?.estimatedCostUsd ?? 0);
+    expect(balanced?.estimatedEnergyWh).toBeGreaterThan(lean?.estimatedEnergyWh ?? 0);
+    expect(premium?.estimatedCostUsd).toBeGreaterThan(balanced?.estimatedCostUsd ?? 0);
+    expect(premium?.estimatedEnergyWh).toBeGreaterThan(balanced?.estimatedEnergyWh ?? 0);
   });
 
   it("keeps human approval requirements visible on card and option records", () => {
