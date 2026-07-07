@@ -53,8 +53,8 @@ export function buildTrackedImpactSummary(
 
     followedPlanCount += 1;
     followedByStrategy[strategy] += 1;
-    estimatedAvoidedCostUsd += perTaskCostUsd * multiplier;
-    estimatedAvoidedWattHours += perTaskWattHours * multiplier;
+    estimatedAvoidedCostUsd += selectedOption?.estimatedSavingsUsd ?? perTaskCostUsd * multiplier;
+    estimatedAvoidedWattHours += selectedOption?.estimatedEnergySavingsWh ?? perTaskWattHours * multiplier;
   }
 
   return {

@@ -160,9 +160,14 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByRole("heading", { name: "Run the prompt" })).toBeVisible();
   await expect(page.locator(".stageGuidanceItem.stage-create")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
+  await expect(page.getByLabel("100 use route cost and energy comparison")).toBeVisible();
+  await expect(page.getByText("100-use scenario")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lean route", level: 4 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Balanced route", level: 4 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Premium route", level: 4 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Cost and savings" })).toHaveCount(3);
+  await expect(page.getByText("Estimated energy")).toHaveCount(3);
+  await expect(page.getByText("Energy saved")).toHaveCount(3);
   await expect(page.getByText(/Human approval is required before using public-facing/)).toBeVisible();
   await expectNoHorizontalOverflow(page);
 

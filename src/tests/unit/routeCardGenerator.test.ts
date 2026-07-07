@@ -132,6 +132,9 @@ describe("route card generator", () => {
     expect(card.options.every((option) => option.estimatedCostUsd !== undefined)).toBe(true);
     expect(card.options.every((option) => option.estimatedSavingsUsd !== undefined)).toBe(true);
     expect(card.options.every((option) => option.costEstimateBasis?.includes("100k-token API-equivalent"))).toBe(true);
+    expect(card.options.every((option) => option.estimatedEnergyWh !== undefined)).toBe(true);
+    expect(card.options.every((option) => option.estimatedEnergySavingsWh !== undefined)).toBe(true);
+    expect(card.options.every((option) => option.energyEstimateBasis?.includes("compute-energy estimate"))).toBe(true);
     expect(card.options.find((option) => option.id === card.recommendedOptionId)?.score).toBe(
       scoringResult.recommendedCandidate?.score,
     );

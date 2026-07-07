@@ -10,7 +10,9 @@ import {
   pricingSources,
   requirePricingAnchor,
 } from "../../domain/impact/impactEstimator";
+import { buildTrackedImpactSummary } from "../../domain/impact/impactCounter";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
+import type { RouteCard, RouteLogEntry, RouteOption } from "../../domain/types";
 
 describe("impact estimator", () => {
   it("calculates 100k-token benchmark costs from per-million-token pricing", () => {
@@ -104,5 +106,41 @@ describe("impact estimator", () => {
     expect(snapshot.sourceLinks.map((source) => source.url)).toContain(
       "https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference",
     );
+  });
+
+  it("uses route-specific savings when counting followed choices", () => {
+    const selectedOption = {
+      id: "route-option-lean",
+      strategy: "lean",
+      estimatedCostLevel: "low",
+      estimatedEffortLevel: "low",
+      estimatedSavingsUsd: 1.23,
+      estimatedEnergySavingsWh: 4.56,
+    } as RouteOption;
+    const summary = buildTrackedImpactSummary(
+      {
+        routeCards: [
+          {
+            id: "route-card-impact",
+            options: [selectedOption],
+          } as RouteCard,
+        ],
+        routeLogEntries: [
+          {
+            id: "route-log-impact",
+            routeCardId: "route-card-impact",
+            selectedOptionId: selectedOption.id,
+            selectedStrategy: "lean",
+            outcome: "accepted",
+          } as RouteLogEntry,
+        ],
+      },
+      buildDefaultPublicImpactSnapshot(),
+    );
+
+    expect(summary.followedPlanCount).toBe(1);
+    expect(summary.followedByStrategy.lean).toBe(1);
+    expect(summary.estimatedAvoidedCostUsd).toBeCloseTo(1.23);
+    expect(summary.estimatedAvoidedWattHours).toBeCloseTo(4.56);
   });
 });

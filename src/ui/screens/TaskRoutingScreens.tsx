@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { type FormEvent, type ReactNode } from "react";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import {
   buildSuggestedToolkit,
@@ -441,9 +441,6 @@ function GeneratedResults({
   setup: SetupConfigurationController;
 }) {
   const recommended = result.routeCard.options.find((option) => option.id === result.routeCard.recommendedOptionId);
-  const [selectedStrategy, setSelectedStrategy] = useState<RouteOption["strategy"]>(
-    recommended?.strategy ?? result.routeCard.options[0]?.strategy ?? "lean",
-  );
   const suggestedToolkit = buildSuggestedToolkit({
     task: result.task,
     models: setup.configuration?.modelInventory ?? [],
@@ -503,15 +500,15 @@ function GeneratedResults({
       <section className="routingSection" aria-labelledby="route-comparison-heading">
         <div className="sectionHeading">
           <h3 id="route-comparison-heading">Your options</h3>
-          <p>Each option is a recommendation only. You choose what to copy, paste, or ignore.</p>
+          <p>Compare the likely cost, energy use, tradeoff, and safety fit before choosing what to copy or ignore.</p>
         </div>
+        <RouteTrustPanel recommended={recommended} result={result} reviewedAt={publicImpactSnapshot.reviewedAt} />
+        <RouteHundredUseComparison options={result.routeCard.options} />
         <div className="routeComparisonGrid">
           {routeStrategies.map((strategy) => (
             <RouteStrategyCard
               key={strategy}
-              onSelect={setSelectedStrategy}
               result={result}
-              selected={selectedStrategy === strategy}
               strategy={strategy}
             />
           ))}
@@ -698,20 +695,235 @@ function routeSavingsLabel(candidate: RouteOption) {
   return `${formatUsd(candidate.estimatedSavingsUsd)} (${candidate.estimatedSavingsPercent}%)`;
 }
 
-function RouteStrategyCard({
-  onSelect,
+function routeEnergyLabel(candidate: RouteOption) {
+  return candidate.estimatedEnergyWh === undefined
+    ? "Estimate unavailable"
+    : `${formatWattHours(candidate.estimatedEnergyWh)} per use`;
+}
+
+function routeEnergySavingsLabel(candidate: RouteOption) {
+  if (candidate.estimatedEnergySavingsWh === undefined || candidate.estimatedEnergySavingsPercent === undefined) {
+    return "Estimate unavailable";
+  }
+
+  return `${formatWattHours(candidate.estimatedEnergySavingsWh)} (${candidate.estimatedEnergySavingsPercent}%)`;
+}
+
+function RouteTrustPanel({
+  recommended,
   result,
-  selected,
+  reviewedAt,
+}: {
+  recommended: RouteOption | undefined;
+  result: GeneratedRouteResult;
+  reviewedAt: string;
+}) {
+  const blockedCount = result.routeCard.blockedRoutes.length;
+  const warningCount = result.routeCard.warnings.length;
+  const availableStrategyLabels = result.routeCard.options.map((option) => optionLabel(option.strategy)).join(", ");
+  const unavailableStrategyLabels = result.scoringResult.unavailable.map((candidate) => optionLabel(candidate.strategy));
+
+  return (
+    <section className="routeTrustPanel" aria-labelledby="route-trust-heading">
+      <div>
+        <p className="screenKicker">Recommendation audit</p>
+        <h4 id="route-trust-heading">Why this comparison is trustworthy enough to use</h4>
+        <p>
+          The app compares saved tools, allowed information, task risk, and choosing style in this browser. It does not
+          call an AI provider or treat the estimate as a live quote.
+        </p>
+      </div>
+      <dl>
+        <div>
+          <dt>Best fit</dt>
+          <dd>{recommended ? `${recommended.label} at ${recommended.score}/100` : "Manual review only"}</dd>
+        </div>
+        <div>
+          <dt>Safety checks</dt>
+          <dd>{blockedCount || warningCount ? `${blockedCount} blocked, ${warningCount} warning(s)` : "No blocks or warnings"}</dd>
+        </div>
+        <div>
+          <dt>Routes compared</dt>
+          <dd>
+            {availableStrategyLabels}
+            {unavailableStrategyLabels.length ? `; left out: ${unavailableStrategyLabels.join(", ")}` : ""}
+          </dd>
+        </div>
+        <div>
+          <dt>Pricing and energy data</dt>
+          <dd>{impactDataFreshnessLabel(reviewedAt)}</dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
+function RouteHundredUseComparison({ options }: { options: readonly RouteOption[] }) {
+  const series = routeStrategies
+    .map((strategy) => options.find((option) => option.strategy === strategy))
+    .filter((option): option is RouteOption => option !== undefined)
+    .map((option) => ({
+      color: routeChartColor(option.strategy),
+      costPerUse: option.estimatedCostUsd ?? 0,
+      energyPerUse: option.estimatedEnergyWh ?? 0,
+      id: option.id,
+      label: option.label,
+    }));
+
+  if (series.length === 0) {
+    return null;
+  }
+
+  const usageTicks = [0, 25, 50, 75, 100];
+  const maxCost = Math.max(0.01, ...series.map((item) => item.costPerUse * 100));
+  const maxEnergy = Math.max(0.01, ...series.map((item) => item.energyPerUse * 100));
+  const xStart = 76;
+  const xEnd = 1134;
+  const costTop = 48;
+  const energyTop = 124;
+  const plotHeight = 42;
+  const xForUse = (uses: number) => xStart + ((xEnd - xStart) * uses) / 100;
+  const yForValue = (value: number, maxValue: number, top: number) => top + plotHeight - (value / maxValue) * plotHeight;
+
+  return (
+    <div className="routeHundredUseChart" aria-label="100 use route cost and energy comparison">
+      <svg aria-labelledby="route-chart-title route-chart-desc" role="img" viewBox="0 0 1200 200">
+        <title id="route-chart-title">100-use comparison</title>
+        <desc id="route-chart-desc">
+          Compares cumulative estimated cost and energy for available lean, balanced, and premium routes from 0 to 100
+          uses.
+        </desc>
+        <text className="chartTitle" x="76" y="20">
+          100-use scenario
+        </text>
+        <text className="chartSubtitle" x="248" y="20">
+          cumulative estimate, not a live provider quote
+        </text>
+
+        <ChartPanelAxes
+          label="Cost"
+          maxLabel={formatUsd(maxCost)}
+          plotHeight={plotHeight}
+          top={costTop}
+          xEnd={xEnd}
+          xStart={xStart}
+        />
+        <ChartPanelAxes
+          label="Energy"
+          maxLabel={formatEnergyAxis(maxEnergy)}
+          plotHeight={plotHeight}
+          top={energyTop}
+          xEnd={xEnd}
+          xStart={xStart}
+        />
+
+        {usageTicks.map((tick) => (
+          <g key={tick}>
+            <line className="chartGridLine" x1={xForUse(tick)} x2={xForUse(tick)} y1={costTop} y2={energyTop + plotHeight} />
+            <text className="chartTickLabel" textAnchor="middle" x={xForUse(tick)} y="188">
+              {tick}
+            </text>
+          </g>
+        ))}
+        <text className="chartAxisTitle" textAnchor="middle" x={(xStart + xEnd) / 2} y="198">
+          times used
+        </text>
+
+        {series.map((item) => (
+          <g key={`${item.id}-cost`}>
+            <polyline
+              className="chartSeriesLine"
+              fill="none"
+              points={usageTicks
+                .map((tick) => `${xForUse(tick)},${yForValue(item.costPerUse * tick, maxCost, costTop)}`)
+                .join(" ")}
+              stroke={item.color}
+            />
+            <circle cx={xForUse(100)} cy={yForValue(item.costPerUse * 100, maxCost, costTop)} fill={item.color} r="4" />
+          </g>
+        ))}
+        {series.map((item) => (
+          <g key={`${item.id}-energy`}>
+            <polyline
+              className="chartSeriesLine"
+              fill="none"
+              points={usageTicks
+                .map((tick) => `${xForUse(tick)},${yForValue(item.energyPerUse * tick, maxEnergy, energyTop)}`)
+                .join(" ")}
+              stroke={item.color}
+            />
+            <circle cx={xForUse(100)} cy={yForValue(item.energyPerUse * 100, maxEnergy, energyTop)} fill={item.color} r="4" />
+          </g>
+        ))}
+
+        <g className="chartLegend">
+          {series.map((item, index) => (
+            <g key={item.id} transform={`translate(${720 + index * 138} 16)`}>
+              <line stroke={item.color} strokeLinecap="round" strokeWidth="4" x1="0" x2="22" y1="0" y2="0" />
+              <text x="30" y="5">
+                {item.label.replace(" route", "")}
+              </text>
+            </g>
+          ))}
+        </g>
+      </svg>
+      <div className="routeHundredUseTotals" aria-label="100 use totals">
+        {series.map((item) => (
+          <div key={item.id}>
+            <strong>{item.label}</strong>
+            <span>
+              {formatUsd(item.costPerUse * 100)} and {formatWattHours(item.energyPerUse * 100)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChartPanelAxes({
+  label,
+  maxLabel,
+  plotHeight,
+  top,
+  xEnd,
+  xStart,
+}: {
+  label: string;
+  maxLabel: string;
+  plotHeight: number;
+  top: number;
+  xEnd: number;
+  xStart: number;
+}) {
+  return (
+    <g>
+      <text className="chartAxisTitle" x={xStart} y={top - 8}>
+        {label}
+      </text>
+      <text className="chartTickLabel" textAnchor="end" x="68" y={top + 5}>
+        {maxLabel}
+      </text>
+      <text className="chartTickLabel" textAnchor="end" x="68" y={top + plotHeight + 4}>
+        0
+      </text>
+      <line className="chartAxisLine" x1={xStart} x2={xStart} y1={top} y2={top + plotHeight} />
+      <line className="chartAxisLine" x1={xStart} x2={xEnd} y1={top + plotHeight} y2={top + plotHeight} />
+      <line className="chartGridLine" x1={xStart} x2={xEnd} y1={top} y2={top} />
+    </g>
+  );
+}
+
+function RouteStrategyCard({
+  result,
   strategy,
 }: {
-  onSelect: (strategy: RouteOption["strategy"]) => void;
   result: GeneratedRouteResult;
-  selected: boolean;
   strategy: RouteOption["strategy"];
 }) {
   const candidate = result.routeCard.options.find((routeOption) => routeOption.strategy === strategy);
   const unavailable = result.scoringResult.unavailable.find((routeCandidate) => routeCandidate.strategy === strategy);
-  const recommended = candidate?.id === result.scoringResult.recommendedCandidateId;
+  const recommended = candidate?.id === result.routeCard.recommendedOptionId;
 
   if (!candidate) {
     return (
@@ -731,7 +943,7 @@ function RouteStrategyCard({
 
   return (
     <section
-      className={routeCardClassName({ recommended, selected })}
+      className={routeCardClassName({ recommended })}
       aria-labelledby={`${strategy}-route-heading`}
     >
       <div className="routeCardHeader">
@@ -749,6 +961,10 @@ function RouteStrategyCard({
           <dd>{routeSavingsLabel(candidate)}</dd>
         </div>
         <div>
+          <dt>Est. energy</dt>
+          <dd>{routeEnergyLabel(candidate)}</dd>
+        </div>
+        <div>
           <dt>Steps</dt>
           <dd>{candidate.steps.length}</dd>
         </div>
@@ -761,15 +977,7 @@ function RouteStrategyCard({
           </li>
         ))}
       </ol>
-      <button
-        aria-pressed={selected}
-        className="routeSelectButton"
-        onClick={() => onSelect(strategy)}
-        type="button"
-      >
-        {selected ? "Selected option" : "Compare cost and savings"}
-      </button>
-      {selected ? <RouteCostSavingsDetail candidate={candidate} recommended={recommended} /> : null}
+      <RouteCostSavingsDetail candidate={candidate} recommended={recommended} />
     </section>
   );
 }
@@ -796,6 +1004,16 @@ function RouteCostSavingsDetail({
           </dd>
         </div>
         <div>
+          <dt>Estimated energy</dt>
+          <dd>{routeEnergyLabel(candidate)}</dd>
+        </div>
+        <div>
+          <dt>Energy saved</dt>
+          <dd>
+            {routeEnergySavingsLabel(candidate)} vs {candidate.savingsComparedWith ?? "the heavier route"}
+          </dd>
+        </div>
+        <div>
           <dt>Use this when</dt>
           <dd>{routeUseCase(candidate)}</dd>
         </div>
@@ -813,22 +1031,21 @@ function RouteCostSavingsDetail({
         </div>
         <div>
           <dt>Basis</dt>
-          <dd>{candidate.costEstimateBasis ?? "Estimate unavailable for this saved option."}</dd>
+          <dd>
+            {candidate.costEstimateBasis ?? "Cost estimate unavailable for this saved option."}{" "}
+            {candidate.energyEstimateBasis ?? "Energy estimate unavailable for this saved option."}
+          </dd>
         </div>
       </dl>
     </div>
   );
 }
 
-function routeCardClassName({ recommended, selected }: { recommended: boolean; selected: boolean }) {
+function routeCardClassName({ recommended }: { recommended: boolean }) {
   const classNames = ["routeResultCard"];
 
   if (recommended) {
     classNames.push("recommendedRouteCard");
-  }
-
-  if (selected) {
-    classNames.push("selectedRouteCard");
   }
 
   return classNames.join(" ");
@@ -962,6 +1179,60 @@ function formatUsd(value: number) {
     minimumFractionDigits,
     maximumFractionDigits: 3,
   }).format(value);
+}
+
+function formatWattHours(value: number) {
+  const absValue = Math.abs(value);
+  const maximumFractionDigits = absValue > 100 ? 0 : absValue >= 10 ? 1 : 3;
+
+  return `${new Intl.NumberFormat(undefined, {
+    maximumFractionDigits,
+    minimumFractionDigits: absValue > 0 && absValue < 1 ? 3 : 0,
+  }).format(value)} Wh`;
+}
+
+function formatEnergyAxis(value: number) {
+  if (value >= 1000) {
+    return `${new Intl.NumberFormat(undefined, {
+      maximumFractionDigits: 1,
+    }).format(value / 1000)} kWh`;
+  }
+
+  return formatWattHours(value);
+}
+
+function formatReviewedDate(timestamp: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+  }).format(new Date(timestamp));
+}
+
+function impactDataFreshnessLabel(reviewedAt: string) {
+  const reviewedTime = new Date(reviewedAt).getTime();
+  const ageInDays = Number.isFinite(reviewedTime)
+    ? Math.max(0, Math.floor((Date.now() - reviewedTime) / 86_400_000))
+    : null;
+  const reviewedLabel = formatReviewedDate(reviewedAt);
+
+  if (ageInDays === null) {
+    return "Static public pricing and energy snapshot; verify exact provider pricing before relying on exact savings.";
+  }
+
+  if (ageInDays > 30) {
+    return `Reviewed ${reviewedLabel}; ${ageInDays} days old, so refresh provider pricing before quoting exact savings.`;
+  }
+
+  return `Reviewed ${reviewedLabel}; useful for comparison, not a live provider quote.`;
+}
+
+function routeChartColor(strategy: RouteOption["strategy"]) {
+  const colors: Record<RouteOption["strategy"], string> = {
+    lean: "#0b82a6",
+    balanced: "#6f8f2f",
+    premium: "#94505d",
+  };
+
+  return colors[strategy];
 }
 
 function plainRouteSummary(summary: string) {
