@@ -184,6 +184,10 @@ function savingsHeadline(recommended: RouteOption | undefined) {
     return "Pause first";
   }
 
+  if (recommended.estimatedSavingsUsd !== undefined) {
+    return `${formatUsd(recommended.estimatedSavingsUsd)} est. saved`;
+  }
+
   if (recommended.estimatedCostLevel === "low") {
     return recommended.estimatedEffortLevel === "high" ? "Tool cost down" : "Start small";
   }
@@ -198,6 +202,12 @@ function savingsHeadline(recommended: RouteOption | undefined) {
 function savingsDetail(recommended: RouteOption | undefined) {
   if (!recommended) {
     return "Changing the setup is cheaper than forcing a blocked or unclear route.";
+  }
+
+  if (recommended.estimatedCostUsd !== undefined && recommended.estimatedSavingsPercent !== undefined) {
+    return `${formatUsd(recommended.estimatedCostUsd)} estimated route cost; ${recommended.estimatedSavingsPercent}% below ${
+      recommended.savingsComparedWith ?? "the heavier route"
+    }.`;
   }
 
   if (recommended.estimatedCostLevel === "low") {

@@ -12,6 +12,7 @@ import type {
 import type { HardGateBlock, HardGateResult } from "./hardGates";
 import type { RouteScoringResult, ScoredRouteCandidate } from "./scoring";
 import { buildProjectStageGuidance } from "./stageGuidance";
+import { attachRouteEconomics } from "./routeEconomics";
 
 export type GenerateRouteCardInput = {
   task: TaskIntake;
@@ -37,7 +38,7 @@ export function generateRouteCard({
 }: GenerateRouteCardInput): RouteCard {
   assertPromptPackageMatchesTask(task, promptPackage);
 
-  const scoredOptions = scoringResult.scoredCandidates.map(routeOptionFromScoredCandidate);
+  const scoredOptions = attachRouteEconomics(scoringResult.scoredCandidates.map(routeOptionFromScoredCandidate), models);
   let recommendedOptionId =
     scoringResult.recommendedCandidateId && scoredOptions.some((option) => option.id === scoringResult.recommendedCandidateId)
       ? scoringResult.recommendedCandidateId

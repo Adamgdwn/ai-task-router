@@ -461,6 +461,15 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
     `- Score: ${option.score}/100`,
     `- Cost: ${option.estimatedCostLevel}`,
     `- Effort: ${option.estimatedEffortLevel}`,
+    ...(option.estimatedCostUsd !== undefined ? [`- Estimated API-equivalent cost: ${formatUsd(option.estimatedCostUsd)}`] : []),
+    ...(option.estimatedSavingsUsd !== undefined && option.estimatedSavingsPercent !== undefined
+      ? [
+          `- Estimated savings: ${formatUsd(option.estimatedSavingsUsd)} (${option.estimatedSavingsPercent}%) vs ${
+            option.savingsComparedWith ?? "the heavier route"
+          }`,
+        ]
+      : []),
+    ...(option.costEstimateBasis ? [`- Estimate basis: ${option.costEstimateBasis}`] : []),
     "",
     option.summary,
     "",
@@ -478,6 +487,17 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
     markdownList(option.warnings),
     "",
   ];
+}
+
+function formatUsd(value: number) {
+  const minimumFractionDigits = value > 0 && value < 0.1 ? 3 : 2;
+
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits,
+    maximumFractionDigits: 3,
+  }).format(value);
 }
 
 function stageGuidanceMarkdown(routeCard: RouteCard): string {

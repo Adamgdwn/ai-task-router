@@ -167,6 +167,20 @@ describe("hard gates", () => {
     expect(result.warnings.some((warning) => warning.reasonCode === "research-context-missing")).toBe(false);
   });
 
+  it("implies a safe web research source for public current-facts tasks", () => {
+    const task = buildTask({
+      sensitivityClass: "public",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+
+    const result = evaluateHardGates({ task, models: routeReadyModels });
+
+    expect(result.allowedSourceIds).toEqual(["web"]);
+    expect(result.allowedModelIds).toContain("user-research-tool");
+    expect(result.warnings.some((warning) => warning.reasonCode === "research-context-missing")).toBe(false);
+  });
+
   it.each([
     ["public-facing task", { publicFacing: true }],
     ["public-facing risk task", { sensitivityClass: "public-facing risk" }],

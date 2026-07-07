@@ -902,8 +902,8 @@ function PolicyCard({
       <details className="advancedDrawer">
         <summary>Fine-tune how this style chooses</summary>
         <p className="advancedNote">
-          These sliders are optional. Low means the app pays less attention to that factor; high means it matters more
-          when routes are close.
+          These sliders are optional. The app turns the six sliders into a 100% balance, so moving one changes the
+          percentage share of the others behind the scenes.
         </p>
 
         <div className="formGrid compactFormGrid">
@@ -947,7 +947,8 @@ function PolicyCard({
                 value={scaledWeightValue(policy.scoringWeights[weightKey])}
               />
               <small>
-                {weightStrengthLabel(policy.scoringWeights[weightKey])}: {weightHelpText(weightKey)}
+                {weightStrengthLabel(policy.scoringWeights[weightKey])};{" "}
+                {weightShareLabel(policy.scoringWeights, weightKey)}. {weightHelpText(weightKey)}
               </small>
             </label>
           ))}
@@ -1190,4 +1191,14 @@ function weightStrengthLabel(value: number) {
   }
 
   return "High";
+}
+
+function weightShareLabel(weights: ScoringWeights, weightKey: keyof ScoringWeights) {
+  const totalWeight = scoringWeightKeys.reduce((total, candidateKey) => total + weights[candidateKey], 0);
+
+  if (totalWeight === 0) {
+    return "0% of this style";
+  }
+
+  return `${Math.round((weights[weightKey] / totalWeight) * 100)}% of this style`;
 }

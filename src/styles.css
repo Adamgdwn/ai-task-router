@@ -1680,6 +1680,7 @@ button:focus-visible {
 }
 
 .routeComparisonGrid {
+  align-items: start;
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1783,6 +1784,7 @@ button:focus-visible {
 }
 
 .routeSelectButton {
+  align-self: end;
   background: #ffffff;
   border-color: var(--brand-teal);
   color: var(--brand-navy);

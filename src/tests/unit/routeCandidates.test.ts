@@ -1,4 +1,5 @@
 import { defaultFinalApprovalRouteStep, defaultPolicies } from "../../domain/defaults/defaultPolicies";
+import { createEverydayToolModel } from "../../domain/defaults/everydayToolCatalog";
 import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generateRouteCandidates, type RouteCandidate, type RouteCandidateGenerationResult } from "../../domain/routing/candidateGeneration";
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
@@ -175,6 +176,89 @@ describe("route candidate generation", () => {
       expect(candidate.steps[0]?.instruction).toContain("the app does not search, fetch, or call the tool");
       expectValidRouteSteps(candidate);
     }
+  });
+
+  it("uses Perplexity-style research help when current facts are requested without a manual source choice", () => {
+    const modelsWithPerplexityFree = routeReadyModels.map((model) =>
+      model.id === "user-research-tool"
+        ? createEverydayToolModel({
+            id: model.id,
+            providerId: "perplexity",
+            accountId: "basic",
+            frequencyId: "weekly",
+          })
+        : model,
+    );
+    const task = buildTask({
+      id: "task-implied-current-facts",
+      title: "Research current public facts without setup expertise",
+      knowledgeWorkType: "research",
+      outputType: "answer",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+
+    const { hardGateResult, candidateResult } = generateForTask(task, modelsWithPerplexityFree);
+    const lean = requireCandidate(candidateResult, "lean");
+
+    expect(hardGateResult.allowedSourceIds).toEqual(["web"]);
+    expect(lean.steps[0]).toMatchObject({
+      kind: "research",
+      modelId: "user-research-tool",
+      sourceIds: ["web"],
+    });
+    expect(lean.steps[0]?.label).toContain("Perplexity");
+    expect(lean.steps[0]?.label).toContain("minimum Perplexity Sonar");
+    expect(lean.steps[0]?.label).not.toContain("minimum Perplexity Sonar Pro");
+  });
+
+  it("does not treat a research-only tool as the premium drafting helper", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-go",
+        providerId: "chatgpt",
+        accountId: "go",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-chatgpt-go-perplexity-free",
+      title: "Plan a finance app with current facts",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+
+    const { candidateResult } = generateForTask(task, models);
+    const balanced = requireCandidate(candidateResult, "balanced");
+
+    expect(balanced.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "research", modelId: "perplexity-free" }),
+        expect.objectContaining({ kind: "model", modelId: "chatgpt-go" }),
+      ]),
+    );
+    expect(candidateResult.candidates.map((candidate) => candidate.strategy)).not.toContain("premium");
+    expect(candidateResult.unavailable).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          strategy: "premium",
+          reasonCode: "no-safe-premium-path",
+        }),
+      ]),
+    );
   });
 
   it("adds a premium artifact step for packaging-shaped outputs when the artifact tool is allowed", () => {

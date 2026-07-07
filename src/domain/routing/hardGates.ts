@@ -40,7 +40,7 @@ const humanApprovalMessage =
   "Human approval is required before using public-facing, regulated, highly restricted, high-quality, or critical output.";
 
 export function evaluateHardGates({ task, models }: EvaluateHardGatesInput): HardGateResult {
-  const requestedSourceIds = new Set(task.requestedSourceIds);
+  const requestedSourceIds = sourceIdsRequestedOrImpliedByTask(task);
   const sourceEvaluation = evaluateSources(task, requestedSourceIds);
   const sourcePermissionCeiling = highestPermissionLevel(sourceEvaluation.allowedSources);
   const modelEvaluation = evaluateModels(task, models, sourcePermissionCeiling);
@@ -62,6 +62,20 @@ export function evaluateHardGates({ task, models }: EvaluateHardGatesInput): Har
     warnings,
     requiresHumanApproval,
   };
+}
+
+function sourceIdsRequestedOrImpliedByTask(task: TaskIntake) {
+  const requestedSourceIds = new Set(task.requestedSourceIds);
+
+  if (task.requiresCurrentFacts || task.requiresCitations) {
+    for (const source of task.sourcePermissions) {
+      if (source.sourceType === "web") {
+        requestedSourceIds.add(source.id);
+      }
+    }
+  }
+
+  return requestedSourceIds;
 }
 
 function evaluateSources(task: TaskIntake, requestedSourceIds: Set<string>) {

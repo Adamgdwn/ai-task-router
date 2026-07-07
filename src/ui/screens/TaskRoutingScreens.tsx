@@ -630,9 +630,11 @@ function taskEvaluationSummary(task: TaskIntake, recommended: RouteOption | unde
   const deliverable = friendlyTaskOptionLabel(task.outputType).toLowerCase();
   const quality = friendlyTaskOptionLabel(task.qualityBar).toLowerCase();
   const sourceNeed =
-    task.requestedSourceIds.length > 0
-      ? "specific information you selected"
-      : "the task description and anything you intentionally add later";
+    task.requiresCurrentFacts || task.requiresCitations
+      ? "a safe current-facts or citation check before drafting"
+      : task.requestedSourceIds.length > 0
+        ? "specific information you selected"
+        : "the task description and anything you intentionally add later";
 
   if (!recommended) {
     return `This looks like a ${workType} job that should end in ${deliverable}, but the current setup does not leave a safe route. Adjust the helper or information choices before pasting the task into another tool.`;
@@ -682,6 +684,20 @@ function savingsAimLabel(recommended: RouteOption | undefined) {
   return "Reduce risk";
 }
 
+function routeCostLabel(candidate: RouteOption) {
+  return candidate.estimatedCostUsd === undefined
+    ? candidate.estimatedCostLevel
+    : `${formatUsd(candidate.estimatedCostUsd)} (${candidate.estimatedCostLevel})`;
+}
+
+function routeSavingsLabel(candidate: RouteOption) {
+  if (candidate.estimatedSavingsUsd === undefined || candidate.estimatedSavingsPercent === undefined) {
+    return "Estimate unavailable";
+  }
+
+  return `${formatUsd(candidate.estimatedSavingsUsd)} (${candidate.estimatedSavingsPercent}%)`;
+}
+
 function RouteStrategyCard({
   onSelect,
   result,
@@ -693,7 +709,7 @@ function RouteStrategyCard({
   selected: boolean;
   strategy: RouteOption["strategy"];
 }) {
-  const candidate = result.scoringResult.scoredCandidates.find((routeCandidate) => routeCandidate.strategy === strategy);
+  const candidate = result.routeCard.options.find((routeOption) => routeOption.strategy === strategy);
   const unavailable = result.scoringResult.unavailable.find((routeCandidate) => routeCandidate.strategy === strategy);
   const recommended = candidate?.id === result.scoringResult.recommendedCandidateId;
 
@@ -725,12 +741,12 @@ function RouteStrategyCard({
       <p>{plainRouteSummary(candidate.summary)}</p>
       <dl>
         <div>
-          <dt>Cost</dt>
-          <dd>{candidate.estimatedCostLevel}</dd>
+          <dt>Est. cost</dt>
+          <dd>{routeCostLabel(candidate)}</dd>
         </div>
         <div>
-          <dt>Effort</dt>
-          <dd>{candidate.estimatedEffortLevel}</dd>
+          <dt>Est. saved</dt>
+          <dd>{routeSavingsLabel(candidate)}</dd>
         </div>
         <div>
           <dt>Steps</dt>
@@ -770,6 +786,16 @@ function RouteCostSavingsDetail({
       <h5>Cost and savings</h5>
       <dl>
         <div>
+          <dt>Estimated cost</dt>
+          <dd>{routeCostLabel(candidate)}</dd>
+        </div>
+        <div>
+          <dt>Estimated savings</dt>
+          <dd>
+            {routeSavingsLabel(candidate)} vs {candidate.savingsComparedWith ?? "the heavier route"}
+          </dd>
+        </div>
+        <div>
           <dt>Use this when</dt>
           <dd>{routeUseCase(candidate)}</dd>
         </div>
@@ -784,6 +810,10 @@ function RouteCostSavingsDetail({
         <div>
           <dt>{recommended ? "Why this is best fit" : "When to choose it instead"}</dt>
           <dd>{routeSelectionCue(candidate, recommended)}</dd>
+        </div>
+        <div>
+          <dt>Basis</dt>
+          <dd>{candidate.costEstimateBasis ?? "Estimate unavailable for this saved option."}</dd>
         </div>
       </dl>
     </div>
@@ -921,6 +951,17 @@ function routeSelectionCue(candidate: RouteOption, recommended: boolean) {
   }
 
   return "Choose it if the result will be public, critical, complex, or expensive to fix later.";
+}
+
+function formatUsd(value: number) {
+  const minimumFractionDigits = value > 0 && value < 0.1 ? 3 : 2;
+
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits,
+    maximumFractionDigits: 3,
+  }).format(value);
 }
 
 function plainRouteSummary(summary: string) {

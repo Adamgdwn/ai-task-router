@@ -1,6 +1,8 @@
 import { defaultFinalApprovalRouteStep } from "../defaults/defaultPolicies";
+import { everydayToolFrequencyRank } from "../defaults/everydayToolCatalog";
 import type { HardGateResult } from "./hardGates";
 import type { ModelInventoryItem, PermissionLevel, PolicyDefault, RouteStep, SourcePermission, TaskIntake } from "../types";
+import { modelInstructionGuidance, modelLabelWithMinimum } from "./modelGuidance";
 
 export const routeCandidateStrategies = ["lean", "balanced", "premium"] as const;
 
@@ -136,7 +138,7 @@ function buildCandidateContext(
   hardGateResult: HardGateResult,
 ): CandidateContext {
   const allowedModelIds = new Set(hardGateResult.allowedModelIds);
-  const allowedSourceIds = task.requestedSourceIds.filter((sourceId) => hardGateResult.allowedSourceIds.includes(sourceId));
+  const allowedSourceIds = hardGateResult.allowedSourceIds;
   const allowedSourceIdSet = new Set(allowedSourceIds);
 
   return {
@@ -170,7 +172,7 @@ function buildStrategyCandidate(input: {
     });
   }
 
-  const primaryModel = selectPreferredModel(context.allowedModels, definition.primaryModelTiers);
+  const primaryModel = selectPreferredModel(context.allowedModels, primaryModelTiersForStrategy(strategy, task, definition));
   const usesManualPrimaryStep = primaryModel?.tier === "human";
 
   if (!primaryModel) {
@@ -248,14 +250,38 @@ function selectPreferredModel(
   allowedModels: ModelInventoryItem[],
   preferredTiers: ModelInventoryItem["tier"][],
 ): ModelInventoryItem | null {
-  for (const preferredTier of preferredTiers) {
-    const model = allowedModels.find((candidateModel) => candidateModel.tier === preferredTier);
-    if (model) {
-      return model;
-    }
+  const preferredTierRank = new Map(preferredTiers.map((tier, index) => [tier, index]));
+  const matchingModels = allowedModels.filter((candidateModel) => preferredTierRank.has(candidateModel.tier));
+
+  return [...matchingModels].sort((left, right) => {
+    const tierComparison = (preferredTierRank.get(left.tier) ?? 99) - (preferredTierRank.get(right.tier) ?? 99);
+    const frequencyComparison = everydayToolFrequencyRank(right) - everydayToolFrequencyRank(left);
+    const capabilityComparison = averageCapability(right) - averageCapability(left);
+
+    return tierComparison || frequencyComparison || capabilityComparison || left.label.localeCompare(right.label);
+  })[0] ?? null;
+}
+
+function primaryModelTiersForStrategy(
+  strategy: RouteCandidateStrategy,
+  task: TaskIntake,
+  definition: StrategyDefinition,
+): ModelInventoryItem["tier"][] {
+  if (strategy !== "premium") {
+    return definition.primaryModelTiers;
   }
 
-  return null;
+  const premiumTiers: ModelInventoryItem["tier"][] = ["frontier"];
+
+  if (task.knowledgeWorkType === "research" || (task.outputType === "answer" && (task.requiresCurrentFacts || task.requiresCitations))) {
+    premiumTiers.push("research");
+  }
+
+  if (shouldAddArtifactStep(task)) {
+    premiumTiers.push("artifact");
+  }
+
+  return premiumTiers;
 }
 
 function buildResearchStep(input: {
@@ -281,10 +307,12 @@ function buildResearchStep(input: {
   return {
     id: `${routeId}-research`,
     kind: "research",
-    label: "Research context check",
+    label: `${modelLabelWithMinimum(researchModel)}: current facts check`,
     instruction: `Manually consult ${researchModel.label} using only allowed research source IDs: ${formatSourceIds(
       researchSourceIds,
-    )}. Capture current facts or citations outside the app before synthesis; the app does not search, fetch, or call the tool.`,
+    )}. ${modelInstructionGuidance(
+      researchModel,
+    )} Capture current facts or citations outside the app before synthesis; the app does not search, fetch, or call the tool.`,
     requiredPermissionLevel: permissionLevelForSourceIds(researchSourceIds, context.allowedSources),
     modelId: researchModel.id,
     sourceIds: researchSourceIds,
@@ -329,8 +357,10 @@ function buildPrimaryStep(input: {
   return {
     id: `${routeId}-${strategy === "premium" && model.tier === "artifact" ? "artifact" : "synthesis"}`,
     kind,
-    label: `${model.label}: ${primaryActionLabel(task, kind)}`,
-    instruction: `Use ${model.label} manually outside the app to evaluate the task, prepare a beginner-friendly ${task.outputType}, and call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). The app does not send task data to the model.`,
+    label: `${modelLabelWithMinimum(model)}: ${primaryActionLabel(task, kind)}`,
+    instruction: `Use ${model.label} manually outside the app to evaluate the task, prepare a beginner-friendly ${task.outputType}, and call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidance(
+      model,
+    )} The app does not send task data to the model.`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
     modelId: model.id,
     sourceIds: context.allowedSourceIds,
@@ -378,10 +408,10 @@ function buildArtifactStep(input: {
   return {
     id: `${routeId}-artifact`,
     kind: "artifact",
-    label: "Artifact packaging",
+    label: `${modelLabelWithMinimum(artifactModel)}: artifact packaging`,
     instruction: `Use ${artifactModel.label} manually outside the app to package the draft as a ${task.outputType}. Do not add sources beyond the allowed source IDs (${formatSourceIds(
       context.allowedSourceIds,
-    )}).`,
+    )}). ${modelInstructionGuidance(artifactModel)}`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
     modelId: artifactModel.id,
     sourceIds: context.allowedSourceIds,
@@ -444,4 +474,9 @@ function formatSourceIds(sourceIds: string[]) {
 
 function uniqueMessages(messages: string[]) {
   return [...new Set(messages)];
+}
+
+function averageCapability(model: ModelInventoryItem) {
+  const scores = Object.values(model.capabilityScores);
+  return scores.reduce((total, score) => total + score, 0) / scores.length;
 }

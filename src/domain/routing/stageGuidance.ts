@@ -1,4 +1,5 @@
 import type { ModelInventoryItem, ProjectStageGuidance, RouteOption, RouteStep, TaskIntake } from "../types";
+import { modelLabelWithMinimum } from "./modelGuidance";
 
 export type BuildProjectStageGuidanceInput = {
   task: TaskIntake;
@@ -570,7 +571,8 @@ function modelLabelForStep(
   }
 
   if (step?.modelId) {
-    return modelById.get(step.modelId)?.label ?? step.modelId;
+    const model = modelById.get(step.modelId);
+    return model ? modelLabelWithMinimum(model) : step.modelId;
   }
 
   if (step?.kind === "human review") {

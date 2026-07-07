@@ -129,6 +129,9 @@ describe("route card generator", () => {
     });
     expect(card.options.map((option) => option.strategy)).toEqual(["lean", "balanced", "premium"]);
     expect(card.options.map((option) => option.id)).toEqual(scoringResult.scoredCandidates.map((candidate) => candidate.id));
+    expect(card.options.every((option) => option.estimatedCostUsd !== undefined)).toBe(true);
+    expect(card.options.every((option) => option.estimatedSavingsUsd !== undefined)).toBe(true);
+    expect(card.options.every((option) => option.costEstimateBasis?.includes("100k-token API-equivalent"))).toBe(true);
     expect(card.options.find((option) => option.id === card.recommendedOptionId)?.score).toBe(
       scoringResult.recommendedCandidate?.score,
     );
@@ -143,6 +146,7 @@ describe("route card generator", () => {
       methodLabel: "Do - Analyze/Improve",
       recommendedModelLabel: expect.stringMatching(/Gemini|ChatGPT|Claude/),
     });
+    expect(card.stageGuidance.find((stage) => stage.stage === "create")?.recommendedModelLabel).toContain("minimum");
   });
 
   it("preserves hard-gate warnings and blocked reasons on the route card", () => {
