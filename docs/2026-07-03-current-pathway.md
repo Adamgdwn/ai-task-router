@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-06T15:24:36.2422654-06:00
-Status Updated: 2026-07-06T15:24:36.2422654-06:00
+Last Updated: 2026-07-06T23:26:17-06:00
+Status Updated: 2026-07-06T23:26:17-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -134,6 +134,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Desktop public distribution decision | task complete, public download hold | 2026-07-06T13:39:30-06:00 | Technical Lead | Added [Desktop Public Distribution Decision](2026-07-06-desktop-public-distribution-decision.md), selected Windows Store/MSIX-first as the recommended first trusted Windows lane, added a hold-state public release evidence template, and tightened `npm run desktop:gate:public` so it fails until real platform trust evidence exists. Public desktop downloads, public GitHub Releases, signing workflows, updater flows, Store submission, and ordinary-user installers remain gated. |
 | Windows MSIX proof | task complete, public download hold | 2026-07-06T14:08:49-06:00 | Technical Lead | Added [Windows MSIX Proof](2026-07-06-windows-msix-proof.md), WinApp CLI MSIX manifest/assets, repeatable self-signed MSIX proof packaging, Node script tests, and manual workflow MSIX proof artifact support. Local proof package/checksum passed technical-preview gate; public gate still fails until real trust evidence exists. |
 | Windows Store trust prep | task complete, public download hold | 2026-07-06T15:24:36.2422654-06:00 | Technical Lead | Added [Windows Store Trust Prep](2026-07-06-windows-store-trust-prep.md), `docs/release/windows-store-package-identity.template.json`, `scripts/prepare-windows-store-manifest.mjs`, Node tests, and `npm run desktop:prepare:windows-store-manifest`. Store/MSIX remains the first trusted Windows path; public desktop downloads remain held until owner-controlled Partner Center identity, Store certification or equivalent trust evidence, smoke checks, and owner approval exist. |
+| Structural routing hardening | task complete | 2026-07-06T23:26:17-06:00 | Technical Lead | Replaced one-primary-helper routing with deterministic task decomposition, stage-aware tool/mode catalog selection, role-based route steps, nested PDCA/light-DMAIC work items, mode-aware cost/energy estimates, full-plan prompt/export support, and added regression coverage for finance tracker, CRM/dashboard, policy memo, public copy, code review, ChatGPT Go plus Perplexity Free, and ChatGPT Pro plus Claude Max/Claude Code plus Perplexity Pro. Validation passed: governance preflight, focused unit tests, full `npm test -- --run`, `npm run build`, Playwright e2e against this app on `127.0.0.1:5179` because `5173` was occupied by another repo, and `git diff --check`. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline

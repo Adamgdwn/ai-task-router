@@ -107,7 +107,7 @@ describe("route scoring", () => {
     expect(result.unavailable).toEqual([]);
     expect(result.scoredCandidates.map((candidate) => candidate.strategy)).toEqual(["lean", "balanced", "premium"]);
     expect(result.recommendedCandidateId).toBe("route-task-score-public-writing-lean");
-    expect(result.tieBreakersApplied).toEqual([expect.stringContaining("least-resource safe route")]);
+    expect(result.tieBreakersApplied).toEqual([]);
 
     for (const candidate of result.scoredCandidates) {
       expect(candidate.score).toBeGreaterThanOrEqual(0);
@@ -199,7 +199,7 @@ describe("route scoring", () => {
     expect(lean.cautions).toEqual(expect.arrayContaining(lean.warnings));
   });
 
-  it("uses the least-resource tie-breaker when scores are equal", () => {
+  it("uses the least-resource tie-breaker when scores are equal after policy fit", () => {
     const task = buildTask({
       id: "task-equal-score-tie",
       requestedSourceIds: [],
@@ -211,11 +211,12 @@ describe("route scoring", () => {
       instruction: "Manually prepare the requested draft without external calls.",
       requiredPermissionLevel: 0,
       modelId: "manual-human-review",
+      deliverableIds: [],
+      selectionReasons: [],
       sourceIds: [],
       warnings: [],
     } satisfies RouteStep;
     const candidates = [
-      buildManualTieCandidate(task.id, "premium", manualStep),
       buildManualTieCandidate(task.id, "balanced", manualStep),
       buildManualTieCandidate(task.id, "lean", manualStep),
     ];
@@ -224,7 +225,7 @@ describe("route scoring", () => {
       task,
       candidateResult: { candidates, unavailable: [] },
       models: routeReadyModels,
-      policy: policyById("balanced"),
+      policy: policyById("quality-first"),
     });
     const uniqueScores = new Set(result.scoredCandidates.map((candidate) => candidate.score));
 

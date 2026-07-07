@@ -59,6 +59,8 @@ const validRouteStep = {
   instruction: "Use the permitted uploaded notes to create the synthesis.",
   requiredPermissionLevel: 2,
   modelId: "small-local-model",
+  deliverableIds: [],
+  selectionReasons: [],
   sourceIds: ["uploaded-notes"],
   warnings: [],
 } satisfies RouteStep;
@@ -101,6 +103,7 @@ const validRouteCard = {
       actions: ["Clarify the goal and quality bar."],
       reviewChecks: ["The goal is clear."],
       recommendedModelLabel: "You first",
+      workItems: [],
     },
     {
       id: "stage-task-001-create",
@@ -113,6 +116,7 @@ const validRouteCard = {
       recommendedModelId: "small-local-model",
       recommendedModelLabel: "Small local model",
       routeStepId: "step-001",
+      workItems: [],
     },
   ],
   warnings: ["No external execution is allowed."],

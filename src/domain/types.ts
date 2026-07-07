@@ -13,6 +13,7 @@ import type {
   permissionLevelSchema,
   policyDefaultSchema,
   projectStageGuidanceSchema,
+  projectStageWorkItemSchema,
   promptPackageSchema,
   promptStepSchema,
   routeCardSchema,
@@ -24,6 +25,7 @@ import type {
   sourcePermissionSchema,
   taskTemplateSchema,
   taskIntakeSchema,
+  workRoles,
 } from "./schemas";
 
 export type PermissionLevel = z.infer<typeof permissionLevelSchema>;
@@ -37,6 +39,8 @@ export type TaskTemplate = z.infer<typeof taskTemplateSchema>;
 export type TaskIntake = z.infer<typeof taskIntakeSchema>;
 export type RouteStep = z.infer<typeof routeStepSchema>;
 export type RouteOption = z.infer<typeof routeOptionSchema>;
+export type WorkRole = (typeof workRoles)[number];
+export type ProjectStageWorkItem = z.infer<typeof projectStageWorkItemSchema>;
 export type ProjectStageGuidance = z.infer<typeof projectStageGuidanceSchema>;
 export type PromptStep = z.infer<typeof promptStepSchema>;
 export type PromptPackage = z.infer<typeof promptPackageSchema>;

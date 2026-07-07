@@ -1,14 +1,27 @@
-import type { ModelInventoryItem, ProjectStageGuidance, RouteOption, RouteStep, TaskIntake } from "../types";
+import type {
+  ModelInventoryItem,
+  ProjectStageGuidance,
+  ProjectStageWorkItem,
+  RouteOption,
+  RouteStep,
+  TaskIntake,
+  WorkRole,
+} from "../types";
+import { estimateRouteStepCostUsd, estimateRouteStepEnergyWh } from "./routeEconomics";
 import {
   modelLabelForExecutionForTask,
   modelLabelForPromptDesignForTask,
   modelLabelWithMinimum,
 } from "./modelGuidance";
 import {
+  decomposeTask,
   requestedDeliverableLabels,
   requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
+  taskNeedsFullBuildPlan,
+  type TaskDecomposition,
+  type TaskDeliverable,
 } from "./taskDecomposition";
 
 export type BuildProjectStageGuidanceInput = {
@@ -28,6 +41,7 @@ type StageDraft = {
   fallbackModelLabel: string;
   recommendedModelLabel?: string;
   recommendedModelId?: string;
+  workItems?: ProjectStageWorkItem[];
 };
 
 export function buildProjectStageGuidance({
@@ -37,22 +51,27 @@ export function buildProjectStageGuidance({
 }: BuildProjectStageGuidanceInput): ProjectStageGuidance[] {
   const modelById = new Map(models.map((model) => [model.id, model]));
   const manualReviewModel = models.find((model) => model.tier === "human");
-  const researchStep = firstStepOfKind(recommendedOption, "research");
-  const primaryStep = primaryWorkStep(recommendedOption);
+  const decomposition = decomposeTask(task);
+  const researchStep = firstStepOfWorkRole(recommendedOption, "evidence-check") ?? firstStepOfKind(recommendedOption, "research");
+  const promptStep = firstStepOfWorkRole(recommendedOption, "prompt-design") ?? primaryWorkStep(recommendedOption);
+  const primaryStep = promptStep;
+  const executionStep =
+    firstStepOfWorkRole(recommendedOption, "build-slice") ??
+    firstStepOfWorkRole(recommendedOption, "execution") ??
+    primaryWorkStep(recommendedOption);
   const artifactStep = firstStepOfKind(recommendedOption, "artifact");
   const reviewStep = firstStepOfKind(recommendedOption, "human review");
   const promptBuilderModelLabel = modelLabelForStageStep(
     task,
-    primaryStep,
+    promptStep,
     modelById,
     manualReviewModel,
     "You first",
     "prompt",
   );
-  const executionStep = artifactStep ?? primaryStep;
   const executionModelLabel = modelLabelForStageStep(
     task,
-    executionStep,
+    artifactStep ?? executionStep,
     modelById,
     manualReviewModel,
     modelLabelForStep(primaryStep, modelById, manualReviewModel, "You first"),
@@ -68,6 +87,7 @@ export function buildProjectStageGuidance({
       actions: frameStageActions(task),
       reviewChecks: frameStageChecks(task),
       fallbackModelLabel: "You first",
+      workItems: frameStageWorkItems(task, decomposition),
     },
   ];
 
@@ -81,6 +101,16 @@ export function buildProjectStageGuidance({
       reviewChecks: gatherStageChecks(task),
       routeStep: researchStep ?? primaryStep,
       fallbackModelLabel: "You first",
+      workItems: buildStageWorkItems({
+        task,
+        decomposition,
+        stage: "gather",
+        workRole: "evidence-check",
+        routeStep: researchStep ?? undefined,
+        modelById,
+        manualReviewModel,
+        fallbackModelLabel: "You first",
+      }),
     });
   }
 
@@ -95,6 +125,16 @@ export function buildProjectStageGuidance({
     fallbackModelLabel: "You first",
     recommendedModelLabel: promptBuilderModelLabel,
     recommendedModelId: primaryStep?.modelId,
+    workItems: buildStageWorkItems({
+      task,
+      decomposition,
+      stage: "create",
+      workRole: "prompt-design",
+      routeStep: promptStep,
+      modelById,
+      manualReviewModel,
+      fallbackModelLabel: "You first",
+    }),
   });
 
   if (shouldAddPackageStage(task, artifactStep)) {
@@ -105,10 +145,20 @@ export function buildProjectStageGuidance({
       purpose: packageStagePurpose(task),
       actions: packageStageActions(task),
       reviewChecks: packageStageChecks(task),
-      routeStep: artifactStep ?? primaryStep,
+      routeStep: artifactStep ?? executionStep,
       fallbackModelLabel: modelLabelForStep(primaryStep, modelById, manualReviewModel, "You first"),
       recommendedModelLabel: executionModelLabel,
-      recommendedModelId: executionStep?.modelId,
+      recommendedModelId: (artifactStep ?? executionStep)?.modelId,
+      workItems: buildStageWorkItems({
+        task,
+        decomposition,
+        stage: "package",
+        workRole: artifactStep ? "artifact-package" : executionStep?.workRole === "build-slice" ? "build-slice" : "execution",
+        routeStep: artifactStep ?? executionStep,
+        modelById,
+        manualReviewModel,
+        fallbackModelLabel: modelLabelForStep(primaryStep, modelById, manualReviewModel, "You first"),
+      }),
     });
   }
 
@@ -121,6 +171,16 @@ export function buildProjectStageGuidance({
     reviewChecks: reviewStageChecks(task),
     routeStep: reviewStep ?? undefined,
     fallbackModelLabel: manualReviewModel?.label ?? "Your review",
+    workItems: buildStageWorkItems({
+      task,
+      decomposition,
+      stage: "review",
+      workRole: "quality-review",
+      routeStep: reviewStep ?? undefined,
+      modelById,
+      manualReviewModel,
+      fallbackModelLabel: manualReviewModel?.label ?? "Your review",
+    }),
   });
 
   stages.push({
@@ -131,6 +191,16 @@ export function buildProjectStageGuidance({
     actions: actStageActions(task),
     reviewChecks: actStageChecks(task),
     fallbackModelLabel: "You first",
+    workItems: buildStageWorkItems({
+      task,
+      decomposition,
+      stage: "act",
+      workRole: "next-action",
+      routeStep: undefined,
+      modelById,
+      manualReviewModel,
+      fallbackModelLabel: "You first",
+    }),
   });
 
   return stages.map((stageDraft) =>
@@ -169,7 +239,198 @@ function buildStageGuidance(input: {
     recommendedModelLabel: stageDraft.recommendedModelLabel ?? recommendedModelLabel,
     ...(recommendedModelId ? { recommendedModelId } : {}),
     ...(stageDraft.routeStep?.id ? { routeStepId: stageDraft.routeStep.id } : {}),
+    workItems: stageDraft.workItems ?? [],
   };
+}
+
+function frameStageWorkItems(task: TaskIntake, decomposition: TaskDecomposition): ProjectStageWorkItem[] {
+  return [
+    {
+      id: `stage-${task.id}-frame-deliverables`,
+      workRole: "next-action",
+      deliverableIds: decomposition.deliverables.map((deliverable) => deliverable.id),
+      label: "Confirm the full request",
+      expectedOutput: `A visible checklist of everything the route must cover: ${inlineList(
+        decomposition.deliverables.map((deliverable) => deliverable.label),
+      )}.`,
+      recommendedModelLabel: "You first",
+      selectionReasons: ["The user should confirm scope and privacy before any helper is used."],
+      reviewChecks: ["No requested deliverable has been dropped or merged into vague wording."],
+      upgradeTrigger: "Ask for help only after the goal, inputs, privacy limits, and done state are clear.",
+    },
+  ];
+}
+
+function buildStageWorkItems(input: {
+  task: TaskIntake;
+  decomposition: TaskDecomposition;
+  stage: ProjectStageGuidance["stage"];
+  workRole: WorkRole;
+  routeStep: RouteStep | undefined | null;
+  modelById: Map<string, ModelInventoryItem>;
+  manualReviewModel: ModelInventoryItem | undefined;
+  fallbackModelLabel: string;
+}): ProjectStageWorkItem[] {
+  const { task, decomposition, stage, workRole, routeStep, modelById, manualReviewModel, fallbackModelLabel } = input;
+  const deliverables = deliverablesForStageRole(decomposition, workRole);
+  const splitByDeliverable =
+    decomposition.complexBuildPlan &&
+    (stage === "create" || stage === "package") &&
+    deliverables.length > 1;
+  const targets = splitByDeliverable ? deliverables.slice(0, 8).map((deliverable) => [deliverable]) : [deliverables];
+  const estimatedCostUsd = routeStep ? estimateRouteStepCostUsd(routeStep, modelById) : undefined;
+  const estimatedEnergyWh = routeStep ? estimateRouteStepEnergyWh(routeStep, modelById) : undefined;
+  const perItemCost = estimatedCostUsd !== undefined ? estimatedCostUsd / targets.length : undefined;
+  const perItemEnergy = estimatedEnergyWh !== undefined ? estimatedEnergyWh / targets.length : undefined;
+
+  return targets.map((targetDeliverables, index) => {
+    const deliverableIds = targetDeliverables.map((deliverable) => deliverable.id);
+    const label = workItemLabel(workRole, targetDeliverables, stage);
+
+    return {
+      id: `stage-${task.id}-${stage}-${workRole}-${index + 1}`,
+      workRole,
+      deliverableIds,
+      label,
+      expectedOutput: expectedOutputForWorkItem(task, workRole, targetDeliverables),
+      recommendedModelLabel: recommendedLabelForWorkItem(routeStep, modelById, manualReviewModel, fallbackModelLabel),
+      ...(routeStep?.modelId ? { recommendedModelId: routeStep.modelId } : {}),
+      ...(routeStep?.modeId ? { modeId: routeStep.modeId } : {}),
+      ...(routeStep?.modeLabel ? { modeLabel: routeStep.modeLabel } : {}),
+      selectionReasons: routeStep?.selectionReasons?.length
+        ? routeStep.selectionReasons
+        : ["This stage follows the selected route and the user's allowed tools."],
+      reviewChecks: reviewChecksForWorkItem(task, workRole, targetDeliverables),
+      upgradeTrigger: upgradeTriggerForWorkItem(task, workRole),
+      ...(perItemCost !== undefined ? { estimatedCostUsd: roundEstimate(perItemCost) } : {}),
+      ...(perItemEnergy !== undefined ? { estimatedEnergyWh: roundEstimate(perItemEnergy) } : {}),
+    };
+  });
+}
+
+function deliverablesForStageRole(decomposition: TaskDecomposition, workRole: WorkRole): TaskDeliverable[] {
+  const matching = decomposition.deliverables.filter((deliverable) => deliverable.roles.includes(workRole));
+
+  return matching.length ? matching : decomposition.deliverables;
+}
+
+function workItemLabel(
+  workRole: WorkRole,
+  deliverables: readonly TaskDeliverable[],
+  stage: ProjectStageGuidance["stage"],
+) {
+  const deliverableLabel = deliverables.length === 1 ? deliverables[0]?.label : "full request";
+
+  switch (workRole) {
+    case "evidence-check":
+      return `Check evidence for ${deliverableLabel}`;
+    case "prompt-design":
+      return `Prompt section for ${deliverableLabel}`;
+    case "execution":
+      return `Execute ${deliverableLabel}`;
+    case "build-slice":
+      return `Build-plan slice for ${deliverableLabel}`;
+    case "artifact-package":
+      return `Package ${deliverableLabel}`;
+    case "quality-review":
+      return `Review ${deliverableLabel ?? "the result"}`;
+    case "next-action":
+      return stage === "act" ? "Pick the first action" : "Confirm scope";
+  }
+}
+
+function expectedOutputForWorkItem(
+  task: TaskIntake,
+  workRole: WorkRole,
+  deliverables: readonly TaskDeliverable[],
+) {
+  const deliverableText = inlineList(deliverables.map((deliverable) => deliverable.label));
+
+  switch (workRole) {
+    case "evidence-check":
+      return `Current facts, source notes, model availability, and privacy notes for ${deliverableText}.`;
+    case "prompt-design":
+      return `A master-prompt section that makes ${deliverableText} explicit and testable before execution.`;
+    case "execution":
+      return `The first usable ${task.outputType} output for ${deliverableText}.`;
+    case "build-slice":
+      return `A concrete build-plan slice for ${deliverableText}, including data flow, screens or files, tests, and deferred work.`;
+    case "artifact-package":
+      return `A saved or copy-ready ${task.outputType} package with warnings, checks, and next action visible.`;
+    case "quality-review":
+      return `A pass/fail review of ${deliverableText || "the result"} against the prompt, privacy limits, and acceptance checks.`;
+    case "next-action":
+      return "The smallest next action, the measure to check next, and whether the route should be reused or upgraded.";
+  }
+}
+
+function reviewChecksForWorkItem(
+  task: TaskIntake,
+  workRole: WorkRole,
+  deliverables: readonly TaskDeliverable[],
+) {
+  const deliverableText = inlineList(deliverables.map((deliverable) => deliverable.label));
+
+  switch (workRole) {
+    case "evidence-check":
+      return [
+        "Current facts and model/privacy assumptions are dated or marked uncertain.",
+        "No unapproved source is required for the next stage.",
+      ];
+    case "prompt-design":
+      return [
+        `The prompt explicitly covers ${deliverableText}.`,
+        "The prompt names the execution mode, checks, privacy limits, and upgrade trigger.",
+      ];
+    case "execution":
+    case "build-slice":
+      return [
+        `The output produces ${deliverableText}, not another layer of prompt advice.`,
+        taskHasBuildIntent(task) ? "The first slice is small enough to review before adding features." : "The first result is ready for review.",
+      ];
+    case "artifact-package":
+      return ["The package keeps warnings, checks, savings, and next action visible."];
+    case "quality-review":
+      return ["Every requested deliverable is present or explicitly marked as missing.", "Privacy and sensitivity limits are still respected."];
+    case "next-action":
+      return ["The next action is small, visible, and tied to a measure."];
+  }
+}
+
+function upgradeTriggerForWorkItem(task: TaskIntake, workRole: WorkRole) {
+  if (workRole === "prompt-design") {
+    return "Upgrade the prompt-design helper only if the master prompt misses deliverables, checks, privacy, or the execution model choice.";
+  }
+
+  if (workRole === "execution" || workRole === "build-slice") {
+    return "Upgrade execution only if the lighter mode ignores the master prompt or fails review after a focused retry.";
+  }
+
+  if (workRole === "evidence-check") {
+    return "Upgrade research only if current facts, citations, or model/privacy details are too thin.";
+  }
+
+  return task.qualityBar === "critical"
+    ? "Use stronger review if mistakes would be expensive or hard to reverse."
+    : "Reuse the lighter route when the checks pass.";
+}
+
+function recommendedLabelForWorkItem(
+  routeStep: RouteStep | undefined | null,
+  modelById: Map<string, ModelInventoryItem>,
+  manualReviewModel: ModelInventoryItem | undefined,
+  fallbackModelLabel: string,
+) {
+  if (routeStep?.modeLabel) {
+    const modelPrefix = routeStep.label.split(": ")[0];
+    return modelPrefix ? `${modelPrefix} (${routeStep.modeLabel})` : routeStep.modeLabel;
+  }
+
+  return modelLabelForStep(routeStep, modelById, manualReviewModel, fallbackModelLabel);
+}
+
+function roundEstimate(value: number) {
+  return Math.round(value * 1000) / 1000;
 }
 
 function frameStageActions(task: TaskIntake) {
@@ -701,14 +962,7 @@ function actStageChecks(task: TaskIntake) {
 }
 
 function needsFullBuildPlan(task: TaskIntake) {
-  return (
-    taskHasBuildIntent(task) &&
-    (task.knowledgeWorkType === "coding" ||
-      task.knowledgeWorkType === "planning" ||
-      task.outputType === "code" ||
-      task.outputType === "plan" ||
-      taskHasModelSelectionIntent(task))
-  );
+  return taskNeedsFullBuildPlan(task);
 }
 
 function buildPlanCoverageSummary(task: TaskIntake) {
@@ -770,6 +1024,10 @@ function primaryWorkStep(recommendedOption: RouteOption): RouteStep | undefined 
 
 function firstStepOfKind(recommendedOption: RouteOption, kind: RouteStep["kind"]): RouteStep | null {
   return recommendedOption.steps.find((step) => step.kind === kind) ?? null;
+}
+
+function firstStepOfWorkRole(recommendedOption: RouteOption, workRole: WorkRole): RouteStep | null {
+  return recommendedOption.steps.find((step) => step.workRole === workRole) ?? null;
 }
 
 function modelLabelForStep(

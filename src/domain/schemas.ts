@@ -46,6 +46,16 @@ export const routeStepKinds = ["model", "research", "artifact", "human review", 
 
 export const projectStageKinds = ["frame", "gather", "create", "package", "review", "act"] as const;
 
+export const workRoles = [
+  "evidence-check",
+  "prompt-design",
+  "execution",
+  "build-slice",
+  "artifact-package",
+  "quality-review",
+  "next-action",
+] as const;
+
 export const policyDefaultIds = ["least-resource", "balanced", "quality-first"] as const;
 
 export const desktopDiscoveryPlatforms = ["windows", "macos", "linux", "unknown"] as const;
@@ -226,6 +236,11 @@ export const routeStepSchema = z
     instruction: nonEmptyTextSchema,
     requiredPermissionLevel: permissionLevelSchema,
     modelId: nonEmptyIdSchema.optional(),
+    workRole: z.enum(workRoles).optional(),
+    modeId: nonEmptyIdSchema.optional(),
+    modeLabel: nonEmptyTextSchema.optional(),
+    deliverableIds: z.array(nonEmptyIdSchema).default([]),
+    selectionReasons: z.array(nonEmptyTextSchema).default([]),
     sourceIds: z.array(nonEmptyIdSchema).default([]),
     warnings: z.array(nonEmptyTextSchema).default([]),
   })
@@ -255,6 +270,25 @@ export const routeOptionSchema = z
   })
   .strict();
 
+export const projectStageWorkItemSchema = z
+  .object({
+    id: nonEmptyIdSchema,
+    workRole: z.enum(workRoles),
+    deliverableIds: z.array(nonEmptyIdSchema).default([]),
+    label: nonEmptyTextSchema,
+    expectedOutput: nonEmptyTextSchema,
+    recommendedModelLabel: nonEmptyTextSchema,
+    recommendedModelId: nonEmptyIdSchema.optional(),
+    modeId: nonEmptyIdSchema.optional(),
+    modeLabel: nonEmptyTextSchema.optional(),
+    selectionReasons: z.array(nonEmptyTextSchema).default([]),
+    reviewChecks: z.array(nonEmptyTextSchema).default([]),
+    upgradeTrigger: nonEmptyTextSchema.optional(),
+    estimatedCostUsd: z.number().min(0).optional(),
+    estimatedEnergyWh: z.number().min(0).optional(),
+  })
+  .strict();
+
 export const projectStageGuidanceSchema = z
   .object({
     id: nonEmptyIdSchema,
@@ -267,6 +301,7 @@ export const projectStageGuidanceSchema = z
     recommendedModelLabel: nonEmptyTextSchema,
     recommendedModelId: nonEmptyIdSchema.optional(),
     routeStepId: nonEmptyIdSchema.optional(),
+    workItems: z.array(projectStageWorkItemSchema).max(12).default([]),
   })
   .strict();
 

@@ -38,7 +38,7 @@ export function generateRouteCard({
 }: GenerateRouteCardInput): RouteCard {
   assertPromptPackageMatchesTask(task, promptPackage);
 
-  const scoredOptions = attachRouteEconomics(scoringResult.scoredCandidates.map(routeOptionFromScoredCandidate), models);
+  const scoredOptions = attachRouteEconomics(scoringResult.scoredCandidates.map(routeOptionFromScoredCandidate), models, task);
   let recommendedOptionId =
     scoringResult.recommendedCandidateId && scoredOptions.some((option) => option.id === scoringResult.recommendedCandidateId)
       ? scoringResult.recommendedCandidateId
@@ -122,6 +122,8 @@ function buildManualReviewFallbackStep(
     label: "Manual safety review",
     instruction: `Review the task, blocked routes, and allowed source IDs (${allowedSourceText}) manually. Do not use blocked sources or treat this route card as execution approval.`,
     requiredPermissionLevel: highestAllowedSourcePermissionLevel(task, hardGateResult.allowedSourceIds),
+    deliverableIds: [],
+    selectionReasons: ["No safe generated route remains, so manual review is the only allowed route."],
     sourceIds: hardGateResult.allowedSourceIds,
     warnings: [noSafeRouteWarning],
   };

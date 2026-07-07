@@ -112,8 +112,8 @@ describe("prompt package generator", () => {
     });
     expect(promptPackage.steps).toHaveLength(selectedRoute.steps.length);
     expect(promptPackage.steps[0]).toMatchObject({
-      id: "prompt-step-route-task-prompt-public-writing-lean-route-task-prompt-public-writing-lean-synthesis",
-      title: "Step 1: Build Master Prompt Then Execute",
+      id: "prompt-step-route-task-prompt-public-writing-lean-route-task-prompt-public-writing-lean-prompt-design",
+      title: "Step 1: Build Master Prompt",
       requiresHumanApproval: false,
     });
     expect(promptPackage.steps[0]?.inputRefs).toEqual(
@@ -121,12 +121,12 @@ describe("prompt package generator", () => {
     );
     expect(promptPackage.steps[0]?.instruction).toContain("Use this prompt package as manual guidance only.");
     expect(promptPackage.steps[0]?.instruction).toContain("Work type: writing. Output type: draft.");
-    expect(promptPackage.steps[0]?.instruction).toContain("First build a master prompt before creating the final output");
-    expect(promptPackage.steps[0]?.instruction).toContain("Explicitly carry forward these requested pieces");
+    expect(promptPackage.steps[0]?.instruction).toContain("Create a master prompt for this writing task");
+    expect(promptPackage.steps[0]?.instruction).toContain("Carry forward every requested piece");
     expect(promptPackage.steps[0]?.instruction).toContain(
       "Use only these allowed source IDs for this step: web (Websites or web search), github (GitHub or repo pages).",
     );
-    expect(promptPackage.steps[0]?.expectedOutput).toContain("draft");
+    expect(promptPackage.steps[0]?.expectedOutput).toContain("master prompt");
   });
 
   it("carries prompt, model, and build deliverables into planning prompts", () => {
@@ -153,7 +153,7 @@ describe("prompt package generator", () => {
     expect(instruction).toContain("categorization rules");
     expect(instruction).toContain("month-over-month tracking");
     expect(instruction).toContain("model/tool choice for execution");
-    expect(instruction).toContain("Name the specific execution model or mode to start with");
+    expect(instruction).toContain("name the specific execution model or mode");
   });
 
   it("includes current-facts and citation reminders without implying the app searches", () => {
@@ -173,7 +173,7 @@ describe("prompt package generator", () => {
     const instructionText = promptPackage.steps.map((step) => step.instruction).join("\n");
 
     expectValidPromptPackage(promptPackage);
-    expect(promptPackage.steps.map((step) => step.title)).toContain("Step 1: Check Research");
+    expect(promptPackage.steps.map((step) => step.title)).toContain("Step 1: Check Evidence");
     expect(instructionText).toContain("Current-facts reminder");
     expect(instructionText).toContain("Citation reminder");
     expect(instructionText).toContain("this app does not search, fetch, or update facts");
@@ -221,7 +221,7 @@ describe("prompt package generator", () => {
     expectValidPromptPackage(promptPackage);
     expect(approvalSteps).toHaveLength(1);
     expect(approvalSteps[0]).toMatchObject({
-      title: "Step 2: Approve Before Use",
+      title: "Step 3: Approve Before Use",
       expectedOutput: expect.stringContaining("human approval decision"),
     });
     expect(approvalSteps[0]?.instruction).toContain("Human review checklist");
@@ -292,8 +292,12 @@ describe("prompt package generator", () => {
     const inputRefs = promptPackage.steps.flatMap((step) => step.inputRefs);
 
     expectValidPromptPackage(promptPackage);
-    expect(selectedRoute.steps.map((step) => step.kind)).toEqual(["manual", "human review"]);
-    expect(promptPackage.steps.map((step) => step.title)).toEqual(["Step 1: Prepare Manually", "Step 2: Approve Before Use"]);
+    expect(selectedRoute.steps.map((step) => step.kind)).toEqual(["manual", "manual", "human review"]);
+    expect(promptPackage.steps.map((step) => step.title)).toEqual([
+      "Step 1: Build Master Prompt",
+      "Step 2: Run Finished Prompt",
+      "Step 3: Approve Before Use",
+    ]);
     expect(promptPackage.steps[promptPackage.steps.length - 1]?.requiresHumanApproval).toBe(true);
     expect(inputRefs).toContain("manual-human-review");
     expect(inputRefs).toContain("secure-local-source");

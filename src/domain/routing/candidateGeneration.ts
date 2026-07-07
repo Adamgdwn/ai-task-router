@@ -1,14 +1,25 @@
 import { defaultFinalApprovalRouteStep } from "../defaults/defaultPolicies";
 import { everydayToolFrequencyRank } from "../defaults/everydayToolCatalog";
 import type { HardGateResult } from "./hardGates";
-import type { ModelInventoryItem, PermissionLevel, PolicyDefault, RouteStep, SourcePermission, TaskIntake } from "../types";
+import type { ModelInventoryItem, PermissionLevel, PolicyDefault, RouteStep, SourcePermission, TaskIntake, WorkRole } from "../types";
 import {
   modelInstructionGuidance,
   modelInstructionGuidanceForTask,
   modelLabelWithMinimum,
   modelLabelWithMinimumForTask,
 } from "./modelGuidance";
-import { requestedDeliverableSummary, taskHasBuildIntent, taskHasModelSelectionIntent } from "./taskDecomposition";
+import {
+  decomposeTask,
+  requestedDeliverableSummary,
+  taskHasBuildIntent,
+  taskHasModelSelectionIntent,
+  type TaskDecomposition,
+} from "./taskDecomposition";
+import {
+  buildToolModeCatalog,
+  selectToolModeForRole,
+  type ToolModeCandidate,
+} from "./toolModeCatalog";
 
 export const routeCandidateStrategies = ["lean", "balanced", "premium"] as const;
 
@@ -61,6 +72,8 @@ type CandidateContext = {
   allowedModels: ModelInventoryItem[];
   allowedSourceIds: string[];
   allowedSources: SourcePermission[];
+  decomposition: TaskDecomposition;
+  modes: ToolModeCandidate[];
   warnings: string[];
 };
 
@@ -153,6 +166,8 @@ function buildCandidateContext(
     allowedModels: models.filter((model) => allowedModelIds.has(model.id)),
     allowedSourceIds,
     allowedSources: task.sourcePermissions.filter((source) => allowedSourceIdSet.has(source.id)),
+    decomposition: decomposeTask(task),
+    modes: buildToolModeCatalog(models.filter((model) => allowedModelIds.has(model.id)), task),
     warnings: uniqueMessages(hardGateResult.warnings.map((warning) => warning.message)),
   };
 }
@@ -180,14 +195,31 @@ function buildStrategyCandidate(input: {
     });
   }
 
-  const primaryModel = selectPreferredModel(context.allowedModels, primaryModelTiersForStrategy(strategy, task, definition));
-  const premiumBenchmarkModel =
-    strategy === "premium" && !primaryModel ? selectPremiumBenchmarkModel(context.allowedModels, task) : null;
-  const resolvedPrimaryModel = primaryModel ?? premiumBenchmarkModel;
-  const usesPremiumBenchmark = strategy === "premium" && !primaryModel && premiumBenchmarkModel !== null;
-  const usesManualPrimaryStep = resolvedPrimaryModel?.tier === "human";
+  if (strategy !== "lean" && !context.allowedModels.some((model) => model.tier !== "human")) {
+    return unavailableCandidate({
+      taskId: task.id,
+      strategy,
+      label: definition.label,
+      reasonCode: definition.unavailableReasonCode,
+      reason: definition.unavailableReason,
+      warnings: context.warnings,
+    });
+  }
 
-  if (!resolvedPrimaryModel) {
+  const roleSelections = selectRouteRoleModes({ strategy, task, context });
+  const usableSelections = [
+    roleSelections.evidence,
+    roleSelections.promptDesign,
+    roleSelections.execution,
+    roleSelections.artifact,
+  ].filter((mode): mode is ToolModeCandidate => mode !== null);
+  const usesManualPrimaryStep = usableSelections.length > 0 && usableSelections.every((mode) => mode.modeKind === "manual");
+  const usesPremiumBenchmark =
+    strategy === "premium" &&
+    usableSelections.some((mode) => mode.modeKind === "benchmark") &&
+    !context.allowedModels.some((model) => model.tier === "frontier");
+
+  if (!roleSelections.promptDesign && !roleSelections.execution) {
     return unavailableCandidate({
       taskId: task.id,
       strategy,
@@ -199,15 +231,51 @@ function buildStrategyCandidate(input: {
   }
 
   const steps: RouteStep[] = [];
-  const researchStep = buildResearchStep({ routeId, task, context });
+  const researchStep = buildEvidenceStep({ routeId, task, context, mode: roleSelections.evidence });
   if (researchStep) {
     steps.push(researchStep);
   }
 
-  steps.push(buildPrimaryStep({ routeId, strategy, task, model: resolvedPrimaryModel, context, usesPremiumBenchmark }));
+  const promptStep = roleSelections.promptDesign
+    ? buildRoleModeStep({
+        routeId,
+        task,
+        context,
+        mode: roleSelections.promptDesign,
+        workRole: "prompt-design",
+        sourceIds: context.allowedSourceIds,
+      })
+    : null;
+  if (promptStep) {
+    steps.push(promptStep);
+  }
 
-  const artifactStep = buildArtifactStep({ routeId, task, primaryModel: resolvedPrimaryModel, context });
-  if (strategy === "premium" && artifactStep) {
+  const executionWorkRole = taskHasBuildIntent(task) || task.outputType === "code" ? "build-slice" : "execution";
+  const executionStep = roleSelections.execution
+    ? buildRoleModeStep({
+        routeId,
+        task,
+        context,
+        mode: roleSelections.execution,
+        workRole: executionWorkRole,
+        sourceIds: context.allowedSourceIds,
+      })
+    : null;
+  if (executionStep) {
+    steps.push(executionStep);
+  }
+
+  const artifactStep = roleSelections.artifact
+    ? buildRoleModeStep({
+        routeId,
+        task,
+        context,
+        mode: roleSelections.artifact,
+        workRole: "artifact-package",
+        sourceIds: context.allowedSourceIds,
+      })
+    : null;
+  if (artifactStep) {
     steps.push(artifactStep);
   }
 
@@ -226,8 +294,9 @@ function buildStrategyCandidate(input: {
       usesManualPrimaryStep,
       usesPremiumBenchmark,
       hasResearchStep: researchStep !== null,
-      hasArtifactStep: strategy === "premium" && artifactStep !== null,
+      hasArtifactStep: artifactStep !== null,
       requiresHumanApproval: hardGateResult.requiresHumanApproval,
+      workItemCount: context.decomposition.deliverables.length,
     }),
     estimatedCostLevel: definition.estimatedCostLevel,
     estimatedEffortLevel: usesManualPrimaryStep ? "high" : definition.estimatedEffortLevel,
@@ -238,6 +307,60 @@ function buildStrategyCandidate(input: {
 
 function routeCandidateId(taskId: string, strategy: RouteCandidateStrategy) {
   return `route-${taskId}-${strategy}`;
+}
+
+function selectRouteRoleModes(input: {
+  strategy: RouteCandidateStrategy;
+  task: TaskIntake;
+  context: CandidateContext;
+}): {
+  evidence: ToolModeCandidate | null;
+  promptDesign: ToolModeCandidate | null;
+  execution: ToolModeCandidate | null;
+  artifact: ToolModeCandidate | null;
+} {
+  const { strategy, task, context } = input;
+  const executionWorkRole = taskHasBuildIntent(task) || task.outputType === "code" ? "build-slice" : "execution";
+  const promptDesign = selectToolModeForRole({ task, modes: context.modes, role: "prompt-design", strategy });
+  const execution = selectExecutionModeForRoute({
+    strategy,
+    task,
+    context,
+    executionWorkRole,
+    promptDesign,
+  });
+
+  return {
+    evidence: shouldAddEvidenceStep(task)
+      ? selectToolModeForRole({ task, modes: context.modes, role: "evidence-check", strategy })
+      : null,
+    promptDesign,
+    execution,
+    artifact: shouldAddArtifactStep(task)
+      ? selectToolModeForRole({ task, modes: context.modes, role: "artifact-package", strategy })
+      : null,
+  };
+}
+
+function selectExecutionModeForRoute(input: {
+  strategy: RouteCandidateStrategy;
+  task: TaskIntake;
+  context: CandidateContext;
+  executionWorkRole: WorkRole;
+  promptDesign: ToolModeCandidate | null;
+}) {
+  const { strategy, task, context, executionWorkRole, promptDesign } = input;
+
+  if (strategy === "balanced" && executionWorkRole === "execution" && promptDesign && !context.decomposition.complexBuildPlan) {
+    const sameToolModes = context.modes.filter((mode) => mode.modelId === promptDesign.modelId);
+    const sameToolExecution = selectToolModeForRole({ task, modes: sameToolModes, role: executionWorkRole, strategy });
+
+    if (sameToolExecution) {
+      return sameToolExecution;
+    }
+  }
+
+  return selectToolModeForRole({ task, modes: context.modes, role: executionWorkRole, strategy });
 }
 
 function unavailableCandidate(input: {
@@ -257,6 +380,172 @@ function unavailableCandidate(input: {
     reason: input.reason,
     warnings: input.warnings,
   };
+}
+
+function buildEvidenceStep(input: {
+  routeId: string;
+  task: TaskIntake;
+  context: CandidateContext;
+  mode: ToolModeCandidate | null;
+}): RouteStep | null {
+  const { routeId, task, context, mode } = input;
+
+  if (!shouldAddEvidenceStep(task) || !mode) {
+    return null;
+  }
+
+  const researchSourceIds = context.allowedSources
+    .filter((source) => source.sourceType === "web")
+    .map((source) => source.id);
+
+  if (researchSourceIds.length === 0) {
+    return null;
+  }
+
+  return buildRoleModeStep({
+    routeId,
+    task,
+    context,
+    mode,
+    workRole: "evidence-check",
+    sourceIds: researchSourceIds,
+  });
+}
+
+function buildRoleModeStep(input: {
+  routeId: string;
+  task: TaskIntake;
+  context: CandidateContext;
+  mode: ToolModeCandidate;
+  workRole: WorkRole;
+  sourceIds: string[];
+}): RouteStep {
+  const { routeId, task, context, mode, workRole, sourceIds } = input;
+  const deliverables = context.decomposition.deliverables.filter((deliverable) => deliverable.roles.includes(workRole));
+  const deliverableIds = deliverables.length
+    ? deliverables.map((deliverable) => deliverable.id)
+    : context.decomposition.deliverables.map((deliverable) => deliverable.id);
+  const stepKind = routeStepKindForMode(mode, workRole);
+
+  return {
+    id: `${routeId}-${workRole}`,
+    kind: stepKind,
+    label: `${mode.displayLabel}: ${roleActionLabel(workRole, task)}`,
+    instruction: roleInstruction({
+      task,
+      context,
+      mode,
+      workRole,
+      sourceIds,
+      deliverableSummary: deliverableIds.length ? deliverableSummaryForIds(context, deliverableIds) : requestedDeliverableSummary(task),
+    }),
+    requiredPermissionLevel: permissionLevelForSourceIds(sourceIds, context.allowedSources),
+    modelId: mode.modelId,
+    workRole,
+    modeId: mode.id,
+    modeLabel: mode.modeLabel,
+    deliverableIds,
+    selectionReasons: mode.selectionReasons,
+    sourceIds,
+    warnings: [],
+  };
+}
+
+function routeStepKindForMode(mode: ToolModeCandidate, workRole: WorkRole): RouteStep["kind"] {
+  if (mode.modeKind === "manual") {
+    return "manual";
+  }
+
+  if (workRole === "evidence-check" || mode.modeKind === "research") {
+    return "research";
+  }
+
+  if (workRole === "artifact-package" || mode.modeKind === "artifact") {
+    return "artifact";
+  }
+
+  return "model";
+}
+
+function roleActionLabel(workRole: WorkRole, task: TaskIntake) {
+  switch (workRole) {
+    case "evidence-check":
+      return "evidence and model availability check";
+    case "prompt-design":
+      return taskHasBuildIntent(task) ? "master build prompt" : "master prompt";
+    case "execution":
+      return "run the finished prompt";
+    case "build-slice":
+      return "first usable build slice";
+    case "artifact-package":
+      return "package the result";
+    case "quality-review":
+      return "quality review";
+    case "next-action":
+      return "choose the next action";
+  }
+}
+
+function roleInstruction(input: {
+  task: TaskIntake;
+  context: CandidateContext;
+  mode: ToolModeCandidate;
+  workRole: WorkRole;
+  sourceIds: string[];
+  deliverableSummary: string;
+}) {
+  const { task, context, mode, workRole, sourceIds, deliverableSummary } = input;
+  const sourceText = formatSourceIds(sourceIds);
+  const reasonText = mode.selectionReasons.join(" ");
+  const upgradeTrigger = upgradeTriggerForRole(workRole, mode, task);
+
+  switch (workRole) {
+    case "evidence-check":
+      return `Manually use ${mode.displayLabel} for current facts, citations, model availability, and privacy notes before prompt design. Use only allowed source IDs (${sourceText}). Cover ${deliverableSummary}. ${reasonText} The app does not search, fetch, or call the tool.`;
+    case "prompt-design":
+      return `Use ${mode.displayLabel} for the thinking-heavy prompt-design pass. Build a master prompt that covers ${deliverableSummary}, names allowed inputs, privacy limits, acceptance checks, Plan-Do-Check-Act or light DMAIC stages, the execution helper, and the upgrade trigger. ${context.decomposition.complexBuildPlan ? "Do not create only prompt advice; make the prompt require the actual build plan and first usable slice. " : ""}${reasonText} Upgrade trigger: ${upgradeTrigger}. The app does not send task data to the model.`;
+    case "execution":
+      return `Run the approved master prompt in ${mode.displayLabel}. Produce the requested ${task.outputType} for ${deliverableSummary}, not another prompt-writing plan. Keep the first pass small enough to review. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
+    case "build-slice":
+      return `Run the approved master prompt in ${mode.displayLabel} to produce the first usable build slice for ${deliverableSummary}. Include data flow, files or screens, acceptance checks, deferred features, and what to do if the first pass fails. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
+    case "artifact-package":
+      return `Use ${mode.displayLabel} to package the reviewed result as ${task.outputType}. Keep sources limited to (${sourceText}) and keep warnings, checks, savings, and next action visible. ${reasonText}`;
+    case "quality-review":
+      return `Use ${mode.displayLabel} to check the result against the original task, promised deliverables, privacy limits, and acceptance checks. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
+    case "next-action":
+      return `Choose the smallest next action after review. Save what worked, what saved cost or energy, and when this route should be upgraded.`;
+  }
+}
+
+function upgradeTriggerForRole(workRole: WorkRole, mode: ToolModeCandidate, task: TaskIntake) {
+  if (workRole === "evidence-check") {
+    return "upgrade only if source coverage, citations, or current model/privacy facts are thin.";
+  }
+
+  if (workRole === "prompt-design") {
+    return task.qualityBar === "high" || task.qualityBar === "critical"
+      ? "upgrade if the prompt misses deliverables, privacy limits, acceptance checks, or the execution model choice."
+      : "upgrade if the prompt is vague enough that execution would require guessing.";
+  }
+
+  if (workRole === "build-slice" || workRole === "execution") {
+    return "upgrade only if the lighter execution pass ignores the master prompt, misses requested deliverables, or fails review twice.";
+  }
+
+  if (mode.resourceProfile === "premium") {
+    return "downgrade future similar work if this pass did not improve quality enough to justify the added cost and energy.";
+  }
+
+  return "upgrade if review finds missing reasoning, missing facts, unsafe handling, or expensive rework.";
+}
+
+function deliverableSummaryForIds(context: CandidateContext, deliverableIds: readonly string[]) {
+  const deliverableIdSet = new Set(deliverableIds);
+  const labels = context.decomposition.deliverables
+    .filter((deliverable) => deliverableIdSet.has(deliverable.id))
+    .map((deliverable) => deliverable.label);
+
+  return labels.length ? inlineList(labels) : "the requested output";
 }
 
 function selectPreferredModel(
@@ -345,6 +634,8 @@ function buildResearchStep(input: {
     )} Capture current facts or citations outside the app before synthesis; the app does not search, fetch, or call the tool.`,
     requiredPermissionLevel: permissionLevelForSourceIds(researchSourceIds, context.allowedSources),
     modelId: researchModel.id,
+    deliverableIds: [],
+    selectionReasons: ["Current facts and citations require a research-capable helper before synthesis."],
     sourceIds: researchSourceIds,
     warnings: [],
   };
@@ -378,6 +669,8 @@ function buildPrimaryStep(input: {
       instruction: `Evaluate the task manually, write the master prompt first, then prepare the ${task.outputType} from allowed source IDs (${sourceText}). Note what would justify using an AI helper or premium route. Treat this app as a planning record only.`,
       requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
       modelId: model.id,
+      deliverableIds: [],
+      selectionReasons: ["Manual preparation remains available when it is the safest or lightest adequate path."],
       sourceIds: context.allowedSourceIds,
       warnings: [],
     };
@@ -397,6 +690,8 @@ function buildPrimaryStep(input: {
     )} The app does not send task data to the model.`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
     modelId: model.id,
+    deliverableIds: [],
+    selectionReasons: ["Legacy primary route step kept for compatibility with older route construction paths."],
     sourceIds: context.allowedSourceIds,
     warnings: [],
   };
@@ -452,6 +747,8 @@ function buildArtifactStep(input: {
     )}). ${modelInstructionGuidanceForTask(artifactModel, task)}`,
     requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
     modelId: artifactModel.id,
+    deliverableIds: [],
+    selectionReasons: ["An artifact-capable helper is useful for packaging the reviewed result."],
     sourceIds: context.allowedSourceIds,
     warnings: [],
   };
@@ -476,10 +773,12 @@ function buildCandidateSummary(input: {
   hasResearchStep: boolean;
   hasArtifactStep: boolean;
   requiresHumanApproval: boolean;
+  workItemCount: number;
 }) {
   const routeParts = [
     input.definition.posture,
     input.policy.description,
+    `It decomposes the request into ${input.workItemCount} deliverable-focused part(s), then assigns help by work stage instead of using one helper for everything.`,
     input.usesManualPrimaryStep
       ? "Because no lighter AI helper is selected for this route, the work stays with you and should be treated as higher effort."
       : null,
@@ -493,6 +792,10 @@ function buildCandidateSummary(input: {
   ].filter((part): part is string => part !== null);
 
   return routeParts.join(" ");
+}
+
+function shouldAddEvidenceStep(task: TaskIntake) {
+  return task.requiresCurrentFacts || task.requiresCitations || taskHasModelSelectionIntent(task);
 }
 
 function permissionLevelForSourceIds(sourceIds: string[], sources: SourcePermission[]): PermissionLevel {
@@ -512,6 +815,18 @@ function permissionLevelForSources(sources: SourcePermission[]): PermissionLevel
 
 function formatSourceIds(sourceIds: string[]) {
   return sourceIds.length === 0 ? "none" : sourceIds.join(", ");
+}
+
+function inlineList(items: readonly string[]) {
+  if (items.length === 0) {
+    return "";
+  }
+
+  if (items.length === 1) {
+    return items[0] ?? "";
+  }
+
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
 function uniqueMessages(messages: string[]) {

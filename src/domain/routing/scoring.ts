@@ -138,9 +138,10 @@ function scoreCandidate(input: {
   const weightedScoreBeforePenalty = clampScore(
     weightedComponents.reduce((total, component) => total + component.contribution, 0),
   );
+  const policyStrategyBonus = strategyFitBonus(candidate, policy);
   const warningPenalty = warningPenaltyFor(candidate);
   const warningPenaltyComponent = buildWarningPenaltyComponent(warningPenalty, candidate.warnings.length);
-  const score = clampScore(weightedScoreBeforePenalty - warningPenalty);
+  const score = clampScore(weightedScoreBeforePenalty + policyStrategyBonus - warningPenalty);
   const scoreComponents = [...weightedComponents, warningPenaltyComponent];
 
   return {
@@ -153,6 +154,14 @@ function scoreCandidate(input: {
     strengths: buildStrengths(scoreComponents),
     cautions: buildCautions(candidate, scoreComponents, warningPenalty),
   };
+}
+
+function strategyFitBonus(candidate: RouteCandidate, policy: PolicyDefault) {
+  if (candidate.strategy !== policy.strategy) {
+    return 0;
+  }
+
+  return 8;
 }
 
 function buildWeightedComponents(input: {

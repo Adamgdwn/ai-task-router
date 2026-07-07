@@ -5,8 +5,9 @@ import {
   requirePricingAnchor,
   type TokenRun,
 } from "../impact/impactEstimator";
-import type { ModelInventoryItem, RouteOption, RouteStep } from "../types";
+import type { ModelInventoryItem, RouteOption, RouteStep, TaskIntake, WorkRole } from "../types";
 import { pricingAnchorIdForModel } from "./modelGuidance";
+import { modeEstimateAnchorsForRouteStep } from "./toolModeCatalog";
 
 type RouteCostBasis = {
   costUsd: number;
@@ -24,11 +25,30 @@ const stepCostMultipliers: Record<RouteStep["kind"], number> = {
   "human review": 0,
 };
 
+const roleCostMultipliers: Record<WorkRole, number> = {
+  "evidence-check": 0.25,
+  "prompt-design": 0.45,
+  execution: 0.65,
+  "build-slice": 0.85,
+  "artifact-package": 0.35,
+  "quality-review": 0.15,
+  "next-action": 0,
+};
+
+const energyProfileMultipliers = {
+  none: 0,
+  low: 0.35,
+  medium: 0.65,
+  high: 1,
+  reasoning: 1.2,
+} as const;
+
 const minimumActionableRouteEnergyWh = 0.024;
 
 export function attachRouteEconomics(
   options: RouteOption[],
   models: readonly ModelInventoryItem[],
+  task?: TaskIntake,
 ): RouteOption[] {
   const modelById = new Map(models.map((model) => [model.id, model]));
   const premiumBenchmarkCostUsd = estimatePricingAnchorCost("openai-premium-text-anchor", defaultHundredThousandTokenRun);
@@ -37,12 +57,12 @@ export function attachRouteEconomics(
     option,
     costUsd:
       option.strategy === "premium"
-        ? Math.max(estimateRouteCostUsd(option, modelById), premiumBenchmarkCostUsd)
-        : estimateRouteCostUsd(option, modelById),
+        ? Math.max(estimateRouteCostUsd(option, modelById, task), premiumBenchmarkCostUsd)
+        : estimateRouteCostUsd(option, modelById, task),
     energyWh:
       option.strategy === "premium"
-        ? Math.max(estimateRouteEnergyWh(option, modelById), premiumBenchmarkEnergyWh)
-        : estimateRouteEnergyWh(option, modelById),
+        ? Math.max(estimateRouteEnergyWh(option, modelById, task), premiumBenchmarkEnergyWh)
+        : estimateRouteEnergyWh(option, modelById, task),
   }));
   const baseline = optionCosts.reduce(
     (currentBaseline, candidate) =>
@@ -70,24 +90,10 @@ export function attachRouteEconomics(
 export function estimateRouteCostUsd(
   option: Pick<RouteOption, "steps">,
   modelById: ReadonlyMap<string, ModelInventoryItem>,
+  _task?: TaskIntake,
 ): number {
   const total = option.steps.reduce((sum, step) => {
-    if (!step.modelId) {
-      return sum;
-    }
-
-    const model = modelById.get(step.modelId);
-    if (!model) {
-      return sum;
-    }
-
-    const pricingAnchorId = pricingAnchorIdForModel(model);
-    if (!pricingAnchorId) {
-      return sum;
-    }
-
-    const multiplier = stepCostMultipliers[step.kind];
-    return sum + estimatePricingAnchorCost(pricingAnchorId, scaledTokenRun(multiplier));
+    return sum + estimateRouteStepCostUsd(step, modelById);
   }, 0);
 
   return roundUsd(total);
@@ -96,23 +102,10 @@ export function estimateRouteCostUsd(
 export function estimateRouteEnergyWh(
   option: Pick<RouteOption, "steps">,
   modelById: ReadonlyMap<string, ModelInventoryItem>,
+  _task?: TaskIntake,
 ): number {
   const total = option.steps.reduce((sum, step) => {
-    if (!step.modelId) {
-      return sum;
-    }
-
-    const model = modelById.get(step.modelId);
-    if (!model) {
-      return sum;
-    }
-
-    const energyAnchorId = energyAnchorIdForModel(model);
-    if (!energyAnchorId) {
-      return sum;
-    }
-
-    return sum + estimateEnergyAnchorWh(energyAnchorId, stepCostMultipliers[step.kind]);
+    return sum + estimateRouteStepEnergyWh(step, modelById);
   }, 0);
 
   if (option.steps.length > 0 && total === 0) {
@@ -120,6 +113,50 @@ export function estimateRouteEnergyWh(
   }
 
   return roundWh(total);
+}
+
+export function estimateRouteStepCostUsd(
+  step: RouteStep,
+  modelById: ReadonlyMap<string, ModelInventoryItem>,
+): number {
+  if (!step.modelId) {
+    return 0;
+  }
+
+  const model = modelById.get(step.modelId);
+  if (!model) {
+    return 0;
+  }
+
+  const pricingAnchorId = pricingAnchorIdForStep(step, model);
+  if (!pricingAnchorId) {
+    return 0;
+  }
+
+  return roundUsd(estimatePricingAnchorCost(pricingAnchorId, scaledTokenRun(multiplierForStep(step))));
+}
+
+export function estimateRouteStepEnergyWh(
+  step: RouteStep,
+  modelById: ReadonlyMap<string, ModelInventoryItem>,
+): number {
+  if (!step.modelId) {
+    return 0;
+  }
+
+  const model = modelById.get(step.modelId);
+  if (!model) {
+    return 0;
+  }
+
+  const anchors = modeEstimateAnchorsForRouteStep(step, model);
+  const energyAnchorId = anchors.energyAnchorId ?? energyAnchorIdForModel(model);
+  if (!energyAnchorId) {
+    return step.kind === "manual" ? minimumActionableRouteEnergyWh : 0;
+  }
+
+  const profileMultiplier = energyProfileMultipliers[anchors.energyProfile];
+  return roundWh(estimateEnergyAnchorWh(energyAnchorId, multiplierForStep(step) * profileMultiplier));
 }
 
 function attachEconomicsToOption(option: RouteOption, basis: RouteCostBasis): RouteOption {
@@ -161,7 +198,21 @@ function scaledTokenRun(multiplier: number): TokenRun {
   };
 }
 
-function energyAnchorIdForModel(model: ModelInventoryItem): string | null {
+function pricingAnchorIdForStep(step: RouteStep, model: ModelInventoryItem) {
+  const anchors = modeEstimateAnchorsForRouteStep(step, model);
+
+  if (anchors.zeroMarginalCost) {
+    return null;
+  }
+
+  return anchors.pricingAnchorId ?? pricingAnchorIdForModel(model);
+}
+
+function multiplierForStep(step: RouteStep) {
+  return step.workRole ? roleCostMultipliers[step.workRole] : stepCostMultipliers[step.kind];
+}
+
+export function energyAnchorIdForModel(model: ModelInventoryItem): string | null {
   if (model.localOnly || model.tier === "human") {
     return null;
   }

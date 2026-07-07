@@ -3,6 +3,7 @@ import { createEverydayToolModel } from "../../domain/defaults/everydayToolCatal
 import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generateRouteCandidates, type RouteCandidate, type RouteCandidateGenerationResult } from "../../domain/routing/candidateGeneration";
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
+import { decomposeTask } from "../../domain/routing/taskDecomposition";
 import { routeStepSchema } from "../../domain/schemas";
 import type { ModelInventoryItem, SourcePermission, TaskIntake } from "../../domain/types";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
@@ -91,14 +92,24 @@ describe("route candidate generation", () => {
     });
     expect(lean.steps).toEqual([
       expect.objectContaining({
-        id: "route-task-public-writing-lean-synthesis",
+        id: "route-task-public-writing-lean-prompt-design",
         kind: "model",
         modelId: "user-free-small-model",
+        workRole: "prompt-design",
+        modeLabel: expect.stringContaining("master prompt"),
+        sourceIds: ["web", "github"],
+      }),
+      expect.objectContaining({
+        id: "route-task-public-writing-lean-execution",
+        kind: "model",
+        modelId: "user-free-small-model",
+        workRole: "execution",
         sourceIds: ["web", "github"],
       }),
     ]);
-    expect(balanced.steps[0]).toMatchObject({ modelId: "user-mid-synthesis-model" });
-    expect(premium.steps[0]).toMatchObject({ modelId: "user-frontier-quality-model" });
+    expect(balanced.steps[0]).toMatchObject({ modelId: "user-mid-synthesis-model", workRole: "prompt-design" });
+    expect(balanced.steps[1]).toMatchObject({ modelId: "user-mid-synthesis-model", workRole: "execution" });
+    expect(premium.steps[0]).toMatchObject({ modelId: "user-frontier-quality-model", workRole: "prompt-design" });
 
     for (const candidate of candidateResult.candidates) {
       expect(candidate.summary).not.toMatch(/score|scoring|weighted/i);
@@ -168,12 +179,13 @@ describe("route candidate generation", () => {
 
     for (const candidate of candidateResult.candidates) {
       expect(candidate.steps[0]).toMatchObject({
-        id: `${candidate.id}-research`,
+        id: `${candidate.id}-evidence-check`,
         kind: "research",
         modelId: "user-research-tool",
+        workRole: "evidence-check",
         sourceIds: ["web"],
       });
-      expect(candidate.steps[0]?.instruction).toContain("the app does not search, fetch, or call the tool");
+      expect(candidate.steps[0]?.instruction.toLowerCase()).toContain("the app does not search, fetch, or call the tool");
       expectValidRouteSteps(candidate);
     }
   });
@@ -205,11 +217,12 @@ describe("route candidate generation", () => {
     expect(lean.steps[0]).toMatchObject({
       kind: "research",
       modelId: "user-research-tool",
+      workRole: "evidence-check",
       sourceIds: ["web"],
     });
     expect(lean.steps[0]?.label).toContain("Perplexity");
-    expect(lean.steps[0]?.label).toContain("minimum Perplexity Sonar");
-    expect(lean.steps[0]?.label).not.toContain("minimum Perplexity Sonar Pro");
+    expect(lean.steps[0]?.label).toContain("Perplexity Sonar");
+    expect(lean.steps[0]?.label).not.toContain("Perplexity Sonar Pro");
   });
 
   it("uses Perplexity for evidence and keeps premium visible as a comparison benchmark", () => {
@@ -246,15 +259,29 @@ describe("route candidate generation", () => {
 
     expect(balanced.steps).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ kind: "research", modelId: "perplexity-free" }),
-        expect.objectContaining({ kind: "model", modelId: "chatgpt-go" }),
+        expect.objectContaining({ kind: "research", modelId: "perplexity-free", workRole: "evidence-check" }),
+        expect.objectContaining({
+          kind: "model",
+          modelId: "chatgpt-go",
+          workRole: "prompt-design",
+          modeLabel: expect.stringContaining("strongest reasoning mode included in this account"),
+        }),
+        expect.objectContaining({
+          kind: "model",
+          modelId: "chatgpt-go",
+          workRole: "build-slice",
+          modeLabel: expect.stringContaining("fastest adequate lower-cost"),
+        }),
       ]),
     );
+    const deliverableIds = new Set(decomposeTask(task).deliverables.map((deliverable) => deliverable.id));
+    const coveredDeliverableIds = new Set(balanced.steps.flatMap((step) => step.deliverableIds));
+    expect([...deliverableIds].every((deliverableId) => coveredDeliverableIds.has(deliverableId))).toBe(true);
     const premium = requireCandidate(candidateResult, "premium");
     expect(premium.steps).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ kind: "research", modelId: "perplexity-free" }),
-        expect.objectContaining({ kind: "model", modelId: "chatgpt-go" }),
+        expect.objectContaining({ kind: "research", modelId: "perplexity-free", workRole: "evidence-check" }),
+        expect.objectContaining({ kind: "model", modelId: "chatgpt-go", workRole: "prompt-design" }),
       ]),
     );
     expect(premium.summary).toContain("premium benchmark");
@@ -262,6 +289,70 @@ describe("route candidate generation", () => {
       "No premium-capacity helper is saved for this task, so the premium route is shown as a comparison benchmark using the strongest safe helper currently selected.",
     );
     expect(candidateResult.unavailable.map((candidate) => candidate.strategy)).not.toContain("premium");
+  });
+
+  it("uses Perplexity, strongest owned reasoning, Claude Code build execution, and lighter safe execution for a full paid stack", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-pro",
+        providerId: "chatgpt",
+        accountId: "pro",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "claude-max-build",
+        providerId: "claude",
+        accountId: "max-20x",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-pro",
+        providerId: "perplexity",
+        accountId: "pro",
+        frequencyId: "daily",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-full-paid-build-stack",
+      title: "Build a CRM dashboard with current model choices",
+      description:
+        "Plan and build a CRM dashboard that imports contacts, tracks pipeline trends, recommends next actions, checks current model choices, and creates the first usable code slice.",
+      knowledgeWorkType: "coding",
+      outputType: "code",
+      qualityBar: "high",
+      requiresCurrentFacts: true,
+      requestedSourceIds: [],
+    });
+
+    const { candidateResult } = generateForTask(task, models);
+    const balanced = requireCandidate(candidateResult, "balanced");
+
+    expect(balanced.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          modelId: "perplexity-pro",
+          workRole: "evidence-check",
+          modeLabel: expect.stringContaining("Perplexity Sonar Pro"),
+        }),
+        expect.objectContaining({
+          workRole: "prompt-design",
+          modeLabel: expect.stringMatching(/strongest|highest/i),
+        }),
+        expect.objectContaining({
+          modelId: "claude-max-build",
+          workRole: "build-slice",
+          modeLabel: expect.stringContaining("Claude Code via this Claude subscription"),
+        }),
+      ]),
+    );
+    expect(balanced.steps.find((step) => step.workRole === "build-slice")?.instruction).toContain(
+      "Claude Code note: use the subscription's Claude Code surface",
+    );
   });
 
   it("adds a premium artifact step for packaging-shaped outputs when the artifact tool is allowed", () => {
@@ -276,9 +367,10 @@ describe("route candidate generation", () => {
     const { candidateResult } = generateForTask(task);
     const premium = requireCandidate(candidateResult, "premium");
 
-    expect(premium.steps.map((step) => step.kind)).toEqual(["model", "artifact"]);
-    expect(premium.steps[1]).toMatchObject({
-      id: "route-task-artifact-packaging-premium-artifact",
+    expect(premium.steps.map((step) => step.kind)).toEqual(["model", "model", "artifact"]);
+    expect(premium.steps.map((step) => step.workRole)).toEqual(["prompt-design", "execution", "artifact-package"]);
+    expect(premium.steps[2]).toMatchObject({
+      id: "route-task-artifact-packaging-premium-artifact-package",
       modelId: "user-artifact-tool",
       sourceIds: ["web"],
     });
@@ -349,7 +441,8 @@ describe("route candidate generation", () => {
     ]);
 
     const lean = requireCandidate(candidateResult, "lean");
-    expect(lean.steps.map((step) => step.kind)).toEqual(["manual", "human review"]);
+    expect(lean.steps.map((step) => step.kind)).toEqual(["manual", "manual", "human review"]);
+    expect(lean.steps.map((step) => step.workRole)).toEqual(["prompt-design", "execution", undefined]);
     expect(lean.steps[0]).toMatchObject({
       modelId: "manual-human-review",
       sourceIds: ["secure-local-source"],

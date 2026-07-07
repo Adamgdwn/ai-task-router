@@ -2,6 +2,7 @@ import { promptPackageSchema } from "../schemas";
 import type { PromptPackage, PromptStep, RouteOption, RouteStep, SourcePermission, TaskIntake } from "../types";
 import type { HardGateResult } from "../routing/hardGates";
 import {
+  decomposeTask,
   requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
@@ -135,10 +136,21 @@ function buildPromptInstruction(input: {
   const { task, selectedRoute, routeStep, routeStepIndex, routeStepCount, safeSourceIds, expectedOutput, context } = input;
   const sourceRefs = formatSourceRefs(safeSourceIds, context.sourceById);
   const stepPosition = `Route step ${routeStepIndex + 1} of ${routeStepCount}: ${routeStep.label}.`;
+  const decomposition = decomposeTask(task);
+  const routeDeliverables = routeStep.deliverableIds.length
+    ? decomposition.deliverables.filter((deliverable) => routeStep.deliverableIds.includes(deliverable.id))
+    : decomposition.deliverables;
+  const deliverableText = routeDeliverables.length
+    ? routeDeliverables.map((deliverable) => deliverable.label).join(", ")
+    : requestedDeliverableSummary(task);
   const lines = [
     manualUseBoundary,
     stepPosition,
     `Recommended route: ${selectedRoute.label} (${selectedRoute.strategy}); score ${selectedRoute.score}.`,
+    routeStep.workRole ? `Work role: ${routeStep.workRole}.` : "",
+    routeStep.modeLabel ? `Recommended mode: ${routeStep.modeLabel}.` : "",
+    routeStep.selectionReasons.length ? `Why this helper/mode: ${routeStep.selectionReasons.join(" ")}` : "",
+    `Deliverables this step must cover: ${deliverableText}.`,
     `Task: ${task.title}.`,
     `Task description: ${task.description}`,
     `Work type: ${task.knowledgeWorkType}. Output type: ${task.outputType}. Quality bar: ${task.qualityBar}. Sensitivity: ${task.sensitivityClass}.`,
@@ -150,7 +162,7 @@ function buildPromptInstruction(input: {
     promptTextForStep({ task, routeStep, sourceRefs, expectedOutput }),
   ];
 
-  return lines.filter((line) => line.length > 0).join("\n\n");
+  return lines.filter((line): line is string => typeof line === "string" && line.length > 0).join("\n\n");
 }
 
 function promptTextForStep(input: {
@@ -169,6 +181,10 @@ function promptTextForStep(input: {
       "- Confirm route warnings and sensitivity reminders were addressed before any outside use.",
       "- Decide whether to approve, revise, stop, or reroute outside the app.",
     ].join("\n");
+  }
+
+  if (routeStep.workRole) {
+    return promptTextForWorkRole({ task, routeStep, sourceRefs, expectedOutput });
   }
 
   return [
@@ -203,6 +219,84 @@ function promptTextForStep(input: {
     "- End with the first action I should take next.",
     `Expected output: ${expectedOutput}`,
   ].filter((line) => line.length > 0).join("\n");
+}
+
+function promptTextForWorkRole(input: {
+  task: TaskIntake;
+  routeStep: RouteStep;
+  sourceRefs: string;
+  expectedOutput: string;
+}) {
+  const { task, routeStep, sourceRefs, expectedOutput } = input;
+  const deliverableText = requestedDeliverableSummary(task);
+  const reviewLines = [
+    "- Check that every requested deliverable is present or explicitly marked missing.",
+    "- Check privacy, allowed sources, current-facts needs, acceptance checks, and upgrade trigger.",
+  ];
+
+  switch (routeStep.workRole) {
+    case "evidence-check":
+      return [
+        "Evidence-check instruction:",
+        `Use only these source IDs: ${sourceRefs}.`,
+        "Collect current facts, citation notes, model availability, privacy notes, and any uncertainties before prompt design.",
+        "Do not draft the final result yet.",
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
+    case "prompt-design":
+      return [
+        "Prompt to paste manually into the prompt-design helper:",
+        `Create a master prompt for this ${task.knowledgeWorkType} task.`,
+        `Task title: ${task.title}`,
+        `Task description: ${task.description}`,
+        `Requested output type: ${task.outputType}`,
+        `Carry forward every requested piece: ${deliverableText}.`,
+        `Use only these source IDs in the later execution pass: ${sourceRefs}.`,
+        "The master prompt must require Plan-Do-Check-Act or light DMAIC.",
+        "The master prompt must name the specific execution model or mode, privacy limits, acceptance checks, first usable slice, deferred work, savings note, and upgrade trigger.",
+        "Return the master prompt only, plus a short note explaining why the chosen execution mode is adequate.",
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
+    case "execution":
+      return [
+        "Execution instruction:",
+        "Paste the approved master prompt into this lighter execution helper.",
+        "Produce the requested output, not another layer of prompt advice.",
+        `The result must cover: ${deliverableText}.`,
+        ...reviewLines,
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
+    case "build-slice":
+      return [
+        "Build-slice execution instruction:",
+        "Paste the approved master prompt into this build helper or mode.",
+        "Produce the first usable build slice before adding polish or extra features.",
+        "Include data flow, screens or files, tests, acceptance checks, deferred features, and the smallest next implementation action.",
+        `The result must cover: ${deliverableText}.`,
+        ...reviewLines,
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
+    case "artifact-package":
+      return [
+        "Packaging instruction:",
+        "Package the reviewed result into the requested saved or copy-ready format.",
+        "Keep inputs, warnings, checks, savings, and next action visible.",
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
+    case "quality-review":
+      return [
+        "Quality review instruction:",
+        ...reviewLines,
+        "Decide whether to approve, revise, stop, or reroute before relying on the result.",
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
+    case "next-action":
+      return [
+        "Next-action instruction:",
+        "Choose the smallest useful action, the measure to check next, and whether this route should be reused or upgraded.",
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
+  }
 }
 
 function buildAddedHumanApprovalStep(
@@ -258,11 +352,30 @@ function sourceUseReminder(routeStep: RouteStep, safeSourceIds: string[], source
   }
 
   return safeSourceIds.length === 0
-    ? "Source-use reminder: no source IDs are approved for this step; rely only on the task description and user-provided context already in the destination tool."
+    ? "Source-use reminder: no source IDs are approved for this step; rely only on the task description and user-provided context already in the destination tool. Use only these source IDs for this step: none."
     : `Source-use reminder: Use only these allowed source IDs for this step: ${sourceRefs}.`;
 }
 
 function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
+  if (routeStep.workRole) {
+    switch (routeStep.workRole) {
+      case "evidence-check":
+        return `Evidence notes for "${task.title}" with current facts, source notes, model/privacy assumptions, and uncertainty.`;
+      case "prompt-design":
+        return `A master prompt for "${task.title}" that covers ${requestedDeliverableSummary(task)}, names the execution mode, and includes checks and upgrade triggers.`;
+      case "execution":
+        return `The first usable ${task.outputType} for "${task.title}" produced from the approved master prompt.`;
+      case "build-slice":
+        return `A first usable build-plan slice for "${task.title}" with data flow, screens or files, tests, acceptance checks, deferred work, and next action.`;
+      case "artifact-package":
+        return `A packaged ${task.outputType} for "${task.title}" with route warnings, checks, savings, and next action visible.`;
+      case "quality-review":
+        return `A review decision for "${task.title}" with required fixes, missing deliverables, privacy issues, and reroute or upgrade notes.`;
+      case "next-action":
+        return `The smallest next action for "${task.title}" plus the measure and route lesson to save.`;
+    }
+  }
+
   switch (routeStep.kind) {
     case "research":
       return task.requiresCitations
@@ -280,6 +393,20 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
 }
 
 function promptStepTitle(routeStep: RouteStep, routeStepIndex: number) {
+  if (routeStep.workRole) {
+    const actionByRole: Record<NonNullable<RouteStep["workRole"]>, string> = {
+      "evidence-check": "Check Evidence",
+      "prompt-design": "Build Master Prompt",
+      execution: "Run Finished Prompt",
+      "build-slice": "Execute Build Slice",
+      "artifact-package": "Package Output",
+      "quality-review": "Review Quality",
+      "next-action": "Choose Next Action",
+    };
+
+    return `Step ${routeStepIndex + 1}: ${actionByRole[routeStep.workRole]}`;
+  }
+
   const actionByKind: Record<RouteStep["kind"], string> = {
     research: "Check Research",
     model: "Build Master Prompt Then Execute",
@@ -301,7 +428,7 @@ function factAndCitationReminders(task: TaskIntake) {
   }
 
   if (task.requiresCitations) {
-    reminders.push("Citation reminder: ask for citations for external claims and review citation quality before outside use.");
+    reminders.push("Citation reminder: Include citations for external claims and review citation quality before outside use.");
   }
 
   return reminders;

@@ -1511,6 +1511,101 @@ button:focus-visible {
   line-height: 1.38;
 }
 
+.stageWorkItems {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.stageWorkItems > strong {
+  color: #334b5a;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.stageWorkItems > ol {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stageWorkItems > ol > li {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 20%, #d9e3e8);
+  border-radius: 6px;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px;
+}
+
+.stageWorkItems > ol > li > div:first-child {
+  align-items: start;
+  display: grid;
+  gap: 3px;
+}
+
+.stageWorkItems > ol > li > div:first-child > span {
+  color: var(--stage-accent);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.stageWorkItems > ol > li > div:first-child > strong {
+  color: var(--brand-navy);
+  font-size: 0.86rem;
+  line-height: 1.25;
+}
+
+.stageWorkItems p {
+  font-size: 0.82rem;
+}
+
+.stageWorkItems dl {
+  display: grid;
+  gap: 5px;
+}
+
+.stageWorkItems dl div {
+  display: grid;
+  gap: 2px;
+}
+
+.stageWorkItems dt {
+  font-size: 0.66rem;
+}
+
+.stageWorkItems dd {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: #263742;
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+.stageWorkItemReasons,
+.stageWorkItemChecks {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 16px;
+}
+
+.stageWorkItemReasons li,
+.stageWorkItemChecks li {
+  color: #425462;
+  font-size: 0.76rem;
+  line-height: 1.34;
+}
+
 .stageGuidanceList dl {
   margin: 0;
 }

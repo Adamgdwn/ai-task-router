@@ -6,6 +6,8 @@ export const defaultFinalApprovalRouteStep = {
   label: "Final human approval",
   instruction: "Review the proposed route, prompt package, and any warnings before using the output.",
   requiredPermissionLevel: 4,
+  deliverableIds: [],
+  selectionReasons: [],
   sourceIds: [],
   warnings: ["Human approval is required before public, regulated, highly restricted, or high-impact use."],
 } satisfies RouteStep;

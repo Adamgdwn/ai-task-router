@@ -514,6 +514,25 @@ function stageGuidanceMarkdown(routeCard: RouteCard): string {
         `   - Purpose: ${stage.purpose}`,
         `   - Do this: ${inlineList(stage.actions)}`,
         `   - Check: ${inlineList(stage.reviewChecks)}`,
+        ...(stage.workItems.length
+          ? [
+              "   - Work items:",
+              ...stage.workItems.flatMap((item) => [
+                `     - **${item.label}** (${item.workRole})`,
+                `       - Output: ${item.expectedOutput}`,
+                `       - Help: ${item.recommendedModelLabel}`,
+                item.modeLabel ? `       - Mode: ${item.modeLabel}` : "",
+                item.selectionReasons.length ? `       - Why: ${inlineList(item.selectionReasons)}` : "",
+                item.reviewChecks.length ? `       - Checks: ${inlineList(item.reviewChecks)}` : "",
+                item.upgradeTrigger ? `       - Upgrade trigger: ${item.upgradeTrigger}` : "",
+                item.estimatedCostUsd !== undefined || item.estimatedEnergyWh !== undefined
+                  ? `       - Estimate: ${item.estimatedCostUsd !== undefined ? formatUsd(item.estimatedCostUsd) : "cost not estimated"}; ${
+                      item.estimatedEnergyWh !== undefined ? `${item.estimatedEnergyWh} Wh` : "energy not estimated"
+                    }`
+                  : "",
+              ]),
+            ].filter(Boolean)
+          : []),
       ].join("\n"),
     )
     .join("\n");
