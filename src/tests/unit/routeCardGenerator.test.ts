@@ -218,7 +218,7 @@ describe("route card generator", () => {
     });
     expect(createStage).toMatchObject({
       label: "Build the master prompt",
-      recommendedModelLabel: expect.stringContaining("strongest reasoning mode included in this account"),
+      recommendedModelLabel: expect.stringContaining("GPT-5.5 Thinking Medium"),
     });
     expect(createStage?.recommendedModelLabel).not.toContain("Instant first");
     expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");

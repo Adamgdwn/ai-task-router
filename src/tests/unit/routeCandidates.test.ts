@@ -4,6 +4,7 @@ import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generateRouteCandidates, type RouteCandidate, type RouteCandidateGenerationResult } from "../../domain/routing/candidateGeneration";
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
 import { decomposeTask } from "../../domain/routing/taskDecomposition";
+import { buildToolModeCatalog } from "../../domain/routing/toolModeCatalog";
 import { routeStepSchema } from "../../domain/schemas";
 import type { ModelInventoryItem, SourcePermission, TaskIntake } from "../../domain/types";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
@@ -264,13 +265,13 @@ describe("route candidate generation", () => {
           kind: "model",
           modelId: "chatgpt-go",
           workRole: "prompt-design",
-          modeLabel: expect.stringContaining("strongest reasoning mode included in this account"),
+          modeLabel: expect.stringContaining("GPT-5.5 Thinking Medium"),
         }),
         expect.objectContaining({
           kind: "model",
           modelId: "chatgpt-go",
           workRole: "build-slice",
-          modeLabel: expect.stringContaining("fastest adequate lower-cost"),
+          modeLabel: expect.stringContaining("GPT-5.5 Instant"),
         }),
       ]),
     );
@@ -341,7 +342,7 @@ describe("route candidate generation", () => {
         }),
         expect.objectContaining({
           workRole: "prompt-design",
-          modeLabel: expect.stringMatching(/strongest|highest/i),
+          modeLabel: expect.stringContaining("GPT-5.5 Pro Standard"),
         }),
         expect.objectContaining({
           modelId: "claude-max-build",
@@ -353,6 +354,121 @@ describe("route candidate generation", () => {
     expect(balanced.steps.find((step) => step.workRole === "build-slice")?.instruction).toContain(
       "Claude Code note: use the subscription's Claude Code surface",
     );
+  });
+
+  it("uses decomposed research intent to pull Perplexity into evidence even without the current-facts checkbox", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-plus",
+        providerId: "chatgpt",
+        accountId: "plus",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-research-from-description",
+      title: "Plan a launch note",
+      description: "Research the latest public details, then draft a short launch note with source notes.",
+      knowledgeWorkType: "planning",
+      outputType: "brief",
+      requiresCurrentFacts: false,
+      requiresCitations: false,
+      requestedSourceIds: ["web"],
+    });
+
+    const { candidateResult } = generateForTask(task, models);
+    const balanced = requireCandidate(candidateResult, "balanced");
+
+    expect(balanced.steps[0]).toMatchObject({
+      kind: "research",
+      modelId: "perplexity-free",
+      workRole: "evidence-check",
+      modeLabel: expect.stringContaining("Perplexity Sonar"),
+    });
+  });
+
+  it("routes SuperGrok build work through Grok 4.3 reasoning and Grok Build instead of generic best-model labels", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "supergrok-build",
+        providerId: "grok",
+        accountId: "supergrok",
+        frequencyId: "daily",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-supergrok-build",
+      title: "Build a small dashboard",
+      description: "Create a prompt, then build the first usable dashboard slice.",
+      knowledgeWorkType: "coding",
+      outputType: "code",
+      requestedSourceIds: ["web"],
+    });
+
+    const { candidateResult } = generateForTask(task, models);
+    const balanced = requireCandidate(candidateResult, "balanced");
+
+    expect(balanced.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          modelId: "supergrok-build",
+          workRole: "prompt-design",
+          modeLabel: expect.stringContaining("Grok 4.3 with reasoning high"),
+        }),
+        expect.objectContaining({
+          modelId: "supergrok-build",
+          workRole: "build-slice",
+          modeLabel: expect.stringContaining("Grok Build 0.1"),
+        }),
+      ]),
+    );
+    expect(balanced.steps.map((step) => step.modeLabel ?? "").join(" ")).not.toContain("best available");
+  });
+
+  it("gives broader non-coding tools provider-specific surfaces instead of best-available wording", () => {
+    const task = buildTask({
+      id: "task-broader-tool-surfaces",
+      title: "Package a board update",
+      outputType: "slide outline",
+      requestedSourceIds: ["web"],
+    });
+    const modes = buildToolModeCatalog(
+      [
+        createEverydayToolModel({
+          id: "canva-pro",
+          providerId: "canva",
+          accountId: "pro",
+          frequencyId: "weekly",
+        }),
+        createEverydayToolModel({
+          id: "poe-hub",
+          providerId: "poe",
+          accountId: "poe-660k",
+          frequencyId: "weekly",
+        }),
+      ],
+      task,
+    );
+
+    expect(modes.find((mode) => mode.modelId === "canva-pro")?.modeLabel).toContain("Canva Magic");
+    expect(modes.find((mode) => mode.modelId === "poe-hub")?.modeLabel).toContain("underlying bot");
+    expect(modes.map((mode) => mode.modeLabel).join(" ")).not.toContain("best available");
   });
 
   it("adds a premium artifact step for packaging-shaped outputs when the artifact tool is allowed", () => {

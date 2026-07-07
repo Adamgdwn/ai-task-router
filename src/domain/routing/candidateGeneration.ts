@@ -331,7 +331,7 @@ function selectRouteRoleModes(input: {
   });
 
   return {
-    evidence: shouldAddEvidenceStep(task)
+    evidence: shouldAddEvidenceStep(task, context)
       ? selectToolModeForRole({ task, modes: context.modes, role: "evidence-check", strategy })
       : null,
     promptDesign,
@@ -390,7 +390,7 @@ function buildEvidenceStep(input: {
 }): RouteStep | null {
   const { routeId, task, context, mode } = input;
 
-  if (!shouldAddEvidenceStep(task) || !mode) {
+  if (!shouldAddEvidenceStep(task, context) || !mode) {
     return null;
   }
 
@@ -575,7 +575,7 @@ function primaryModelTiersForStrategy(
 
   const premiumTiers: ModelInventoryItem["tier"][] = ["frontier"];
 
-  if (task.knowledgeWorkType === "research" || (task.outputType === "answer" && (task.requiresCurrentFacts || task.requiresCitations))) {
+  if (task.knowledgeWorkType === "research" || taskNeedsEvidenceFromDecomposition(task)) {
     premiumTiers.push("research");
   }
 
@@ -595,7 +595,7 @@ function selectPremiumBenchmarkModel(
 
   if (
     task.knowledgeWorkType === "research" ||
-    (task.outputType === "answer" && (task.requiresCurrentFacts || task.requiresCitations))
+    taskNeedsEvidenceFromDecomposition(task)
   ) {
     fallbackTiers.splice(1, 0, "research");
   }
@@ -794,8 +794,22 @@ function buildCandidateSummary(input: {
   return routeParts.join(" ");
 }
 
-function shouldAddEvidenceStep(task: TaskIntake) {
-  return task.requiresCurrentFacts || task.requiresCitations || taskHasModelSelectionIntent(task);
+function shouldAddEvidenceStep(task: TaskIntake, context: Pick<CandidateContext, "decomposition">) {
+  return (
+    task.requiresCurrentFacts ||
+    task.requiresCitations ||
+    taskHasModelSelectionIntent(task) ||
+    context.decomposition.deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
+  );
+}
+
+function taskNeedsEvidenceFromDecomposition(task: TaskIntake) {
+  return (
+    task.requiresCurrentFacts ||
+    task.requiresCitations ||
+    taskHasModelSelectionIntent(task) ||
+    decomposeTask(task).deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
+  );
 }
 
 function permissionLevelForSourceIds(sourceIds: string[], sources: SourcePermission[]): PermissionLevel {

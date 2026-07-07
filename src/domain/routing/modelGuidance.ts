@@ -5,6 +5,13 @@ import {
   type EverydayToolProviderId,
 } from "../defaults/everydayToolCatalog";
 import type { ModelInventoryItem, TaskIntake } from "../types";
+import {
+  chatGptGuidanceLabels,
+  claudeGuidanceLabels,
+  geminiGuidanceLabels,
+  grokGuidanceLabels,
+  perplexityGuidanceLabels,
+} from "./providerModeProfiles";
 import { taskHasBuildIntent } from "./taskDecomposition";
 
 export type ModelUseGuidance = {
@@ -163,19 +170,42 @@ function guidanceForProvider(
 ): ModelUseGuidance {
   switch (providerId) {
     case "chatgpt":
-      return chatGptGuidance(accountId);
+      return {
+        ...chatGptGuidanceLabels(accountId),
+        pricingAnchorId:
+          accountId === "pro" || accountId === "business" || accountId === "enterprise"
+            ? "openai-premium-text-anchor"
+            : "openai-low-cost-text-anchor",
+      };
     case "claude":
-      return claudeGuidance(accountId);
+      return {
+        ...claudeGuidanceLabels(accountId),
+        pricingAnchorId:
+          accountId === "max-5x" || accountId === "max-20x" || accountId === "team" || accountId === "enterprise"
+            ? "anthropic-frontier-text-anchor"
+            : accountId === "pro"
+              ? "anthropic-premium-text-anchor"
+              : "anthropic-low-cost-text-anchor",
+      };
     case "gemini":
-      return geminiGuidance(accountId);
+      return {
+        ...geminiGuidanceLabels(accountId),
+        pricingAnchorId:
+          accountId === "google-ai-pro" || accountId === "google-ai-ultra" || accountId === "team" || accountId === "enterprise"
+            ? "google-premium-text-anchor"
+            : "google-low-cost-text-anchor",
+      };
     case "perplexity":
-      return perplexityGuidance(accountId);
+      return {
+        ...perplexityGuidanceLabels(accountId),
+        pricingAnchorId:
+          accountId === "pro" || accountId === "max" || accountId === "enterprise-pro" || accountId === "enterprise-max"
+            ? "perplexity-sonar-pro"
+            : "perplexity-sonar",
+      };
     case "grok":
       return {
-        minimumModelLabel: "the fast/default Grok mode included in this account",
-        promptBuilderModelLabel: "the strongest Grok reasoning mode available in this account when the prompt is the hard part",
-        executionModelLabel: "the fast/default Grok mode after the master prompt is clear",
-        upgradeModelLabel: "the strongest Grok reasoning mode available in this account",
+        ...grokGuidanceLabels(accountId),
         pricingAnchorId: "xai-premium-text-anchor",
       };
     case "mistral":
@@ -203,106 +233,6 @@ function guidanceForProvider(
     default:
       return genericProviderGuidance(model);
   }
-}
-
-function chatGptGuidance(accountId: EverydayToolAccountId): ModelUseGuidance {
-  if (accountId === "pro" || accountId === "business" || accountId === "enterprise") {
-    return {
-      minimumModelLabel: "GPT-5.5 Instant or the account's current Instant mode",
-      promptBuilderModelLabel: "the highest reasoning or Pro mode you own in this account for the master prompt",
-      executionModelLabel: "GPT-5.5 Instant or the fastest adequate lower-cost GPT-5.x/mini mode after the master prompt is clear",
-      upgradeModelLabel: "the highest reasoning or Pro mode available in this account",
-      pricingAnchorId: "openai-premium-text-anchor",
-    };
-  }
-
-  if (accountId === "plus" || accountId === "go") {
-    return {
-      minimumModelLabel: "GPT-5.5 Instant or the account's current fast mode",
-      promptBuilderModelLabel: "the strongest reasoning mode included in this account for the master prompt",
-      executionModelLabel: "GPT-5.5 Instant or the fastest adequate lower-cost GPT-5.x/mini mode once the prompt is clear",
-      upgradeModelLabel: "the strongest reasoning mode included in this account",
-      pricingAnchorId: "openai-low-cost-text-anchor",
-    };
-  }
-
-  return {
-    minimumModelLabel: "GPT-5.5 when available in the Free account",
-    promptBuilderModelLabel: "the strongest Free ChatGPT mode available for the master prompt; keep the scope small",
-    executionModelLabel: "the current Free ChatGPT model or mini fallback after the prompt is clear",
-    upgradeModelLabel: "a paid ChatGPT reasoning mode when the first plan fails review",
-    pricingAnchorId: "openai-low-cost-text-anchor",
-  };
-}
-
-function claudeGuidance(accountId: EverydayToolAccountId): ModelUseGuidance {
-  if (accountId === "max-5x" || accountId === "max-20x" || accountId === "team" || accountId === "enterprise") {
-    return {
-      minimumModelLabel: "the strongest everyday Claude model included in this account",
-      promptBuilderModelLabel: "Claude's strongest everyday reasoning mode when the prompt is the hard part",
-      executionModelLabel: "Claude's fast/default mode after the master prompt is clear",
-      upgradeModelLabel: "Claude's strongest available model for the highest-risk pass",
-      pricingAnchorId: "anthropic-frontier-text-anchor",
-    };
-  }
-
-  if (accountId === "pro") {
-    return {
-      minimumModelLabel: "the default paid Claude model included in Pro",
-      promptBuilderModelLabel: "the default paid Claude model for the master prompt",
-      executionModelLabel: "Claude's fast/default mode after the master prompt is clear",
-      upgradeModelLabel: "Claude's strongest available model when quality checks fail",
-      pricingAnchorId: "anthropic-premium-text-anchor",
-    };
-  }
-
-  return {
-    minimumModelLabel: "the fast/default Claude model included in this account",
-    promptBuilderModelLabel: "the fast/default Claude model with a clear review trigger",
-    executionModelLabel: "the fast/default Claude model after the prompt is clear",
-    upgradeModelLabel: "the default paid Claude model or strongest available Claude model",
-    pricingAnchorId: "anthropic-low-cost-text-anchor",
-  };
-}
-
-function geminiGuidance(accountId: EverydayToolAccountId): ModelUseGuidance {
-  if (accountId === "google-ai-pro" || accountId === "google-ai-ultra" || accountId === "team" || accountId === "enterprise") {
-    return {
-      minimumModelLabel: "the default paid Gemini model included in this account",
-      promptBuilderModelLabel: "the default paid Gemini model for the master prompt",
-      executionModelLabel: "Gemini Flash/fast mode after the master prompt is clear",
-      upgradeModelLabel: "the strongest available Gemini Pro/Ultra model",
-      pricingAnchorId: "google-premium-text-anchor",
-    };
-  }
-
-  return {
-    minimumModelLabel: "the fast/default Gemini model included in this account",
-    promptBuilderModelLabel: "the fast/default Gemini model with a clear review trigger",
-    executionModelLabel: "Gemini Flash/fast mode after the prompt is clear",
-    upgradeModelLabel: "the default paid Gemini model",
-    pricingAnchorId: "google-low-cost-text-anchor",
-  };
-}
-
-function perplexityGuidance(accountId: EverydayToolAccountId): ModelUseGuidance {
-  if (accountId === "pro" || accountId === "max" || accountId === "enterprise-pro" || accountId === "enterprise-max") {
-    return {
-      minimumModelLabel: "Perplexity Sonar Pro",
-      promptBuilderModelLabel: "Perplexity Sonar Pro for source-backed framing, not final app execution",
-      executionModelLabel: "Perplexity Sonar Pro only for evidence checks; use a general model to execute builds",
-      upgradeModelLabel: "the highest available Perplexity research mode",
-      pricingAnchorId: "perplexity-sonar-pro",
-    };
-  }
-
-  return {
-    minimumModelLabel: "Perplexity Sonar",
-    promptBuilderModelLabel: "Perplexity Sonar for current-facts framing, not final app execution",
-    executionModelLabel: "Perplexity Sonar only for evidence checks; use a general model to execute builds",
-    upgradeModelLabel: "Perplexity Sonar Pro when citations or current facts are thin",
-    pricingAnchorId: "perplexity-sonar",
-  };
 }
 
 function genericProviderGuidance(model: ModelInventoryItem): ModelUseGuidance {

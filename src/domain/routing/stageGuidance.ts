@@ -454,11 +454,17 @@ function frameStageChecks(task: TaskIntake) {
 }
 
 function shouldAddGatherStage(task: TaskIntake) {
-  return task.requestedSourceIds.length > 0 || task.requiresCurrentFacts || task.requiresCitations;
+  return (
+    task.requestedSourceIds.length > 0 ||
+    task.requiresCurrentFacts ||
+    task.requiresCitations ||
+    taskHasModelSelectionIntent(task) ||
+    decomposeTask(task).deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
+  );
 }
 
 function gatherStageLabel(task: TaskIntake) {
-  if (task.requiresCurrentFacts || task.requiresCitations) {
+  if (task.requiresCurrentFacts || task.requiresCitations || taskHasModelSelectionIntent(task)) {
     return "Check the evidence";
   }
 
@@ -466,6 +472,10 @@ function gatherStageLabel(task: TaskIntake) {
 }
 
 function gatherStagePurpose(task: TaskIntake) {
+  if (taskHasModelSelectionIntent(task)) {
+    return "Check current tool/model availability, limits, and privacy notes before choosing the execution model.";
+  }
+
   if (task.requiresCurrentFacts && task.requiresCitations) {
     return "Collect current facts and citation notes before asking any helper to make a recommendation.";
   }
@@ -482,6 +492,15 @@ function gatherStagePurpose(task: TaskIntake) {
 }
 
 function gatherStageActions(task: TaskIntake) {
+  if (taskHasModelSelectionIntent(task)) {
+    return [
+      "Check which models or modes are actually available in the tools you selected.",
+      "Write down the minimum execution mode, the stronger prompt-design mode, and the upgrade trigger.",
+      "Note privacy limits before moving any project details into a helper.",
+      "Bring only the relevant availability notes into the master prompt.",
+    ];
+  }
+
   if (task.requiresCurrentFacts && task.requiresCitations) {
     return [
       "Open the allowed sources yourself.",
@@ -522,6 +541,10 @@ function gatherStageActions(task: TaskIntake) {
 
 function gatherStageChecks(task: TaskIntake) {
   const checks = ["The next stage has enough context to work without guessing."];
+
+  if (taskHasModelSelectionIntent(task)) {
+    checks.push("The model or mode choice is named clearly enough for a novice to select it.");
+  }
 
   if (task.requiresCurrentFacts) {
     checks.push("Current facts have been checked recently.");
