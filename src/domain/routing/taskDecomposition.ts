@@ -36,6 +36,12 @@ type DeliverableDetector = {
   roles: WorkRole[];
 };
 
+const buildIntentPatterns = [
+  /\b(app|application|tool|tracker|dashboard|prototype|mini app|mini application|code|codebase|software|website|web app|build slice|code slice|first usable (build|code|app|tool) slice)\b/,
+  /\b(build|create|make|develop|implement|ship)\s+(a |an |the )?(app|application|tool|tracker|dashboard|prototype|mini app|mini application|website|web app|codebase|automation|workflow)\b/,
+  /\bautomate\b.*\b(workflow|process|spreadsheet|quote|invoice)\b/,
+];
+
 const detectorDefinitions: DeliverableDetector[] = [
   {
     kind: "prompt",
@@ -46,7 +52,7 @@ const detectorDefinitions: DeliverableDetector[] = [
   {
     kind: "build",
     label: "first usable tool or app build",
-    patterns: [/\b(app|application|tool|tracker|dashboard|prototype|mini app|build|code)\b/],
+    patterns: buildIntentPatterns,
     roles: ["prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
@@ -126,7 +132,7 @@ export function requestedDeliverableSummary(task: TaskIntake): string {
 }
 
 export function taskHasBuildIntent(task: TaskIntake): boolean {
-  return /\b(app|application|tool|tracker|dashboard|prototype|mini app|build|code)\b/.test(normalizedTaskText(task));
+  return textHasBuildIntent(normalizedTaskText(task));
 }
 
 export function taskHasModelSelectionIntent(task: TaskIntake): boolean {
@@ -309,7 +315,7 @@ function clauseLabel(clause: string) {
 function rolesForGenericClause(clause: string): WorkRole[] {
   const normalized = clause.toLowerCase();
 
-  if (/\b(build|code|app|tool|dashboard|tracker)\b/.test(normalized)) {
+  if (textHasBuildIntent(normalized)) {
     return ["prompt-design", "execution", "build-slice", "quality-review"];
   }
 
@@ -318,6 +324,10 @@ function rolesForGenericClause(clause: string): WorkRole[] {
   }
 
   return ["prompt-design", "execution", "quality-review"];
+}
+
+function textHasBuildIntent(text: string) {
+  return buildIntentPatterns.some((pattern) => new RegExp(pattern.source, pattern.flags).test(text));
 }
 
 function isComplexBuildPlan(task: TaskIntake, deliverables: readonly TaskDeliverable[]) {

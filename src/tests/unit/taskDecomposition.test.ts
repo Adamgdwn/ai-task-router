@@ -118,6 +118,30 @@ describe("task decomposition", () => {
     );
   });
 
+  it("does not treat ordinary planning language like building an itinerary as an app build", () => {
+    const task = buildTask({
+      id: "task-decomposition-family-trip",
+      title: "Family trip planner",
+      description:
+        "Compare a 5 day family trip by drive versus flight, check current attraction hours and rough ticket prices, build a day by day itinerary, estimate total cost, and flag what I should book first.",
+      knowledgeWorkType: "planning",
+      outputType: "table",
+      requiresCurrentFacts: true,
+      requiresCitations: true,
+    });
+    const decomposition = decomposeTask(task);
+
+    expect(decomposition.complexBuildPlan).toBe(false);
+    expect(labelsFor(task)).not.toContain("first usable tool or app build");
+    expect(deliverablesForWorkRole(task, "build-slice")).toHaveLength(0);
+    expect(deliverablesForWorkRole(task, "execution").map((item) => item.label)).toContain(
+      "cost, savings, or energy comparison",
+    );
+    expect(deliverablesForWorkRole(task, "evidence-check").map((item) => item.label)).toContain(
+      "current facts and source notes",
+    );
+  });
+
   it("adds review work for public copy drafts", () => {
     const task = buildTask({
       id: "task-decomposition-public-copy",
