@@ -421,6 +421,9 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Quick project plan" })).toBeInTheDocument();
     expect(screen.getByText("Frame the outcome")).toBeInTheDocument();
     expect(screen.getAllByText("Recommended help").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Mode").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Why this help").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Upgrade trigger").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Best fit").length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "What this route can save" })).toBeInTheDocument();
     expect(screen.getByText("Savings recommendation")).toBeInTheDocument();

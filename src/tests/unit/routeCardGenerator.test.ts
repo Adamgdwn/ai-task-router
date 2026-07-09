@@ -215,11 +215,24 @@ describe("route card generator", () => {
     const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
     const reviewStage = card.stageGuidance.find((stage) => stage.stage === "review");
     const actStage = card.stageGuidance.find((stage) => stage.stage === "act");
+    const visibleStageHelpers = new Set(
+      card.stageGuidance
+        .filter((stage) => ["gather", "create", "package", "review"].includes(stage.stage))
+        .map((stage) => stage.recommendedModelLabel),
+    );
 
     expectValidRouteCard(card);
     expect(card.recommendedOptionId).toBe("route-task-card-finance-prompt-build-balanced");
+    expect(visibleStageHelpers.size).toBeGreaterThanOrEqual(3);
     expect(gatherStage).toMatchObject({
       recommendedModelLabel: expect.stringContaining("Perplexity Sonar"),
+    });
+    expect(gatherStage?.workItems[0]).toMatchObject({
+      modeLabel: expect.stringContaining("Perplexity Sonar"),
+      selectionReasons: expect.arrayContaining([
+        expect.stringContaining("current facts"),
+      ]),
+      upgradeTrigger: expect.stringContaining("Upgrade research only if"),
     });
     expect(createStage).toMatchObject({
       label: "Build the master prompt",
@@ -254,6 +267,7 @@ describe("route card generator", () => {
     expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");
     expect(reviewStage?.recommendedModelLabel).toContain("GPT-5.5 Thinking Medium");
+    expect(reviewStage?.recommendedModelLabel).not.toBe(packageStage?.recommendedModelLabel);
     expect(reviewStage?.actions.join(" ")).toContain("improvement and strength insights");
     expect(reviewStage?.reviewChecks.join(" ")).toContain("full requested build path");
     expect(actStage?.reviewChecks.join(" ")).toContain("smallest useful build slice");

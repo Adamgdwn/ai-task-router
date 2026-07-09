@@ -21,96 +21,137 @@ export function StageGuidancePanel({
       </div>
       <ol className="stageGuidanceList">
         {stages.map((stage, stageIndex) => (
-          <li className={`stageGuidanceItem stage-${stage.stage}`} key={stage.id}>
-            <div className="stageOverview">
-              <span>Stage {stageIndex + 1}</span>
-              {stage.methodLabel ? <strong className="methodPill">{stage.methodLabel}</strong> : null}
-              <h4>{stage.label}</h4>
-              <p>{stage.purpose}</p>
-              <dl className="stageRecommended">
-                <div>
-                  <dt>Recommended help</dt>
-                  <dd>{stage.recommendedModelLabel}</dd>
-                </div>
-              </dl>
-            </div>
-            <div className="stageActionGrid">
-              {stage.actions.length ? (
-                <div className="stageDetailBlock">
-                  <strong>Do this</strong>
-                  <ul>
-                    {stage.actions.map((action) => (
-                      <li key={action}>{action}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {stage.reviewChecks.length ? (
-                <div className="stageDetailBlock">
-                  <strong>Check</strong>
-                  <ul>
-                    {stage.reviewChecks.map((reviewCheck) => (
-                      <li key={reviewCheck}>{reviewCheck}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
-            {stage.workItems.length ? (
-              <details className="stageWorkItems" aria-label={`${stage.label} routing detail`}>
-                <summary>Routing detail</summary>
-                <ol>
-                  {stage.workItems.map((item) => (
-                    <li key={item.id}>
-                      <div>
-                        <span>{workRoleLabel(item.workRole)}</span>
-                        <strong>{item.label}</strong>
-                      </div>
-                      <p>{item.expectedOutput}</p>
-                      <dl>
-                        <div>
-                          <dt>Help</dt>
-                          <dd>{item.recommendedModelLabel}</dd>
-                        </div>
-                        {item.modeLabel ? (
-                          <div>
-                            <dt>Mode</dt>
-                            <dd>{item.modeLabel}</dd>
-                          </div>
-                        ) : null}
-                        <div>
-                          <dt>Estimate</dt>
-                          <dd>{workItemEstimateLabel(item)}</dd>
-                        </div>
-                        <div>
-                          <dt>Upgrade trigger</dt>
-                          <dd>{item.upgradeTrigger}</dd>
-                        </div>
-                      </dl>
-                      {item.selectionReasons.length ? (
-                        <ul className="stageWorkItemReasons">
-                          {item.selectionReasons.slice(0, 2).map((reason) => (
-                            <li key={reason}>{reason}</li>
-                          ))}
-                        </ul>
-                      ) : null}
-                      {item.reviewChecks.length ? (
-                        <ul className="stageWorkItemChecks">
-                          {item.reviewChecks.slice(0, 2).map((check) => (
-                            <li key={check}>{check}</li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </li>
-                  ))}
-                </ol>
-              </details>
-            ) : null}
-          </li>
+          <StageGuidanceItem key={stage.id} stage={stage} stageIndex={stageIndex} />
         ))}
       </ol>
     </section>
   );
+}
+
+function StageGuidanceItem({
+  stage,
+  stageIndex,
+}: {
+  stage: ProjectStageGuidance;
+  stageIndex: number;
+}) {
+  const primaryWorkItem = primaryStageWorkItem(stage);
+  const selectionReason = primaryWorkItem?.selectionReasons[0];
+
+  return (
+    <li className={`stageGuidanceItem stage-${stage.stage}`}>
+      <div className="stageOverview">
+        <span>Stage {stageIndex + 1}</span>
+        {stage.methodLabel ? <strong className="methodPill">{stage.methodLabel}</strong> : null}
+        <h4>{stage.label}</h4>
+        <p>{stage.purpose}</p>
+        <dl className="stageRecommended">
+          <div>
+            <dt>Recommended help</dt>
+            <dd>{stage.recommendedModelLabel}</dd>
+          </div>
+        </dl>
+        {primaryWorkItem ? (
+          <dl className="stageChoiceSummary">
+            {primaryWorkItem.modeLabel ? (
+              <div>
+                <dt>Mode</dt>
+                <dd>{primaryWorkItem.modeLabel}</dd>
+              </div>
+            ) : null}
+            {selectionReason ? (
+              <div>
+                <dt>Why this help</dt>
+                <dd>{selectionReason}</dd>
+              </div>
+            ) : null}
+            {primaryWorkItem.upgradeTrigger ? (
+              <div>
+                <dt>Upgrade trigger</dt>
+                <dd>{primaryWorkItem.upgradeTrigger}</dd>
+              </div>
+            ) : null}
+          </dl>
+        ) : null}
+      </div>
+      <div className="stageActionGrid">
+        {stage.actions.length ? (
+          <div className="stageDetailBlock">
+            <strong>Do this</strong>
+            <ul>
+              {stage.actions.map((action) => (
+                <li key={action}>{action}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {stage.reviewChecks.length ? (
+          <div className="stageDetailBlock">
+            <strong>Check</strong>
+            <ul>
+              {stage.reviewChecks.map((reviewCheck) => (
+                <li key={reviewCheck}>{reviewCheck}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+      {stage.workItems.length ? (
+        <details className="stageWorkItems" aria-label={`${stage.label} routing detail`}>
+          <summary>Routing detail</summary>
+          <ol>
+            {stage.workItems.map((item) => (
+              <li key={item.id}>
+                <div>
+                  <span>{workRoleLabel(item.workRole)}</span>
+                  <strong>{item.label}</strong>
+                </div>
+                <p>{item.expectedOutput}</p>
+                <dl>
+                  <div>
+                    <dt>Help</dt>
+                    <dd>{item.recommendedModelLabel}</dd>
+                  </div>
+                  {item.modeLabel ? (
+                    <div>
+                      <dt>Mode</dt>
+                      <dd>{item.modeLabel}</dd>
+                    </div>
+                  ) : null}
+                  <div>
+                    <dt>Estimate</dt>
+                    <dd>{workItemEstimateLabel(item)}</dd>
+                  </div>
+                  <div>
+                    <dt>Upgrade trigger</dt>
+                    <dd>{item.upgradeTrigger}</dd>
+                  </div>
+                </dl>
+                {item.selectionReasons.length ? (
+                  <ul className="stageWorkItemReasons">
+                    {item.selectionReasons.slice(0, 2).map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {item.reviewChecks.length ? (
+                  <ul className="stageWorkItemChecks">
+                    {item.reviewChecks.slice(0, 2).map((check) => (
+                      <li key={check}>{check}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </details>
+      ) : null}
+    </li>
+  );
+}
+
+function primaryStageWorkItem(stage: ProjectStageGuidance) {
+  return stage.workItems.find((item) => item.recommendedModelLabel === stage.recommendedModelLabel) ?? stage.workItems[0];
 }
 
 function workRoleLabel(workRole: ProjectStageGuidance["workItems"][number]["workRole"]) {

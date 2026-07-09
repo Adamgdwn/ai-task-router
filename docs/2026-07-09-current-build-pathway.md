@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.2.0
+Version: 1.3.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-08T21:46:17-06:00
-Status Updated: 2026-07-08T21:46:17-06:00
+Last Updated: 2026-07-08T21:55:26-06:00
+Status Updated: 2026-07-08T21:55:26-06:00
 
 ## Purpose
 
@@ -37,7 +37,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Chunk 1 task complete | Individual power story audit is complete; next recommended build chunk is Chunk 2. |
+| Active chunk | Chunk 2 integration complete | Right-agent UX proof slice is complete; next recommended build chunk is Chunk 3. |
 
 ## Product Boundary
 
@@ -87,8 +87,8 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | Order | Chunk | Status | Completion target | Why it matters |
 |---:|---|---|---|---|
 | 1 | Individual power story audit | task complete | Task complete | Confirms the app and public docs explain the personal value clearly before adding more surface area. |
-| 2 | Right-agent UX proof slice | next | Integration complete | Makes the live recommendation flow visibly show which helper or mode belongs at each stage. |
-| 3 | Decision Card and prompt handoff polish | planned | Integration complete | Ensures exports carry the same staged agent-choice logic into the user's real workflow. |
+| 2 | Right-agent UX proof slice | integration complete | Integration complete | Makes the live recommendation flow visibly show which helper or mode belongs at each stage. |
+| 3 | Decision Card and prompt handoff polish | next | Integration complete | Ensures exports carry the same staged agent-choice logic into the user's real workflow. |
 | 4 | Reviewed methodology page | planned | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
 | 5 | Opt-in local estimator UI | planned | Draft complete | Lets users explore local, caveated impact estimates without telemetry or provider connections. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
@@ -149,8 +149,8 @@ README, product brief, manual, architecture notes, and visible stage wording now
 
 ### Chunk 2 - Right-Agent UX Proof Slice
 
-Status: planned
-Status Updated: 2026-07-08T21:17:29-06:00
+Status: integration complete
+Status Updated: 2026-07-08T21:54:37-06:00
 Completion target: Integration complete
 Budget class: Medium
 
@@ -194,6 +194,10 @@ Validation expectations:
 Stop condition:
 
 Stop when the staged recommendation proves the concept in the live flow. Defer estimator, methodology, and launch copy.
+
+Acceptance result:
+
+The live stage guidance now shows a compact route-choice summary on each stage card when data is available: recommended help, visible mode, first selection reason, and upgrade trigger. Route-card tests now prove a realistic staged task uses different help across gather, create, package, and review. App and Playwright coverage verify the route-choice summary appears in the live recommendation flow while no-execution boundaries remain visible.
 
 ### Chunk 3 - Decision Card And Prompt Handoff Polish
 
@@ -400,6 +404,14 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-08T21:46:17-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 Chromium workflow tests passed. |
 | 2026-07-08T21:46:17-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings after marking Chunk 1 complete and Chunk 2 next. |
 | 2026-07-08T21:46:17-06:00 | `git diff --check` | pass | Only normal Windows LF-to-CRLF notices. |
+| 2026-07-08T21:50:38-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings before Chunk 2 edits. |
+| 2026-07-08T21:53:33-06:00 | `npm run test -- routeCardGenerator App` | pass | 2 files, 26 tests; includes visible mode/reason/upgrade UI assertions and staged-helper diversity proof. |
+| 2026-07-08T21:53:54-06:00 | `npm run test -- promptPackageGenerator` | pass | 1 file, 8 tests. |
+| 2026-07-08T21:53:54-06:00 | `npm run build` | pass | TypeScript and Vite build passed; existing large chunk warning remains. |
+| 2026-07-08T21:54:37-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 Chromium workflow tests passed, including route-choice summary visibility and narrow viewport overflow check. |
+| 2026-07-08T21:55:26-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings after Chunk 2 edits and pathway handoff update. |
+| 2026-07-08T21:55:26-06:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
+| 2026-07-08T21:55:26-06:00 | `git diff --check` | pass | Only normal Windows LF-to-CRLF notices. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -462,6 +474,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next chunk is Chunk 2, the right-agent UX proof slice, starting at the Plan Chunks section above. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway.
+Immediate next chunk is Chunk 3, the Decision Card and prompt handoff polish slice, starting at the Plan Chunks section above. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.
