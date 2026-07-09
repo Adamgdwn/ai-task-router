@@ -430,6 +430,8 @@ describe("App", () => {
     expect(screen.getAllByText("Action").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Why").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Check").length).toBeGreaterThan(0);
+    expect(document.querySelectorAll(".stageGuidanceSection details")).toHaveLength(0);
+    expect(document.querySelectorAll(".stageGuidanceSection summary")).toHaveLength(0);
     expect(screen.getByLabelText(/Lean route: .* cost at 50 uses/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Balanced route: .* energy at 75 uses/)).toBeInTheDocument();
     expect(screen.getAllByText("Best fit").length).toBeGreaterThan(0);

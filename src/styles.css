@@ -1508,8 +1508,7 @@ button:focus-visible {
 
 .stageOverview,
 .stageActionGrid,
-.stageGuidanceList li > div,
-.stageGuidanceList li > details {
+.stageGuidanceList li > div {
   display: grid;
   gap: 5px;
   min-width: 0;
@@ -1662,21 +1661,6 @@ button:focus-visible {
   font-weight: 700;
   margin: 0;
   padding: 0;
-}
-
-.stageWorkItemReasons,
-.stageWorkItemChecks {
-  display: grid;
-  gap: 4px;
-  margin: 0;
-  padding-left: 16px;
-}
-
-.stageWorkItemReasons li,
-.stageWorkItemChecks li {
-  color: #425462;
-  font-size: 0.76rem;
-  line-height: 1.34;
 }
 
 .stageGuidanceList dl {

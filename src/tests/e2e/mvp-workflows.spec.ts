@@ -167,6 +167,8 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.locator(".stageChoiceSummary").filter({ hasText: "Upgrade trigger" }).first()).toBeVisible();
   await expect(page.getByText("Path for this stage").first()).toBeVisible();
   await expect(page.getByText("Action").first()).toBeVisible();
+  await expect(page.locator(".stageGuidanceSection details")).toHaveCount(0);
+  await expect(page.locator(".stageGuidanceSection summary")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Selected route", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Choose this route" }).first()).toBeVisible();
