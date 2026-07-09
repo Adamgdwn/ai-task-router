@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-09T09:20:39-06:00
-Status Updated: 2026-07-09T09:20:39-06:00
+Last Updated: 2026-07-09T10:14:22-06:00
+Status Updated: 2026-07-09T10:14:22-06:00
 
 ## Purpose
 
@@ -38,7 +38,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Production deploy blocked | Source commit `f8e0a40` removes the remaining stage-path disclosure affordance and is pushed to `main`, but Cloudflare rejected the production deploy token from the current public IP. Deploy from an allowed IP/session or update the token location policy before owner production testing. |
+| Active chunk | Production deploy blocked | Current `main` is pushed at `80a661b` and includes commit `f8e0a40`, which removes the remaining stage-path disclosure affordance. Release checks passed from HEAD, but Cloudflare still rejected the production deploy token from public IP `184.67.69.66` with code `9109`. The direct-link Linux fallback was unavailable. Deploy from an allowed IP/session or update the token location policy before owner production testing. |
 
 ## Product Boundary
 
@@ -458,6 +458,10 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-09T09:17:07-06:00 | `npm run test -- App`; `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | App tests passed 15 tests and MVP Chromium workflow passed 6 tests; both now assert the stage guidance contains no `details` or `summary` disclosure elements. |
 | 2026-07-09T09:17:36-06:00 | `npm audit --audit-level=moderate`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `git diff --check` | pass | Audit found 0 vulnerabilities; Vitest passed 14 files and 119 tests; production build passed with the existing large chunk warning; web release-candidate scan found no release-blocking findings; whitespace check only reported normal Windows LF-to-CRLF notices. |
 | 2026-07-09T09:20:39-06:00 | `npx --yes wrangler pages deploy dist --project-name ai-task-router --branch main --commit-hash f8e0a40 --commit-message "Remove stage path disclosure affordance" --env-file ...` | blocked | Cloudflare rejected the secure env-file token from the current public IP with code `9109` and then reported too many auth failures on deployment-list retry. Token values were not printed. Source commit `f8e0a40` is pushed; production remains on the previous deployment until a deploy is run from an allowed IP/session or the token location policy is updated. |
+| 2026-07-09T10:11:44-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings before retrying production deployment from current `main`. |
+| 2026-07-09T10:12:14-06:00 | `npm audit --audit-level=moderate`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `git diff --check` | pass | Audit found 0 vulnerabilities; Vitest passed 14 files and 119 tests; production build from `80a661b` passed with the existing Vite chunk-size warning; web release-candidate scan found no release-blocking findings; whitespace check was clean. |
+| 2026-07-09T10:12:52-06:00 | `npx --yes wrangler pages deploy dist --project-name ai-task-router --branch main --commit-hash 80a661b --commit-message "Record production deploy blocker" --env-file ...` | blocked | Cloudflare again rejected the secure env-file token from public IP `184.67.69.66` with code `9109` and authentication error `10000`. Token values were not printed. |
+| 2026-07-09T10:14:22-06:00 | Direct-link fallback check | blocked | `ssh linux-direct` to `10.77.77.2` timed out and the Windows direct-link status script could not find the configured `Ethernet 2` adapter, so no alternate allowed-location deploy host was reachable from this session. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -520,6 +524,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next step is production deployment of pushed source commit `f8e0a40` from an allowed Cloudflare token location/session, then hosted smoke of `https://ai-task-router.pages.dev/`. The production app still serves the previous deployment until that succeeds. Verify that each stage shows a visible path with no disclosure/pull-down, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
+Immediate next step is production deployment of current pushed `main` (`80a661b`, including functional commit `f8e0a40`) from an allowed Cloudflare token location/session, then hosted smoke of `https://ai-task-router.pages.dev/`. The production app still serves the previous deployment until that succeeds. The local Windows session is not an allowed token location at public IP `184.67.69.66`, and the direct-link Linux fallback was unreachable during the latest retry. Verify that each stage shows a visible path with no disclosure/pull-down, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.
