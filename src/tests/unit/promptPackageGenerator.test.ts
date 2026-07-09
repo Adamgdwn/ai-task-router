@@ -120,6 +120,10 @@ describe("prompt package generator", () => {
       expect.arrayContaining([task.id, selectedRoute.id, selectedRoute.steps[0]?.id, "user-free-small-model", "web", "github"]),
     );
     expect(promptPackage.steps[0]?.instruction).toContain("Use this prompt package as manual guidance only.");
+    expect(promptPackage.steps[0]?.instruction).toContain("Handoff stage: Create.");
+    expect(promptPackage.steps[0]?.instruction).toContain("Recommended help:");
+    expect(promptPackage.steps[0]?.instruction).toContain("Review checks:");
+    expect(promptPackage.steps[0]?.instruction).toContain("Upgrade trigger:");
     expect(promptPackage.steps[0]?.instruction).toContain("Work type: writing. Output type: draft.");
     expect(promptPackage.steps[0]?.instruction).toContain("Create a master prompt for this writing task");
     expect(promptPackage.steps[0]?.instruction).toContain("Carry forward every requested piece");
@@ -154,6 +158,8 @@ describe("prompt package generator", () => {
     expect(instruction).toContain("month-over-month tracking");
     expect(instruction).toContain("model/tool choice for execution");
     expect(instruction).toContain("name the specific execution model or mode");
+    expect(instruction).toContain("Handoff stage: Create.");
+    expect(instruction).toContain("Upgrade prompt design only if the master prompt misses deliverables");
     expect(instruction).toContain("four sections only: Plan, Do, Check, Act");
     expect(instruction).not.toMatch(/\b(DMAIC|Define|Measure|Analyze|Improve|Control)\b/);
   });

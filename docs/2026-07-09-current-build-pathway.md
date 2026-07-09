@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-08T21:55:26-06:00
-Status Updated: 2026-07-08T21:55:26-06:00
+Last Updated: 2026-07-08T22:03:18-06:00
+Status Updated: 2026-07-08T22:03:18-06:00
 
 ## Purpose
 
@@ -37,7 +37,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Chunk 2 integration complete | Right-agent UX proof slice is complete; next recommended build chunk is Chunk 3. |
+| Active chunk | Chunk 3 integration complete | Decision Card and prompt handoff polish is complete; next recommended build chunk is Chunk 4. |
 
 ## Product Boundary
 
@@ -88,8 +88,8 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 |---:|---|---|---|---|
 | 1 | Individual power story audit | task complete | Task complete | Confirms the app and public docs explain the personal value clearly before adding more surface area. |
 | 2 | Right-agent UX proof slice | integration complete | Integration complete | Makes the live recommendation flow visibly show which helper or mode belongs at each stage. |
-| 3 | Decision Card and prompt handoff polish | next | Integration complete | Ensures exports carry the same staged agent-choice logic into the user's real workflow. |
-| 4 | Reviewed methodology page | planned | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
+| 3 | Decision Card and prompt handoff polish | integration complete | Integration complete | Ensures exports carry the same staged agent-choice logic into the user's real workflow. |
+| 4 | Reviewed methodology page | next | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
 | 5 | Opt-in local estimator UI | planned | Draft complete | Lets users explore local, caveated impact estimates without telemetry or provider connections. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
 
@@ -201,8 +201,8 @@ The live stage guidance now shows a compact route-choice summary on each stage c
 
 ### Chunk 3 - Decision Card And Prompt Handoff Polish
 
-Status: planned
-Status Updated: 2026-07-08T21:17:29-06:00
+Status: integration complete
+Status Updated: 2026-07-08T22:03:18-06:00
 Completion target: Integration complete
 Budget class: Medium
 
@@ -243,6 +243,10 @@ Validation expectations:
 Stop condition:
 
 Stop at export and handoff clarity. Do not add new artifact formats unless separately approved.
+
+Acceptance result:
+
+Decision Card Markdown now includes a manual-use boundary before the summary, preserves stage guidance with recommended help plus model/mode guidance, and keeps work-item reasons, review checks, and upgrade triggers visible. Prompt package Markdown now includes a manual-use boundary, and generated prompt-step instructions carry the handoff stage, recommended help or mode, review checks, and upgrade trigger. JSON schemas and local export bundle formats were not changed.
 
 ### Chunk 4 - Reviewed Methodology Page
 
@@ -412,6 +416,12 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-08T21:55:26-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings after Chunk 2 edits and pathway handoff update. |
 | 2026-07-08T21:55:26-06:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
 | 2026-07-08T21:55:26-06:00 | `git diff --check` | pass | Only normal Windows LF-to-CRLF notices. |
+| 2026-07-08T22:00:32-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings before Chunk 3 edits; PowerShell `date -Iseconds` failed because `date` is an alias, then timestamp was captured through Bash. |
+| 2026-07-08T22:02:57-06:00 | `npm run test -- exportImport promptPackageGenerator` | pass | 2 files, 15 tests; verifies exported Markdown and prompt handoff stage/helper/check/upgrade details. |
+| 2026-07-08T22:02:57-06:00 | `npm run build` | pass | TypeScript and Vite build passed; existing large chunk warning remains. |
+| 2026-07-08T22:04:06-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings after Chunk 3 edits and pathway handoff update. |
+| 2026-07-08T22:04:06-06:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
+| 2026-07-08T22:04:06-06:00 | `git diff --check` | pass | Only normal Windows LF-to-CRLF notices. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -474,6 +484,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next chunk is Chunk 3, the Decision Card and prompt handoff polish slice, starting at the Plan Chunks section above. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway.
+Immediate next chunk is Chunk 4, the reviewed methodology page slice, starting at the Plan Chunks section above. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.

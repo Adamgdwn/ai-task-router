@@ -109,6 +109,8 @@ const policySettingsExportSchema = z.array(policyDefaultSchema).superRefine(addD
 const routeCardsExportSchema = z.array(routeCardSchema).superRefine(addDuplicateIdIssues);
 const promptPackagesExportSchema = z.array(promptPackageSchema).superRefine(addDuplicateIdIssues);
 const routeLogEntriesExportSchema = z.array(routeLogEntrySchema).superRefine(addDuplicateIdIssues);
+const manualUseBoundary =
+  "Use this artifact as manual guidance only. The app does not send prompts, call tools, connect accounts, approve output, or execute outside actions.";
 
 const exportedLocalConfigurationSchema = z
   .object({
@@ -233,6 +235,13 @@ export function serializeRouteCardMarkdown(routeCard: RouteCard, promptPackage: 
     `- Sensitivity: ${validRouteCard.sensitivityClass}`,
     `- Recommended option: ${recommendedOption?.label ?? validRouteCard.recommendedOptionId}`,
     `- Created: ${validRouteCard.createdAt}`,
+    "",
+    "## Manual Use Boundary",
+    markdownList([
+      manualUseBoundary,
+      "Copy or download this Decision Card locally, then run each stage yourself in the chosen helper.",
+      "Keep source, privacy, review, and upgrade limits visible before using any result outside the app.",
+    ]),
     "",
     "## Summary",
     recommendedOption?.summary ?? "No recommended route summary is available.",
@@ -511,6 +520,7 @@ function stageGuidanceMarkdown(routeCard: RouteCard): string {
         `${stageIndex + 1}. **${stage.label}**`,
         ...(stage.methodLabel ? [`   - Method: ${stage.methodLabel}`] : []),
         `   - Recommended help: ${stage.recommendedModelLabel}`,
+        `   - Model/mode guidance: ${stageModelModeGuidance(stage)}`,
         `   - Purpose: ${stage.purpose}`,
         `   - Do this: ${inlineList(stage.actions)}`,
         `   - Check: ${inlineList(stage.reviewChecks)}`,
@@ -548,6 +558,12 @@ function promptPackageMarkdownSection(promptPackage: PromptPackage, headingLevel
     `- Prompt package ID: \`${promptPackage.id}\``,
     `- Task ID: \`${promptPackage.taskId}\``,
     "",
+    `${stepHeading} Manual Use Boundary`,
+    markdownList([
+      manualUseBoundary,
+      "Paste each prompt step manually into the chosen helper, then review the result before outside use.",
+    ]),
+    "",
     `${stepHeading} Prompt Steps`,
     ...promptPackage.steps.flatMap((step, stepIndex) => [
       "",
@@ -558,6 +574,22 @@ function promptPackageMarkdownSection(promptPackage: PromptPackage, headingLevel
       `   - Human approval: ${step.requiresHumanApproval ? "Required" : "Not required"}`,
     ]),
   ].join("\n");
+}
+
+function stageModelModeGuidance(stage: RouteCard["stageGuidance"][number]): string {
+  const primaryWorkItem = stage.workItems[0];
+
+  if (primaryWorkItem?.modeLabel) {
+    return primaryWorkItem.recommendedModelLabel.toLowerCase().includes(primaryWorkItem.modeLabel.toLowerCase())
+      ? primaryWorkItem.recommendedModelLabel
+      : `${primaryWorkItem.recommendedModelLabel}; mode ${primaryWorkItem.modeLabel}`;
+  }
+
+  if (primaryWorkItem?.recommendedModelLabel) {
+    return primaryWorkItem.recommendedModelLabel;
+  }
+
+  return stage.recommendedModelLabel;
 }
 
 function markdownList(values: readonly string[]): string {

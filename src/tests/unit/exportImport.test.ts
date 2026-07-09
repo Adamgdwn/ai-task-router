@@ -61,17 +61,24 @@ describe("export and import utilities", () => {
     const routeCardMarkdown = serializeRouteCardMarkdown(routeCard);
 
     expect(routeCardMarkdown).toContain("# Route card: Export fixture");
+    expect(routeCardMarkdown).toContain("## Manual Use Boundary");
+    expect(routeCardMarkdown).toContain("The app does not send prompts, call tools, connect accounts, approve output, or execute outside actions.");
     expect(routeCardMarkdown).toContain("## Quick Project Plan");
     expect(routeCardMarkdown).toContain("Method: Plan");
     expect(routeCardMarkdown).not.toContain("Method: Plan - Define");
     expect(routeCardMarkdown).toContain("Recommended help: Local export model");
+    expect(routeCardMarkdown).toContain("Model/mode guidance: Local export model (build mode)");
     expect(routeCardMarkdown).toContain("Do this: Build the master prompt, then execute it manually.");
+    expect(routeCardMarkdown).toContain("Why: The build mode fits this stage better than a generic chat answer.");
+    expect(routeCardMarkdown).toContain("Checks: The result includes the first usable slice.");
+    expect(routeCardMarkdown).toContain("Upgrade trigger: Upgrade only if the build mode cannot pass review.");
     expect(routeCardMarkdown).toContain("## Route Options");
     expect(routeCardMarkdown).toContain("### 1. Balanced route");
     expect(routeCardMarkdown).toContain("## Prompt package: Export fixture");
     expect(routeCardMarkdown).toContain("Use this local prompt fixture manually.");
     expect(routeCardMarkdown).toContain("None.");
     expect(promptPackageMarkdown).toContain("# Prompt package: Export fixture");
+    expect(promptPackageMarkdown).toContain("## Manual Use Boundary");
     expect(promptPackageMarkdown).toContain("## Prompt Steps");
     expect(promptPackageMarkdown).toContain("Human approval: Not required");
   });
@@ -265,8 +272,11 @@ function buildRouteCard(): RouteCard {
             instruction: "Manually use the chosen tool outside the app.",
             requiredPermissionLevel: 1,
             modelId: "local-export-model",
+            workRole: "build-slice",
+            modeId: "build-mode",
+            modeLabel: "build mode",
             deliverableIds: [],
-            selectionReasons: [],
+            selectionReasons: ["The build mode fits this stage better than a generic chat answer."],
             sourceIds: ["web-export-source"],
             warnings: [],
           },
@@ -295,9 +305,24 @@ function buildRouteCard(): RouteCard {
         actions: ["Build the master prompt, then execute it manually."],
         reviewChecks: ["The prompt and result answer the task."],
         recommendedModelId: "local-export-model",
-        recommendedModelLabel: "Local export model",
+        recommendedModelLabel: "Local export model (build mode)",
         routeStepId: "route-export-fixture-balanced-step",
-        workItems: [],
+        workItems: [
+          {
+            id: "stage-task-export-fixture-create-build-slice-1",
+            workRole: "build-slice",
+            deliverableIds: [],
+            label: "Build the first usable slice",
+            expectedOutput: "A local build slice fixture for export/import tests.",
+            recommendedModelId: "local-export-model",
+            recommendedModelLabel: "Local export model (build mode)",
+            modeId: "build-mode",
+            modeLabel: "build mode",
+            selectionReasons: ["The build mode fits this stage better than a generic chat answer."],
+            reviewChecks: ["The result includes the first usable slice."],
+            upgradeTrigger: "Upgrade only if the build mode cannot pass review.",
+          },
+        ],
       },
     ],
     warnings: [],

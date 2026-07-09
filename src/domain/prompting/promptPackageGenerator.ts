@@ -1,5 +1,5 @@
 import { promptPackageSchema } from "../schemas";
-import type { PromptPackage, PromptStep, RouteOption, RouteStep, SourcePermission, TaskIntake } from "../types";
+import type { PromptPackage, PromptStep, RouteOption, RouteStep, SourcePermission, TaskIntake, WorkRole } from "../types";
 import type { HardGateResult } from "../routing/hardGates";
 import {
   decomposeTask,
@@ -147,6 +147,7 @@ function buildPromptInstruction(input: {
     manualUseBoundary,
     stepPosition,
     `Recommended route: ${selectedRoute.label} (${selectedRoute.strategy}); score ${selectedRoute.score}.`,
+    ...stageHandoffLines(routeStep),
     routeStep.workRole ? `Work role: ${routeStep.workRole}.` : "",
     routeStep.modeLabel ? `Recommended mode: ${routeStep.modeLabel}.` : "",
     routeStep.selectionReasons.length ? `Why this helper/mode: ${routeStep.selectionReasons.join(" ")}` : "",
@@ -163,6 +164,100 @@ function buildPromptInstruction(input: {
   ];
 
   return lines.filter((line): line is string => typeof line === "string" && line.length > 0).join("\n\n");
+}
+
+function stageHandoffLines(routeStep: RouteStep): string[] {
+  return [
+    `Handoff stage: ${stageLabelForRouteStep(routeStep)}.`,
+    `Recommended help: ${recommendedHelpForRouteStep(routeStep)}.`,
+    `Review checks: ${reviewChecksForPromptHandoff(routeStep).join(" ")}`,
+    `Upgrade trigger: ${upgradeTriggerForPromptHandoff(routeStep)}.`,
+  ];
+}
+
+function stageLabelForRouteStep(routeStep: RouteStep): string {
+  if (routeStep.workRole) {
+    const stageByWorkRole: Record<WorkRole, string> = {
+      "evidence-check": "Gather",
+      "prompt-design": "Create",
+      execution: "Package",
+      "build-slice": "Package",
+      "artifact-package": "Package",
+      "quality-review": "Review",
+      "next-action": "Act",
+    };
+
+    return stageByWorkRole[routeStep.workRole];
+  }
+
+  const stageByKind: Record<RouteStep["kind"], string> = {
+    research: "Gather",
+    model: "Create",
+    artifact: "Package",
+    "human review": "Review",
+    manual: "Create",
+  };
+
+  return stageByKind[routeStep.kind];
+}
+
+function recommendedHelpForRouteStep(routeStep: RouteStep): string {
+  const modeOrModel = routeStep.modeLabel
+    ? ` mode '${routeStep.modeLabel}'`
+    : routeStep.modelId
+      ? ` model ID '${routeStep.modelId}'`
+      : "";
+
+  return `${routeStep.label}${modeOrModel}`;
+}
+
+function reviewChecksForPromptHandoff(routeStep: RouteStep): string[] {
+  if (routeStep.workRole) {
+    const checksByWorkRole: Record<WorkRole, string[]> = {
+      "evidence-check": [
+        "Current facts, source notes, model availability, and privacy assumptions are dated or marked uncertain.",
+        "No unapproved source is required for the next stage.",
+      ],
+      "prompt-design": [
+        "The master prompt covers the requested deliverables, execution mode, privacy limits, acceptance checks, and upgrade trigger.",
+      ],
+      execution: ["The output follows the approved master prompt and is ready for review, not another layer of prompt advice."],
+      "build-slice": ["The first usable slice is small enough to review before adding features."],
+      "artifact-package": ["Warnings, checks, savings notes, and next action remain visible in the package."],
+      "quality-review": ["Every requested deliverable is present or explicitly marked missing, and privacy limits are still respected."],
+      "next-action": ["The next action is small, visible, and tied to a measure."],
+    };
+
+    return checksByWorkRole[routeStep.workRole];
+  }
+
+  if (routeStep.kind === "human review") {
+    return ["A human has decided whether to approve, revise, stop, or reroute before outside use."];
+  }
+
+  return ["The step output matches the task, allowed sources, privacy limits, and route warnings."];
+}
+
+function upgradeTriggerForPromptHandoff(routeStep: RouteStep): string {
+  switch (routeStep.workRole) {
+    case "evidence-check":
+      return "Upgrade research only if current facts, citations, or model/privacy details are too thin";
+    case "prompt-design":
+      return "Upgrade prompt design only if the master prompt misses deliverables, checks, privacy, or the execution model choice";
+    case "execution":
+    case "build-slice":
+      return "Upgrade execution only if the lighter mode ignores the master prompt or fails review after one focused retry";
+    case "artifact-package":
+      return "Use stronger packaging help only if warnings, checks, or next action become unclear";
+    case "quality-review":
+      return "Use stronger review if mistakes would be expensive, public, sensitive, or hard to reverse";
+    case "next-action":
+      return "Reuse the lighter route when the checks pass; reroute when the next action is still unclear";
+    default:
+      return routeStep.kind === "human review"
+        ? "Stop or reroute if the human review cannot approve the result safely"
+        : "Use stronger help only when the step cannot pass its review checks";
+  }
 }
 
 function promptTextForStep(input: {
