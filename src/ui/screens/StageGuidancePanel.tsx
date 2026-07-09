@@ -117,7 +117,7 @@ function workRoleLabel(workRole: ProjectStageGuidance["workItems"][number]["work
   const labels: Record<ProjectStageGuidance["workItems"][number]["workRole"], string> = {
     "evidence-check": "Evidence",
     "prompt-design": "Prompt",
-    execution: "Execute",
+    execution: "Use helper",
     "build-slice": "Build",
     "artifact-package": "Package",
     "quality-review": "Review",

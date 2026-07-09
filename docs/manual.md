@@ -2,7 +2,18 @@
 
 ## What This Project Is
 
-Describe the project in operator-friendly terms.
+AI Task Router is a local-first browser app for one person deciding how to use AI help on a task.
+
+The app does not do the work for the user. It helps them choose the right helper, model tier, mode, or manual step for each stage of the work, then prepares local guidance they can use outside the app.
+
+In ordinary use, a person enters the task, chooses what information and tools are allowed, compares lean, balanced, and premium routes, reviews the staged project plan, and saves a Decision Card plus copy-ready prompts. The app stays recommendation-only: it does not call AI providers, connect accounts, scan files, send prompts, publish, deploy, purchase, or execute external actions.
+
+The practical outcome should be easy to explain:
+
+- start with the smallest adequate helper
+- use research-capable help only when current facts or citations are needed
+- reserve stronger models for review, risk, complex synthesis, or expensive mistakes
+- carry a manual plan and prompt package into the user's chosen tools
 
 ## How To Work In This Repo
 

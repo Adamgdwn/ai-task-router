@@ -1,8 +1,17 @@
 # 2026-07-09T03:04:01+00:00 - AI Task Router
 
-AI Task Router is a local-first decision helper for choosing the smallest adequate AI route for a task.
+AI Task Router is a local-first decision helper for choosing the right AI helper, model, or mode at the right moment in a task.
+
+For an individual user, the core value is practical: start with the smallest adequate help, upgrade only when the task needs it, and leave with a staged plan that can be followed manually outside the app.
 
 It recommends lean, balanced, and premium tool/model routes while respecting task information choices, sensitivity, privacy posture, cost, energy, quality needs, and user-configured tool availability.
+
+## What It Helps You Do
+
+- choose which helper or model tier belongs at each stage of the work
+- separate framing, fact-checking, drafting, reviewing, and packaging instead of using one tool for everything
+- see when a lighter route is enough and when a stronger model or research-capable tool earns its cost
+- save a local Decision Card and copy-ready prompt package without sending the task anywhere
 
 ## Product Boundary
 
@@ -29,8 +38,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA production URL is live at `https://ai-task-router.pages.dev/`; Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`; D19 PDF-ready Decision Card reports are deployed; D21 added a Windows MSIX proof package path and workflow support; D22 added Windows Store/MSIX trust prep for Partner Center identity values; social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks
-Status Updated: 2026-07-06T15:24:36.2422654-06:00
+Status: v0.2 browser/PWA app is live. The current product focus is making the individual user story clear: pick the right helper at the right stage, then save local guidance for manual use. Social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
+Status Updated: 2026-07-08T21:43:43-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 
@@ -189,7 +198,7 @@ npm run desktop:gate:public
 
 That command should fail until real platform trust evidence exists in `docs/release/desktop-public-release-evidence.json`.
 
-Public web distribution uses GitHub plus Cloudflare. D13 deployed the browser/PWA app to the Cloudflare Pages production URL at `https://ai-task-router.pages.dev/` and recorded hosted smoke evidence in [Cloudflare Production Launch Smoke](docs/2026-07-05-cloudflare-production-launch-smoke.md). D14 published and smoked the Old Skool AI public hub, public security route, and Guided AI Labs / Guided AI Journey cross-site links in [Public Hub And Cross-Site Link Smoke](docs/2026-07-05-public-hub-and-cross-site-link-smoke.md). D16 added and deployed the public impact insight in [Public Impact Insight Cloudflare Update](docs/2026-07-05-public-impact-insight-cloudflare-update.md). D17 added the desktop download readiness gate in [Desktop Download Readiness Gate](docs/2026-07-05-desktop-download-readiness-gate.md). D18 added and deployed suggested stage guidance in [Public Stage Guidance Cloudflare Update](docs/2026-07-05-public-stage-guidance-cloudflare-update.md). D19 added and deployed PDF-ready saved Decision Card reports in [Public PDF Report Cloudflare Update](docs/2026-07-05-public-pdf-report-cloudflare-update.md). D20 selected the Windows Store/MSIX-first public desktop lane and tightened the public evidence gate in [Desktop Public Distribution Decision](docs/2026-07-06-desktop-public-distribution-decision.md). D21 added the Windows MSIX proof in [Windows MSIX Proof](docs/2026-07-06-windows-msix-proof.md). D22 added the [Windows Store Trust Prep](docs/2026-07-06-windows-store-trust-prep.md) identity template and manifest-prep command. Do not use the D9 preview alias in public links.
+Public web distribution uses GitHub plus Cloudflare. The browser/PWA app is live at `https://ai-task-router.pages.dev/`, and the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`. Release evidence is retained in the dated launch, impact, stage-guidance, PDF-report, and desktop-trust documents listed below. Do not use the D9 preview alias in public links.
 
 Desktop prerequisites installed on this Windows machine:
 
@@ -204,7 +213,7 @@ The desktop app is still an internal prototype. It now has a desktop-only `Check
 
 Desktop Chunk D4 implements the first native local discovery path: custom Rust commands check only allowlisted local tools after user approval, hide model names by default, reject path details, and return schema-validated results to the UI. Browser users still add tools manually.
 
-Manual local start check used for Chunk One:
+Manual local app check:
 
 ```bash
 npm run dev -- --host 127.0.0.1 --port 5173

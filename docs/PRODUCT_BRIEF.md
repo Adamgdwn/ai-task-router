@@ -9,9 +9,11 @@ Source inputs:
 
 ## Purpose
 
-AI Task Router is a local-first, single-user decision helper that recommends the smallest adequate AI tool, model tier, and toolchain for a task.
+AI Task Router is a local-first, single-user decision helper that recommends the right AI helper, model tier, mode, or manual step for each stage of a task.
 
-It evaluates the user's available tools, source permissions, task details, sensitivity, privacy posture, cost preference, energy preference, and quality needs. It then produces lean, balanced, and premium route options with warnings, blocked routes, a route card, and a prompt package.
+It evaluates the user's available tools, source permissions, task details, sensitivity, privacy posture, cost preference, energy preference, and quality needs. It then produces lean, balanced, and premium route options with warnings, blocked routes, a staged project plan, a Decision Card, and a prompt package.
+
+The product promise for an individual user is simple: do not use one AI helper for everything. Frame the job, gather evidence, create, package, review, and act with the lightest safe helper for that stage, then upgrade only when the checks show the task needs stronger help.
 
 ## Product Boundary
 
@@ -74,15 +76,15 @@ Core concepts:
 - hard gates
 - route candidate generation
 - route scoring
-- route card
+- Decision Card / route card
 - prompt package
 - route log entry
 - feedback outcome
 
 Key classifiers:
 
-- DMAIC phase
-- lifecycle stage
+- work stage
+- PDCA method label
 - knowledge work type
 - output type
 - quality bar
@@ -108,5 +110,5 @@ Hard gates override scoring. Highly restricted content blocks external AI routes
 
 Small model first. Mid model for synthesis. Frontier model for expensive mistakes. Research tool for current evidence. Artifact tool for packaging. Human approval for high-risk output.
 
-The app should be smarter than a spreadsheet and more controlled than an agent.
+The app should feel like a calm routing coach for one person: smarter than a spreadsheet, more bounded than an agent, and explicit about which helper belongs at which stage.
 

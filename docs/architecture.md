@@ -4,9 +4,9 @@ Document status: draft baseline
 
 ## Summary
 
-AI Task Router is planned as a local-first React/TypeScript web app.
+AI Task Router is a local-first React/TypeScript web app.
 
-Its core responsibility is to recommend AI tool/model/toolchain routes for a user-entered task while respecting tool availability, source permissions, sensitivity, privacy posture, cost preference, energy preference, and quality needs.
+Its core responsibility is to recommend the right AI helper, model tier, mode, or manual step for each stage of a user-entered task while respecting tool availability, source permissions, sensitivity, privacy posture, cost preference, energy preference, and quality needs.
 
 The MVP is intentionally not an AI agent. It does not execute actions, call provider APIs, connect to external systems, store credentials, search sources automatically, or modify external records.
 
@@ -14,7 +14,7 @@ The MVP is intentionally not an AI agent. It does not execute actions, call prov
 
 Current MVP components:
 
-- UI shell and screens for setup, task intake, route results, route cards, prompt packages, route logs, and reference material
+- UI shell and screens for setup, task intake, route results, staged guidance, Decision Cards, prompt packages, route logs, and reference material
 - domain types and runtime schemas
 - editable default registries for models, sources, policies, and task templates
 - deterministic hard gates
@@ -38,9 +38,9 @@ Planned v0.2 flow:
 5. App applies hard gates.
 6. App generates lean, balanced, and premium route candidates.
 7. App scores routes and selects a recommendation.
-8. App renders warnings, blocked routes, route card, and prompt package.
+8. App renders warnings, blocked routes, staged guidance, a Decision Card, and a prompt package.
 9. User may save the local route log entry.
-10. User may export route card, route log, or configuration.
+10. User may export the Decision Card, route log, or configuration.
 
 All MVP data stays in browser-local storage or user-triggered exports.
 
