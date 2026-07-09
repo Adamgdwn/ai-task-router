@@ -1,8 +1,8 @@
 # 2026-07-09T03:04:01+00:00 - Start Here
 
-Last Updated: 2026-07-09T03:04:01+00:00
+Last Updated: 2026-07-08T21:17:29-06:00
 Status: draft
-Status Updated: 2026-07-09T03:04:01+00:00
+Status Updated: 2026-07-08T21:17:29-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -57,7 +57,7 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`.
 
-The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. Superseded pathway archives are not part of startup or normal work routing. Next chunk is owner choice: social/video launch copy review, reviewed methodology page, opt-in local estimator UI, or the next Windows Store submission slice.
+The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. Superseded pathway archives are not part of startup or normal work routing. The active pathway contains the current chunk queue; the next recommended build chunk is Chunk 1, the individual power story audit.
 
 Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, custom-domain/DNS changes, live pricing tables, live pricing/model fetches, provider connections, exact public savings claims, Partner Center secrets, identity documents, tax/banking details, private account screenshots, or external execution workflows without a separate approved chunk and release gate evidence.
 
