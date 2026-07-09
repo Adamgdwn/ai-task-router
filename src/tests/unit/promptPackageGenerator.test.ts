@@ -154,6 +154,8 @@ describe("prompt package generator", () => {
     expect(instruction).toContain("month-over-month tracking");
     expect(instruction).toContain("model/tool choice for execution");
     expect(instruction).toContain("name the specific execution model or mode");
+    expect(instruction).toContain("four sections only: Plan, Do, Check, Act");
+    expect(instruction).not.toMatch(/\b(DMAIC|Define|Measure|Analyze|Improve|Control)\b/);
   });
 
   it("includes current-facts and citation reminders without implying the app searches", () => {

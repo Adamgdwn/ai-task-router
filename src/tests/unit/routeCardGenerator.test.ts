@@ -150,20 +150,24 @@ describe("route card generator", () => {
       "act",
     ]);
     expect(card.stageGuidance[0]).toMatchObject({
-      methodLabel: "Plan - Define",
+      methodLabel: "Plan",
       actions: expect.arrayContaining(["Restate the task in one plain sentence."]),
       reviewChecks: expect.arrayContaining(["The goal, audience, inputs, and finish line are clear."]),
     });
     expect(card.stageGuidance.find((stage) => stage.stage === "create")).toMatchObject({
       label: "Build the drafting prompt",
-      methodLabel: "Plan - Analyze",
+      methodLabel: "Plan",
       recommendedModelLabel: expect.stringMatching(/Gemini|ChatGPT|Claude/),
     });
     expect(card.stageGuidance.find((stage) => stage.stage === "create")?.recommendedModelLabel).toContain("prompt builder");
     expect(card.stageGuidance.find((stage) => stage.stage === "package")).toMatchObject({
       label: "Run the prompt",
-      methodLabel: "Do - Improve",
+      methodLabel: "Do",
     });
+    expect(card.stageGuidance.map((stage) => stage.methodLabel)).toEqual(["Plan", "Plan", "Plan", "Do", "Check", "Act"]);
+    expect(card.stageGuidance.map((stage) => stage.methodLabel).join(" ")).not.toMatch(
+      /\b(DMAIC|Define|Measure|Analyze|Improve|Control)\b/,
+    );
   });
 
   it("expands prompt-first planning into requested deliverables, execution model, and first build slice", () => {
@@ -226,6 +230,8 @@ describe("route card generator", () => {
     expect(createStage?.workItems[0]).toMatchObject({
       label: "Build one master prompt",
       recommendedModelLabel: expect.stringContaining("GPT-5.5 Thinking Medium"),
+      modeLabel: expect.stringContaining("Thinking Medium"),
+      upgradeTrigger: expect.stringContaining("Upgrade the prompt-design helper only if"),
     });
     expect(createStage?.workItems.map((item) => item.label).join(" ")).not.toContain("Prompt section");
     expect(createStage?.workItems[0]?.expectedOutput).toContain("One master prompt");
@@ -241,6 +247,8 @@ describe("route card generator", () => {
     expect(packageStage?.workItems[0]).toMatchObject({
       label: "Create the first usable build slice",
       recommendedModelLabel: expect.stringContaining("GPT-5.5 Instant"),
+      modeLabel: expect.stringContaining("Instant"),
+      upgradeTrigger: expect.stringContaining("Upgrade execution only if"),
     });
     expect(packageStage?.actions.join(" ")).toContain("actual plan or build brief");
     expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");

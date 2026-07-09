@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-03
 Last Reviewed: 2026-07-04
 Next Review: During the next substantial build session
-Last Updated: 2026-07-08T17:03:41-06:00
-Status Updated: 2026-07-08T17:03:41-06:00
+Last Updated: 2026-07-08T18:54:14-06:00
+Status Updated: 2026-07-08T18:54:14-06:00
 
 > This is the live path from charter baseline to the v0.2 Local Web App MVP.
 
@@ -139,7 +139,7 @@ Do not hand a coder a vague chunk such as "build the routing engine." Split work
 | Compact routing judgment correction | task complete | 2026-07-07T07:35:14-06:00 | Technical Lead | Corrected an over-detailed planning swing by grouping complex deliverables into one stage work pack per phase, keeping the visible plan compact with progressive routing details, using evidence/model-availability intent to imply web research sources, allowing Perplexity/research tools to appear from typed research intent, making selected deciding style win near-tie recommendations, and using AI review support where available instead of showing human judgment as every stage. Validation passed: governance preflight, focused route/card/decomposition tests, full `npm test -- --run`, `npm run build`, and Playwright e2e on `127.0.0.1:5179`; the existing Vite chunk-size warning remains unchanged. |
 | Concrete mode recommendation correction | task complete | 2026-07-07T07:50:36-06:00 | Technical Lead | Fixed the visible route plan so public build/planning work no longer collapses lean prompt/build stages to "You first" when a safe AI mode is available. Least-resource public build routing now chooses the lightest adequate AI prompt/build mode before manual work, compact stage bullets summarize deliverables instead of echoing the user's full paragraph, research-only setups show an explicit missing prompt/build helper label, and build-slice stage labels preserve selected modes such as Grok Build 0.1 instead of flattening to generic provider execution guidance. Validation passed: focused route-card regression tests, focused routing/scoring/decomposition tests, full `npm test -- --run`, `npm run build`, Playwright e2e on `127.0.0.1:5179`, targeted browser smokes for ChatGPT Go plus Perplexity Free and SuperGrok plus Perplexity Free, and `git diff --check`. The existing Vite chunk-size warning remains unchanged. |
 | Browser storage notice and launch cleanup | task complete, public web updated | 2026-07-07T17:12:16-06:00 | Technical Lead | Added the Start Here browser-storage notice with `Got it` and `Learn more`, clarified that saved choices stay in browser storage, removed the left-sidebar `v0.2 local MVP` tag, pushed GitHub through commit `6d2d418`, and redeployed Cloudflare Pages production. Hosted checks confirmed the storage notice is present, the old sidebar tag is absent, and `https://ai-task-router.pages.dev/` passed the full Playwright E2E suite. |
-| PDCA planning simplification | planned | 2026-07-08T17:03:41-06:00 | Technical Lead | Next owner-approved product chunk: simplify visible project planning from DMAIC-flavored labels to `Plan`, `Do`, `Check`, `Act`, while each idea-step pulled from the user's task briefly names the recommended helper/model/mode, token-efficient move, and upgrade trigger. |
+| PDCA planning simplification | task complete | 2026-07-08T18:54:14-06:00 | Technical Lead | Simplified visible planning labels to `Plan`, `Do`, `Check`, `Act`; updated generated prompt guidance to require only those four sections; exposed mode and upgrade trigger in stage routing detail; preserved deliverable-level helper routing for prompt, build, evidence, package, review, and next-action work. Validation passed: governance preflight, focused unit tests, full unit suite, production build, Playwright MVP workflow smoke, and `git diff --check` with normal Windows line-ending notices. |
 | Source control baseline | complete | 2026-07-03T11:51:11-06:00 | Technical Lead | Local Git repo initialized and public GitHub repo created at `https://github.com/Adamgdwn/ai-task-router`. |
 
 ## Chunk Zero - Charter Lock And Planning Baseline
@@ -3701,10 +3701,10 @@ Stop if public pages point at the D9 preview alias, expose desktop artifacts, im
 | 2026-07-07T17:12:16-06:00 | `bash scripts/governance-preflight.sh`; `npm ci`; `npm audit --audit-level=moderate`; `npm run test`; `npm run build`; `npm run scan:web-rc`; local `PLAYWRIGHT_BASE_URL=http://127.0.0.1:5184 npx playwright test`; Wrangler production deploy; hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test`; public asset string checks | passed with existing build warning | Browser storage notice and launch cleanup deployment passed: governance preflight reported 0 warnings; clean install and audit found 0 vulnerabilities; Vitest passed 14 files and 116 tests; production build passed with the existing Vite chunk-size warning; web release-candidate scan passed; local production preview and hosted public URL each passed 6 Playwright tests; Cloudflare production deployment `a5b7ebd5` from source `6d2d418` served the browser-storage notice and no longer served the `v0.2 local MVP` sidebar tag. |
 | 2026-07-08T17:03:41-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check`; doc diff review | passed | PDCA planning simplification box-up passed governance preflight with 0 warnings. `git diff --check` reported only normal Windows LF-to-CRLF notices. No runtime tests were run because this chunk only updated the token-friendly startup handoff and active pathway planning packet. |
 
-## Planned Chunk - PDCA Planning Simplification
+## Completed Chunk - PDCA Planning Simplification
 
-Status: planned
-Status Updated: 2026-07-08T17:03:41-06:00
+Status: task complete
+Status Updated: 2026-07-08T18:54:14-06:00
 
 Completion target: Task complete
 
@@ -3764,12 +3764,26 @@ Handoff note:
 
 Start from `stageGuidance.ts` and the existing `ProjectStageWorkItem` structure. Prefer adapting labels and work-item copy over adding a storage/schema migration unless the implementation truly needs new fields.
 
+Implementation notes:
+
+- Updated `stageGuidance.ts` so visible stage method labels are only `Plan`, `Do`, `Check`, and `Act`.
+- Updated route-step and prompt-package instructions so generated planning prompts ask for four sections only: `Plan`, `Do`, `Check`, `Act`.
+- Updated `StageGuidancePanel.tsx` so expanded routing detail shows recommended help, mode when available, estimate, and upgrade trigger.
+- Updated route-card, prompt-package, export/import, schema, and local-store tests so saved cards and Markdown exports preserve the simplified language.
+
+Validation evidence:
+
+- `bash scripts/governance-preflight.sh` passed with 0 warnings.
+- `npm run test -- routeCardGenerator promptPackageGenerator exportImport domainSchemas storageLocalStore` passed: 5 files, 44 tests.
+- `npm run test` passed: 14 files, 116 tests.
+- `npm run build` passed with the existing Vite chunk-size warning.
+- `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` passed: 6 tests.
+- `git diff --check` passed with normal Windows LF-to-CRLF notices.
+
 ## Next Handoff
 
 D22 Windows Store trust prep is task complete with public desktop downloads still held. The web/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI hub is live at `https://oldskoolai.com/ai-task-router/`, and the public security route is live at `https://oldskoolai.com/security/`.
 
-Immediate next chunk: implement **Planned Chunk - PDCA Planning Simplification** above. The owner wants the project-planning section reduced to a simple `Plan`, `Do`, `Check`, `Act` shape, with each idea-step pulled from the user's task briefly showing the recommended helper/model/mode, token-efficient move, and upgrade trigger. Start from `src/domain/routing/stageGuidance.ts`, `src/domain/prompting/promptPackageGenerator.ts`, and `src/domain/routing/candidateGeneration.ts`; use existing route-card and prompt-package tests as the first validation target.
-
-Later options remain: owner-approved social/video launch copy review, reviewed methodology page, opt-in local estimator UI, or the next Windows Store submission slice. For desktop work, D20-D22 keep Windows Store/MSIX first with direct signed installer as fallback; keep desktop download buttons hidden or disabled until signing and safety checks pass.
+Immediate next chunk is owner choice. Later options remain: owner-approved social/video launch copy review, reviewed methodology page, opt-in local estimator UI, or the next Windows Store submission slice. For desktop work, D20-D22 keep Windows Store/MSIX first with direct signed installer as fallback; keep desktop download buttons hidden or disabled until signing and safety checks pass.
 
 Preserve the conversational UX direction now covered by E2E: Start Here, My AI Tools with one generic `Tool selection` row, no automatic second row after app selection, branded `Add another tool` button, researched provider-specific account dropdowns, `Remove tool`, selected-count updates, no selected-chip wrapping, Local model choices, optional desktop-only `Check this computer`, stale five-row local-store migration, Genspark and broader app options, Choosing Style, My Task with the optional `Do you want to include anything specific?` question and `Nothing specific` default/clear behavior, Best Options with Suggested stages and impact insight, Decision Card with saved Suggested stages, impact context, Markdown export, and `Save PDF report`, Copy-Ready Prompts, Past Choices, and saved-plan language. Keep `npm run detect:local-models` as a separate explicit local command. Do not reintroduce a standalone `What To Include` onboarding screen, source-permission, policy-default, model-tier, scoring-weight, raw-score, permission-level, subscription-level, capability-score, routing-category, technical-routing-details, DMAIC, internal task ID, reference-name, task-local-route, or app/model/thinking terminology in primary user flows. Do not expand local discovery into broad filesystem permissions, arbitrary shell/process execution, startup/background scans, user-supplied paths, provider account connections, credential storage, authentication, telemetry, remote sync, provider API calls, external destinations, automatic uploads, file indexing, feedback analytics, best-stack recommendation logic, packaging, signing, updater, server-rendered PDF jobs, or execution workflows without a separate approved chunk.

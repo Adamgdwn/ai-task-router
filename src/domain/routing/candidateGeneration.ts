@@ -504,7 +504,7 @@ function roleInstruction(input: {
     case "evidence-check":
       return `Manually use ${mode.displayLabel} for current facts, citations, model availability, and privacy notes before prompt design. Use only allowed source IDs (${sourceText}). Cover ${deliverableSummary}. ${reasonText} The app does not search, fetch, or call the tool.`;
     case "prompt-design":
-      return `Use ${mode.displayLabel} for the thinking-heavy prompt-design pass. Build a master prompt that covers ${deliverableSummary}, names allowed inputs, privacy limits, acceptance checks, Plan-Do-Check-Act or light DMAIC stages, the execution helper, and the upgrade trigger. ${context.decomposition.complexBuildPlan ? "Do not create only prompt advice; make the prompt require the actual build plan and first usable slice. " : ""}${reasonText} Upgrade trigger: ${upgradeTrigger}. The app does not send task data to the model.`;
+      return `Use ${mode.displayLabel} for the thinking-heavy prompt-design pass. Build a master prompt that covers ${deliverableSummary}, names allowed inputs, privacy limits, acceptance checks, four sections only (Plan, Do, Check, Act), the execution helper, and the upgrade trigger. ${context.decomposition.complexBuildPlan ? "Do not create only prompt advice; make the prompt require the actual build plan and first usable slice. " : ""}${reasonText} Upgrade trigger: ${upgradeTrigger}. The app does not send task data to the model.`;
     case "execution":
       return `Run the approved master prompt in ${mode.displayLabel}. Produce the requested ${task.outputType} for ${deliverableSummary}, not another prompt-writing plan. Keep the first pass small enough to review. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
     case "build-slice":

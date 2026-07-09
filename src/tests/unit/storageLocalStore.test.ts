@@ -284,7 +284,7 @@ function buildRouteCard(): RouteCard {
       {
         id: "stage-task-storage-fixture-frame",
         stage: "frame",
-        methodLabel: "Plan - Define",
+        methodLabel: "Plan",
         label: "Frame the job",
         purpose: "Clarify the goal and quality bar before using a tool.",
         actions: ["Clarify the goal and quality bar."],
@@ -295,7 +295,7 @@ function buildRouteCard(): RouteCard {
       {
         id: "stage-task-storage-fixture-create",
         stage: "create",
-        methodLabel: "Plan - Analyze",
+        methodLabel: "Plan",
         label: "Build the drafting prompt",
         purpose: "Write the prompt before creating the requested output.",
         actions: ["Build the master prompt, then execute it manually."],

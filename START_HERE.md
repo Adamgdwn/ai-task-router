@@ -1,8 +1,8 @@
 # 2026-07-03T11:49:34-06:00 - Start Here
 
-Last Updated: 2026-07-08T17:03:41-06:00
+Last Updated: 2026-07-08T18:54:14-06:00
 Status: draft
-Status Updated: 2026-07-08T17:03:41-06:00
+Status Updated: 2026-07-08T18:54:14-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -58,7 +58,7 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`.
 
-Next chunk: implement the owner-requested PDCA planning simplification in the active pathway. The visible project plan should use simple `Plan`, `Do`, `Check`, `Act` stages, and each idea-step pulled from the user's task should briefly show what helper/model/mode to use at that stage, the token-efficient move, and the upgrade trigger. Remove user-facing DMAIC/Define/Measure/Analyze/Improve/Control language from planning guidance and generated prompts.
+PDCA planning simplification is task complete in the active pathway. The visible project plan now uses simple `Plan`, `Do`, `Check`, `Act` stages, generated prompt guidance asks for only those four sections, and expanded routing detail shows helper/model/mode plus the upgrade trigger. Next chunk is owner choice: social/video launch copy review, reviewed methodology page, opt-in local estimator UI, or the next Windows Store submission slice.
 
 Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, custom-domain/DNS changes, live pricing tables, live pricing/model fetches, provider connections, exact public savings claims, Partner Center secrets, identity documents, tax/banking details, private account screenshots, or external execution workflows without a separate approved chunk and release gate evidence.
 

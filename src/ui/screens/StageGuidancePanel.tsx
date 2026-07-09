@@ -72,9 +72,19 @@ export function StageGuidancePanel({
                           <dt>Help</dt>
                           <dd>{item.recommendedModelLabel}</dd>
                         </div>
+                        {item.modeLabel ? (
+                          <div>
+                            <dt>Mode</dt>
+                            <dd>{item.modeLabel}</dd>
+                          </div>
+                        ) : null}
                         <div>
                           <dt>Estimate</dt>
                           <dd>{workItemEstimateLabel(item)}</dd>
+                        </div>
+                        <div>
+                          <dt>Upgrade trigger</dt>
+                          <dd>{item.upgradeTrigger}</dd>
                         </div>
                       </dl>
                       {item.selectionReasons.length ? (

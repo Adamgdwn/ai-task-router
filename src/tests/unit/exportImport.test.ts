@@ -62,7 +62,8 @@ describe("export and import utilities", () => {
 
     expect(routeCardMarkdown).toContain("# Route card: Export fixture");
     expect(routeCardMarkdown).toContain("## Quick Project Plan");
-    expect(routeCardMarkdown).toContain("Method: Plan - Define");
+    expect(routeCardMarkdown).toContain("Method: Plan");
+    expect(routeCardMarkdown).not.toContain("Method: Plan - Define");
     expect(routeCardMarkdown).toContain("Recommended help: Local export model");
     expect(routeCardMarkdown).toContain("Do this: Build the master prompt, then execute it manually.");
     expect(routeCardMarkdown).toContain("## Route Options");
@@ -277,7 +278,7 @@ function buildRouteCard(): RouteCard {
       {
         id: "stage-task-export-fixture-frame",
         stage: "frame",
-        methodLabel: "Plan - Define",
+        methodLabel: "Plan",
         label: "Frame the job",
         purpose: "Clarify the goal and success bar before using a tool.",
         actions: ["Clarify the goal and success bar."],
@@ -288,7 +289,7 @@ function buildRouteCard(): RouteCard {
       {
         id: "stage-task-export-fixture-create",
         stage: "create",
-        methodLabel: "Plan - Analyze",
+        methodLabel: "Plan",
         label: "Build the brief prompt",
         purpose: "Write the prompt before creating the first pass.",
         actions: ["Build the master prompt, then execute it manually."],

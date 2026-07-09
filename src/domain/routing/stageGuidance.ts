@@ -82,7 +82,7 @@ export function buildProjectStageGuidance({
   const stages: StageDraft[] = [
     {
       stage: "frame",
-      methodLabel: "Plan - Define",
+      methodLabel: "Plan",
       label: "Frame the outcome",
       purpose: "Write down the goal, who will use the result, what inputs are allowed, and what done looks like.",
       actions: frameStageActions(task),
@@ -95,7 +95,7 @@ export function buildProjectStageGuidance({
   if (shouldAddGatherStage(task)) {
     stages.push({
       stage: "gather",
-      methodLabel: "Plan - Measure",
+      methodLabel: "Plan",
       label: gatherStageLabel(task),
       purpose: gatherStagePurpose(task),
       actions: gatherStageActions(task),
@@ -117,7 +117,7 @@ export function buildProjectStageGuidance({
 
   stages.push({
     stage: "create",
-    methodLabel: "Plan - Analyze",
+    methodLabel: "Plan",
     label: createStageLabel(task),
     purpose: createStagePurpose(task),
     actions: createStageActions(task),
@@ -141,7 +141,7 @@ export function buildProjectStageGuidance({
   if (shouldAddPackageStage(task, artifactStep)) {
     stages.push({
       stage: "package",
-      methodLabel: "Do - Improve",
+      methodLabel: "Do",
       label: packageStageLabel(task),
       purpose: packageStagePurpose(task),
       actions: packageStageActions(task),
@@ -165,7 +165,7 @@ export function buildProjectStageGuidance({
 
   stages.push({
     stage: "review",
-    methodLabel: "Check - Control",
+    methodLabel: "Check",
     label: reviewStageLabel(task),
     purpose: reviewStagePurpose(task),
     actions: reviewStageActions(task),
@@ -189,7 +189,7 @@ export function buildProjectStageGuidance({
 
   stages.push({
     stage: "act",
-    methodLabel: "Act - Control",
+    methodLabel: "Act",
     label: actStageLabel(task),
     purpose: actStagePurpose(task),
     actions: actStageActions(task),
@@ -617,7 +617,7 @@ function createStageActions(task: TaskIntake) {
       "Ask the highest-level model or reasoning mode you own to create the master prompt before any lower-mode execution run.",
       `Make one prompt cover the main deliverables: ${compactTaskDeliverableSummary(task)}.`,
       `Require the prompt to produce the actual build path: ${buildPlanCoverageSummary(task)}.`,
-      "Include Plan-Do-Check-Act or light DMAIC, privacy limits, acceptance checks, exact execution mode, and upgrade trigger.",
+      "Include four sections only: Plan, Do, Check, and Act, plus privacy limits, acceptance checks, exact execution mode, and upgrade trigger.",
     ];
   }
 
@@ -650,7 +650,7 @@ function createStageActions(task: TaskIntake) {
     return [
       "Ask for a master prompt, not the finished output yet.",
       `Make the prompt cover every main deliverable: ${compactTaskDeliverableSummary(task)}.`,
-      "Make it require Plan-Do-Check-Act, or light DMAIC when useful.",
+      "Make it require four sections only: Plan, Do, Check, and Act.",
       "Require the prompt to name the minimum execution model or mode and what would justify upgrading.",
     ];
   }

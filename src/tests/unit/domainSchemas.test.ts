@@ -97,7 +97,7 @@ const validRouteCard = {
     {
       id: "stage-task-001-frame",
       stage: "frame",
-      methodLabel: "Plan - Define",
+      methodLabel: "Plan",
       label: "Frame the job",
       purpose: "Clarify the goal and quality bar before using a tool.",
       actions: ["Clarify the goal and quality bar."],
@@ -108,7 +108,7 @@ const validRouteCard = {
     {
       id: "stage-task-001-create",
       stage: "create",
-      methodLabel: "Do - Improve",
+      methodLabel: "Do",
       label: "Draft the brief",
       purpose: "Use the recommended tool to prepare the first pass.",
       actions: ["Use the recommended tool to prepare the first pass."],
