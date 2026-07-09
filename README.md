@@ -1,4 +1,4 @@
-# 2026-07-03T11:58:27-06:00 - AI Task Router
+# 2026-07-09T03:04:01+00:00 - AI Task Router
 
 AI Task Router is a local-first decision helper for choosing the smallest adequate AI route for a task.
 
@@ -40,7 +40,7 @@ Current public hub: https://oldskoolai.com/ai-task-router/
 
 Current target: v0.2 Local Web App MVP
 
-Active plan: [docs/2026-07-03-current-pathway.md](docs/2026-07-03-current-pathway.md)
+Active plan: [docs/2026-07-09-current-build-pathway.md](docs/2026-07-09-current-build-pathway.md)
 
 Product brief: [docs/PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md)
 
@@ -229,7 +229,8 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Product brief](docs/PRODUCT_BRIEF.md)
 - [Architecture](docs/architecture.md)
 - [Context map](docs/context-map.md)
-- [Current build pathway](docs/2026-07-03-current-pathway.md)
+- [Current build pathway](docs/2026-07-09-current-build-pathway.md)
+- [Historical build pathway archive](docs/2026-07-03-current-pathway.md)
 - [Manual](docs/manual.md)
 - [Roadmap](docs/roadmap.md)
 - [Desktop trust and distribution plan](docs/2026-07-04-desktop-trust-distribution-plan.md)

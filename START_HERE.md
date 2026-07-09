@@ -1,8 +1,8 @@
-# 2026-07-03T11:49:34-06:00 - Start Here
+# 2026-07-09T03:04:01+00:00 - Start Here
 
-Last Updated: 2026-07-08T18:54:14-06:00
+Last Updated: 2026-07-09T03:04:01+00:00
 Status: draft
-Status Updated: 2026-07-08T18:54:14-06:00
+Status Updated: 2026-07-09T03:04:01+00:00
 Owner: Project Owner
 
 ## Current Plan
@@ -25,10 +25,9 @@ Current priorities:
 
 ## Current Build Pathway
 
-Default live build route: [docs/2026-07-03-current-pathway.md](docs/2026-07-03-current-pathway.md).
+Default live build route: [docs/2026-07-09-current-build-pathway.md](docs/2026-07-09-current-build-pathway.md).
 
-If this project later promotes a different active plan, name it here and route
-agents there instead of rereading archived pathway history.
+The older [docs/2026-07-03-current-pathway.md](docs/2026-07-03-current-pathway.md) file is now a historical archive. Search it or open targeted excerpts only when older evidence is needed.
 
 For ordinary scoped work:
 
@@ -58,7 +57,7 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`.
 
-PDCA planning simplification is task complete in the active pathway. The visible project plan now uses simple `Plan`, `Do`, `Check`, `Act` stages, generated prompt guidance asks for only those four sections, and expanded routing detail shows helper/model/mode plus the upgrade trigger. Next chunk is owner choice: social/video launch copy review, reviewed methodology page, opt-in local estimator UI, or the next Windows Store submission slice.
+The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. The older `docs/2026-07-03-current-pathway.md` file is retained as historical evidence only because it grew too large for context-friendly startup. Next chunk is owner choice: social/video launch copy review, reviewed methodology page, opt-in local estimator UI, or the next Windows Store submission slice.
 
 Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, custom-domain/DNS changes, live pricing tables, live pricing/model fetches, provider connections, exact public savings claims, Partner Center secrets, identity documents, tax/banking details, private account screenshots, or external execution workflows without a separate approved chunk and release gate evidence.
 

@@ -1,4 +1,4 @@
-# 2026-07-04T11:28:22-06:00 - Agent Instructions
+# 2026-07-09T03:04:01+00:00 - Agent Instructions
 
 ## Normal Startup
 
@@ -17,7 +17,7 @@ Do not turn `START_HERE.md`, pathway docs, governance standards, Graphify, plugi
 Before making material or risk-triggering code or configuration changes in this repository:
 
 1. read `START_HERE.md`
-2. review the active plan named in `START_HERE.md` (default `docs/2026-07-03-current-pathway.md`)
+2. review the active plan named in `START_HERE.md` (default `docs/2026-07-09-current-build-pathway.md`)
 3. review `docs/standards/README.md`
 4. review `docs/standards/engineering-governance-by-use-case.md`
 5. review `docs/policy/durable-development-engineering-policy.md`
@@ -130,7 +130,7 @@ At the end of every chunk of work:
 5. Do not auto-compact. Do not skip the commit step without flagging why.
 
 A chunk ends when:
-- the current definition-of-done in `docs/2026-07-03-current-pathway.md` is met, or
+- the current definition-of-done in the active plan named by `START_HERE.md` is met, or
 - a stop condition is reached (blocker, repeated failure, scope boundary), or
 - the user signals done.
 

@@ -1,17 +1,17 @@
-# Current Build Pathway
+# 2026-07-09T03:04:01+00:00 - Historical Build Pathway Archive
 
 Document ID: PATH-ENG-001
-Version: 0.13.0
-Status: active
+Version: 0.14.0
+Status: superseded
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-03
-Last Reviewed: 2026-07-04
-Next Review: During the next substantial build session
-Last Updated: 2026-07-08T18:54:14-06:00
-Status Updated: 2026-07-08T18:54:14-06:00
+Last Reviewed: 2026-07-09
+Next Review: As historical archive requires
+Last Updated: 2026-07-09T03:04:01+00:00
+Status Updated: 2026-07-09T03:04:01+00:00
 
-> This is the live path from charter baseline to the v0.2 Local Web App MVP.
+> Superseded as the active pathway by [2026-07-09 Current Build Pathway](2026-07-09-current-build-pathway.md). Keep this file as historical evidence. Use targeted search or excerpts when older chunk detail is needed; do not load the whole archive during normal startup.
 
 ## Purpose
 

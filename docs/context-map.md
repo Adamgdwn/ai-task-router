@@ -1,8 +1,8 @@
-# 2026-07-03T11:49:34-06:00 - Context Map
+# 2026-07-09T03:04:01+00:00 - Context Map
 
 Document type: project context routing map
 Status: draft
-Status Updated: 2026-07-04T22:23:04-06:00
+Status Updated: 2026-07-09T03:04:01+00:00
 Owner: Technical Lead
 Audience: coding agents, human coders, reviewers, and project owners
 
@@ -26,7 +26,7 @@ Keep these files compact. They should route to durable docs, not duplicate them.
 
 | Task | Load First |
 |---|---|
-| Current plan, chunking, validation, or handoff | Active plan named by `START_HERE.md`; default `docs/2026-07-03-current-pathway.md` |
+| Current plan, chunking, validation, or handoff | Active plan named by `START_HERE.md`; default `docs/2026-07-09-current-build-pathway.md` |
 | Engineering standards map | `docs/standards/README.md` |
 | Context windows, token budgets, compaction, scoped reads, or handoffs | `docs/standards/context-hygiene-standard.md` |
 | Durable implementation, design quality, testing discipline, or AI coding fundamentals | `docs/policy/durable-development-engineering-policy.md` |
@@ -41,7 +41,7 @@ Keep these files compact. They should route to durable docs, not duplicate them.
 ## Search Before Loading
 
 - long audit reports
-- old pathway history below the current active chunk
+- old pathway history, including `docs/2026-07-03-current-pathway.md`, unless targeted historical evidence is needed
 - logs, generated reports, and command output
 - exported manifests
 - archived plans or superseded briefs
