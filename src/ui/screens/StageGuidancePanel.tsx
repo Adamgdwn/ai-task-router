@@ -99,8 +99,8 @@ function StageGuidanceItem({
         ) : null}
       </div>
       {stage.workItems.length ? (
-        <details className="stageWorkItems" aria-label={`${stage.label} routing detail`}>
-          <summary>Routing detail: {primaryWorkItem?.label ?? stage.label}</summary>
+        <section className="stageWorkItems" aria-label={`${stage.label} path`}>
+          <h5>Path for this stage</h5>
           <ol>
             {stage.workItems.map((item) => (
               <li key={item.id}>
@@ -111,7 +111,7 @@ function StageGuidanceItem({
                 <p>{item.expectedOutput}</p>
                 <dl>
                   <div>
-                    <dt>Decision</dt>
+                    <dt>Action</dt>
                     <dd>{stageDecisionLabel(item)}</dd>
                   </div>
                   <div>
@@ -145,24 +145,10 @@ function StageGuidanceItem({
                     <dd>{item.upgradeTrigger}</dd>
                   </div>
                 </dl>
-                {item.selectionReasons.length ? (
-                  <ul className="stageWorkItemReasons">
-                    {item.selectionReasons.slice(0, 2).map((reason) => (
-                      <li key={reason}>{reason}</li>
-                    ))}
-                  </ul>
-                ) : null}
-                {item.reviewChecks.length ? (
-                  <ul className="stageWorkItemChecks">
-                    {item.reviewChecks.slice(0, 2).map((check) => (
-                      <li key={check}>{check}</li>
-                    ))}
-                  </ul>
-                ) : null}
               </li>
             ))}
           </ol>
-        </details>
+        </section>
       ) : null}
     </li>
   );

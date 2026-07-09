@@ -1003,7 +1003,7 @@ function actStageActions(task: TaskIntake) {
 
   return [
     "Decide whether to use, edit, or reject the result.",
-    "Save the recommendation if you followed it.",
+    "Accept and save the route if this is the path you intend to follow.",
     "Carry one prompt or routing lesson into the next similar task.",
   ];
 }

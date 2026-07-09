@@ -165,7 +165,11 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.locator(".stageChoiceSummary").filter({ hasText: "Mode" }).first()).toBeVisible();
   await expect(page.locator(".stageChoiceSummary").filter({ hasText: "Why this help" }).first()).toBeVisible();
   await expect(page.locator(".stageChoiceSummary").filter({ hasText: "Upgrade trigger" }).first()).toBeVisible();
+  await expect(page.getByText("Path for this stage").first()).toBeVisible();
+  await expect(page.getByText("Action").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Selected route", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Choose this route" }).first()).toBeVisible();
   await expect(page.getByLabel("100 use route cost and energy comparison")).toBeVisible();
   await expect(page.getByText("100-use scenario")).toBeVisible();
   await expect(page.getByText("linear scale; exact totals below")).toBeVisible();
@@ -180,8 +184,9 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByText(/Human approval is required before using public-facing/)).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
-  await page.getByRole("button", { name: "Save decision and prompts" }).click();
-  await expect(page.getByText("Decision card, prompts, and Past Choices record saved on this device.")).toBeVisible();
+  await page.getByRole("button", { name: "Accept selected route and save prompts" }).click();
+  await expect(page.getByText("Selected route, decision card, prompts, and followed-choice impact saved on this device.")).toBeVisible();
+  await expect(page.getByText("1 followed recommendation(s) counted on this device.")).toBeVisible();
 
   await page.getByRole("button", { name: "Decision Card", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeVisible();

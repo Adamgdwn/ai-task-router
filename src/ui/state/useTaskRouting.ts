@@ -73,11 +73,13 @@ export type TaskRoutingController = {
   routingMessage: string;
   saveStatus: GeneratedRouteSaveStatus;
   saveMessage: string;
+  selectedRouteOptionId: string | null;
   canRoute: boolean;
   updateDraftField: <Key extends keyof TaskRoutingDraft>(field: Key, value: TaskRoutingDraft[Key]) => void;
   applyTemplate: (templateId: TaskTemplate["id"] | "custom") => void;
   toggleRequestedSource: (sourceId: string) => void;
   generateRoute: () => Promise<boolean>;
+  selectRouteOption: (optionId: string) => void;
   saveGeneratedRoute: () => Promise<boolean>;
 };
 
@@ -139,6 +141,7 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
   const [routingMessage, setRoutingMessage] = useState("No options have been prepared yet.");
   const [saveStatus, setSaveStatus] = useState<GeneratedRouteSaveStatus>("idle");
   const [saveMessage, setSaveMessage] = useState("The decision card and prompts are not saved yet.");
+  const [selectedRouteOptionId, setSelectedRouteOptionId] = useState<string | null>(null);
 
   const resetGeneratedRoute = useCallback((nextDraft: TaskRoutingDraft) => {
     setValidationErrors({});
@@ -147,6 +150,7 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
     setRoutingMessage("Task details changed. Ask for options again to refresh results.");
     setSaveStatus("idle");
     setSaveMessage("The decision card and prompts are not saved yet.");
+    setSelectedRouteOptionId(null);
 
     return nextDraft;
   }, []);
@@ -292,7 +296,8 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
       setRoutingStatus("success");
       setRoutingMessage("Your options are ready.");
       setSaveStatus("idle");
-      setSaveMessage("The decision card and prompts are not saved yet.");
+      setSelectedRouteOptionId(routeCard.recommendedOptionId);
+      setSaveMessage("The best-fit route is selected. Choose another route if it fits better before saving.");
 
       return true;
     } catch (error) {
@@ -302,10 +307,24 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
       setRoutingMessage("Your options could not be prepared.");
       setSaveStatus("idle");
       setSaveMessage("The decision card and prompts are not saved yet.");
+      setSelectedRouteOptionId(null);
 
       return false;
     }
   }, [draft, setup]);
+
+  const selectRouteOption = useCallback(
+    (optionId: string) => {
+      if (!routeResult?.routeCard.options.some((option) => option.id === optionId)) {
+        return;
+      }
+
+      setSelectedRouteOptionId(optionId);
+      setSaveStatus("idle");
+      setSaveMessage("Route selected. Save it when this is the path you want to follow.");
+    },
+    [routeResult],
+  );
 
   const saveGeneratedRoute = useCallback(async () => {
     if (!routeResult) {
@@ -314,21 +333,28 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
       return false;
     }
 
+    const selectedOptionId = selectedRouteOptionId ?? routeResult.routeCard.recommendedOptionId;
+    if (!routeResult.routeCard.options.some((option) => option.id === selectedOptionId)) {
+      setSaveStatus("error");
+      setSaveMessage("Choose one available route before saving.");
+      return false;
+    }
+
     setSaveStatus("saving");
-    setSaveMessage("Saving the decision card and prompts on this device.");
+    setSaveMessage("Saving your selected route, decision card, and prompts on this device.");
 
     try {
       await store.saveRouteCard(routeResult.routeCard);
-      await store.saveRouteLogEntry(buildRouteLogEntry(routeResult));
+      await store.saveRouteLogEntry(buildRouteLogEntry(routeResult, selectedOptionId));
       setSaveStatus("saved");
-      setSaveMessage("Decision card, prompts, and Past Choices record saved on this device.");
+      setSaveMessage("Selected route, decision card, prompts, and followed-choice impact saved on this device.");
       return true;
     } catch (error) {
       setSaveStatus("error");
       setSaveMessage(routingErrorMessage(error));
       return false;
     }
-  }, [routeResult, store]);
+  }, [routeResult, selectedRouteOptionId, store]);
 
   return {
     draft,
@@ -339,18 +365,20 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
     routingMessage,
     saveStatus,
     saveMessage,
+    selectedRouteOptionId,
     canRoute: setup.status !== "loading" && setup.status !== "saving",
     updateDraftField,
     applyTemplate,
     toggleRequestedSource,
     generateRoute,
+    selectRouteOption,
     saveGeneratedRoute,
   };
 }
 
-function buildRouteLogEntry(routeResult: GeneratedRouteResult): RouteLogEntry {
+function buildRouteLogEntry(routeResult: GeneratedRouteResult, selectedOptionId: string): RouteLogEntry {
   const selectedRoute =
-    routeResult.routeCard.options.find((option) => option.id === routeResult.routeCard.recommendedOptionId) ??
+    routeResult.routeCard.options.find((option) => option.id === selectedOptionId) ??
     routeResult.selectedRoute;
 
   return {
@@ -359,7 +387,7 @@ function buildRouteLogEntry(routeResult: GeneratedRouteResult): RouteLogEntry {
     routeCardId: routeResult.routeCard.id,
     selectedOptionId: selectedRoute.id,
     selectedStrategy: selectedRoute.strategy,
-    outcome: "deferred",
+    outcome: "accepted",
     createdAt: routeResult.generatedAt,
   };
 }

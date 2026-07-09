@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-08T22:45:18-06:00
-Status Updated: 2026-07-08T22:45:18-06:00
+Last Updated: 2026-07-09T08:09:23-06:00
+Status Updated: 2026-07-09T08:09:23-06:00
 
 ## Purpose
 
@@ -35,7 +35,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Public desktop downloads | held | Windows Store/MSIX is the preferred first trusted Windows path; ordinary-user downloads remain gated. |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
-| Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. |
+| Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
 | Active chunk | Owner testing / production smoke | Core web/PWA tool is ready for owner testing; Chunk 5 is paused until explicitly requested and Chunk 6 remains held. |
@@ -451,6 +451,9 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-08T22:37:17-06:00 | Cloudflare production deploy and canonical hosted smoke | pass | Deployed source `8c707d3` to `https://45781c97.ai-task-router.pages.dev`; canonical `https://ai-task-router.pages.dev/` root, manifest, service worker, and immutable deployment root returned HTTP 200; service worker contained `ai-task-router-pwa-v2`; hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` passed 6 Chromium tests. |
 | 2026-07-08T22:44:24-06:00 | Average-person routing probe and focused checks | pass | Probed personal finance tracker, small business quote/invoice workflow, medical appointment prep, and family trip planning. The probe exposed and then verified a fix for ordinary planning language: "build a day by day itinerary" no longer becomes a software build slice, while true app/workflow/code tasks still route to prompt-design plus build execution. `npm run test -- taskDecomposition routeCardGenerator routeCandidates` passed 3 files and 31 tests; `npm run test` passed 14 files and 119 tests; `npm run build` passed with the existing large chunk warning. |
 | 2026-07-08T22:45:18-06:00 | Cloudflare production deploy and canonical hosted smoke | pass | Deployed source `9639840` to `https://ef92b270.ai-task-router.pages.dev`; canonical `https://ai-task-router.pages.dev/` root, manifest, service worker, and immutable deployment root returned HTTP 200; service worker contained `ai-task-router-pwa-v2`; hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` passed 6 Chromium tests. |
+| 2026-07-09T08:03:28-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings before Best Options owner-testing UX fixes. |
+| 2026-07-09T08:07:40-06:00 | `npm run test -- App`; `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | Focused app and browser checks verified visible stage paths, route selection, accepted-route save, and immediate followed-choice impact refresh. |
+| 2026-07-09T08:09:23-06:00 | `npm run test`; `npm run build`; `npm run scan:web-rc` | pass | Vitest passed 14 files and 119 tests; TypeScript/Vite build passed with the existing large chunk warning after fixing a test-only unsupported `exact` option; web release-candidate scan found no release-blocking findings. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -513,6 +516,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next step is owner testing of the live routing-feedback and average-person routing fix at `https://ai-task-router.pages.dev/`. Verify the live flow on both a difficult build-planning task and an ordinary planning task. True build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items. Ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. The cost chart should expose point values on hover/focus. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
+Immediate next step is local owner review of the Best Options screen after the UX fix, then production deployment if accepted. Verify that each stage shows a visible path without opening a disclosure, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.

@@ -441,11 +441,18 @@ function GeneratedResults({
   setup: SetupConfigurationController;
 }) {
   const recommended = result.routeCard.options.find((option) => option.id === result.routeCard.recommendedOptionId);
+  const selectedOptionId = routing.selectedRouteOptionId ?? result.routeCard.recommendedOptionId;
+  const selectedOption = result.routeCard.options.find((option) => option.id === selectedOptionId) ?? recommended;
   const suggestedToolkit = buildSuggestedToolkit({
     task: result.task,
     models: setup.configuration?.modelInventory ?? [],
-    recommended,
+    recommended: selectedOption ?? recommended,
   });
+  const handleSaveSelectedRoute = async () => {
+    if (await routing.saveGeneratedRoute()) {
+      await impactCounter?.refresh();
+    }
+  };
 
   return (
     <div className="resultsStack">
@@ -488,7 +495,7 @@ function GeneratedResults({
       />
 
       <ImpactInsightPanel
-        recommended={recommended}
+        recommended={selectedOption ?? recommended}
         snapshot={publicImpactSnapshot}
         task={result.task}
         trackedImpact={impactCounter?.summary}
@@ -500,7 +507,7 @@ function GeneratedResults({
       <section className="routingSection" aria-labelledby="route-comparison-heading">
         <div className="sectionHeading">
           <h3 id="route-comparison-heading">Your options</h3>
-          <p>Compare the likely cost, energy use, tradeoff, and safety fit before choosing what to copy or ignore.</p>
+          <p>Pick the route you actually intend to follow. The selected route is what gets saved to Past Choices and counted in local impact.</p>
         </div>
         <RouteTrustPanel recommended={recommended} result={result} reviewedAt={publicImpactSnapshot.reviewedAt} />
         <RouteHundredUseComparison options={result.routeCard.options} />
@@ -508,7 +515,9 @@ function GeneratedResults({
           {routeStrategies.map((strategy) => (
             <RouteStrategyCard
               key={strategy}
+              onSelect={routing.selectRouteOption}
               result={result}
+              selectedOptionId={selectedOptionId}
               strategy={strategy}
             />
           ))}
@@ -544,15 +553,18 @@ function GeneratedResults({
 
       <section className="saveRoutePanel" aria-labelledby="save-route-heading">
         <div>
-          <h3 id="save-route-heading">Keep this plan</h3>
-          <p>Save the decision card and copy-ready prompts on this device.</p>
+          <h3 id="save-route-heading">Accept and save this route</h3>
+          <p>
+            Selected route: <strong>{selectedOption?.label ?? "Choose a route above"}</strong>. Save it with the
+            decision card and copy-ready prompts on this device.
+          </p>
         </div>
         <button
-          disabled={routing.saveStatus === "saving" || routing.saveStatus === "saved"}
-          onClick={() => void routing.saveGeneratedRoute()}
+          disabled={!selectedOption || routing.saveStatus === "saving" || routing.saveStatus === "saved"}
+          onClick={() => void handleSaveSelectedRoute()}
           type="button"
         >
-          {routing.saveStatus === "saved" ? "Saved on this device" : "Save decision and prompts"}
+          {routing.saveStatus === "saved" ? "Saved on this device" : "Accept selected route and save prompts"}
         </button>
         <span aria-live="polite" role="status">
           {routing.saveMessage}
@@ -1030,15 +1042,20 @@ function ChartPanelAxes({
 }
 
 function RouteStrategyCard({
+  onSelect,
   result,
+  selectedOptionId,
   strategy,
 }: {
+  onSelect: (optionId: string) => void;
   result: GeneratedRouteResult;
+  selectedOptionId: string | null;
   strategy: RouteOption["strategy"];
 }) {
   const candidate = result.routeCard.options.find((routeOption) => routeOption.strategy === strategy);
   const unavailable = result.scoringResult.unavailable.find((routeCandidate) => routeCandidate.strategy === strategy);
   const recommended = candidate?.id === result.routeCard.recommendedOptionId;
+  const selected = candidate?.id === selectedOptionId;
 
   if (!candidate) {
     return (
@@ -1058,12 +1075,12 @@ function RouteStrategyCard({
 
   return (
     <section
-      className={routeCardClassName({ recommended })}
+      className={routeCardClassName({ recommended, selected })}
       aria-labelledby={`${strategy}-route-heading`}
     >
       <div className="routeCardHeader">
         <h4 id={`${strategy}-route-heading`}>{candidate.label}</h4>
-        <span>{recommended ? "Best fit" : fitLabel(candidate.score)}</span>
+        <span>{selected ? "Selected" : recommended ? "Best fit" : fitLabel(candidate.score)}</span>
       </div>
       <p>{plainRouteSummary(candidate.summary)}</p>
       <dl>
@@ -1092,6 +1109,15 @@ function RouteStrategyCard({
           </li>
         ))}
       </ol>
+      <button
+        aria-pressed={selected}
+        className="routeSelectButton"
+        disabled={selected}
+        onClick={() => onSelect(candidate.id)}
+        type="button"
+      >
+        {selected ? "Selected route" : "Choose this route"}
+      </button>
       <RouteCostSavingsDetail candidate={candidate} recommended={recommended} />
     </section>
   );
@@ -1156,11 +1182,15 @@ function RouteCostSavingsDetail({
   );
 }
 
-function routeCardClassName({ recommended }: { recommended: boolean }) {
+function routeCardClassName({ recommended, selected }: { recommended: boolean; selected: boolean }) {
   const classNames = ["routeResultCard"];
 
   if (recommended) {
     classNames.push("recommendedRouteCard");
+  }
+
+  if (selected) {
+    classNames.push("selectedRouteCard");
   }
 
   return classNames.join(" ");
