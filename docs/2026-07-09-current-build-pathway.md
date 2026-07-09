@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-09T08:09:23-06:00
-Status Updated: 2026-07-09T08:09:23-06:00
+Last Updated: 2026-07-09T09:20:39-06:00
+Status Updated: 2026-07-09T09:20:39-06:00
 
 ## Purpose
 
@@ -38,7 +38,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Owner testing / production smoke | Core web/PWA tool is ready for owner testing; Chunk 5 is paused until explicitly requested and Chunk 6 remains held. |
+| Active chunk | Production deploy blocked | Source commit `f8e0a40` removes the remaining stage-path disclosure affordance and is pushed to `main`, but Cloudflare rejected the production deploy token from the current public IP. Deploy from an allowed IP/session or update the token location policy before owner production testing. |
 
 ## Product Boundary
 
@@ -454,6 +454,10 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-09T08:03:28-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings before Best Options owner-testing UX fixes. |
 | 2026-07-09T08:07:40-06:00 | `npm run test -- App`; `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | Focused app and browser checks verified visible stage paths, route selection, accepted-route save, and immediate followed-choice impact refresh. |
 | 2026-07-09T08:09:23-06:00 | `npm run test`; `npm run build`; `npm run scan:web-rc` | pass | Vitest passed 14 files and 119 tests; TypeScript/Vite build passed with the existing large chunk warning after fixing a test-only unsupported `exact` option; web release-candidate scan found no release-blocking findings. |
+| 2026-07-09T09:16:28-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings before removing the remaining stage-path disclosure affordance and attempting production deploy. |
+| 2026-07-09T09:17:07-06:00 | `npm run test -- App`; `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | App tests passed 15 tests and MVP Chromium workflow passed 6 tests; both now assert the stage guidance contains no `details` or `summary` disclosure elements. |
+| 2026-07-09T09:17:36-06:00 | `npm audit --audit-level=moderate`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `git diff --check` | pass | Audit found 0 vulnerabilities; Vitest passed 14 files and 119 tests; production build passed with the existing large chunk warning; web release-candidate scan found no release-blocking findings; whitespace check only reported normal Windows LF-to-CRLF notices. |
+| 2026-07-09T09:20:39-06:00 | `npx --yes wrangler pages deploy dist --project-name ai-task-router --branch main --commit-hash f8e0a40 --commit-message "Remove stage path disclosure affordance" --env-file ...` | blocked | Cloudflare rejected the secure env-file token from the current public IP with code `9109` and then reported too many auth failures on deployment-list retry. Token values were not printed. Source commit `f8e0a40` is pushed; production remains on the previous deployment until a deploy is run from an allowed IP/session or the token location policy is updated. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -516,6 +520,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next step is local owner review of the Best Options screen after the UX fix, then production deployment if accepted. Verify that each stage shows a visible path without opening a disclosure, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
+Immediate next step is production deployment of pushed source commit `f8e0a40` from an allowed Cloudflare token location/session, then hosted smoke of `https://ai-task-router.pages.dev/`. The production app still serves the previous deployment until that succeeds. Verify that each stage shows a visible path with no disclosure/pull-down, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.
