@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.5.2
+Version: 1.5.3
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-09T11:06:44-06:00
-Status Updated: 2026-07-09T11:06:44-06:00
+Last Updated: 2026-07-09T12:41:50-06:00
+Status Updated: 2026-07-09T12:41:50-06:00
 
 ## Purpose
 
@@ -38,7 +38,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Production deploy blocked | Current `main` includes commit `f8e0a40`, which removes the remaining stage-path disclosure affordance, plus docs-only deploy blocker and Chunk 4 review notes. Release checks passed from HEAD before the latest docs-only review pass, but Cloudflare still rejected the production deploy token from public IP `184.67.69.66` with code `9109`. The direct-link Linux fallback was unavailable. Deploy from an allowed IP/session or update the token location policy before owner production testing. |
+| Active chunk | Production deploy blocked | Current `main` includes commit `f8e0a40`, which removes the remaining stage-path disclosure affordance, plus docs-only deploy blocker and Chunk 4 review notes. Release checks passed from HEAD before the latest docs-only review pass, but Cloudflare still rejected the production deploy token from public IP `184.67.69.66` with code `9109`. The owner decided to wait until returning to the home network because the current network is restrictive. Use the turnover note at `docs/2026-07-09-cloudflare-deploy-turnover.md` for the next deploy attempt from an allowed IP/session. |
 
 ## Product Boundary
 
@@ -463,6 +463,7 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-09T10:12:52-06:00 | `npx --yes wrangler pages deploy dist --project-name ai-task-router --branch main --commit-hash 80a661b --commit-message "Record production deploy blocker" --env-file ...` | blocked | Cloudflare again rejected the secure env-file token from public IP `184.67.69.66` with code `9109` and authentication error `10000`. Token values were not printed. |
 | 2026-07-09T10:14:22-06:00 | Direct-link fallback check | blocked | `ssh linux-direct` to `10.77.77.2` timed out and the Windows direct-link status script could not find the configured `Ethernet 2` adapter, so no alternate allowed-location deploy host was reachable from this session. |
 | 2026-07-09T11:06:44-06:00 | `bash scripts/governance-preflight.sh`; Chunk 4 methodology claim-boundary `rg`; `git diff --check` | pass | Governance preflight reported 0 warnings; methodology review found route-contract, saved-choice, source-snapshot, manual-use, and forbidden-claim boundary language; whitespace check reported only normal Windows LF-to-CRLF notices. |
+| 2026-07-09T12:41:50-06:00 | `bash scripts/governance-preflight.sh`; deploy turnover doc review; `git diff --check` | pass | Governance preflight reported 0 warnings before boxing up the Cloudflare deploy blocker. Turnover note records the blocked public IP, Cloudflare code `9109`, secure-token handling, allowed-location recovery options, deploy command shape, and hosted smoke checklist. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -525,6 +526,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next step is production deployment of latest pushed `main`, including functional commit `f8e0a40` and the Chunk 4 methodology review pass, from an allowed Cloudflare token location/session, then hosted smoke of `https://ai-task-router.pages.dev/`. The production app still serves the previous deployment until that succeeds. The local Windows session is not an allowed token location at public IP `184.67.69.66`, and the direct-link Linux fallback was unreachable during the latest retry. Verify that each stage shows a visible path with no disclosure/pull-down, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
+Immediate next step is production deployment of latest pushed `main`, including functional commit `f8e0a40` and the Chunk 4 methodology review pass, from an allowed Cloudflare token location/session, then hosted smoke of `https://ai-task-router.pages.dev/`. The production app still serves the previous deployment until that succeeds. The local Windows session is not an allowed token location at public IP `184.67.69.66`, and the direct-link Linux fallback was unreachable during the latest retry. The owner plans to retry from the home network; use [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) as the operator checklist. Verify that each stage shows a visible path with no disclosure/pull-down, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.
