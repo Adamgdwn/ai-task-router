@@ -1,4 +1,4 @@
-const CACHE_NAME = "ai-task-router-pwa-v1";
+const CACHE_NAME = "ai-task-router-pwa-v2";
 const APP_SHELL_URLS = [
   "/",
   "/index.html",
@@ -62,18 +62,23 @@ async function fetchNavigation(request) {
 }
 
 async function fetchSameOriginAsset(request) {
-  const cachedResponse = await caches.match(request);
+  const cache = await caches.open(CACHE_NAME);
 
-  if (cachedResponse) {
-    return cachedResponse;
+  try {
+    const response = await fetch(request);
+
+    if (response.ok) {
+      await cache.put(request, response.clone());
+    }
+
+    return response;
+  } catch (_error) {
+    const cachedResponse = await cache.match(request);
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    throw _error;
   }
-
-  const response = await fetch(request);
-
-  if (response.ok) {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.put(request, response.clone());
-  }
-
-  return response;
 }

@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.3.0
+Version: 1.4.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-08T22:09:06-06:00
-Status Updated: 2026-07-08T22:09:06-06:00
+Last Updated: 2026-07-08T22:24:11-06:00
+Status Updated: 2026-07-08T22:24:11-06:00
 
 ## Purpose
 
@@ -31,13 +31,13 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live | Production URL: `https://ai-task-router.pages.dev/`. |
+| Browser/PWA app | live | Production URL: `https://ai-task-router.pages.dev/`; latest release path includes a PWA cache-bust fix so returning browsers do not prefer stale app bundles. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Public desktop downloads | held | Windows Store/MSIX is the preferred first trusted Windows path; ordinary-user downloads remain gated. |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Chunk 4 draft complete | Reviewed methodology draft is complete; next recommended build chunk is Chunk 5. |
+| Active chunk | Owner testing / production smoke | Core web/PWA tool is ready for owner testing; Chunk 5 is paused until explicitly requested and Chunk 6 remains held. |
 
 ## Product Boundary
 
@@ -90,7 +90,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 2 | Right-agent UX proof slice | integration complete | Integration complete | Makes the live recommendation flow visibly show which helper or mode belongs at each stage. |
 | 3 | Decision Card and prompt handoff polish | integration complete | Integration complete | Ensures exports carry the same staged agent-choice logic into the user's real workflow. |
 | 4 | Reviewed methodology page | draft complete | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
-| 5 | Opt-in local estimator UI | next | Draft complete | Lets users explore local, caveated impact estimates without telemetry or provider connections. |
+| 5 | Opt-in local estimator UI | paused | Draft complete | Optional enhancement; only start if the owner explicitly wants a local impact-estimate surface. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
 
 ## Plan Chunks
@@ -298,8 +298,8 @@ The methodology page now opens with a date-prefixed controlled-doc title and a c
 
 ### Chunk 5 - Opt-In Local Estimator UI
 
-Status: planned
-Status Updated: 2026-07-08T21:17:29-06:00
+Status: paused
+Status Updated: 2026-07-08T22:17:33-06:00
 Completion target: Draft complete
 Budget class: Medium
 
@@ -341,6 +341,10 @@ Validation expectations:
 Stop condition:
 
 Stop at a draft user-visible estimator. Do not expand to analytics, sync, or provider data.
+
+Pause decision:
+
+As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool functional enough for hands-on testing without this estimator. Do not start Chunk 5 unless the owner explicitly reopens it.
 
 ### Chunk 6 - Windows Store/MSIX Trust Slice
 
@@ -431,9 +435,16 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-08T22:07:13-06:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
 | 2026-07-08T22:07:13-06:00 | methodology line-count check | pass | Methodology draft is 178 lines after refocus; the active pathway stays compact. |
 | 2026-07-08T22:09:58-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings after Chunk 4 edits and pathway handoff update. |
-| 2026-07-08T22:09:58-06:00 | `rg -n "Chunk 4 is draft complete\|next recommended build chunk is Chunk 5\|Immediate next chunk is Chunk 5\|\| 5 \| Opt-in local estimator UI \| next" START_HERE.md docs/2026-07-09-current-build-pathway.md` | pass | Startup and active pathway now route future work to Chunk 5. |
+| 2026-07-08T22:09:58-06:00 | prior Chunk 5 routing check | pass | Historical routing check before the owner paused Chunk 5; superseded by the 2026-07-08T22:17:33-06:00 owner scope decision. |
 | 2026-07-08T22:09:58-06:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
 | 2026-07-08T22:09:58-06:00 | `git diff --check` | pass | Only normal Windows LF-to-CRLF notices. |
+| 2026-07-08T22:17:33-06:00 | owner scope decision | pass | Owner accepted the core web/PWA tool as ready for hands-on testing; Chunk 5 is paused and Chunk 6 remains held. |
+| 2026-07-08T22:17:33-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings before production/testing routing cleanup. |
+| 2026-07-08T22:18:41-06:00 | `npm audit --audit-level=moderate`; `npm run test`; `npm run build`; `npm run scan:web-rc` | pass | Audit found 0 vulnerabilities; Vitest passed 14 files and 116 tests; production build passed with the existing large chunk warning; web release-candidate scan found no release-blocking findings. |
+| 2026-07-08T22:20:19-06:00 | initial Wrangler deploy attempt without env file | blocked | Shell did not have `CLOUDFLARE_API_TOKEN`; no token values were printed. |
+| 2026-07-08T22:21:10-06:00 | Wrangler deploy with secure env file | pass | Cloudflare created production deployment `https://733d9385.ai-task-router.pages.dev` from source `e777fed`; canonical asset checks returned HTTP 200. |
+| 2026-07-08T22:21:35-06:00 | Hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test` | fail | Canonical URL still served a stale PWA flow for the route-summary assertion, while the immutable deployment URL passed all 6 hosted E2E tests. |
+| 2026-07-08T22:23:27-06:00 | `node --check public/service-worker.js`; `npm run test`; `npm run build`; `npm run scan:web-rc`; local `npx playwright test`; `git diff --check` | pass | Added `ai-task-router-pwa-v2` cache and network-first same-origin asset fetching; Vitest passed 14 files and 116 tests; local Playwright passed 6 Chromium tests; build kept the existing large chunk warning; whitespace check only reported normal Windows LF-to-CRLF notices. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -496,6 +507,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next chunk is Chunk 5, the opt-in local estimator UI slice, starting at the Plan Chunks section above. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway.
+Immediate next step is owner testing and a production smoke of the live web/PWA at `https://ai-task-router.pages.dev/`. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.

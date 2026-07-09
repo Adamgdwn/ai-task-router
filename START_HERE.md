@@ -1,8 +1,8 @@
 # 2026-07-09T03:04:01+00:00 - Start Here
 
-Last Updated: 2026-07-08T22:09:06-06:00
+Last Updated: 2026-07-08T22:24:11-06:00
 Status: draft
-Status Updated: 2026-07-08T22:09:06-06:00
+Status Updated: 2026-07-08T22:24:11-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -55,9 +55,9 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 ## Agent Handoff
 
-The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`.
+The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`. The PWA service worker now uses the `ai-task-router-pwa-v2` cache and network-first same-origin asset fetching so returning browsers do not prefer stale app bundles after a release.
 
-The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. Superseded pathway archives are not part of startup or normal work routing. The active pathway contains the current chunk queue; Chunk 4 is draft complete and the next recommended build chunk is Chunk 5, the opt-in local estimator UI slice.
+The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. Superseded pathway archives are not part of startup or normal work routing. The core web/PWA route is ready for owner testing with Chunks 1 through 4 complete enough for the current web product decision. Chunk 5, the opt-in local estimator UI slice, is paused until the owner explicitly wants that extra surface. Chunk 6 remains held.
 
 Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, custom-domain/DNS changes, live pricing tables, live pricing/model fetches, provider connections, exact public savings claims, Partner Center secrets, identity documents, tax/banking details, private account screenshots, or external execution workflows without a separate approved chunk and release gate evidence.
 
