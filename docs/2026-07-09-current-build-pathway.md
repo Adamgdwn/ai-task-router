@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.5.1
+Version: 1.5.2
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-09T10:14:22-06:00
-Status Updated: 2026-07-09T10:14:22-06:00
+Last Updated: 2026-07-09T11:06:44-06:00
+Status Updated: 2026-07-09T11:06:44-06:00
 
 ## Purpose
 
@@ -38,7 +38,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Production deploy blocked | Current `main` is pushed at `80a661b` and includes commit `f8e0a40`, which removes the remaining stage-path disclosure affordance. Release checks passed from HEAD, but Cloudflare still rejected the production deploy token from public IP `184.67.69.66` with code `9109`. The direct-link Linux fallback was unavailable. Deploy from an allowed IP/session or update the token location policy before owner production testing. |
+| Active chunk | Production deploy blocked | Current `main` includes commit `f8e0a40`, which removes the remaining stage-path disclosure affordance, plus docs-only deploy blocker and Chunk 4 review notes. Release checks passed from HEAD before the latest docs-only review pass, but Cloudflare still rejected the production deploy token from public IP `184.67.69.66` with code `9109`. The direct-link Linux fallback was unavailable. Deploy from an allowed IP/session or update the token location policy before owner production testing. |
 
 ## Product Boundary
 
@@ -90,7 +90,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 1 | Individual power story audit | task complete | Task complete | Confirms the app and public docs explain the personal value clearly before adding more surface area. |
 | 2 | Right-agent UX proof slice | integration complete | Integration complete | Makes the live recommendation flow visibly show which helper or mode belongs at each stage. |
 | 3 | Decision Card and prompt handoff polish | integration complete | Integration complete | Ensures exports carry the same staged agent-choice logic into the user's real workflow. |
-| 4 | Reviewed methodology page | draft complete | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
+| 4 | Reviewed methodology page | draft complete; owner-review ready | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
 | 5 | Opt-in local estimator UI | paused | Draft complete | Optional enhancement; only start if the owner explicitly wants a local impact-estimate surface. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
 
@@ -251,8 +251,8 @@ Decision Card Markdown now includes a manual-use boundary before the summary, pr
 
 ### Chunk 4 - Reviewed Methodology Page
 
-Status: draft complete
-Status Updated: 2026-07-08T22:09:06-06:00
+Status: draft complete; owner-review ready
+Status Updated: 2026-07-09T11:06:44-06:00
 Completion target: Draft complete
 Budget class: Small
 
@@ -295,7 +295,7 @@ Stop at a reviewed draft. Public launch copy remains a separate approval chunk.
 
 Acceptance result:
 
-The methodology page now opens with a date-prefixed controlled-doc title and a concise stage-first method: split work into Frame/Gather/Create/Package/Review/Act, apply hard gates, choose the lightest safe helper, show checks and upgrade triggers, and keep outside action manual. Impact math remains as bounded local decision-support scenarios with source snapshot rules, no live pricing fetches, no exact per-user savings claims, and explicit owner/source-refresh gates before public numbers.
+The methodology page now opens with a date-prefixed controlled-doc title and a concise stage-first method: split work into Frame/Gather/Create/Package/Review/Act, apply hard gates, choose the lightest safe helper, show checks and upgrade triggers, and keep outside action manual. Impact math remains as bounded local decision-support scenarios with source snapshot rules, no live pricing fetches, no exact per-user savings claims, and explicit owner/source-refresh gates before public numbers. The 2026-07-09 review pass adds a user-visible route contract and local saved-choice tracking boundaries, so accepted-route counts stay distinct from avoided-cost or energy estimates.
 
 ### Chunk 5 - Opt-In Local Estimator UI
 
@@ -462,6 +462,7 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-09T10:12:14-06:00 | `npm audit --audit-level=moderate`; `npm run test`; `npm run build`; `npm run scan:web-rc`; `git diff --check` | pass | Audit found 0 vulnerabilities; Vitest passed 14 files and 119 tests; production build from `80a661b` passed with the existing Vite chunk-size warning; web release-candidate scan found no release-blocking findings; whitespace check was clean. |
 | 2026-07-09T10:12:52-06:00 | `npx --yes wrangler pages deploy dist --project-name ai-task-router --branch main --commit-hash 80a661b --commit-message "Record production deploy blocker" --env-file ...` | blocked | Cloudflare again rejected the secure env-file token from public IP `184.67.69.66` with code `9109` and authentication error `10000`. Token values were not printed. |
 | 2026-07-09T10:14:22-06:00 | Direct-link fallback check | blocked | `ssh linux-direct` to `10.77.77.2` timed out and the Windows direct-link status script could not find the configured `Ethernet 2` adapter, so no alternate allowed-location deploy host was reachable from this session. |
+| 2026-07-09T11:06:44-06:00 | `bash scripts/governance-preflight.sh`; Chunk 4 methodology claim-boundary `rg`; `git diff --check` | pass | Governance preflight reported 0 warnings; methodology review found route-contract, saved-choice, source-snapshot, manual-use, and forbidden-claim boundary language; whitespace check reported only normal Windows LF-to-CRLF notices. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -524,6 +525,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next step is production deployment of current pushed `main` (`80a661b`, including functional commit `f8e0a40`) from an allowed Cloudflare token location/session, then hosted smoke of `https://ai-task-router.pages.dev/`. The production app still serves the previous deployment until that succeeds. The local Windows session is not an allowed token location at public IP `184.67.69.66`, and the direct-link Linux fallback was unreachable during the latest retry. Verify that each stage shows a visible path with no disclosure/pull-down, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
+Immediate next step is production deployment of latest pushed `main`, including functional commit `f8e0a40` and the Chunk 4 methodology review pass, from an allowed Cloudflare token location/session, then hosted smoke of `https://ai-task-router.pages.dev/`. The production app still serves the previous deployment until that succeeds. The local Windows session is not an allowed token location at public IP `184.67.69.66`, and the direct-link Linux fallback was unreachable during the latest retry. Verify that each stage shows a visible path with no disclosure/pull-down, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.

@@ -1,7 +1,7 @@
 # 2026-07-08T22:07:13-06:00 - AI Task Router Impact Estimator Methodology
 
 Document ID: GUI-ENG-002
-Version: 0.3.0
+Version: 0.4.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,7 +9,7 @@ Effective Date: 2026-07-05
 Last Reviewed: 2026-07-08
 Next Review: Before source refresh, exact public savings claims, social launch copy, live pricing tables, or opt-in estimator release
 Timestamp: 2026-07-08T22:07:13-06:00
-Last Updated: 2026-07-08T22:07:13-06:00
+Last Updated: 2026-07-09T11:06:44-06:00
 
 ## Purpose
 
@@ -21,7 +21,7 @@ Impact estimates are secondary. They explain why right-sized routing may reduce 
 
 ## Current Status
 
-Status: Draft complete for reviewed methodology page
+Status: Draft complete; owner-review ready
 
 Completion target: Draft complete
 
@@ -46,6 +46,19 @@ The router treats work as a staged decision, not a single model choice.
 4. Show why that helper fits, what to check, and when to upgrade.
 5. Package the result as a manual Decision Card and prompt handoff.
 6. Estimate impact only from visible assumptions, never from hidden telemetry or live provider data.
+
+## User-Visible Route Contract
+
+Each recommended stage should give the user a plain path:
+
+1. What stage am I in?
+2. Which helper, model tier, mode, or manual step should I use here?
+3. Why is that choice safe enough for this stage?
+4. What should I check before moving on?
+5. What condition would justify upgrading to stronger help?
+6. What action remains manual and outside the app?
+
+The route detail should not hide this path behind internal implementation language. If a section is shown, it should add a decision, reason, check, or upgrade trigger that helps the user act. Repeating the same claim in several sections is a sign that the route explanation should be tightened.
 
 ## Stage Decision Model
 
@@ -86,6 +99,18 @@ They must not be described as:
 - proof that the product makes AI environmentally harmless
 
 The app may show qualitative or scenario-based impact only when assumptions, source dates, and caveats are visible.
+
+## Local Saved-Choice Tracking
+
+Accepted routes are local records of the route the user chose to follow. The saved-choice count is useful as a behavior signal: it says the user accepted a route and saved its prompts or handoff on this device.
+
+Avoided-cost and energy numbers are different. They should appear only when the selected route has enough reviewed scenario data to calculate a comparison. If the app cannot calculate a meaningful estimate, it should prefer clear unavailable or not-estimated language over implying that the accepted route avoided exactly zero cost or zero watt hours.
+
+This distinction keeps the product honest:
+
+- tracked choice count = local user action
+- avoided cost or energy = scenario estimate from visible assumptions
+- actual provider bill, energy, water, or carbon result = not known by the app
 
 ## Cost Formula
 
@@ -238,6 +263,8 @@ Future opt-in estimator:
 ## Handoff
 
 This methodology now supports a reviewed public methodology draft while preserving safe claim boundaries. It reinforces the main product story: split the task into stages, choose the right helper for each stage, keep the handoff manual, and treat impact numbers as local estimates rather than promises.
+
+The 2026-07-09 review pass adds a user-visible route contract and saved-choice tracking boundaries. This supports owner testing of the Best Options screen without reopening the paused opt-in estimator UI.
 
 Next bounded chunks can be:
 
