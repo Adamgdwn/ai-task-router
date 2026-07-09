@@ -1,8 +1,8 @@
 # 2026-07-09T03:04:01+00:00 - Start Here
 
-Last Updated: 2026-07-08T22:24:11-06:00
+Last Updated: 2026-07-08T22:25:41-06:00
 Status: draft
-Status Updated: 2026-07-08T22:24:11-06:00
+Status Updated: 2026-07-08T22:25:41-06:00
 Owner: Project Owner
 
 ## Current Plan
@@ -55,7 +55,7 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 ## Agent Handoff
 
-The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`. The PWA service worker now uses the `ai-task-router-pwa-v2` cache and network-first same-origin asset fetching so returning browsers do not prefer stale app bundles after a release.
+The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Latest production deployment: `https://9e4ca8a6.ai-task-router.pages.dev` from source `b1fa71d`. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`. The PWA service worker now uses the `ai-task-router-pwa-v2` cache and network-first same-origin asset fetching so returning browsers do not prefer stale app bundles after a release.
 
 The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. Superseded pathway archives are not part of startup or normal work routing. The core web/PWA route is ready for owner testing with Chunks 1 through 4 complete enough for the current web product decision. Chunk 5, the opt-in local estimator UI slice, is paused until the owner explicitly wants that extra surface. Chunk 6 remains held.
 

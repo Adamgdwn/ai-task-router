@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-08T22:24:11-06:00
-Status Updated: 2026-07-08T22:24:11-06:00
+Last Updated: 2026-07-08T22:25:41-06:00
+Status Updated: 2026-07-08T22:25:41-06:00
 
 ## Purpose
 
@@ -31,7 +31,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live | Production URL: `https://ai-task-router.pages.dev/`; latest release path includes a PWA cache-bust fix so returning browsers do not prefer stale app bundles. |
+| Browser/PWA app | live | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://9e4ca8a6.ai-task-router.pages.dev` from source `b1fa71d` includes a PWA cache-bust fix so returning browsers do not prefer stale app bundles. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Public desktop downloads | held | Windows Store/MSIX is the preferred first trusted Windows path; ordinary-user downloads remain gated. |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
@@ -445,6 +445,7 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-08T22:21:10-06:00 | Wrangler deploy with secure env file | pass | Cloudflare created production deployment `https://733d9385.ai-task-router.pages.dev` from source `e777fed`; canonical asset checks returned HTTP 200. |
 | 2026-07-08T22:21:35-06:00 | Hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test` | fail | Canonical URL still served a stale PWA flow for the route-summary assertion, while the immutable deployment URL passed all 6 hosted E2E tests. |
 | 2026-07-08T22:23:27-06:00 | `node --check public/service-worker.js`; `npm run test`; `npm run build`; `npm run scan:web-rc`; local `npx playwright test`; `git diff --check` | pass | Added `ai-task-router-pwa-v2` cache and network-first same-origin asset fetching; Vitest passed 14 files and 116 tests; local Playwright passed 6 Chromium tests; build kept the existing large chunk warning; whitespace check only reported normal Windows LF-to-CRLF notices. |
+| 2026-07-08T22:25:41-06:00 | Cloudflare production deploy and canonical hosted smoke | pass | Deployed source `b1fa71d` to `https://9e4ca8a6.ai-task-router.pages.dev`; canonical `https://ai-task-router.pages.dev/` root, manifest, service worker, and PWA icons returned HTTP 200; service worker contained `ai-task-router-pwa-v2`; hosted Playwright passed 6 Chromium tests. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
