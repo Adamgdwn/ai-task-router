@@ -8,8 +8,8 @@ Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-08T22:03:18-06:00
-Status Updated: 2026-07-08T22:03:18-06:00
+Last Updated: 2026-07-08T22:09:06-06:00
+Status Updated: 2026-07-08T22:09:06-06:00
 
 ## Purpose
 
@@ -37,7 +37,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Chunk 3 integration complete | Decision Card and prompt handoff polish is complete; next recommended build chunk is Chunk 4. |
+| Active chunk | Chunk 4 draft complete | Reviewed methodology draft is complete; next recommended build chunk is Chunk 5. |
 
 ## Product Boundary
 
@@ -89,8 +89,8 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 1 | Individual power story audit | task complete | Task complete | Confirms the app and public docs explain the personal value clearly before adding more surface area. |
 | 2 | Right-agent UX proof slice | integration complete | Integration complete | Makes the live recommendation flow visibly show which helper or mode belongs at each stage. |
 | 3 | Decision Card and prompt handoff polish | integration complete | Integration complete | Ensures exports carry the same staged agent-choice logic into the user's real workflow. |
-| 4 | Reviewed methodology page | next | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
-| 5 | Opt-in local estimator UI | planned | Draft complete | Lets users explore local, caveated impact estimates without telemetry or provider connections. |
+| 4 | Reviewed methodology page | draft complete | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
+| 5 | Opt-in local estimator UI | next | Draft complete | Lets users explore local, caveated impact estimates without telemetry or provider connections. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
 
 ## Plan Chunks
@@ -250,8 +250,8 @@ Decision Card Markdown now includes a manual-use boundary before the summary, pr
 
 ### Chunk 4 - Reviewed Methodology Page
 
-Status: planned
-Status Updated: 2026-07-08T21:17:29-06:00
+Status: draft complete
+Status Updated: 2026-07-08T22:09:06-06:00
 Completion target: Draft complete
 Budget class: Small
 
@@ -291,6 +291,10 @@ Validation expectations:
 Stop condition:
 
 Stop at a reviewed draft. Public launch copy remains a separate approval chunk.
+
+Acceptance result:
+
+The methodology page now opens with a date-prefixed controlled-doc title and a concise stage-first method: split work into Frame/Gather/Create/Package/Review/Act, apply hard gates, choose the lightest safe helper, show checks and upgrade triggers, and keep outside action manual. Impact math remains as bounded local decision-support scenarios with source snapshot rules, no live pricing fetches, no exact per-user savings claims, and explicit owner/source-refresh gates before public numbers.
 
 ### Chunk 5 - Opt-In Local Estimator UI
 
@@ -422,6 +426,14 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-08T22:04:06-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings after Chunk 3 edits and pathway handoff update. |
 | 2026-07-08T22:04:06-06:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
 | 2026-07-08T22:04:06-06:00 | `git diff --check` | pass | Only normal Windows LF-to-CRLF notices. |
+| 2026-07-08T22:07:13-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings before Chunk 4 methodology edits. |
+| 2026-07-08T22:07:13-06:00 | `rg -n "guaranteed savings\|actual provider bill\|live provider price\|exact per-user savings\|right-helper-by-stage\|local decision support\|source snapshot\|manual-use" docs/2026-07-05-impact-estimator-methodology.md README.md docs/PRODUCT_BRIEF.md` | pass | Methodology now includes right-helper-by-stage wording, source snapshot boundaries, manual-use limits, and explicit forbidden-claim examples. |
+| 2026-07-08T22:07:13-06:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
+| 2026-07-08T22:07:13-06:00 | methodology line-count check | pass | Methodology draft is 178 lines after refocus; the active pathway stays compact. |
+| 2026-07-08T22:09:58-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings after Chunk 4 edits and pathway handoff update. |
+| 2026-07-08T22:09:58-06:00 | `rg -n "Chunk 4 is draft complete\|next recommended build chunk is Chunk 5\|Immediate next chunk is Chunk 5\|\| 5 \| Opt-in local estimator UI \| next" START_HERE.md docs/2026-07-09-current-build-pathway.md` | pass | Startup and active pathway now route future work to Chunk 5. |
+| 2026-07-08T22:09:58-06:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
+| 2026-07-08T22:09:58-06:00 | `git diff --check` | pass | Only normal Windows LF-to-CRLF notices. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -484,6 +496,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next chunk is Chunk 4, the reviewed methodology page slice, starting at the Plan Chunks section above. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway.
+Immediate next chunk is Chunk 5, the opt-in local estimator UI slice, starting at the Plan Chunks section above. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.
