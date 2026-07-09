@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.4.0
+Version: 1.5.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-08
 Next Review: During the next substantial build session
-Last Updated: 2026-07-08T22:25:41-06:00
-Status Updated: 2026-07-08T22:25:41-06:00
+Last Updated: 2026-07-08T22:35:42-06:00
+Status Updated: 2026-07-08T22:35:42-06:00
 
 ## Purpose
 
@@ -35,6 +35,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Public desktop downloads | held | Windows Store/MSIX is the preferred first trusted Windows path; ordinary-user downloads remain gated. |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
+| Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
 | Active chunk | Owner testing / production smoke | Core web/PWA tool is ready for owner testing; Chunk 5 is paused until explicitly requested and Chunk 6 remains held. |
@@ -446,6 +447,7 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-08T22:21:35-06:00 | Hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test` | fail | Canonical URL still served a stale PWA flow for the route-summary assertion, while the immutable deployment URL passed all 6 hosted E2E tests. |
 | 2026-07-08T22:23:27-06:00 | `node --check public/service-worker.js`; `npm run test`; `npm run build`; `npm run scan:web-rc`; local `npx playwright test`; `git diff --check` | pass | Added `ai-task-router-pwa-v2` cache and network-first same-origin asset fetching; Vitest passed 14 files and 116 tests; local Playwright passed 6 Chromium tests; build kept the existing large chunk warning; whitespace check only reported normal Windows LF-to-CRLF notices. |
 | 2026-07-08T22:25:41-06:00 | Cloudflare production deploy and canonical hosted smoke | pass | Deployed source `b1fa71d` to `https://9e4ca8a6.ai-task-router.pages.dev`; canonical `https://ai-task-router.pages.dev/` root, manifest, service worker, and PWA icons returned HTTP 200; service worker contained `ai-task-router-pwa-v2`; hosted Playwright passed 6 Chromium tests. |
+| 2026-07-08T22:35:42-06:00 | Owner routing feedback implementation checks | pass | `npm run test` passed 14 files and 118 tests; `npm run build` passed with the existing large chunk warning; `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` passed 6 Chromium tests; `npm audit --audit-level=moderate` found 0 vulnerabilities; `npm run scan:web-rc` found no release-blocking findings; `git diff --check` reported only normal Windows LF-to-CRLF notices. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -508,6 +510,6 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-Immediate next step is owner testing and a production smoke of the live web/PWA at `https://ai-task-router.pages.dev/`. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
+Immediate next step is owner testing of the routing-feedback fix once the updated web/PWA is deployed. Verify the live flow on a difficult build-planning task: the master prompt should use the strongest available reasoning pass, the execution/build stage should move to the lighter or build-capable helper, routing detail should show concrete build items, and the cost chart should expose point values on hover/focus. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.

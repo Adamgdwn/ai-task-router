@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { invoke } from "@tauri-apps/api/core";
 import userEvent from "@testing-library/user-event";
 import { App } from "../../App";
@@ -11,6 +11,7 @@ import {
 import { screenDefinitions } from "../../ui/screens/screenDefinitions";
 import { legacyPrefilledToolModels } from "../fixtures/legacyPrefilledToolModels";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
+import { createEverydayToolModel } from "../../domain/defaults/everydayToolCatalog";
 
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: vi.fn(),
@@ -424,6 +425,12 @@ describe("App", () => {
     expect(screen.getAllByText("Mode").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Why this help").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Upgrade trigger").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Use .* to /).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Decision").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Why").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Check").length).toBeGreaterThan(0);
+    expect(screen.getByLabelText(/Lean route: .* cost at 50 uses/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Balanced route: .* energy at 75 uses/)).toBeInTheDocument();
     expect(screen.getAllByText("Best fit").length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "What this route can save" })).toBeInTheDocument();
     expect(screen.getByText("Savings recommendation")).toBeInTheDocument();
@@ -449,6 +456,50 @@ describe("App", () => {
       selectedOptionId: records.routeCards[0]?.recommendedOptionId,
       outcome: "deferred",
     });
+  });
+
+  it("breaks a difficult build request into visible build routing details", async () => {
+    const user = userEvent.setup();
+    const store = await buildRouteReadyTestStore();
+    const configuration = await store.loadConfiguration();
+    await store.saveModelInventory([
+      ...configuration.modelInventory.filter((model) => model.tier === "human"),
+      createEverydayToolModel({
+        id: "chatgpt-pro-build-plan",
+        providerId: "chatgpt",
+        accountId: "pro",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "claude-build-plan",
+        providerId: "claude",
+        accountId: "pro",
+        frequencyId: "daily",
+      }),
+    ]);
+
+    render(<App store={store} />);
+
+    await user.click(screen.getByRole("button", { name: "My Task" }));
+    await screen.findByText("Notes or background I already know");
+    fireEvent.change(screen.getByLabelText("What do you need help with?"), {
+      target: {
+        value:
+          "Build the master prompt for a finance tracker app that imports spreadsheet data, categorizes expenses, tracks month over month trends, shows where I need to improve, shows what looks good, recommends the best model, protects private financial data, and creates the first usable build slice.",
+      },
+    });
+    await user.selectOptions(screen.getByRole("combobox", { name: "What kind of help do you need?" }), "planning");
+    await user.selectOptions(screen.getByRole("combobox", { name: "What are you making?" }), "plan");
+    await user.selectOptions(screen.getByRole("combobox", { name: "How polished should it be?" }), "high");
+    await user.click(screen.getByRole("button", { name: "Show me my best options" }));
+
+    expect(await screen.findByRole("heading", { name: "Best Options", level: 2 })).toBeInTheDocument();
+    expect(screen.getByText("Build the data import flow")).toBeInTheDocument();
+    expect(screen.getByText("Build the categorization rules")).toBeInTheDocument();
+    expect(screen.getByText("Build the tracking view")).toBeInTheDocument();
+    expect(screen.getByText("Build the insight and recommendation view")).toBeInTheDocument();
+    expect(screen.getAllByText(/GPT-5.5 Pro Extended/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Claude/).length).toBeGreaterThan(0);
   });
 
   it("shows blocked routes when requested sources fail local gates", async () => {

@@ -1696,6 +1696,18 @@ button:focus-visible {
   padding-top: 4px;
 }
 
+.stageDecision {
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 20%, #d9e3e8);
+  border-radius: 6px;
+  color: #17364a;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.35;
+  margin: 2px 0 0;
+  padding: 8px 9px;
+}
+
 .stageChoiceSummary {
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid color-mix(in srgb, var(--stage-accent) 18%, #d9e3e8);
@@ -2095,6 +2107,17 @@ button:focus-visible {
 
 .chartSeriesEndpointHalo {
   fill: var(--panel);
+}
+
+.chartPoint {
+  outline: none;
+}
+
+.chartPoint:focus-visible .chartSeriesEndpointHalo,
+.chartPoint:hover .chartSeriesEndpointHalo {
+  fill: #eaf7f9;
+  stroke: #17364a;
+  stroke-width: 1.75;
 }
 
 .routeHundredUseKey {

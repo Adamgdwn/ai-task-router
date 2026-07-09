@@ -277,7 +277,7 @@ function buildStageWorkItems(input: {
 }): ProjectStageWorkItem[] {
   const { task, decomposition, stage, workRole, routeStep, modelById, manualReviewModel, fallbackModelLabel } = input;
   const deliverables = deliverablesForStageRole(decomposition, workRole);
-  const targets = [deliverables];
+  const targets = targetDeliverableGroups(task, workRole, deliverables);
   const estimatedCostUsd = routeStep ? estimateRouteStepCostUsd(routeStep, modelById) : undefined;
   const estimatedEnergyWh = routeStep ? estimateRouteStepEnergyWh(routeStep, modelById) : undefined;
   const perItemCost = estimatedCostUsd !== undefined ? estimatedCostUsd / targets.length : undefined;
@@ -313,6 +313,22 @@ function buildStageWorkItems(input: {
   });
 }
 
+function targetDeliverableGroups(
+  task: TaskIntake,
+  workRole: WorkRole,
+  deliverables: readonly TaskDeliverable[],
+): TaskDeliverable[][] {
+  if (deliverables.length === 0) {
+    return [[]];
+  }
+
+  if (workRole === "build-slice" && (taskHasBuildIntent(task) || task.outputType === "code" || taskNeedsFullBuildPlan(task))) {
+    return deliverables.map((deliverable) => [deliverable]);
+  }
+
+  return [[...deliverables]];
+}
+
 function deliverablesForStageRole(decomposition: TaskDecomposition, workRole: WorkRole): TaskDeliverable[] {
   const matching = decomposition.deliverables.filter((deliverable) => deliverable.roles.includes(workRole));
 
@@ -335,7 +351,7 @@ function workItemLabel(
     case "execution":
       return deliverables.length > 1 ? "Run the finished prompt" : `Execute ${deliverableLabel}`;
     case "build-slice":
-      return "Create the first usable build slice";
+      return deliverables.length === 1 ? buildSliceItemLabel(deliverables[0]) : "Create the first usable build slice";
     case "artifact-package":
       return `Package ${deliverableLabel}`;
     case "quality-review":
@@ -343,6 +359,22 @@ function workItemLabel(
     case "next-action":
       return stage === "act" ? "Pick the first action" : "Confirm scope";
   }
+}
+
+function buildSliceItemLabel(deliverable: TaskDeliverable | undefined) {
+  if (!deliverable) {
+    return "Create the first usable build slice";
+  }
+
+  const labels: Partial<Record<TaskDeliverable["kind"], string>> = {
+    build: "Build the first usable shell",
+    "data-flow": "Build the data import flow",
+    categorization: "Build the categorization rules",
+    tracking: "Build the tracking view",
+    insight: "Build the insight and recommendation view",
+  };
+
+  return labels[deliverable.kind] ?? `Build ${deliverable.label}`;
 }
 
 function expectedOutputForWorkItem(
@@ -429,7 +461,12 @@ function recommendedLabelForWorkItem(
 ) {
   if (routeStep?.modeLabel) {
     const modelPrefix = routeStep.label.split(": ")[0];
-    return modelPrefix ? `${modelPrefix} (${routeStep.modeLabel})` : routeStep.modeLabel;
+
+    if (!modelPrefix) {
+      return routeStep.modeLabel;
+    }
+
+    return modelPrefix.includes(routeStep.modeLabel) ? modelPrefix : `${modelPrefix} (${routeStep.modeLabel})`;
   }
 
   return modelLabelForStep(routeStep, modelById, manualReviewModel, fallbackModelLabel);

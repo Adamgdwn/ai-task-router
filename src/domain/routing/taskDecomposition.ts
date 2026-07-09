@@ -58,7 +58,7 @@ const detectorDefinitions: DeliverableDetector[] = [
   {
     kind: "categorization",
     label: "categorization rules",
-    patterns: [/\bcategor(y|ies|ize|ise|ized|ised|ization|isation|izing|ising)\b/, /\bclassif(y|ication|y into)\b/],
+    patterns: [/\bcategor(y|ies|ize|izes|ise|ises|ized|ised|ization|isation|izing|ising)\b/, /\bclassif(y|ication|y into)\b/],
     roles: ["prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
@@ -71,7 +71,7 @@ const detectorDefinitions: DeliverableDetector[] = [
     kind: "insight",
     label: "improvement and strength insights",
     patterns: [/\b(improves?|improvement|where .*doing well|doing really well|strength|insights?|recommends?|recommendations?|next actions?|opportunit(y|ies))\b/],
-    roles: ["prompt-design", "execution", "quality-review"],
+    roles: ["prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
     kind: "model-selection",

@@ -94,6 +94,10 @@ export function selectToolModeForRole({ task, modes, role, strategy }: SelectToo
     return selectLeastResourceAdequateMode(eligibleModes, role, task);
   }
 
+  if (strategy === "balanced" && role === "prompt-design" && shouldUseStrongestPromptDesignPass(task)) {
+    return selectStrongestPromptDesignMode(eligibleModes, role, strategy, task);
+  }
+
   if (
     strategy === "balanced" &&
     role === "prompt-design" &&
@@ -124,6 +128,29 @@ export function selectToolModeForRole({ task, modes, role, strategy }: SelectToo
   }
 
   return [...eligibleModes].sort((left, right) => modeScore(right, role, strategy, task) - modeScore(left, role, strategy, task))[0] ?? null;
+}
+
+function shouldUseStrongestPromptDesignPass(task: TaskIntake) {
+  return taskNeedsFullBuildPlan(task) || taskHasBuildIntent(task) || task.qualityBar === "high" || task.qualityBar === "critical";
+}
+
+function selectStrongestPromptDesignMode(
+  eligibleModes: readonly ToolModeCandidate[],
+  role: WorkRole,
+  strategy: "lean" | "balanced" | "premium",
+  task: TaskIntake,
+) {
+  const promptModes = eligibleModes.filter((mode) => mode.modeKind === "prompt");
+  const normalPromptModes = promptModes.filter((mode) => mode.resourceProfile !== "premium");
+  const candidates = normalPromptModes.length ? normalPromptModes : promptModes.length ? promptModes : eligibleModes;
+
+  return [...candidates].sort((left, right) => {
+    const capabilityComparison = roleCapability(right.capabilityScores, role, task) - roleCapability(left.capabilityScores, role, task);
+    const resourceComparison = resourceRanks[right.resourceProfile] - resourceRanks[left.resourceProfile];
+    const scoreComparison = modeScore(right, role, strategy, task) - modeScore(left, role, strategy, task);
+
+    return capabilityComparison || resourceComparison || scoreComparison || left.displayLabel.localeCompare(right.displayLabel);
+  })[0] ?? null;
 }
 
 export function modeForRouteStep(

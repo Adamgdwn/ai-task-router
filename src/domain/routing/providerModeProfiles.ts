@@ -12,7 +12,7 @@ export function chatGptGuidanceLabels(accountId: EverydayToolAccountId): Provide
     return {
       minimumModelLabel: "GPT-5.5 Instant for ordinary execution",
       promptBuilderModelLabel:
-        "GPT-5.5 Pro Standard for the master prompt; Pro Extended when the build is long, risky, or ambiguous",
+        "GPT-5.5 Pro Extended for the master prompt; Pro Standard only when conserving messages",
       executionModelLabel: "GPT-5.5 Instant after the master prompt is clear; GPT-5.5 Instant Mini only after limits",
       upgradeModelLabel: "GPT-5.5 Pro Extended or o3-pro legacy while it remains available in your picker",
     };
@@ -21,7 +21,7 @@ export function chatGptGuidanceLabels(accountId: EverydayToolAccountId): Provide
   if (accountId === "plus") {
     return {
       minimumModelLabel: "GPT-5.5 Instant for ordinary execution",
-      promptBuilderModelLabel: "GPT-5.5 Thinking High for the master prompt; Medium when conserving messages",
+      promptBuilderModelLabel: "the highest available GPT-5.5 Thinking level for the master prompt; usually Thinking High on Plus",
       executionModelLabel: "GPT-5.5 Instant after the master prompt is clear; GPT-5.5 Instant Mini only after limits",
       upgradeModelLabel: "GPT-5.5 Thinking High, then a Pro plan only if the review still fails",
     };
@@ -30,7 +30,7 @@ export function chatGptGuidanceLabels(accountId: EverydayToolAccountId): Provide
   if (accountId === "go") {
     return {
       minimumModelLabel: "GPT-5.5 Instant for ordinary execution",
-      promptBuilderModelLabel: "GPT-5.5 Thinking Medium from Go Thinking for the master prompt",
+      promptBuilderModelLabel: "the highest Go Thinking level for the master prompt, usually GPT-5.5 Thinking Medium",
       executionModelLabel: "GPT-5.5 Instant after the master prompt is clear; GPT-5.5 Instant Mini only after limits",
       upgradeModelLabel: "GPT-5.5 Thinking Medium again, or Plus/Pro if the prompt still misses the job",
     };
@@ -38,7 +38,7 @@ export function chatGptGuidanceLabels(accountId: EverydayToolAccountId): Provide
 
   return {
     minimumModelLabel: "GPT-5.5 Instant when available in the Free account",
-    promptBuilderModelLabel: "GPT-5.5 Instant with automatic Medium when offered; keep the master prompt small",
+    promptBuilderModelLabel: "the highest thinking level the free picker offers; keep the master prompt small",
     executionModelLabel: "GPT-5.5 Instant for execution; GPT-5.5 Instant Mini after free limits",
     upgradeModelLabel: "GPT-5.5 Thinking Medium or a paid tier when the first plan fails review",
   };

@@ -67,6 +67,7 @@ describe("task decomposition", () => {
         "spreadsheet import or paste-in data flow",
         "categorization rules",
         "month-over-month tracking",
+        "improvement and strength insights",
       ]),
     );
   });

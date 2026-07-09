@@ -256,13 +256,23 @@ describe("route card generator", () => {
       label: "Execute the build plan prompt",
       recommendedModelLabel: expect.stringContaining("execution GPT-5.5 Instant"),
     });
-    expect(packageStage?.workItems).toHaveLength(1);
-    expect(packageStage?.workItems[0]).toMatchObject({
-      label: "Create the first usable build slice",
-      recommendedModelLabel: expect.stringContaining("GPT-5.5 Instant"),
-      modeLabel: expect.stringContaining("Instant"),
-      upgradeTrigger: expect.stringContaining("Upgrade execution only if"),
-    });
+    expect(packageStage?.workItems.map((item) => item.label)).toEqual(
+      expect.arrayContaining([
+        "Build the first usable shell",
+        "Build the data import flow",
+        "Build the categorization rules",
+        "Build the tracking view",
+        "Build the insight and recommendation view",
+      ]),
+    );
+    expect(packageStage?.workItems).toHaveLength(5);
+    for (const item of packageStage?.workItems ?? []) {
+      expect(item).toMatchObject({
+        recommendedModelLabel: expect.stringContaining("GPT-5.5 Instant"),
+        modeLabel: expect.stringContaining("Instant"),
+        upgradeTrigger: expect.stringContaining("Upgrade execution only if"),
+      });
+    }
     expect(packageStage?.actions.join(" ")).toContain("actual plan or build brief");
     expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");

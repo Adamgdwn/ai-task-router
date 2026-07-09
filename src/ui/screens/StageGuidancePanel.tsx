@@ -37,6 +37,7 @@ function StageGuidanceItem({
 }) {
   const primaryWorkItem = primaryStageWorkItem(stage);
   const selectionReason = primaryWorkItem?.selectionReasons[0];
+  const routingDecision = primaryWorkItem ? stageDecisionLabel(primaryWorkItem) : null;
 
   return (
     <li className={`stageGuidanceItem stage-${stage.stage}`}>
@@ -51,6 +52,7 @@ function StageGuidanceItem({
             <dd>{stage.recommendedModelLabel}</dd>
           </div>
         </dl>
+        {routingDecision ? <p className="stageDecision">{routingDecision}</p> : null}
         {primaryWorkItem ? (
           <dl className="stageChoiceSummary">
             {primaryWorkItem.modeLabel ? (
@@ -98,7 +100,7 @@ function StageGuidanceItem({
       </div>
       {stage.workItems.length ? (
         <details className="stageWorkItems" aria-label={`${stage.label} routing detail`}>
-          <summary>Routing detail</summary>
+          <summary>Routing detail: {primaryWorkItem?.label ?? stage.label}</summary>
           <ol>
             {stage.workItems.map((item) => (
               <li key={item.id}>
@@ -108,6 +110,10 @@ function StageGuidanceItem({
                 </div>
                 <p>{item.expectedOutput}</p>
                 <dl>
+                  <div>
+                    <dt>Decision</dt>
+                    <dd>{stageDecisionLabel(item)}</dd>
+                  </div>
                   <div>
                     <dt>Help</dt>
                     <dd>{item.recommendedModelLabel}</dd>
@@ -122,6 +128,18 @@ function StageGuidanceItem({
                     <dt>Estimate</dt>
                     <dd>{workItemEstimateLabel(item)}</dd>
                   </div>
+                  {item.selectionReasons[0] ? (
+                    <div>
+                      <dt>Why</dt>
+                      <dd>{item.selectionReasons[0]}</dd>
+                    </div>
+                  ) : null}
+                  {item.reviewChecks[0] ? (
+                    <div>
+                      <dt>Check</dt>
+                      <dd>{item.reviewChecks[0]}</dd>
+                    </div>
+                  ) : null}
                   <div>
                     <dt>Upgrade trigger</dt>
                     <dd>{item.upgradeTrigger}</dd>
@@ -152,6 +170,14 @@ function StageGuidanceItem({
 
 function primaryStageWorkItem(stage: ProjectStageGuidance) {
   return stage.workItems.find((item) => item.recommendedModelLabel === stage.recommendedModelLabel) ?? stage.workItems[0];
+}
+
+function stageDecisionLabel(item: ProjectStageGuidance["workItems"][number]) {
+  return `Use ${item.recommendedModelLabel} to ${lowercaseFirst(item.label)}.`;
+}
+
+function lowercaseFirst(value: string) {
+  return value.length ? `${value.charAt(0).toLowerCase()}${value.slice(1)}` : value;
 }
 
 function workRoleLabel(workRole: ProjectStageGuidance["workItems"][number]["workRole"]) {

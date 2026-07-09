@@ -265,7 +265,7 @@ describe("route candidate generation", () => {
           kind: "model",
           modelId: "chatgpt-go",
           workRole: "prompt-design",
-          modeLabel: expect.stringContaining("GPT-5.5 Thinking Medium"),
+          modeLabel: expect.stringContaining("highest Go Thinking level"),
         }),
         expect.objectContaining({
           kind: "model",
@@ -290,6 +290,65 @@ describe("route candidate generation", () => {
       "No premium-capacity helper is saved for this task, so the premium route is shown as a comparison benchmark using the strongest safe helper currently selected.",
     );
     expect(candidateResult.unavailable.map((candidate) => candidate.strategy)).not.toContain("premium");
+  });
+
+  it("uses the strongest available prompt-design pass before lighter build execution", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-go",
+        providerId: "chatgpt",
+        accountId: "go",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "chatgpt-pro",
+        providerId: "chatgpt",
+        accountId: "pro",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "claude-build",
+        providerId: "claude",
+        accountId: "pro",
+        frequencyId: "daily",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-master-prompt-hard-then-light",
+      title: "Build the master prompt for a project tracker",
+      description:
+        "Build the master prompt for a project tracker app, then use it to create the first usable planning and implementation slice.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      qualityBar: "high",
+      requestedSourceIds: [],
+    });
+
+    const { candidateResult } = generateForTask(task, models);
+    const balanced = requireCandidate(candidateResult, "balanced");
+
+    expect(balanced.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          modelId: "chatgpt-pro",
+          workRole: "prompt-design",
+          modeLabel: expect.stringContaining("GPT-5.5 Pro Extended"),
+        }),
+        expect.objectContaining({
+          modelId: "claude-build",
+          workRole: "build-slice",
+          modeLabel: expect.stringContaining("Claude"),
+        }),
+      ]),
+    );
+    expect(balanced.steps.find((step) => step.workRole === "prompt-design")?.instruction).toContain(
+      "thinking-heavy prompt-design pass",
+    );
   });
 
   it("uses Perplexity, strongest owned reasoning, Claude Code build execution, and lighter safe execution for a full paid stack", () => {
@@ -342,7 +401,7 @@ describe("route candidate generation", () => {
         }),
         expect.objectContaining({
           workRole: "prompt-design",
-          modeLabel: expect.stringContaining("GPT-5.5 Pro Standard"),
+          modeLabel: expect.stringContaining("GPT-5.5 Pro Extended"),
         }),
         expect.objectContaining({
           modelId: "claude-max-build",

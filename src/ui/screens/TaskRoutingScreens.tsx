@@ -834,9 +834,11 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
           <ChartTrendLine
             key={`${item.id}-cost`}
             color={item.color}
+            label={item.label}
             maxValue={maxCost}
             perUseValue={item.costPerUse}
             plotTop={costTop}
+            seriesKind="cost"
             showZeroFloor
             usageTicks={usageTicks}
             xForUse={xForUse}
@@ -848,9 +850,11 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
             dashed
             key={`${item.id}-energy`}
             color={item.color}
+            label={item.label}
             maxValue={maxEnergy}
             perUseValue={item.energyPerUse}
             plotTop={energyTop}
+            seriesKind="energy"
             usageTicks={usageTicks}
             xForUse={xForUse}
             yForValue={yForValue}
@@ -892,9 +896,11 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
 function ChartTrendLine({
   color,
   dashed = false,
+  label,
   maxValue,
   perUseValue,
   plotTop,
+  seriesKind,
   showZeroFloor = false,
   usageTicks,
   xForUse,
@@ -902,9 +908,11 @@ function ChartTrendLine({
 }: {
   color: string;
   dashed?: boolean;
+  label: string;
   maxValue: number;
   perUseValue: number | null;
   plotTop: number;
+  seriesKind: "cost" | "energy";
   showZeroFloor?: boolean;
   usageTicks: readonly number[];
   xForUse: (uses: number) => number;
@@ -915,6 +923,16 @@ function ChartTrendLine({
   }
 
   const shouldUseZeroFloor = showZeroFloor && perUseValue === 0;
+  const pointValues = usageTicks.map((tick) => {
+    const value = perUseValue * tick;
+
+    return {
+      tick,
+      value,
+      x: xForUse(tick),
+      y: yForValue(value, maxValue, plotTop, shouldUseZeroFloor),
+    };
+  });
   const points = usageTicks
     .map((tick) => `${xForUse(tick)},${yForValue(perUseValue * tick, maxValue, plotTop, shouldUseZeroFloor)}`)
     .join(" ");
@@ -925,10 +943,27 @@ function ChartTrendLine({
     <g>
       <polyline className="chartSeriesHalo" fill="none" points={points} />
       <polyline className={lineClassName} fill="none" points={points} stroke={color} />
-      <circle className="chartSeriesEndpointHalo" cx={xForUse(100)} cy={endY} r="5.5" />
-      <circle cx={xForUse(100)} cy={endY} fill={color} r="4" />
+      {pointValues.map((point) => (
+        <g
+          aria-label={chartPointLabel(label, seriesKind, point.tick, point.value)}
+          className="chartPoint"
+          key={`${seriesKind}-${point.tick}`}
+          role="img"
+          tabIndex={0}
+        >
+          <title>{chartPointLabel(label, seriesKind, point.tick, point.value)}</title>
+          <circle className="chartSeriesEndpointHalo" cx={point.x} cy={point.y} r={point.tick === 100 ? "5.5" : "4.75"} />
+          <circle cx={point.x} cy={point.y} fill={color} r={point.tick === 100 ? "4" : "3.25"} />
+        </g>
+      ))}
     </g>
   );
+}
+
+function chartPointLabel(label: string, seriesKind: "cost" | "energy", uses: number, value: number) {
+  const formattedValue = seriesKind === "cost" ? formatUsd(value) : formatWattHours(value);
+
+  return `${label}: ${formattedValue} ${seriesKind} at ${uses} uses`;
 }
 
 function numericChartValue(value: number | undefined) {
