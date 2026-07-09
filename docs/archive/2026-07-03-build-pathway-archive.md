@@ -164,7 +164,7 @@ Allowed files:
 - `README.md`
 - `project-control.yaml`
 - `docs/PRODUCT_BRIEF.md`
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `docs/architecture.md`
 - `docs/roadmap.md`
 - `START_HERE.md` only if the top-level active plan changes
@@ -475,7 +475,7 @@ Allowed files or folders:
 - `src/domain/routing/*` index files only if useful
 - `src/tests/unit/hardGates.test.ts`
 - minor schema or type additions only if a hard-gate result shape is missing
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `IMPLEMENTATION_STATUS.md`
 - `SESSION_STATE.md`
 - `DECISION_LOG.md` only if a new boundary decision is made
@@ -2698,7 +2698,7 @@ Allowed files or folders:
 - `scripts/*`
 - `package.json`
 - `docs/2026-07-04-web-release-candidate-security-pass.md`
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `docs/2026-07-04-desktop-trust-distribution-plan.md`
 - `docs/2026-07-04-release-security-readiness-packet.md`
 - `docs/deployment-guide.md`
@@ -2780,7 +2780,7 @@ Allowed files or folders:
 
 - `playwright.config.ts`
 - `docs/2026-07-04-cloudflare-pages-hosted-preview-smoke.md`
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `docs/2026-07-04-desktop-trust-distribution-plan.md`
 - `docs/2026-07-04-release-security-readiness-packet.md`
 - `docs/2026-07-04-web-release-candidate-security-pass.md`
@@ -2868,7 +2868,7 @@ Allowed files or folders:
 - `docs/runbook.md`
 - `docs/CHANGELOG.md`
 - `docs/risks/risk-register.md`
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `IMPLEMENTATION_STATUS.md`
 - `SESSION_STATE.md`
 - targeted UI/CSS files for polish fixes
@@ -3284,7 +3284,7 @@ The owner can see the whole path to free public distribution without guessing wh
 Allowed files or folders:
 
 - `docs/2026-07-04-public-launch-master-plan.md`
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `docs/2026-07-04-desktop-trust-distribution-plan.md`
 - `docs/context-map.md`
 - `docs/deployment-guide.md`
@@ -3356,7 +3356,7 @@ Allowed files or folders:
 - `docs/2026-07-04-old-skool-ai-hub-handoff.md`
 - `docs/2026-07-04-public-launch-master-plan.md`
 - `docs/2026-07-04-desktop-trust-distribution-plan.md`
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `docs/context-map.md`
 - `docs/deployment-guide.md`
 - `docs/roadmap.md`
@@ -3429,7 +3429,7 @@ Allowed files or folders:
 - `docs/2026-07-05-cloudflare-production-launch-smoke.md`
 - `docs/2026-07-04-public-launch-master-plan.md`
 - `docs/2026-07-04-old-skool-ai-hub-handoff.md`
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `docs/deployment-guide.md`
 - `docs/runbook.md`
 - `docs/roadmap.md`
@@ -3508,7 +3508,7 @@ Allowed files or folders:
 - `docs/2026-07-05-public-hub-and-cross-site-link-smoke.md`
 - `docs/2026-07-04-public-launch-master-plan.md`
 - `docs/2026-07-04-old-skool-ai-hub-handoff.md`
-- `docs/2026-07-03-current-pathway.md`
+- `docs/archive/2026-07-03-build-pathway-archive.md`
 - `docs/deployment-guide.md`
 - `docs/runbook.md`
 - `docs/risks/risk-register.md`

@@ -27,7 +27,7 @@ Current priorities:
 
 Default live build route: [docs/2026-07-09-current-build-pathway.md](docs/2026-07-09-current-build-pathway.md).
 
-The older [docs/2026-07-03-current-pathway.md](docs/2026-07-03-current-pathway.md) file is now a historical archive. Search it or open targeted excerpts only when older evidence is needed.
+Do not load superseded pathway archives during normal startup. Use the active pathway above for current chunks, validation expectations, and handoff.
 
 For ordinary scoped work:
 
@@ -57,7 +57,7 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`.
 
-The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. The older `docs/2026-07-03-current-pathway.md` file is retained as historical evidence only because it grew too large for context-friendly startup. Next chunk is owner choice: social/video launch copy review, reviewed methodology page, opt-in local estimator UI, or the next Windows Store submission slice.
+The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. Superseded pathway archives are not part of startup or normal work routing. Next chunk is owner choice: social/video launch copy review, reviewed methodology page, opt-in local estimator UI, or the next Windows Store submission slice.
 
 Do not publish public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, social posts, custom-domain/DNS changes, live pricing tables, live pricing/model fetches, provider connections, exact public savings claims, Partner Center secrets, identity documents, tax/banking details, private account screenshots, or external execution workflows without a separate approved chunk and release gate evidence.
 

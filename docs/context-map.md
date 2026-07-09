@@ -41,7 +41,7 @@ Keep these files compact. They should route to durable docs, not duplicate them.
 ## Search Before Loading
 
 - long audit reports
-- old pathway history, including `docs/2026-07-03-current-pathway.md`, unless targeted historical evidence is needed
+- superseded pathway history unless targeted historical evidence is needed
 - logs, generated reports, and command output
 - exported manifests
 - archived plans or superseded briefs

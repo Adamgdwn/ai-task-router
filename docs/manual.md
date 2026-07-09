@@ -1,4 +1,4 @@
-# 2026-07-03T11:49:34-06:00 - Manual
+# 2026-07-09T03:04:01+00:00 - Manual
 
 ## What This Project Is
 
@@ -11,7 +11,7 @@ For ordinary scoped work, start lean:
 1. Check `git status --short`.
 2. Read `START_HERE.md` and the short repo-local agent instructions.
 3. Use `docs/context-map.md` to choose only the docs and source areas needed for the task.
-4. Review `docs/2026-07-03-current-pathway.md` for the active chunk, completion target, stop condition, and validation expectations.
+4. Review the active plan named by `START_HERE.md` for the active chunk, completion target, stop condition, and validation expectations.
 5. Run task-relevant validation.
 
 For material or risk-triggering work, add the full governance path:

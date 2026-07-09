@@ -1,4 +1,4 @@
-# 2026-07-03T11:49:34-06:00 - Initial Scope - AI Task Router
+# 2026-07-09T03:04:01+00:00 - Initial Scope - AI Task Router
 
 Generated: 2026-07-03T11:16:47-06:00
 
@@ -30,7 +30,7 @@ Primary builder: **hybrid**
 ## First session checklist
 
 - [ ] Read `START_HERE.md`
-- [ ] Review `docs/2026-07-03-current-pathway.md`
+- [ ] Review the active plan named by `START_HERE.md`
 - [ ] Review `docs/standards/README.md`
 - [ ] Review `docs/standards/engineering-governance-by-use-case.md`
 - [ ] Review `docs/policy/durable-development-engineering-policy.md`

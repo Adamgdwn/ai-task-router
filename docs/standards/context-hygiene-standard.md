@@ -1,8 +1,8 @@
-# 2026-07-03T11:49:34-06:00 - Context Hygiene Standard
+# 2026-07-09T03:04:01+00:00 - Context Hygiene Standard
 
 Document type: supporting engineering standard
 Status: active
-Status Updated: 2026-07-03T11:49:34-06:00
+Status Updated: 2026-07-09T03:04:01+00:00
 Owner: Project owner or human technical lead
 Audience: coding agents, human coders, reviewers, and project owners
 Applies to: coding sessions, agent workflows, long-running implementation threads, reviews, handoffs, and governed build upgrades.
@@ -19,7 +19,7 @@ Context hygiene must not be used as an excuse to skip required governance, secur
 
 Use this standard alongside:
 
-- the active plan named by `START_HERE.md`, normally `docs/2026-07-03-current-pathway.md`
+- the active plan named by `START_HERE.md`
 - `docs/policy/durable-development-engineering-policy.md`
 - `docs/standards/engineering-governance-by-use-case.md`
 - `docs/standards/ship-ready-engineering-standard.md`
@@ -137,7 +137,7 @@ Integration note: `the local cost-effective agentic coding context standard sour
 
 Divide substantial work into clear phases such as discovery, planning, implementation, testing, cleanup, and handoff.
 
-At phase boundaries, write or update a short durable summary instead of relying on transcript history. For governed builds, the preferred live handoff location is the active plan named by `START_HERE.md`, normally `docs/2026-07-03-current-pathway.md`.
+At phase boundaries, write or update a short durable summary instead of relying on transcript history. For governed builds, the preferred live handoff location is the active plan named by `START_HERE.md`.
 
 For meaningful tasks, separate discovery from implementation from review when
 the cost or risk justifies it. Tiny tasks may combine phases, but the agent

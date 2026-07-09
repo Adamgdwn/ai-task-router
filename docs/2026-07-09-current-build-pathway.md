@@ -15,7 +15,7 @@ Status Updated: 2026-07-09T03:04:01+00:00
 
 This is the compact active pathway for AI Task Router work after the original live pathway grew too large for context-friendly startup.
 
-Use this file for current chunks, validation notes, and handoff. Treat [2026-07-03 Current Pathway](2026-07-03-current-pathway.md) as historical archive only. Search it with `rg` or open targeted excerpts when older evidence is needed; do not load the whole archive during normal startup.
+Use this file for current chunks, validation notes, and handoff. Superseded pathway archives are not part of normal startup, governance preflight, or current work routing.
 
 ## Active Source Of Truth
 
@@ -23,7 +23,6 @@ Use this file for current chunks, validation notes, and handoff. Treat [2026-07-
 |---|---|
 | Startup route | `START_HERE.md` |
 | Active pathway | This document |
-| Historical pathway archive | `docs/2026-07-03-current-pathway.md` |
 | Product boundary | `README.md`, `project-control.yaml`, `docs/architecture.md` |
 | Standards map | `docs/standards/README.md` |
 | Context routing | `docs/context-map.md` |
@@ -37,6 +36,7 @@ Use this file for current chunks, validation notes, and handoff. Treat [2026-07-
 | Public desktop downloads | held | Windows Store/MSIX is the preferred first trusted Windows path; ordinary-user downloads remain gated. |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
+| Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
 | Active chunk | none selected | Next chunk is owner choice. |
 
 ## Product Boundary
@@ -120,7 +120,10 @@ Handoff note:
 | 2026-07-09T03:04:01+00:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings after updating active-plan routing references. |
 | 2026-07-09T03:04:01+00:00 | `rg -n "docs/2026-07-09-current-build-pathway.md\|2026-07-09-current-build-pathway" START_HERE.md AGENTS.md AI_BOOTSTRAP.md docs/context-map.md README.md project-control.yaml` | pass | Startup, bootstrap, context map, README, and control docs point to the compact active pathway. |
 | 2026-07-09T03:04:01+00:00 | `git diff --check` | pass | Only normal Windows LF-to-CRLF notices. |
-| 2026-07-09T03:04:01+00:00 | `wc -l docs/2026-07-09-current-build-pathway.md docs/2026-07-03-current-pathway.md` | pass | Compact pathway is 159 lines after closeout; historical archive is 3,789 lines and no longer the startup surface. |
+| 2026-07-09T03:04:01+00:00 | active pathway line-count check | pass | Compact pathway is 159 lines after closeout; superseded pathway history is no longer the startup surface. |
+| 2026-07-09T03:04:01+00:00 | retired pathway filename search | pass | No references remain to the retired pathway filename. |
+| 2026-07-09T03:04:01+00:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings; governance check now requires `docs/2026-07-09-current-build-pathway.md`. |
+| 2026-07-09T03:04:01+00:00 | retired pathway file-existence check | pass | Retired active-path filename is absent from the working tree. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -140,20 +143,25 @@ A human or agent can follow the current plan without loading a multi-thousand-li
 Files updated:
 
 - `docs/2026-07-09-current-build-pathway.md`
-- `docs/2026-07-03-current-pathway.md`
 - `START_HERE.md`
 - `AGENTS.md`
 - `AI_BOOTSTRAP.md`
+- `CLAUDE.md`
+- `INITIAL_SCOPE.md`
+- `SESSION_STATE.md`
 - `docs/context-map.md`
+- `docs/manual.md`
+- `docs/standards/context-hygiene-standard.md`
 - `README.md`
 - `project-control.yaml`
+- `scripts/governance-check.sh`
 
 Acceptance result:
 
-The active route now points to this compact pathway. The old pathway is marked `superseded` and retained as a historical archive. Date-prefixed controlled-doc headers were updated on touched routing documents.
+The active route now points to this compact pathway. Superseded pathway history was moved out of the active docs path and removed from startup, preflight, README, manual, and context-routing references. Date-prefixed controlled-doc headers were updated on touched routing documents.
 
 ## Next Handoff
 
-Immediate next chunk is owner choice from the options above. Keep this active pathway compact; move detailed historical evidence into dated evidence docs or leave it in the archived `2026-07-03` pathway and link to it only when needed.
+Immediate next chunk is owner choice from the options above. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.

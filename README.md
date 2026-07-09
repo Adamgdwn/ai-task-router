@@ -230,7 +230,6 @@ Human approval required: Required for public-facing risk, regulated/highly restr
 - [Architecture](docs/architecture.md)
 - [Context map](docs/context-map.md)
 - [Current build pathway](docs/2026-07-09-current-build-pathway.md)
-- [Historical build pathway archive](docs/2026-07-03-current-pathway.md)
 - [Manual](docs/manual.md)
 - [Roadmap](docs/roadmap.md)
 - [Desktop trust and distribution plan](docs/2026-07-04-desktop-trust-distribution-plan.md)
