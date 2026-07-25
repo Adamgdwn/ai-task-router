@@ -13,6 +13,7 @@ import type {
   PromptPackage,
   RouteCard,
   RouteLogEntry,
+  RouteOption,
   SourcePermission,
 } from "../types";
 
@@ -220,20 +221,28 @@ export function serializePromptPackageMarkdown(promptPackage: PromptPackage): st
   return `${promptPackageMarkdownSection(validPromptPackage, 1)}\n`;
 }
 
-export function serializeRouteCardMarkdown(routeCard: RouteCard, promptPackage: PromptPackage = routeCard.promptPackage): string {
+export function serializeRouteCardMarkdown(
+  routeCard: RouteCard,
+  promptPackage: PromptPackage = routeCard.promptPackage,
+  acceptedOption: RouteOption | null = null,
+): string {
   const validRouteCard = validateExportArtifact(routeCardSchema, routeCard);
   const validPromptPackage = validateExportArtifact(promptPackageSchema, promptPackage);
 
   assertPromptPackageMatchesRouteCard(validRouteCard, validPromptPackage);
 
   const recommendedOption = validRouteCard.options.find((option) => option.id === validRouteCard.recommendedOptionId);
+  // The stage guidance and prompts on this card describe the route the user accepted, so the
+  // export leads with that and keeps the app's suggestion beside it.
+  const followedOption = acceptedOption ?? recommendedOption;
   const lines = [
     `# ${validRouteCard.title}`,
     "",
     `- Route card ID: \`${validRouteCard.id}\``,
     `- Task ID: \`${validRouteCard.taskId}\``,
     `- Sensitivity: ${validRouteCard.sensitivityClass}`,
-    `- Recommended option: ${recommendedOption?.label ?? validRouteCard.recommendedOptionId}`,
+    `- You chose: ${followedOption?.label ?? validRouteCard.recommendedOptionId}`,
+    `- We suggested: ${recommendedOption?.label ?? validRouteCard.recommendedOptionId}`,
     `- Created: ${validRouteCard.createdAt}`,
     "",
     "## Manual Use Boundary",
@@ -244,7 +253,7 @@ export function serializeRouteCardMarkdown(routeCard: RouteCard, promptPackage: 
     ]),
     "",
     "## Summary",
-    recommendedOption?.summary ?? "No recommended route summary is available.",
+    followedOption?.summary ?? "No route summary is available.",
     "",
     "## Quick Project Plan",
     stageGuidanceMarkdown(validRouteCard),
@@ -487,7 +496,7 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
       `${stepIndex + 1}. **${step.label}** (${step.kind})`,
       `   - Instruction: ${step.instruction}`,
       `   - Permission level: ${step.requiredPermissionLevel}`,
-      `   - Model: ${step.modelId ?? "None"}`,
+      `   - Tool or mode: ${step.modeLabel ?? "None"}`,
       `   - Sources: ${inlineList(step.sourceIds)}`,
       `   - Warnings: ${inlineList(step.warnings)}`,
     ]),

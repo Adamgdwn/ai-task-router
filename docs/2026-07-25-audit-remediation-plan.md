@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.2.0
+Version: 1.3.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
-Next Review: When chunk R4 completes or the owner reprioritises
-Last Updated: 2026-07-25T08:48:23-06:00
-Status Updated: 2026-07-25T08:48:23-06:00
+Next Review: When chunk R2 completes or the owner reprioritises
+Last Updated: 2026-07-25T09:08:00-06:00
+Status Updated: 2026-07-25T09:08:00-06:00
 
 ## Purpose
 
@@ -62,7 +62,7 @@ Close-out for each chunk:
 | R1 | Artifacts follow the chosen route | complete | Medium | Correctness: the saved card currently documents a different plan than the user accepted. |
 | R2 | Honest impact numbers | not started - decision recorded | Medium | Credibility: the app currently credits users with savings they did not make. |
 | R3 | First-run honesty | complete | Small | A new user with no tools gets a confident answer built on an empty inventory. |
-| R4 | Clean the copied prompt text | not started | Small | Internal IDs appear in the product's flagship deliverable. |
+| R4 | Clean the copied prompt text | complete | Small | Internal IDs appear in the product's flagship deliverable. |
 | R5 | Dead code and lint feedback loop | not started | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
 | R6 | Catalog staleness signal | not started | Small | Hardcoded model names decay monthly with nothing to notice it. |
 | R7 | Help screen | not started | Small | A developer placeholder is live in production nav. |
@@ -70,9 +70,9 @@ Close-out for each chunk:
 | R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
 | R10 | Reframe the product promise | not started | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
 
-Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → R4 → R2 → R10 → R5 → R7 → R6 → R9 → R8.
+Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → R2 → R10 → R5 → R7 → R6 → R9 → R8.
 
-R1, R3, R4 are the user-visible correctness wins and are cheap. R2 is the most valuable, and its owner decision is now recorded below, so it is ready to start. R10 lands directly after R2 because both change user-facing copy about impact. R5 through R9 are hygiene and can be reordered freely.
+R1, R3, and R4 were the user-visible correctness wins and are done. R2 is the most valuable remaining chunk, and its owner decision is recorded below, so it is ready to start. R10 lands directly after R2 because both change user-facing copy about impact. R5 through R9 are hygiene and can be reordered freely.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -156,7 +156,7 @@ Acceptance Result, 2026-07-25T08:48:23-06:00: met, using shape (a).
 - `BuildProjectStageGuidanceInput.recommendedOption` was renamed to `selectedOption`. The old name was what made the defect easy to miss.
 - The saved Decision Card now shows both "You chose" and "We suggested", and its summary, score, and impact panel follow the accepted route. The accepted option comes from the route log entry, so no schema change was needed.
 - No schema change to `routeCardSchema` or `promptPackageSchema`. Scoring, tie-breaking, and recommendation are unchanged.
-- Known remaining seam, deliberately left for R4: the exported route-card Markdown still leads with "Recommended option". The line is true, but R4 already edits export text and should add the chosen route beside it.
+- Known remaining seam, deliberately left for R4: the exported route-card Markdown still leads with "Recommended option". The line is true, but R4 already edits export text and should add the chosen route beside it. Closed by R4 on 2026-07-25T09:08:00-06:00.
 
 Tests added: `routeCardGenerator.test.ts` covers rebuild-follows-selection and rejects an unknown option id; `App.test.tsx` covers choosing the non-recommended Lean route and asserts the saved card, prompt package, route log, stage guidance step IDs, and the Decision Card labels.
 
@@ -279,7 +279,7 @@ Acceptance Result, 2026-07-25T08:48:23-06:00: met.
 
 ## Chunk R4 - Clean The Copied Prompt Text
 
-Status: not started
+Status: complete - 2026-07-25T09:08:00-06:00
 Budget class: Small
 
 Objective:
@@ -319,6 +319,19 @@ Validation:
 Stop condition:
 
 Stop at text cleanup. Do not restructure the prompt package format.
+
+Acceptance Result, 2026-07-25T09:08:00-06:00: met.
+
+- `toolUseReminder` now reads "Tool/model use: do this step yourself, outside the app, using `<tool or mode label>`." The tool name comes from `routeStep.modeLabel` via a new `toolLabelForRouteStep` helper, falling back to `routeStep.label`. No schema change was needed: every reachable route step that carries a `modelId` also carries a `modeLabel`. The name is placed last in the sentence because mode labels are full phrases, not short nouns.
+- `recommendedHelpForRouteStep` lost its `model ID '<id>'` fallback branch. The blocked-tool variant no longer says "route step model ID", it says the tool "is not allowed by the current privacy and permission limits".
+- `buildInputRefs` no longer lists the model. The tool is not an input to the step, and listing it was the second path by which a slot ID reached the clipboard. `inputRefs` is display-only — UI, copied text, and Markdown export — so nothing downstream depends on it.
+- Secondary noise fixed: with no approved sources the reminder is now one sentence ("no outside sources are approved for this step. Work only from the task description and anything you paste in yourself. Do not pull in blocked, no-access, or undeclared sources.") and the generic source-boundary line is suppressed, because it restated a limit about an empty list. When sources exist, both the allowed-source list and the boundary line are unchanged.
+- Export path carries the cleanup: the route-option step line is now `Tool or mode: <label>` instead of `Model: <slot id>`.
+- Deviation, small and in the same objective: the on-screen Route Options step list in `RouteArtifactScreens.tsx` also rendered `step.modelId` raw under a "Model" heading. It now renders `step.modeLabel` under "Tool or mode". Same defect, adjacent line, one-line fix.
+- Carried-forward seam from R1 closed here: `serializeRouteCardMarkdown` gained an optional third `acceptedOption` argument and now emits both `- You chose:` and `- We suggested:`, with the summary following the accepted route. `SavedRouteCardScreen` passes `artifacts.selectedRouteOption`. When no accepted option is supplied the export falls back to the recommendation rather than guessing.
+- Prompt package format is unchanged. `recommendedModelId` inside stage guidance is untouched: it is stored data, never rendered, and the guidance panel and export already resolve labels from the inventory.
+
+Tests added: `promptPackageGenerator.test.ts` asserts across three task shapes that no step's instruction, `inputRefs`, or expected output matches `/user-[a-z0-9-]*model/`, contains the phrase "model ID", or contains any inventory model ID; `exportImport.test.ts` asserts the export shows `Tool or mode: build mode` with no raw model ID, and covers both the accepted-option and fall-back forms of the chosen/suggested header. Three existing assertions that encoded the defect (a model ID expected in `inputRefs`, and the duplicated "source IDs for this step: none" text) were updated to assert its absence.
 
 ---
 
@@ -625,11 +638,17 @@ The reframe is the recorded decision above. Do not start engine work under any c
 | 2026-07-25T08:48:23-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. No E2E assertion needed changing for R1 or R3. |
 | 2026-07-25T08:48:23-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
 | 2026-07-25T08:48:23-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R1 and R3. |
+| 2026-07-25T09:08:00-06:00 | `npm run test` | pass | 14 files, 129 tests, after R4. Up from 127; 2 new tests in `promptPackageGenerator` and `exportImport`. |
+| 2026-07-25T09:08:00-06:00 | `npm run build` | pass | TypeScript and Vite build clean; existing large chunk warning remains. |
+| 2026-07-25T09:08:00-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. No E2E assertion needed changing for R4. |
+| 2026-07-25T09:08:00-06:00 | generated prompt text read end to end, sourced and source-free tasks | pass | Confirmed the reworded tool-use and source-use lines read as plain instructions, not as a malfunction. Throwaway harness deleted, not committed. |
+| 2026-07-25T09:08:00-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
+| 2026-07-25T09:08:00-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R4. |
 
 ## Next Handoff
 
-R1 and R3 are complete as of 2026-07-25T08:48:23-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has more worth deploying.
+R1, R3, and R4 are complete as of 2026-07-25T09:08:00-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has more worth deploying.
 
-Next coder chunk is R4, then R2 and R10 together. Two notes for whoever picks up R4: the exported route-card Markdown still leads with "Recommended option" and should gain the chosen route beside it, and `noToolsConfiguredMessage` is now exported from `hardGates.ts` if any other surface needs to match on it.
+Next coder chunk is R2, then R10 directly after it, since both change user-facing copy about impact. Notes for whoever picks up R2: `noToolsConfiguredMessage` is exported from `hardGates.ts` if another surface needs to match on it, and prompt/export text now names tools by `modeLabel` rather than model ID — reuse `toolLabelForRouteStep` in `promptPackageGenerator.ts` rather than reaching for `step.modelId` in any new user-facing string.
 
 Both owner decisions are recorded and no chunk is waiting on input. R2 remains unblocked: present every cost figure as an API-equivalent per-token estimate, never as a saving. R10 carries the reframe into the docs. The whole queue serves one goal — teach people to make more efficient, lower-impact AI decisions, without adding friction.

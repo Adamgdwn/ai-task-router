@@ -35,8 +35,8 @@ export function SavedRouteCardScreen({
       return "";
     }
 
-    return serializeRouteCardMarkdown(routeCard, promptPackage);
-  }, [promptPackage, routeCard]);
+    return serializeRouteCardMarkdown(routeCard, promptPackage, acceptedRoute);
+  }, [acceptedRoute, promptPackage, routeCard]);
 
   return (
     <article className="screenPanel artifactPanel">
@@ -437,8 +437,8 @@ function RouteStepList({ steps }: { steps: RouteStep[] }) {
               <dd>Level {step.requiredPermissionLevel}</dd>
             </div>
             <div>
-              <dt>Model</dt>
-              <dd>{step.modelId ?? "None"}</dd>
+              <dt>Tool or mode</dt>
+              <dd>{step.modeLabel ?? "None"}</dd>
             </div>
             <div>
               <dt>Sources</dt>

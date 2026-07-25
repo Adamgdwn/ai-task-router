@@ -74,6 +74,8 @@ describe("export and import utilities", () => {
     expect(routeCardMarkdown).toContain("Upgrade trigger: Upgrade only if the build mode cannot pass review.");
     expect(routeCardMarkdown).toContain("## Route Options");
     expect(routeCardMarkdown).toContain("### 1. Balanced route");
+    expect(routeCardMarkdown).toContain("- Tool or mode: build mode");
+    expect(routeCardMarkdown).not.toContain("local-export-model");
     expect(routeCardMarkdown).toContain("## Prompt package: Export fixture");
     expect(routeCardMarkdown).toContain("Use this local prompt fixture manually.");
     expect(routeCardMarkdown).toContain("None.");
@@ -81,6 +83,28 @@ describe("export and import utilities", () => {
     expect(promptPackageMarkdown).toContain("## Manual Use Boundary");
     expect(promptPackageMarkdown).toContain("## Prompt Steps");
     expect(promptPackageMarkdown).toContain("Human approval: Not required");
+  });
+
+  it("names the accepted route beside the app's suggestion in exported Markdown", () => {
+    const routeCard = buildRouteCard();
+    const acceptedOption = {
+      ...routeCard.options[0]!,
+      id: "route-export-fixture-lean",
+      strategy: "lean" as const,
+      label: "Lean route",
+      summary: "Use the lightest local route fixture.",
+    };
+    const cardWithBothOptions: RouteCard = { ...routeCard, options: [...routeCard.options, acceptedOption] };
+
+    const acceptedMarkdown = serializeRouteCardMarkdown(cardWithBothOptions, routeCard.promptPackage, acceptedOption);
+    const unselectedMarkdown = serializeRouteCardMarkdown(cardWithBothOptions);
+
+    expect(acceptedMarkdown).toContain("- You chose: Lean route");
+    expect(acceptedMarkdown).toContain("- We suggested: Balanced route");
+    expect(acceptedMarkdown).toContain("Use the lightest local route fixture.");
+    // With no accepted option on hand the export falls back to the suggestion rather than guessing.
+    expect(unselectedMarkdown).toContain("- You chose: Balanced route");
+    expect(unselectedMarkdown).toContain("- We suggested: Balanced route");
   });
 
   it("serializes route logs with stable CSV headers and escaped feedback notes", () => {

@@ -117,8 +117,9 @@ describe("prompt package generator", () => {
       requiresHumanApproval: false,
     });
     expect(promptPackage.steps[0]?.inputRefs).toEqual(
-      expect.arrayContaining([task.id, selectedRoute.id, selectedRoute.steps[0]?.id, "user-free-small-model", "web", "github"]),
+      expect.arrayContaining([task.id, selectedRoute.id, selectedRoute.steps[0]?.id, "web", "github"]),
     );
+    expect(promptPackage.steps[0]?.inputRefs).not.toContain("user-free-small-model");
     expect(promptPackage.steps[0]?.instruction).toContain("Use this prompt package as manual guidance only.");
     expect(promptPackage.steps[0]?.instruction).toContain("Handoff stage: Create.");
     expect(promptPackage.steps[0]?.instruction).toContain("Recommended help:");
@@ -270,8 +271,47 @@ describe("prompt package generator", () => {
 
     expectValidPromptPackage(promptPackage);
     expect(inputRefs).not.toEqual(expect.arrayContaining(defaultSources.map((source) => source.id)));
-    expect(instructionText).toContain("no source IDs are approved for this step");
-    expect(instructionText).toContain("Use only these source IDs for this step: none.");
+    expect(instructionText).toContain("no outside sources are approved for this step");
+    expect(instructionText).toContain("Do not pull in blocked, no-access, or undeclared sources.");
+    expect(instructionText).not.toContain("source IDs for this step: none");
+  });
+
+  it("names tools in words rather than internal slot IDs anywhere a user can copy", () => {
+    const tasks = [
+      buildTask({ id: "task-prompt-copy-writing", title: "Draft a short announcement" }),
+      buildTask({
+        id: "task-prompt-copy-research",
+        title: "Check current public facts",
+        knowledgeWorkType: "research",
+        outputType: "answer",
+        requiresCurrentFacts: true,
+        requiresCitations: true,
+      }),
+      buildTask({
+        id: "task-prompt-copy-build",
+        title: "Plan a small budgeting tool",
+        description: "Build a small app that categorizes monthly spending and tracks it month over month.",
+        knowledgeWorkType: "planning",
+        outputType: "plan",
+      }),
+    ];
+
+    for (const task of tasks) {
+      const { hardGateResult, scoringResult } = generatePipeline(task);
+      const selectedRoute = requireRecommendedRoute(scoringResult);
+      const promptPackage = generatePromptPackage({ task, selectedRoute, hardGateResult });
+      // Everything the Copy prompt step text button puts on the clipboard.
+      const copyableText = promptPackage.steps
+        .flatMap((step) => [step.instruction, step.inputRefs.join(", "), step.expectedOutput])
+        .join("\n");
+
+      expect(copyableText).not.toMatch(/user-[a-z0-9-]*model/);
+      expect(copyableText).not.toContain("model ID");
+
+      for (const model of routeReadyModels) {
+        expect(copyableText).not.toContain(model.id);
+      }
+    }
   });
 
   it("keeps highly restricted fallback prompts manual and approval-gated", () => {
@@ -307,8 +347,8 @@ describe("prompt package generator", () => {
       "Step 3: Approve Before Use",
     ]);
     expect(promptPackage.steps[promptPackage.steps.length - 1]?.requiresHumanApproval).toBe(true);
-    expect(inputRefs).toContain("manual-human-review");
     expect(inputRefs).toContain("secure-local-source");
+    expect(inputRefs).not.toContain("manual-human-review");
     expect(inputRefs).not.toContain("user-frontier-quality-model");
     expect(instructionText).toContain("Sensitivity: highly restricted.");
     expect(instructionText).toContain("Human review checklist");

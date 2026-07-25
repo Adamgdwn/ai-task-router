@@ -96,13 +96,7 @@ function buildPromptStep(input: {
       ? context.safeRouteSourceIds
       : safeSourceIdsForStep(routeStep, context.sourceById, context.allowedSourceIds);
   const expectedOutput = expectedOutputForStep(task, routeStep);
-  const inputRefs = buildInputRefs({
-    task,
-    selectedRoute,
-    routeStep,
-    safeSourceIds,
-    allowedModelIds: context.allowedModelIds,
-  });
+  const inputRefs = buildInputRefs({ task, selectedRoute, routeStep, safeSourceIds });
 
   return {
     id: `prompt-step-${selectedRoute.id}-${routeStep.id}`,
@@ -157,7 +151,9 @@ function buildPromptInstruction(input: {
     `Work type: ${task.knowledgeWorkType}. Output type: ${task.outputType}. Quality bar: ${task.qualityBar}. Sensitivity: ${task.sensitivityClass}.`,
     toolUseReminder(routeStep, context.allowedModelIds),
     sourceUseReminder(routeStep, safeSourceIds, sourceRefs),
-    sourceBoundary,
+    // With no approved sources the reminder above already states the limit; repeating the
+    // boundary here produced two sentences about a list that was empty.
+    safeSourceIds.length ? sourceBoundary : "",
     ...factAndCitationReminders(task),
     warningReminder(context.routeWarnings),
     promptTextForStep({ task, routeStep, sourceRefs, expectedOutput }),
@@ -202,13 +198,15 @@ function stageLabelForRouteStep(routeStep: RouteStep): string {
 }
 
 function recommendedHelpForRouteStep(routeStep: RouteStep): string {
-  const modeOrModel = routeStep.modeLabel
-    ? ` mode '${routeStep.modeLabel}'`
-    : routeStep.modelId
-      ? ` model ID '${routeStep.modelId}'`
-      : "";
+  return routeStep.modeLabel ? `${routeStep.label} mode '${routeStep.modeLabel}'` : routeStep.label;
+}
 
-  return `${routeStep.label}${modeOrModel}`;
+/**
+ * The name a person can act on. Route steps carry an inventory slot ID as well, but that
+ * ID means nothing outside this app and must never reach text the user pastes into a tool.
+ */
+function toolLabelForRouteStep(routeStep: RouteStep): string {
+  return routeStep.modeLabel ?? routeStep.label;
 }
 
 function reviewChecksForPromptHandoff(routeStep: RouteStep): string[] {
@@ -428,11 +426,12 @@ function toolUseReminder(routeStep: RouteStep, allowedModelIds: Set<string>) {
   }
 
   if (routeStep.modelId && allowedModelIds.has(routeStep.modelId)) {
-    return `Tool/model use: manually use the user-configured route step model ID '${routeStep.modelId}' outside the app.`;
+    // Mode labels are full phrases, so the name goes last and the sentence still reads.
+    return `Tool/model use: do this step yourself, outside the app, using ${toolLabelForRouteStep(routeStep)}.`;
   }
 
   if (routeStep.modelId) {
-    return "Tool/model use: the route step model ID is not allowed by the current hard gates, so do not use it until the route is corrected.";
+    return "Tool/model use: the tool this step picked is not allowed by the current privacy and permission limits, so do not use it until the route is corrected.";
   }
 
   return "Tool/model use: complete this as a manual route step outside the app.";
@@ -446,7 +445,7 @@ function sourceUseReminder(routeStep: RouteStep, safeSourceIds: string[], source
   }
 
   return safeSourceIds.length === 0
-    ? "Source-use reminder: no source IDs are approved for this step; rely only on the task description and user-provided context already in the destination tool. Use only these source IDs for this step: none."
+    ? "Source-use reminder: no outside sources are approved for this step. Work only from the task description and anything you paste in yourself. Do not pull in blocked, no-access, or undeclared sources."
     : `Source-use reminder: Use only these allowed source IDs for this step: ${sourceRefs}.`;
 }
 
@@ -553,12 +552,12 @@ function buildInputRefs(input: {
   selectedRoute: RouteOption;
   routeStep: RouteStep;
   safeSourceIds: string[];
-  allowedModelIds: Set<string>;
 }) {
-  const { task, selectedRoute, routeStep, safeSourceIds, allowedModelIds } = input;
-  const modelRefs = routeStep.modelId && allowedModelIds.has(routeStep.modelId) ? [routeStep.modelId] : [];
+  const { task, selectedRoute, routeStep, safeSourceIds } = input;
 
-  return uniqueIds([task.id, selectedRoute.id, routeStep.id, ...modelRefs, ...safeSourceIds]);
+  // The tool is not an input to the step. Listing it here put raw inventory slot IDs into
+  // copied prompt text; the step already names the tool in words.
+  return uniqueIds([task.id, selectedRoute.id, routeStep.id, ...safeSourceIds]);
 }
 
 function safeSourceIdsForRoute(
