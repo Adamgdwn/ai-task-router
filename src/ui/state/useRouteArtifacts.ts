@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { PromptPackage, RouteCard } from "../../domain/types";
+import type { PromptPackage, RouteCard, RouteOption } from "../../domain/types";
 import type { LocalRouteRecords, LocalStore } from "../../storage/localStore";
 
 export type RouteArtifactsStatus = "idle" | "loading" | "ready" | "empty" | "error";
@@ -14,6 +14,7 @@ export type RouteArtifactsController = {
   routeCards: RouteCard[];
   selectedRouteCardId: string;
   selectedRouteCard: RouteCard | null;
+  selectedRouteOption: RouteOption | null;
   selectedPromptPackage: PromptPackage | null;
   selectedRouteCardMissing: boolean;
   refresh: () => Promise<void>;
@@ -44,6 +45,19 @@ export function useRouteArtifacts({ store }: UseRouteArtifactsInput): RouteArtif
     () => routeCards.find((routeCard) => routeCard.id === selectedRouteCardId) ?? null,
     [routeCards, selectedRouteCardId],
   );
+  // The route log records which option the user accepted; the card records what was suggested.
+  const selectedRouteOption = useMemo(() => {
+    if (!selectedRouteCard) {
+      return null;
+    }
+
+    const routeLogEntry = routeRecords?.routeLogEntries.find(
+      (entry) => entry.routeCardId === selectedRouteCard.id,
+    );
+    const acceptedOptionId = routeLogEntry?.selectedOptionId ?? selectedRouteCard.recommendedOptionId;
+
+    return selectedRouteCard.options.find((option) => option.id === acceptedOptionId) ?? null;
+  }, [routeRecords, selectedRouteCard]);
   const selectedPromptPackage = useMemo(() => {
     if (!selectedRouteCard) {
       return null;
@@ -122,6 +136,7 @@ export function useRouteArtifacts({ store }: UseRouteArtifactsInput): RouteArtif
     routeCards,
     selectedRouteCardId,
     selectedRouteCard,
+    selectedRouteOption,
     selectedPromptPackage,
     selectedRouteCardMissing,
     refresh,

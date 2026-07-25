@@ -110,6 +110,7 @@ export function App({ store = browserLocalStore }: AppProps) {
             definition={activeScreen}
             impactCounter={impactCounter}
             onOpenTaskIntake={() => setActiveScreenId("task-intake")}
+            onOpenToolInventory={() => setActiveScreenId("tool-inventory")}
             routing={taskRouting}
             setup={setup}
           />

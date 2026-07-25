@@ -465,6 +465,110 @@ describe("App", () => {
     });
   });
 
+  it("saves the route the user chose rather than the route it recommended", async () => {
+    const user = userEvent.setup();
+    const store = await buildRouteReadyTestStore();
+
+    render(<App store={store} />);
+
+    await user.click(screen.getByRole("button", { name: "My Task" }));
+    await screen.findByText("Notes or background I already know");
+    await user.click(screen.getByRole("button", { name: "Use shortcut Draft public-facing copy" }));
+    await user.click(screen.getByRole("button", { name: "Show me my best options" }));
+
+    await screen.findByRole("heading", { name: "Best Options", level: 2 });
+    expect(screen.getByRole("heading", { name: "Start with: Balanced route" })).toBeInTheDocument();
+
+    const stagesBeforeSelection = visibleStageHelperLabels();
+    const leanRoute = screen.getByRole("region", { name: "Lean route" });
+
+    await user.click(within(leanRoute).getByRole("button", { name: "Choose this route" }));
+
+    await waitFor(() => {
+      expect(within(leanRoute).getByRole("button", { name: "Selected route" })).toBeInTheDocument();
+    });
+    // The on-screen plan follows the selection, not the recommendation.
+    expect(visibleStageHelperLabels()).not.toEqual(stagesBeforeSelection);
+
+    await user.click(screen.getByRole("button", { name: "Accept selected route and save prompts" }));
+    await screen.findByText("Selected route, decision card, prompts, and followed-choice impact saved on this device.");
+
+    const records = await store.loadRouteRecords();
+    const savedCard = records.routeCards[0];
+    const leanOptionId = savedCard?.options.find((option) => option.strategy === "lean")?.id;
+
+    expect(leanOptionId).toBeDefined();
+    expect(savedCard?.recommendedOptionId).not.toBe(leanOptionId);
+    expect(records.routeLogEntries[0]).toMatchObject({
+      selectedOptionId: leanOptionId,
+      selectedStrategy: "lean",
+      outcome: "accepted",
+    });
+    expect(savedCard?.promptPackage.id).toContain("-lean");
+    expect(records.promptPackages[0]?.id).toBe(savedCard?.promptPackage.id);
+
+    const leanStepIds = new Set(
+      savedCard?.options.find((option) => option.id === leanOptionId)?.steps.map((step) => step.id) ?? [],
+    );
+    const guidedStepIds = (savedCard?.stageGuidance ?? [])
+      .map((stage) => stage.routeStepId)
+      .filter((stepId): stepId is string => Boolean(stepId));
+
+    expect(guidedStepIds.length).toBeGreaterThan(0);
+    expect(guidedStepIds.every((stepId) => leanStepIds.has(stepId))).toBe(true);
+
+    await user.click(screen.getByRole("button", { name: "Decision Card" }));
+
+    const summary = await screen.findByRole("region", { name: savedCard?.title });
+    const chosenRow = within(summary).getByText("You chose").closest("div");
+    const suggestedRow = within(summary).getByText("We suggested").closest("div");
+
+    expect(chosenRow).toHaveTextContent("Lean route");
+    expect(suggestedRow).toHaveTextContent("Balanced route");
+  });
+
+  it("tells a user with no configured tools that the plan is manual, and offers a way to fix it", async () => {
+    const user = userEvent.setup();
+
+    render(<App store={buildTestStore()} />);
+
+    await user.click(screen.getByRole("button", { name: "My Task" }));
+    await screen.findByText("Notes or background I already know");
+    fireEvent.change(screen.getByLabelText("What do you need help with?"), {
+      target: { value: "Write a short update for my team about this month's progress." },
+    });
+    await user.click(screen.getByRole("button", { name: "Show me my best options" }));
+
+    await screen.findByRole("heading", { name: "Best Options", level: 2 });
+
+    const notice = await screen.findByText(/You have not added any AI tools yet/);
+    expect(notice).toBeInTheDocument();
+    // Inline and non-blocking: the results are still on screen behind the notice.
+    expect(screen.getByRole("heading", { name: "Your options" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Add my AI tools" }));
+
+    expect(await screen.findByRole("heading", { name: "My AI Tools", level: 2 })).toBeInTheDocument();
+  });
+
+  it("does not show the missing-tools notice once an AI tool is configured", async () => {
+    const user = userEvent.setup();
+    const store = await buildRouteReadyTestStore();
+
+    render(<App store={store} />);
+
+    await user.click(screen.getByRole("button", { name: "My Task" }));
+    await screen.findByText("Notes or background I already know");
+    await user.click(screen.getByRole("button", { name: "Use shortcut Draft public-facing copy" }));
+    await user.click(screen.getByRole("button", { name: "Show me my best options" }));
+
+    await screen.findByRole("heading", { name: "Best Options", level: 2 });
+
+    expect(screen.queryByText(/You have not added any AI tools yet/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add my AI tools" })).not.toBeInTheDocument();
+  });
+
   it("breaks a difficult build request into visible build routing details", async () => {
     const user = userEvent.setup();
     const store = await buildRouteReadyTestStore();
@@ -688,6 +792,12 @@ function buildTestStore(): LocalStore {
   storesToDelete.push(store);
 
   return store;
+}
+
+function visibleStageHelperLabels(): string[] {
+  return Array.from(document.querySelectorAll(".stageGuidanceItem .stageRecommended dd")).map(
+    (node) => node.textContent ?? "",
+  );
 }
 
 async function buildRouteReadyTestStore(): Promise<LocalStore> {

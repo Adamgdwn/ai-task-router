@@ -7,6 +7,7 @@ import { evaluateHardGates, type HardGateResult } from "../../domain/routing/har
 import {
   buildManualReviewFallbackRouteOption,
   generateRouteCard,
+  rebuildRouteCardForSelectedOption,
 } from "../../domain/routing/routeCardGenerator";
 import { scoreRouteCandidates, type RouteScoringResult } from "../../domain/routing/scoring";
 import { taskIntakeSchema } from "../../domain/schemas";
@@ -315,15 +316,43 @@ export function useTaskRouting({ setup, store }: UseTaskRoutingInput): TaskRouti
 
   const selectRouteOption = useCallback(
     (optionId: string) => {
-      if (!routeResult?.routeCard.options.some((option) => option.id === optionId)) {
+      const selectedOption = routeResult?.routeCard.options.find((option) => option.id === optionId);
+
+      if (!routeResult || !selectedOption) {
         return;
       }
 
-      setSelectedRouteOptionId(optionId);
-      setSaveStatus("idle");
-      setSaveMessage("Route selected. Save it when this is the path you want to follow.");
+      try {
+        // The card, stage guidance, and prompts must describe the route the user chose,
+        // not the one the app recommended, so regenerate them at selection time.
+        const promptPackage = generatePromptPackage({
+          task: routeResult.task,
+          selectedRoute: selectedOption,
+          hardGateResult: routeResult.hardGateResult,
+        });
+        const routeCard = rebuildRouteCardForSelectedOption({
+          card: routeResult.routeCard,
+          task: routeResult.task,
+          models: setup.configuration?.modelInventory ?? [],
+          promptPackage,
+          selectedOptionId: optionId,
+        });
+
+        setRouteResult({
+          ...routeResult,
+          selectedRoute: selectedOption,
+          promptPackage,
+          routeCard,
+        });
+        setSelectedRouteOptionId(optionId);
+        setSaveStatus("idle");
+        setSaveMessage("Route selected. Save it when this is the path you want to follow.");
+      } catch (error) {
+        setSaveStatus("error");
+        setSaveMessage(routingErrorMessage(error));
+      }
     },
-    [routeResult],
+    [routeResult, setup.configuration],
   );
 
   const saveGeneratedRoute = useCallback(async () => {

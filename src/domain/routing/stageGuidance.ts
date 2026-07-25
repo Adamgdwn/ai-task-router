@@ -26,7 +26,7 @@ import {
 
 export type BuildProjectStageGuidanceInput = {
   task: TaskIntake;
-  recommendedOption: RouteOption;
+  selectedOption: RouteOption;
   models: readonly ModelInventoryItem[];
 };
 
@@ -46,22 +46,22 @@ type StageDraft = {
 
 export function buildProjectStageGuidance({
   task,
-  recommendedOption,
+  selectedOption,
   models,
 }: BuildProjectStageGuidanceInput): ProjectStageGuidance[] {
   const modelById = new Map(models.map((model) => [model.id, model]));
   const manualReviewModel = models.find((model) => model.tier === "human");
   const decomposition = decomposeTask(task);
-  const researchStep = firstStepOfWorkRole(recommendedOption, "evidence-check") ?? firstStepOfKind(recommendedOption, "research");
-  const promptStep = firstStepOfWorkRole(recommendedOption, "prompt-design") ?? primaryWorkStep(recommendedOption);
+  const researchStep = firstStepOfWorkRole(selectedOption, "evidence-check") ?? firstStepOfKind(selectedOption, "research");
+  const promptStep = firstStepOfWorkRole(selectedOption, "prompt-design") ?? primaryWorkStep(selectedOption);
   const primaryStep = promptStep;
   const executionStep =
-    firstStepOfWorkRole(recommendedOption, "build-slice") ??
-    firstStepOfWorkRole(recommendedOption, "execution") ??
-    primaryWorkStep(recommendedOption);
-  const artifactStep = firstStepOfKind(recommendedOption, "artifact");
-  const humanApprovalStep = firstStepOfKind(recommendedOption, "human review");
-  const reviewSupportStep = firstStepOfWorkRole(recommendedOption, "quality-review") ?? aiReviewSupportStep(task, promptStep);
+    firstStepOfWorkRole(selectedOption, "build-slice") ??
+    firstStepOfWorkRole(selectedOption, "execution") ??
+    primaryWorkStep(selectedOption);
+  const artifactStep = firstStepOfKind(selectedOption, "artifact");
+  const humanApprovalStep = firstStepOfKind(selectedOption, "human review");
+  const reviewSupportStep = firstStepOfWorkRole(selectedOption, "quality-review") ?? aiReviewSupportStep(task, promptStep);
   const promptBuilderModelLabel = modelLabelForStageStep(
     task,
     promptStep,
@@ -1096,21 +1096,21 @@ function inlineList(items: readonly string[]) {
   return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
-function primaryWorkStep(recommendedOption: RouteOption): RouteStep | undefined {
+function primaryWorkStep(option: RouteOption): RouteStep | undefined {
   return (
-    recommendedOption.steps.find((step) => step.kind === "model") ??
-    recommendedOption.steps.find((step) => step.kind === "artifact") ??
-    recommendedOption.steps.find((step) => step.kind === "manual") ??
-    recommendedOption.steps.find((step) => step.kind !== "human review")
+    option.steps.find((step) => step.kind === "model") ??
+    option.steps.find((step) => step.kind === "artifact") ??
+    option.steps.find((step) => step.kind === "manual") ??
+    option.steps.find((step) => step.kind !== "human review")
   );
 }
 
-function firstStepOfKind(recommendedOption: RouteOption, kind: RouteStep["kind"]): RouteStep | null {
-  return recommendedOption.steps.find((step) => step.kind === kind) ?? null;
+function firstStepOfKind(option: RouteOption, kind: RouteStep["kind"]): RouteStep | null {
+  return option.steps.find((step) => step.kind === kind) ?? null;
 }
 
-function firstStepOfWorkRole(recommendedOption: RouteOption, workRole: WorkRole): RouteStep | null {
-  return recommendedOption.steps.find((step) => step.workRole === workRole) ?? null;
+function firstStepOfWorkRole(option: RouteOption, workRole: WorkRole): RouteStep | null {
+  return option.steps.find((step) => step.workRole === workRole) ?? null;
 }
 
 function aiReviewSupportStep(task: TaskIntake, promptStep: RouteStep | undefined | null): RouteStep | null {

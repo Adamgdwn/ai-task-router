@@ -528,6 +528,39 @@ button:focus-visible {
   padding: 12px;
 }
 
+/* Quiet, inline, non-blocking counterpart to .setupAlert: it informs beside the result
+   rather than standing between the user and it. */
+.setupNotice {
+  align-items: center;
+  background: var(--app-bg-warm);
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--review-amber);
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.setupNotice p {
+  margin: 0;
+  max-width: 68ch;
+}
+
+.setupNotice button {
+  background: var(--panel);
+  border-color: var(--brand-teal);
+  color: var(--brand-teal);
+  padding: 8px 14px;
+}
+
+.setupNotice button:hover,
+.setupNotice button:focus-visible {
+  background: var(--brand-teal);
+  color: #ffffff;
+}
+
 .loadingPanel,
 .emptySetupState {
   background: var(--panel);

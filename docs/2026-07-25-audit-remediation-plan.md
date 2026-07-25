@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
 Next Review: When chunk R4 completes or the owner reprioritises
-Last Updated: 2026-07-25T08:27:12-06:00
-Status Updated: 2026-07-25T08:27:12-06:00
+Last Updated: 2026-07-25T08:48:23-06:00
+Status Updated: 2026-07-25T08:48:23-06:00
 
 ## Purpose
 
@@ -59,9 +59,9 @@ Close-out for each chunk:
 | Order | Chunk | Status | Budget | Why it matters |
 |---:|---|---|---|---|
 | R0 | Deploy current `main` | blocked - operator | Small | The fixes already written are not in front of users. |
-| R1 | Artifacts follow the chosen route | not started | Medium | Correctness: the saved card currently documents a different plan than the user accepted. |
+| R1 | Artifacts follow the chosen route | complete | Medium | Correctness: the saved card currently documents a different plan than the user accepted. |
 | R2 | Honest impact numbers | not started - decision recorded | Medium | Credibility: the app currently credits users with savings they did not make. |
-| R3 | First-run honesty | not started | Small | A new user with no tools gets a confident answer built on an empty inventory. |
+| R3 | First-run honesty | complete | Small | A new user with no tools gets a confident answer built on an empty inventory. |
 | R4 | Clean the copied prompt text | not started | Small | Internal IDs appear in the product's flagship deliverable. |
 | R5 | Dead code and lint feedback loop | not started | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
 | R6 | Catalog staleness signal | not started | Small | Hardcoded model names decay monthly with nothing to notice it. |
@@ -70,7 +70,7 @@ Close-out for each chunk:
 | R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
 | R10 | Reframe the product promise | not started | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
 
-Recommended order: R0 (operator, parallel) → R1 → R3 → R4 → R2 → R10 → R5 → R7 → R6 → R9 → R8.
+Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → R4 → R2 → R10 → R5 → R7 → R6 → R9 → R8.
 
 R1, R3, R4 are the user-visible correctness wins and are cheap. R2 is the most valuable, and its owner decision is now recorded below, so it is ready to start. R10 lands directly after R2 because both change user-facing copy about impact. R5 through R9 are hygiene and can be reordered freely.
 
@@ -95,7 +95,7 @@ Note: `npm audit --audit-level=moderate` now reports 1 high finding (postcss, bu
 
 ## Chunk R1 - Artifacts Follow The Chosen Route
 
-Status: not started
+Status: complete - 2026-07-25T08:48:23-06:00
 Budget class: Medium
 
 Objective:
@@ -148,6 +148,17 @@ Add a regression test: generate a route with three options, select a non-recomme
 Stop condition:
 
 Stop when the selected route drives the artifacts. Do not change scoring, tie-breaking, or which route gets recommended.
+
+Acceptance Result, 2026-07-25T08:48:23-06:00: met, using shape (a).
+
+- `rebuildRouteCardForSelectedOption` was added to `routeCardGenerator.ts`. It re-points `stageGuidance` and `promptPackage` at the chosen option, re-parses through `routeCardSchema`, and leaves `recommendedOptionId` and `options` untouched.
+- `selectRouteOption` in `useTaskRouting.ts` now regenerates both artifacts at selection time, so on-screen stage guidance changes the moment the user picks a different route. A regeneration failure surfaces as a save-status error rather than a silent mismatch.
+- `BuildProjectStageGuidanceInput.recommendedOption` was renamed to `selectedOption`. The old name was what made the defect easy to miss.
+- The saved Decision Card now shows both "You chose" and "We suggested", and its summary, score, and impact panel follow the accepted route. The accepted option comes from the route log entry, so no schema change was needed.
+- No schema change to `routeCardSchema` or `promptPackageSchema`. Scoring, tie-breaking, and recommendation are unchanged.
+- Known remaining seam, deliberately left for R4: the exported route-card Markdown still leads with "Recommended option". The line is true, but R4 already edits export text and should add the chosen route beside it.
+
+Tests added: `routeCardGenerator.test.ts` covers rebuild-follows-selection and rejects an unknown option id; `App.test.tsx` covers choosing the non-recommended Lean route and asserts the saved card, prompt package, route log, stage guidance step IDs, and the Decision Card labels.
 
 ---
 
@@ -218,7 +229,7 @@ Stop at honest numbers and matching docs. Do not build a new estimator surface �
 
 ## Chunk R3 - First-Run Honesty
 
-Status: not started
+Status: complete - 2026-07-25T08:48:23-06:00
 Budget class: Small
 
 Objective:
@@ -256,6 +267,13 @@ Validation:
 Stop condition:
 
 Stop at the warning. Do not add an onboarding wizard or block routing. Owner constraint: the warning is inline and non-blocking — no modal, no dialog the user must dismiss, no step between the user and their result.
+
+Acceptance Result, 2026-07-25T08:48:23-06:00: met.
+
+- New hard-gate warning reason `no-tools-configured`, raised in `evaluateWarnings`. It keys off the tool inventory (no enabled non-human model), not the allowed model set: a highly restricted task can narrow a well-stocked inventory down to manual review, and blaming the user's tool list there would be wrong. A test covers that case.
+- The results screen shows it as an inline `.setupNotice` with `role="status"` and an "Add my AI tools" button that navigates to My AI Tools. No modal, no dialog, no dismissal step; the full results stay on screen behind it.
+- The message is filtered out of the generic "Warnings" list on that screen so it appears once. The saved route card still carries it in `warnings`.
+- The notice does not appear once any AI tool is enabled, covered by its own test.
 
 ---
 
@@ -602,9 +620,16 @@ The reframe is the recorded decision above. Do not start engine work under any c
 | 2026-07-25T08:17:12-06:00 | `npm audit --audit-level=moderate` | fail | 1 high: postcss path traversal, build-time dependency only. Addressed in R5. |
 | 2026-07-25T08:17:12-06:00 | domain pipeline probe, 8 user profiles | findings | Confirmed R1, R2, R3 defects against real generated output; hard gates and highly-restricted blocking verified correct. |
 | 2026-07-25T08:27:12-06:00 | `bash scripts/governance-preflight.sh` | pass | After recording both owner decisions and adding chunk R10. Docs only; no app behaviour change. |
+| 2026-07-25T08:48:23-06:00 | `npm run test` | pass | 14 files, 127 tests, after R1 and R3. Up from 119; 8 new tests across `hardGates`, `routeCardGenerator`, and `App`. |
+| 2026-07-25T08:48:23-06:00 | `npm run build` | pass | TypeScript and Vite build clean; existing large chunk warning remains. |
+| 2026-07-25T08:48:23-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. No E2E assertion needed changing for R1 or R3. |
+| 2026-07-25T08:48:23-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
+| 2026-07-25T08:48:23-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R1 and R3. |
 
 ## Next Handoff
 
-R0 is operator work and can proceed in parallel with any coder chunk. For coder work, start at R1 — it is the only outright correctness bug, it is cheap, and it sits directly on the "we recommend; you decide" promise.
+R1 and R3 are complete as of 2026-07-25T08:48:23-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has more worth deploying.
 
-Both owner decisions are now recorded and no chunk is waiting on input. R2 is unblocked: present every cost figure as an API-equivalent per-token estimate, never as a saving. R10 carries the reframe into the docs. The whole queue serves one goal — teach people to make more efficient, lower-impact AI decisions, without adding friction.
+Next coder chunk is R4, then R2 and R10 together. Two notes for whoever picks up R4: the exported route-card Markdown still leads with "Recommended option" and should gain the chosen route beside it, and `noToolsConfiguredMessage` is now exported from `hardGates.ts` if any other surface needs to match on it.
+
+Both owner decisions are recorded and no chunk is waiting on input. R2 remains unblocked: present every cost figure as an API-equivalent per-token estimate, never as a saving. R10 carries the reframe into the docs. The whole queue serves one goal — teach people to make more efficient, lower-impact AI decisions, without adding friction.

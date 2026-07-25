@@ -8,7 +8,10 @@ export type HardGateBlockReason =
   | "highly-restricted-non-local"
   | "source-no-access"
   | "source-sensitivity-blocked";
-export type HardGateWarningReason = "research-context-missing" | "human-approval-required";
+export type HardGateWarningReason =
+  | "no-tools-configured"
+  | "research-context-missing"
+  | "human-approval-required";
 
 export type HardGateBlock = {
   kind: HardGateBlockKind;
@@ -40,12 +43,15 @@ export type EvaluateHardGatesInput = {
 const humanApprovalMessage =
   "Human approval is required before using public-facing, regulated, highly restricted, high-quality, or critical output.";
 
+export const noToolsConfiguredMessage =
+  "You have not added any AI tools yet, so this plan is you doing the work by hand. Add your tools in My AI Tools to get real routing.";
+
 export function evaluateHardGates({ task, models }: EvaluateHardGatesInput): HardGateResult {
   const requestedSourceIds = sourceIdsRequestedOrImpliedByTask(task);
   const sourceEvaluation = evaluateSources(task, requestedSourceIds);
   const sourcePermissionCeiling = highestPermissionLevel(sourceEvaluation.allowedSources);
   const modelEvaluation = evaluateModels(task, models, sourcePermissionCeiling);
-  const warnings = evaluateWarnings(task, sourceEvaluation.allowedSources, modelEvaluation.allowedModels);
+  const warnings = evaluateWarnings(task, sourceEvaluation.allowedSources, modelEvaluation.allowedModels, models);
   const requiresHumanApproval = needsHumanApproval(task);
 
   if (requiresHumanApproval) {
@@ -160,8 +166,22 @@ function evaluateModels(task: TaskIntake, models: ModelInventoryItem[], required
   return { allowedModels, blockedModels };
 }
 
-function evaluateWarnings(task: TaskIntake, allowedSources: SourcePermission[], allowedModels: ModelInventoryItem[]) {
+function evaluateWarnings(
+  task: TaskIntake,
+  allowedSources: SourcePermission[],
+  allowedModels: ModelInventoryItem[],
+  models: ModelInventoryItem[],
+) {
   const warnings: HardGateWarning[] = [];
+
+  // Based on the inventory rather than the allowed set: a restrictive task can narrow a
+  // well-stocked inventory down to manual review, and that is a different situation.
+  if (!models.some((model) => model.enabled && model.tier !== "human")) {
+    warnings.push({
+      reasonCode: "no-tools-configured",
+      message: noToolsConfiguredMessage,
+    });
+  }
 
   if (taskNeedsEvidenceCheck(task)) {
     const hasAllowedResearchSource = allowedSources.some((source) => source.sourceType === "web");

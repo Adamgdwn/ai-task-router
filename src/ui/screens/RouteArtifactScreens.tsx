@@ -29,7 +29,7 @@ export function SavedRouteCardScreen({
 }: RouteArtifactScreenProps) {
   const routeCard = artifacts.selectedRouteCard;
   const promptPackage = artifacts.selectedPromptPackage;
-  const recommendedRoute = routeCard ? recommendedOptionFor(routeCard) : null;
+  const acceptedRoute = artifacts.selectedRouteOption;
   const routeCardMarkdown = useMemo(() => {
     if (!routeCard || !promptPackage) {
       return "";
@@ -48,13 +48,13 @@ export function SavedRouteCardScreen({
       {routeCard && promptPackage ? (
         <div className="artifactStack">
           <RouteReportHeader routeCard={routeCard} />
-          <RouteCardSummary routeCard={routeCard} />
+          <RouteCardSummary acceptedRoute={acceptedRoute} routeCard={routeCard} />
           <StageGuidancePanel
             stages={routeCard.stageGuidance}
             lead="This quick project plan was saved with the decision card so the route stays easy to follow later."
           />
           <ImpactInsightPanel
-            recommended={recommendedRoute ?? undefined}
+            recommended={acceptedRoute ?? undefined}
             snapshot={publicImpactSnapshot}
             trackedImpact={impactCounter?.summary}
             trackedImpactMessage={impactCounter?.message}
@@ -193,8 +193,16 @@ function RouteArtifactStatus({
   return null;
 }
 
-function RouteCardSummary({ routeCard }: { routeCard: RouteCard }) {
+function RouteCardSummary({
+  acceptedRoute,
+  routeCard,
+}: {
+  acceptedRoute: RouteOption | null;
+  routeCard: RouteCard;
+}) {
   const recommendedRoute = recommendedOptionFor(routeCard);
+  // The plan, prompts, and stages below belong to the route the user accepted, so lead with it.
+  const followedRoute = acceptedRoute ?? recommendedRoute;
   const approvalStepCount = routeCard.promptPackage.steps.filter((step) => step.requiresHumanApproval).length;
 
   return (
@@ -202,7 +210,7 @@ function RouteCardSummary({ routeCard }: { routeCard: RouteCard }) {
       <div>
         <p className="screenKicker">Decision card</p>
         <h3 id="route-card-summary-heading">{routeCard.title}</h3>
-        <p>{recommendedRoute?.summary ?? "Review this decision card before using any prompts outside the app."}</p>
+        <p>{followedRoute?.summary ?? "Review this decision card before using any prompts outside the app."}</p>
       </div>
       <dl>
         <div>
@@ -214,12 +222,16 @@ function RouteCardSummary({ routeCard }: { routeCard: RouteCard }) {
           <dd>{routeCard.sensitivityClass}</dd>
         </div>
         <div>
-          <dt>Best fit</dt>
+          <dt>You chose</dt>
+          <dd>{followedRoute?.label ?? routeCard.recommendedOptionId}</dd>
+        </div>
+        <div>
+          <dt>We suggested</dt>
           <dd>{recommendedRoute?.label ?? routeCard.recommendedOptionId}</dd>
         </div>
         <div>
           <dt>Score</dt>
-          <dd>{recommendedRoute?.score ?? 0}</dd>
+          <dd>{followedRoute?.score ?? 0}</dd>
         </div>
         <div>
           <dt>Options</dt>

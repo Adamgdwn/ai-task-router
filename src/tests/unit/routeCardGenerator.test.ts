@@ -3,7 +3,8 @@ import { createEverydayToolModel } from "../../domain/defaults/everydayToolCatal
 import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generateRouteCandidates, type RouteCandidateGenerationResult } from "../../domain/routing/candidateGeneration";
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
-import { generateRouteCard } from "../../domain/routing/routeCardGenerator";
+import { generatePromptPackage } from "../../domain/prompting/promptPackageGenerator";
+import { generateRouteCard, rebuildRouteCardForSelectedOption } from "../../domain/routing/routeCardGenerator";
 import { scoreRouteCandidates, type RouteScoringResult } from "../../domain/routing/scoring";
 import { routeCardSchema } from "../../domain/schemas";
 import type { ModelInventoryItem, PolicyDefault, PromptPackage, SourcePermission, TaskIntake } from "../../domain/types";
@@ -718,6 +719,100 @@ describe("route card generator", () => {
       "route-task-card-no-safe-route-lean-unavailable",
       "route-task-card-no-safe-route-balanced-unavailable",
     ]);
+  });
+
+  it("re-points stage guidance and prompts at the option the user selected", () => {
+    const task = buildTask({
+      id: "task-card-selected-route",
+      title: "Draft a public FAQ answer",
+      requestedSourceIds: ["web", "github"],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task);
+    const recommendedCandidate = scoringResult.recommendedCandidate;
+
+    if (!recommendedCandidate) {
+      throw new Error("This fixture is expected to produce a recommended candidate.");
+    }
+
+    const card = generateRouteCard({
+      task,
+      models: routeReadyModels,
+      hardGateResult,
+      scoringResult,
+      promptPackage: generatePromptPackage({ task, selectedRoute: recommendedCandidate, hardGateResult }),
+      createdAt: cardCreatedAt,
+    });
+    const chosenOption = card.options.find((option) => option.id !== card.recommendedOptionId);
+
+    if (!chosenOption) {
+      throw new Error("This fixture is expected to produce more than one route option.");
+    }
+
+    const chosenPromptPackage = generatePromptPackage({
+      task,
+      selectedRoute: chosenOption,
+      hardGateResult,
+    });
+    const rebuiltCard = rebuildRouteCardForSelectedOption({
+      card,
+      task,
+      models: routeReadyModels,
+      promptPackage: chosenPromptPackage,
+      selectedOptionId: chosenOption.id,
+    });
+
+    expectValidRouteCard(rebuiltCard);
+    expect(rebuiltCard.promptPackage.id).toBe(chosenPromptPackage.id);
+    expect(rebuiltCard.promptPackage.id).not.toBe(card.promptPackage.id);
+    expect(rebuiltCard.promptPackage.steps).toHaveLength(chosenPromptPackage.steps.length);
+
+    // The card still records what the app suggested, alongside what the user chose.
+    expect(rebuiltCard.recommendedOptionId).toBe(card.recommendedOptionId);
+    expect(rebuiltCard.options).toEqual(card.options);
+
+    const chosenStepIds = new Set(chosenOption.steps.map((step) => step.id));
+    const recommendedOnlyStepIds = new Set(
+      recommendedCandidate.steps.map((step) => step.id).filter((stepId) => !chosenStepIds.has(stepId)),
+    );
+    const guidedStepIds = rebuiltCard.stageGuidance
+      .map((stage) => stage.routeStepId)
+      .filter((stepId): stepId is string => Boolean(stepId));
+
+    const originalGuidedStepIds = card.stageGuidance
+      .map((stage) => stage.routeStepId)
+      .filter((stepId): stepId is string => Boolean(stepId));
+
+    // Guard the guard: unless the original card really did follow the recommended option,
+    // the assertions below would pass even if the rebuild did nothing.
+    expect(recommendedOnlyStepIds.size).toBeGreaterThan(0);
+    expect(originalGuidedStepIds.some((stepId) => recommendedOnlyStepIds.has(stepId))).toBe(true);
+
+    expect(guidedStepIds.some((stepId) => chosenStepIds.has(stepId))).toBe(true);
+    expect(guidedStepIds.some((stepId) => recommendedOnlyStepIds.has(stepId))).toBe(false);
+  });
+
+  it("rejects a selected option that is not on the card", () => {
+    const task = buildTask({ id: "task-card-unknown-selection", requestedSourceIds: ["web"] });
+    const { hardGateResult, scoringResult } = generatePipeline(task);
+    const promptPackage = buildPromptPackage(task);
+    const card = generateRouteCard({
+      task,
+      models: routeReadyModels,
+      hardGateResult,
+      scoringResult,
+      promptPackage,
+      createdAt: cardCreatedAt,
+    });
+
+    expect(() =>
+      rebuildRouteCardForSelectedOption({
+        card,
+        task,
+        models: routeReadyModels,
+        promptPackage,
+        selectedOptionId: "route-that-does-not-exist",
+      }),
+    ).toThrow("is not one of the options on route card");
   });
 
   it("rejects a prompt package that belongs to a different task", () => {

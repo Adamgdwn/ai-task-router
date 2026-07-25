@@ -1,5 +1,6 @@
 import { type FormEvent, type ReactNode } from "react";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
+import { noToolsConfiguredMessage } from "../../domain/routing/hardGates";
 import {
   buildSuggestedToolkit,
   type SuggestedToolkit,
@@ -40,6 +41,7 @@ type TaskIntakeScreenProps = TaskRoutingScreenProps & {
 
 type RouteResultsScreenProps = TaskRoutingScreenProps & {
   onOpenTaskIntake: () => void;
+  onOpenToolInventory: () => void;
 };
 
 export function TaskIntakeScreen({ definition, routing, setup, onRouteGenerated }: TaskIntakeScreenProps) {
@@ -262,6 +264,7 @@ export function RouteResultsScreen({
   routing,
   setup,
   onOpenTaskIntake,
+  onOpenToolInventory,
 }: RouteResultsScreenProps) {
   const result = routing.routeResult;
 
@@ -278,7 +281,13 @@ export function RouteResultsScreen({
       {!result ? (
         <EmptyResultsState routing={routing} onOpenTaskIntake={onOpenTaskIntake} />
       ) : (
-        <GeneratedResults impactCounter={impactCounter} result={result} routing={routing} setup={setup} />
+        <GeneratedResults
+          impactCounter={impactCounter}
+          onOpenToolInventory={onOpenToolInventory}
+          result={result}
+          routing={routing}
+          setup={setup}
+        />
       )}
     </article>
   );
@@ -432,14 +441,21 @@ function TaskStructurePreview({
 function GeneratedResults({
   result,
   impactCounter,
+  onOpenToolInventory,
   routing,
   setup,
 }: {
   result: GeneratedRouteResult;
   impactCounter?: ImpactCounterController;
+  onOpenToolInventory: () => void;
   routing: TaskRoutingController;
   setup: SetupConfigurationController;
 }) {
+  const noToolsConfigured = result.hardGateResult.warnings.some(
+    (warning) => warning.reasonCode === "no-tools-configured",
+  );
+  // The saved card keeps the warning; the screen shows it once, in the notice below.
+  const listedWarnings = result.routeCard.warnings.filter((warning) => warning !== noToolsConfiguredMessage);
   const recommended = result.routeCard.options.find((option) => option.id === result.routeCard.recommendedOptionId);
   const selectedOptionId = routing.selectedRouteOptionId ?? result.routeCard.recommendedOptionId;
   const selectedOption = result.routeCard.options.find((option) => option.id === selectedOptionId) ?? recommended;
@@ -459,6 +475,18 @@ function GeneratedResults({
       {result.noSafeGeneratedRoute ? (
         <div className="setupAlert" role="alert">
           No safe option is available yet. Use manual review only until the task details or information choices are adjusted.
+        </div>
+      ) : null}
+
+      {noToolsConfigured ? (
+        <div className="setupNotice noToolsNotice" role="status">
+          <p>
+            You have not added any AI tools yet, so this plan is you doing the work by hand. Add your tools to get
+            real routing.
+          </p>
+          <button onClick={onOpenToolInventory} type="button">
+            Add my AI tools
+          </button>
         </div>
       ) : null}
 
@@ -524,11 +552,11 @@ function GeneratedResults({
         </div>
       </section>
 
-      {result.routeCard.warnings.length ? (
+      {listedWarnings.length ? (
         <ListSection
           className="warningList"
           heading="Warnings"
-          items={result.routeCard.warnings}
+          items={listedWarnings}
           lead="Review these before using any route outside the app."
         />
       ) : null}

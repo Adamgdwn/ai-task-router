@@ -136,6 +136,42 @@ describe("hard gates", () => {
     );
   });
 
+  it("warns when the user has not configured any AI tools", () => {
+    const manualOnlyModels = routeReadyModels.filter((model) => model.tier === "human");
+    const task = buildTask({ requestedSourceIds: ["local-files"] });
+
+    const result = evaluateHardGates({ task, models: manualOnlyModels });
+
+    expect(result.allowedModelIds).toEqual(["manual-human-review"]);
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({
+        reasonCode: "no-tools-configured",
+        message: expect.stringContaining("have not added any AI tools yet"),
+      }),
+    );
+  });
+
+  it("does not warn about missing tools when at least one AI tool is enabled", () => {
+    const task = buildTask({ requestedSourceIds: ["local-files"] });
+
+    const result = evaluateHardGates({ task, models: routeReadyModels });
+
+    expect(result.warnings.some((warning) => warning.reasonCode === "no-tools-configured")).toBe(false);
+  });
+
+  it("does not blame the tool inventory when a restrictive task narrows a stocked inventory to manual review", () => {
+    const task = buildTask({
+      sensitivityClass: "highly restricted",
+      sourcePermissions: [],
+      requestedSourceIds: [],
+    });
+
+    const result = evaluateHardGates({ task, models: routeReadyModels });
+
+    expect(result.allowedModelIds).toEqual(["manual-human-review"]);
+    expect(result.warnings.some((warning) => warning.reasonCode === "no-tools-configured")).toBe(false);
+  });
+
   it("warns when current facts or citations lack allowed research support", () => {
     const task = buildTask({
       requiresCurrentFacts: true,

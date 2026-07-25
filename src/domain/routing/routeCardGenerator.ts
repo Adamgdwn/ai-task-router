@@ -64,7 +64,7 @@ export function generateRouteCard({
     stageGuidance: recommendedOption
       ? buildProjectStageGuidance({
           task,
-          recommendedOption,
+          selectedOption: recommendedOption,
           models,
         })
       : [],
@@ -75,6 +75,47 @@ export function generateRouteCard({
   };
 
   return routeCardSchema.parse(card);
+}
+
+export type RebuildRouteCardForSelectedOptionInput = {
+  card: RouteCard;
+  task: TaskIntake;
+  models: ModelInventoryItem[];
+  promptPackage: PromptPackage;
+  selectedOptionId: string;
+};
+
+/**
+ * Re-point a route card's stage guidance and prompt package at the option the user chose.
+ * `recommendedOptionId` is left alone: it still records what the app suggested, so the card
+ * can show both "we recommended" and "you chose" without ambiguity.
+ */
+export function rebuildRouteCardForSelectedOption({
+  card,
+  task,
+  models,
+  promptPackage,
+  selectedOptionId,
+}: RebuildRouteCardForSelectedOptionInput): RouteCard {
+  assertPromptPackageMatchesTask(task, promptPackage);
+
+  const selectedOption = card.options.find((option) => option.id === selectedOptionId);
+
+  if (!selectedOption) {
+    throw new Error(`Selected option '${selectedOptionId}' is not one of the options on route card '${card.id}'.`);
+  }
+
+  const rebuiltCard: RouteCard = {
+    ...card,
+    stageGuidance: buildProjectStageGuidance({
+      task,
+      selectedOption,
+      models,
+    }),
+    promptPackage,
+  };
+
+  return routeCardSchema.parse(rebuiltCard);
 }
 
 function routeOptionFromScoredCandidate(candidate: ScoredRouteCandidate): RouteOption {
