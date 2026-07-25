@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
 Next Review: When chunk R4 completes or the owner reprioritises
-Last Updated: 2026-07-25T08:17:12-06:00
-Status Updated: 2026-07-25T08:17:12-06:00
+Last Updated: 2026-07-25T08:27:12-06:00
+Status Updated: 2026-07-25T08:27:12-06:00
 
 ## Purpose
 
@@ -60,7 +60,7 @@ Close-out for each chunk:
 |---:|---|---|---|---|
 | R0 | Deploy current `main` | blocked - operator | Small | The fixes already written are not in front of users. |
 | R1 | Artifacts follow the chosen route | not started | Medium | Correctness: the saved card currently documents a different plan than the user accepted. |
-| R2 | Honest impact numbers | not started | Medium | Credibility: the app currently credits users with savings they did not make. |
+| R2 | Honest impact numbers | not started - decision recorded | Medium | Credibility: the app currently credits users with savings they did not make. |
 | R3 | First-run honesty | not started | Small | A new user with no tools gets a confident answer built on an empty inventory. |
 | R4 | Clean the copied prompt text | not started | Small | Internal IDs appear in the product's flagship deliverable. |
 | R5 | Dead code and lint feedback loop | not started | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
@@ -68,10 +68,13 @@ Close-out for each chunk:
 | R7 | Help screen | not started | Small | A developer placeholder is live in production nav. |
 | R8 | Real first-run E2E coverage | not started | Medium | The journey every real user takes is not tested end to end. |
 | R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
+| R10 | Reframe the product promise | not started | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
 
-Recommended order: R0 (operator, parallel) → R1 → R3 → R4 → R2 → R5 → R7 → R6 → R9 → R8.
+Recommended order: R0 (operator, parallel) → R1 → R3 → R4 → R2 → R10 → R5 → R7 → R6 → R9 → R8.
 
-R1, R3, R4 are the user-visible correctness wins and are cheap. R2 is the most valuable but needs the owner decision recorded below. R5 through R9 are hygiene and can be reordered freely.
+R1, R3, R4 are the user-visible correctness wins and are cheap. R2 is the most valuable, and its owner decision is now recorded below, so it is ready to start. R10 lands directly after R2 because both change user-facing copy about impact. R5 through R9 are hygiene and can be reordered freely.
+
+Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
 ---
 
@@ -150,14 +153,14 @@ Stop when the selected route drives the artifacts. Do not change scoring, tie-br
 
 ## Chunk R2 - Honest Impact Numbers
 
-Status: not started - owner decision required first
+Status: not started - owner decision recorded, ready to start
 Budget class: Medium
 
-Owner decision required before starting. Recommended default is (1); confirm or override in one line, then proceed.
+Owner decision, 2026-07-25T08:27:12-06:00: option (1), with the comparison number kept and reframed. Every cost figure is presented as an API-equivalent per-token estimate — "if you were paying per token, this route would cost about X" — never as money the user saved. Subscriptions mask real per-task cost, and making that hidden cost visible is the teaching point. Options (2) and (3) are not taken.
 
 Objective:
 
-Stop reporting savings the user did not make, while keeping the genuine right-sizing signal.
+Stop reporting savings the user did not make, and show instead what each route would cost if it were metered per token, so the user learns the real shape of the choice.
 
 Defect:
 
@@ -170,9 +173,9 @@ These per-route figures accumulate into the lifetime counter in `impactCounter.t
 
 Options:
 
-1. Recommended. Drop the absolute USD figure for routes whose steps are all zero-marginal-cost (subscription or free tier). Keep relative comparison between the user's own three routes. Where an API-equivalent baseline is shown, label it explicitly as "if you paid per token" rather than as savings. Keep energy comparison but reduce to one significant figure and name the baseline anchor in the UI.
-2. Keep absolute figures but gate them behind an opt-in "show API-equivalent estimate" toggle, defaulted off, with the baseline named inline.
-3. Remove the per-route economics display entirely and keep only the followed-choice count.
+1. Chosen. Stop calling any figure a saving. Present per-route cost as an API-equivalent per-token estimate, shown for every route including subscription-covered ones, always labelled as "if you were paying per token". Keep the relative comparison between the user's own three routes, since that is the decision the user actually makes. Keep the energy comparison, reduce it to one significant figure, and name the baseline anchor in the UI.
+2. Not taken. Keep absolute figures but gate them behind an opt-in "show API-equivalent estimate" toggle, defaulted off, with the baseline named inline.
+3. Not taken. Remove the per-route economics display entirely and keep only the followed-choice count.
 
 Context load:
 
@@ -185,15 +188,17 @@ Context load:
 
 Change:
 
-- Add a zero-marginal-cost check so subscription-covered routes do not report dollar savings against an API anchor.
+- Remove the savings framing from the domain layer and the UI copy. A route reports what it would cost per token, not what the user avoided. Delete or rename any field whose name asserts a saving.
+- Keep the API-equivalent figure for subscription-covered routes rather than suppressing it — that number is the lesson. It must read as "if you were paying per token, about X", with the anchor named.
 - Reduce displayed precision: `$0.051` and `11.619Wh` imply measurement accuracy that hand-tuned qualitative multipliers do not have. One or two significant figures.
-- Name the baseline wherever a comparison number appears.
+- Fix the lifetime counter the same way. `impactCounter.ts` currently accumulates dollars from a fixed illustrative scenario; it must either accumulate real per-route API-equivalent estimates or be labelled illustrative in the UI.
 - Update the methodology doc in the same task so docs and behaviour agree.
 
 Acceptance criteria:
 
-- A user whose routes are all subscription-covered sees no dollar savings claim.
-- Any comparison number visible in the UI names what it is compared against.
+- No screen, card, export, or saved record claims the user saved money. Grep for "saved", "savings", "avoided" and confirm each remaining use is about energy comparison or is removed.
+- Every dollar figure reads as an API-equivalent per-token estimate and names its anchor.
+- A user whose routes are all subscription-covered still sees the per-token estimate, and it is unambiguous that their subscription already covers the run.
 - The lifetime counter no longer accumulates dollars derived from a fixed illustrative scenario, or clearly labels them as illustrative.
 - The methodology doc matches the shipped behaviour.
 - Held scope respected: still no live pricing fetches and no public savings claims.
@@ -250,7 +255,7 @@ Validation:
 
 Stop condition:
 
-Stop at the warning. Do not add an onboarding wizard or block routing.
+Stop at the warning. Do not add an onboarding wizard or block routing. Owner constraint: the warning is inline and non-blocking — no modal, no dialog the user must dismiss, no step between the user and their result.
 
 ---
 
@@ -518,7 +523,64 @@ Stop at one option. Do not extend into other setup fields.
 
 ---
 
-## Decision Needed, Not A Chunk
+## Chunk R10 - Reframe The Product Promise
+
+Status: not started
+Budget class: Small
+
+Copy only. No source changes, no engine work.
+
+Objective:
+
+Make the written promise match what the app actually does, and state the end goal plainly: this is a guide that teaches people to make more efficient, lower-impact AI decisions.
+
+Defect:
+
+The docs imply the router picks the right tool for your task using provider-level judgement. It does not. `everydayToolCatalog.ts` collapses every provider and plan into three capability buckets, so ChatGPT Plus and Claude Pro carry identical capability vectors, and two unrelated tasks can produce the same recommendation with the same score. What the app genuinely does well — staged prompt packages, privacy-posture gating, right-sizing away from oversized models — is undersold by comparison.
+
+Context load:
+
+- `README.md`
+- `docs/PRODUCT_BRIEF.md`
+- `docs/manual.md`
+- `docs/2026-07-25-audit-remediation-plan.md` (the Decision Recorded section below)
+
+Change:
+
+- Replace any claim that the app knows which provider or model is best for a given task. It recommends a *tier* and a *shape of work*, not a vendor.
+- State the end goal in the opening lines of README and the product brief: help people use AI more efficiently and with lower environmental impact, by staging the work and right-sizing the tool.
+- Keep every claim that is already earned: staged prompt packages, sensitivity and permission gating, local-first with no execution and no data leaving the device.
+- Align impact wording with R2. If R2 is already done, reuse its exact phrasing rather than inventing a second vocabulary.
+
+Acceptance criteria:
+
+- No user-facing doc claims provider-level or model-level task matching.
+- README and product brief open with the teaching goal, not a feature list.
+- Impact wording is identical across README, product brief, manual, and the app UI.
+- No source file changed by this chunk.
+
+Validation:
+
+- `bash scripts/governance-preflight.sh`
+- `git diff --check`
+- `git diff --stat` — confirm no files outside `README.md`, `docs/PRODUCT_BRIEF.md`, `docs/manual.md`, and this plan are touched
+
+Stop condition:
+
+Stop when the docs are honest. Do not rewrite the marketing site, the public hub, or any launch material — those are gated release work.
+
+---
+
+## Decision Recorded, Not A Chunk
+
+Owner decision, 2026-07-25T08:27:12-06:00: take the reframe. The product's end goal is to teach and guide people toward more efficient, lower-impact AI decisions, and to do that with as little friction as possible. Tool selection is a teaching device, not a precision instrument, and the docs should say so. No engine work under any chunk in this file. Richer per-provider capability data stays a separate future decision.
+
+This decision constrains the rest of the queue in two ways:
+
+- Copy in README, product brief, and the manual should describe a guide that teaches efficient, lower-impact AI use — not a system that knows which provider is best for your task.
+- Frictionless is a constraint, not a preference. Any chunk that adds a warning, a gate, or a screen must not add a step the user has to clear before getting a result. R3 in particular states its warning inline; it must not become a blocking dialog.
+
+Background that produced the decision:
 
 Routing is thinner than the docs claim. Two unrelated tasks — "write a blog post about composting" and "plan a two-week trip to Portugal" — produce an identical recommendation for the same user: Balanced route, score 95.3, same two steps. Root cause is that `everydayToolCatalog.ts` collapses every provider and plan into three capability buckets, so ChatGPT Plus and Claude Pro carry byte-identical capability vectors. The app cannot express "Claude is better for this, Gemini for that" because it never encodes it.
 
@@ -527,7 +589,7 @@ Two honest paths:
 - Reframe the product as a prompt-staging coach that respects your privacy posture. The prompt output already earns this claim today, and no engine work is needed — only copy in README, product brief, and manual.
 - Invest in per-provider, per-task-type capability data so tool selection means something. This is real work and needs a source of truth that will not go stale, which conflicts with the no-live-fetch boundary.
 
-Recommendation: take the reframe now, and treat richer capability data as a separate future decision. Do not start engine work under any chunk in this file.
+The reframe is the recorded decision above. Do not start engine work under any chunk in this file.
 
 ## Validation Log
 
@@ -539,7 +601,10 @@ Recommendation: take the reframe now, and treat richer capability data as a sepa
 | 2026-07-25T08:17:12-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings. |
 | 2026-07-25T08:17:12-06:00 | `npm audit --audit-level=moderate` | fail | 1 high: postcss path traversal, build-time dependency only. Addressed in R5. |
 | 2026-07-25T08:17:12-06:00 | domain pipeline probe, 8 user profiles | findings | Confirmed R1, R2, R3 defects against real generated output; hard gates and highly-restricted blocking verified correct. |
+| 2026-07-25T08:27:12-06:00 | `bash scripts/governance-preflight.sh` | pass | After recording both owner decisions and adding chunk R10. Docs only; no app behaviour change. |
 
 ## Next Handoff
 
-R0 is operator work and can proceed in parallel with any coder chunk. For coder work, start at R1 — it is the only outright correctness bug, it is cheap, and it sits directly on the "we recommend; you decide" promise. R2 needs the owner to confirm the framing option before code starts.
+R0 is operator work and can proceed in parallel with any coder chunk. For coder work, start at R1 — it is the only outright correctness bug, it is cheap, and it sits directly on the "we recommend; you decide" promise.
+
+Both owner decisions are now recorded and no chunk is waiting on input. R2 is unblocked: present every cost figure as an API-equivalent per-token estimate, never as a saving. R10 carries the reframe into the docs. The whole queue serves one goal — teach people to make more efficient, lower-impact AI decisions, without adding friction.
