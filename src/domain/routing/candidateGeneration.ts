@@ -1,19 +1,11 @@
 import { defaultFinalApprovalRouteStep } from "../defaults/defaultPolicies";
-import { everydayToolFrequencyRank } from "../defaults/everydayToolCatalog";
 import type { HardGateResult } from "./hardGates";
 import type { ModelInventoryItem, PermissionLevel, PolicyDefault, RouteStep, SourcePermission, TaskIntake, WorkRole } from "../types";
-import {
-  modelInstructionGuidance,
-  modelInstructionGuidanceForTask,
-  modelLabelWithMinimum,
-  modelLabelWithMinimumForTask,
-} from "./modelGuidance";
 import {
   decomposeTask,
   requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
-  taskNeedsEvidenceCheck,
   type TaskDecomposition,
 } from "./taskDecomposition";
 import {
@@ -549,212 +541,6 @@ function deliverableSummaryForIds(context: CandidateContext, deliverableIds: rea
   return labels.length ? inlineList(labels) : "the requested output";
 }
 
-function selectPreferredModel(
-  allowedModels: ModelInventoryItem[],
-  preferredTiers: ModelInventoryItem["tier"][],
-): ModelInventoryItem | null {
-  const preferredTierRank = new Map(preferredTiers.map((tier, index) => [tier, index]));
-  const matchingModels = allowedModels.filter((candidateModel) => preferredTierRank.has(candidateModel.tier));
-
-  return [...matchingModels].sort((left, right) => {
-    const tierComparison = (preferredTierRank.get(left.tier) ?? 99) - (preferredTierRank.get(right.tier) ?? 99);
-    const frequencyComparison = everydayToolFrequencyRank(right) - everydayToolFrequencyRank(left);
-    const capabilityComparison = averageCapability(right) - averageCapability(left);
-
-    return tierComparison || frequencyComparison || capabilityComparison || left.label.localeCompare(right.label);
-  })[0] ?? null;
-}
-
-function primaryModelTiersForStrategy(
-  strategy: RouteCandidateStrategy,
-  task: TaskIntake,
-  definition: StrategyDefinition,
-): ModelInventoryItem["tier"][] {
-  if (strategy !== "premium") {
-    return definition.primaryModelTiers;
-  }
-
-  const premiumTiers: ModelInventoryItem["tier"][] = ["frontier"];
-
-  if (task.knowledgeWorkType === "research" || taskNeedsEvidenceFromDecomposition(task)) {
-    premiumTiers.push("research");
-  }
-
-  if (shouldAddArtifactStep(task)) {
-    premiumTiers.push("artifact");
-  }
-
-  return premiumTiers;
-}
-
-function selectPremiumBenchmarkModel(
-  allowedModels: ModelInventoryItem[],
-  task: TaskIntake,
-): ModelInventoryItem | null {
-  const safeAiModels = allowedModels.filter((model) => model.tier !== "human");
-  const fallbackTiers: ModelInventoryItem["tier"][] = ["frontier", "mid", "small", "artifact"];
-
-  if (
-    task.knowledgeWorkType === "research" ||
-    taskNeedsEvidenceFromDecomposition(task)
-  ) {
-    fallbackTiers.splice(1, 0, "research");
-  }
-
-  return selectPreferredModel(safeAiModels, fallbackTiers);
-}
-
-function buildResearchStep(input: {
-  routeId: string;
-  task: TaskIntake;
-  context: CandidateContext;
-}): RouteStep | null {
-  const { routeId, task, context } = input;
-
-  if (!task.requiresCurrentFacts && !task.requiresCitations) {
-    return null;
-  }
-
-  const researchSourceIds = context.allowedSources
-    .filter((source) => source.sourceType === "web")
-    .map((source) => source.id);
-  const researchModel = selectResearchModel(context.allowedModels);
-
-  if (!researchModel || researchSourceIds.length === 0) {
-    return null;
-  }
-
-  return {
-    id: `${routeId}-research`,
-    kind: "research",
-    label: `${modelLabelWithMinimum(researchModel)}: current facts check`,
-    instruction: `Manually consult ${researchModel.label} using only allowed research source IDs: ${formatSourceIds(
-      researchSourceIds,
-    )}. ${modelInstructionGuidance(
-      researchModel,
-    )} Capture current facts or citations outside the app before synthesis; the app does not search, fetch, or call the tool.`,
-    requiredPermissionLevel: permissionLevelForSourceIds(researchSourceIds, context.allowedSources),
-    modelId: researchModel.id,
-    deliverableIds: [],
-    selectionReasons: ["Current facts and citations require a research-capable helper before synthesis."],
-    sourceIds: researchSourceIds,
-    warnings: [],
-  };
-}
-
-function selectResearchModel(allowedModels: ModelInventoryItem[]): ModelInventoryItem | null {
-  const researchTierModel = allowedModels.find((model) => model.tier === "research");
-  if (researchTierModel) {
-    return researchTierModel;
-  }
-
-  return allowedModels.find((model) => model.capabilityScores.research >= 4) ?? null;
-}
-
-function buildPrimaryStep(input: {
-  routeId: string;
-  strategy: RouteCandidateStrategy;
-  task: TaskIntake;
-  model: ModelInventoryItem;
-  context: CandidateContext;
-  usesPremiumBenchmark?: boolean;
-}): RouteStep {
-  const { routeId, strategy, task, model, context, usesPremiumBenchmark = false } = input;
-  const sourceText = formatSourceIds(context.allowedSourceIds);
-
-  if (model.tier === "human") {
-    return {
-      id: `${routeId}-manual`,
-      kind: "manual",
-      label: "You-first project plan",
-      instruction: `Evaluate the task manually, write the master prompt first, then prepare the ${task.outputType} from allowed source IDs (${sourceText}). Note what would justify using an AI helper or premium route. Treat this app as a planning record only.`,
-      requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
-      modelId: model.id,
-      deliverableIds: [],
-      selectionReasons: ["Manual preparation remains available when it is the safest or lightest adequate path."],
-      sourceIds: context.allowedSourceIds,
-      warnings: [],
-    };
-  }
-
-  const kind = model.tier === "artifact" ? "artifact" : "model";
-
-  return {
-    id: `${routeId}-${strategy === "premium" && model.tier === "artifact" ? "artifact" : "synthesis"}`,
-    kind,
-    label: `${modelLabelWithMinimumForTask(model, task)}: ${primaryActionLabel(task, kind, usesPremiumBenchmark)}`,
-    instruction: `${usesPremiumBenchmark ? "Premium comparison route: if you choose this path, use the strongest paid or premium mode you actually have access to; otherwise treat it as a cost and effort benchmark. " : ""}Use ${model.label} manually outside the app in two passes: first create the master prompt with the prompt-building mode, then run that prompt with the execution mode. The result must cover ${requestedDeliverableSummary(
-      task,
-    )}. ${taskHasBuildIntent(task) ? "For build-shaped work, include the first usable slice, data flow, acceptance checks, and what can wait. " : ""}${taskHasModelSelectionIntent(task) ? "Name the minimum execution model or mode and the upgrade trigger. " : ""}Call out lower-impact or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidanceForTask(
-      model,
-      task,
-    )} The app does not send task data to the model.`,
-    requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
-    modelId: model.id,
-    deliverableIds: [],
-    selectionReasons: ["Legacy primary route step kept for compatibility with older route construction paths."],
-    sourceIds: context.allowedSourceIds,
-    warnings: [],
-  };
-}
-
-function primaryActionLabel(task: TaskIntake, kind: RouteStep["kind"], usesPremiumBenchmark = false) {
-  if (usesPremiumBenchmark) {
-    return "premium comparison pass";
-  }
-
-  if (kind === "artifact") {
-    return "package the result";
-  }
-
-  if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
-    return "design and run the plan prompt";
-  }
-
-  if (task.knowledgeWorkType === "coding") {
-    return "design the build prompt";
-  }
-
-  if (task.knowledgeWorkType === "analysis" || task.knowledgeWorkType === "review") {
-    return "design the evaluation prompt";
-  }
-
-  return "build and run the prompt";
-}
-
-function buildArtifactStep(input: {
-  routeId: string;
-  task: TaskIntake;
-  primaryModel: ModelInventoryItem;
-  context: CandidateContext;
-}): RouteStep | null {
-  const { routeId, task, primaryModel, context } = input;
-
-  if (!shouldAddArtifactStep(task) || primaryModel.tier === "artifact") {
-    return null;
-  }
-
-  const artifactModel = selectPreferredModel(context.allowedModels, ["artifact"]);
-  if (!artifactModel) {
-    return null;
-  }
-
-  return {
-    id: `${routeId}-artifact`,
-    kind: "artifact",
-    label: `${modelLabelWithMinimumForTask(artifactModel, task)}: artifact packaging`,
-    instruction: `Use ${artifactModel.label} manually outside the app to package the draft as a ${task.outputType}. Do not add sources beyond the allowed source IDs (${formatSourceIds(
-      context.allowedSourceIds,
-    )}). ${modelInstructionGuidanceForTask(artifactModel, task)}`,
-    requiredPermissionLevel: permissionLevelForSources(context.allowedSources),
-    modelId: artifactModel.id,
-    deliverableIds: [],
-    selectionReasons: ["An artifact-capable helper is useful for packaging the reviewed result."],
-    sourceIds: context.allowedSourceIds,
-    warnings: [],
-  };
-}
-
 function shouldAddArtifactStep(task: TaskIntake) {
   return task.knowledgeWorkType === "packaging" || artifactOutputTypes.has(task.outputType);
 }
@@ -799,10 +585,6 @@ function shouldAddEvidenceStep(task: TaskIntake, context: Pick<CandidateContext,
   return taskNeedsEvidenceCheckFromDecomposition(task, context.decomposition);
 }
 
-function taskNeedsEvidenceFromDecomposition(task: TaskIntake) {
-  return taskNeedsEvidenceCheck(task);
-}
-
 function taskNeedsEvidenceCheckFromDecomposition(task: TaskIntake, decomposition: TaskDecomposition) {
   return (
     task.requiresCurrentFacts ||
@@ -845,9 +627,4 @@ function inlineList(items: readonly string[]) {
 
 function uniqueMessages(messages: string[]) {
   return [...new Set(messages)];
-}
-
-function averageCapability(model: ModelInventoryItem) {
-  const scores = Object.values(model.capabilityScores);
-  return scores.reduce((total, score) => total + score, 0) / scores.length;
 }

@@ -402,41 +402,6 @@ const copilotAccountOptions = [
   },
 ] satisfies EverydayToolAccountOption[];
 
-const researchAccountOptions = [
-  {
-    id: "basic",
-    label: "Free or basic",
-    tier: "research",
-    capabilityScores: researchScores,
-    maxPermissionLevel: 1,
-    note: "Good for public questions and source-backed answers.",
-  },
-  {
-    id: "paid",
-    label: "Pro or paid",
-    tier: "research",
-    capabilityScores: researchScores,
-    maxPermissionLevel: 1,
-    note: "Use for regular current-facts checks.",
-  },
-  {
-    id: "pro",
-    label: "Highest research tier",
-    tier: "research",
-    capabilityScores: strongResearchScores,
-    maxPermissionLevel: 2,
-    note: "Use for careful research or citation-heavy work.",
-  },
-  {
-    id: "team",
-    label: "Team or enterprise",
-    tier: "research",
-    capabilityScores: strongResearchScores,
-    maxPermissionLevel: 3,
-    note: "Use only for work research your organization allows in that account.",
-  },
-] satisfies EverydayToolAccountOption[];
-
 const perplexityAccountOptions = [
   {
     id: "basic",
@@ -480,47 +445,6 @@ const perplexityAccountOptions = [
   },
 ] satisfies EverydayToolAccountOption[];
 
-const artifactAccountOptions = [
-  {
-    id: "basic",
-    label: "Free or basic",
-    tier: "artifact",
-    capabilityScores: artifactScores,
-    maxPermissionLevel: 1,
-    note: "Useful when the tool helps shape a document, table, image, or slide.",
-  },
-  {
-    id: "paid",
-    label: "Paid or premium",
-    tier: "artifact",
-    capabilityScores: artifactScores,
-    maxPermissionLevel: 2,
-    note: "Good for regular finished-file or structured-output help.",
-  },
-  {
-    id: "pro",
-    label: "Highest creator plan",
-    tier: "artifact",
-    capabilityScores: scores({
-      reasoning: 4,
-      writing: 5,
-      coding: 2,
-      research: 2,
-      packaging: 5,
-    }),
-    maxPermissionLevel: 2,
-    note: "Use when the final package needs more polish.",
-  },
-  {
-    id: "team",
-    label: "Team, business, or enterprise",
-    tier: "artifact",
-    capabilityScores: artifactScores,
-    maxPermissionLevel: 3,
-    note: "Use only for work artifacts your organization allows in that account.",
-  },
-] satisfies EverydayToolAccountOption[];
-
 const canvaAccountOptions = [
   {
     id: "basic",
@@ -553,47 +477,6 @@ const canvaAccountOptions = [
     capabilityScores: artifactScores,
     maxPermissionLevel: 3,
     note: "Use only for enterprise-approved brand or design work.",
-  },
-] satisfies EverydayToolAccountOption[];
-
-const codingAccountOptions = [
-  {
-    id: "basic",
-    label: "Free or basic",
-    tier: "mid",
-    capabilityScores: codingScores,
-    maxPermissionLevel: 1,
-    note: "Useful for simple coding help.",
-  },
-  {
-    id: "paid",
-    label: "Pro or paid",
-    tier: "frontier",
-    capabilityScores: codingScores,
-    maxPermissionLevel: 2,
-    note: "Good for regular coding, debugging, and repo assistance.",
-  },
-  {
-    id: "pro",
-    label: "Highest individual plan",
-    tier: "frontier",
-    capabilityScores: scores({
-      reasoning: 5,
-      writing: 3,
-      coding: 5,
-      research: 3,
-      packaging: 4,
-    }),
-    maxPermissionLevel: 2,
-    note: "Use for harder code or architecture work.",
-  },
-  {
-    id: "team",
-    label: "Team, business, or enterprise",
-    tier: "frontier",
-    capabilityScores: codingScores,
-    maxPermissionLevel: 3,
-    note: "Use only for code your organization allows in that account.",
   },
 ] satisfies EverydayToolAccountOption[];
 
@@ -1896,42 +1779,6 @@ function generalProvider(id: EverydayToolProviderId, label: string): EverydayToo
     defaultAccountId: "paid",
     defaultFrequencyId: "daily",
     accountOptions: consumerAccountOptions,
-    frequencyOptions: realFrequencyOptions,
-  });
-}
-
-function researchProvider(id: EverydayToolProviderId, label: string): EverydayToolProvider {
-  return provider({
-    id,
-    label,
-    summary: `Use this when ${label} helps you check current facts, sources, or research.`,
-    defaultAccountId: "paid",
-    defaultFrequencyId: "weekly",
-    accountOptions: researchAccountOptions,
-    frequencyOptions: realFrequencyOptions,
-  });
-}
-
-function artifactProvider(id: EverydayToolProviderId, label: string): EverydayToolProvider {
-  return provider({
-    id,
-    label,
-    summary: `Use this when ${label} helps create documents, tables, slides, images, or polished outputs.`,
-    defaultAccountId: "paid",
-    defaultFrequencyId: "weekly",
-    accountOptions: artifactAccountOptions,
-    frequencyOptions: realFrequencyOptions,
-  });
-}
-
-function codingProvider(id: EverydayToolProviderId, label: string): EverydayToolProvider {
-  return provider({
-    id,
-    label,
-    summary: `Use this when ${label} helps you write, review, or understand code.`,
-    defaultAccountId: "paid",
-    defaultFrequencyId: "weekly",
-    accountOptions: codingAccountOptions,
     frequencyOptions: realFrequencyOptions,
   });
 }

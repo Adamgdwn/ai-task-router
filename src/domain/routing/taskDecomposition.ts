@@ -338,10 +338,6 @@ function isComplexBuildPlan(task: TaskIntake, deliverables: readonly TaskDeliver
   return buildLike && (planningLike || multiPart);
 }
 
-function uniqueLabels(labels: string[]) {
-  return [...new Set(labels)];
-}
-
 function uniqueRoles(roles: WorkRole[]) {
   return [...new Set(roles)];
 }

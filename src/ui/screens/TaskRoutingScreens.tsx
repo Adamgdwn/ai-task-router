@@ -1027,7 +1027,6 @@ function ChartTrendLine({
   const points = usageTicks
     .map((tick) => `${xForUse(tick)},${yForValue(perUseValue * tick, maxValue, plotTop, shouldUseZeroFloor)}`)
     .join(" ");
-  const endY = yForValue(perUseValue * 100, maxValue, plotTop, shouldUseZeroFloor);
   const lineClassName = dashed ? "chartSeriesLine chartSeriesLineDashed" : "chartSeriesLine";
 
   return (
@@ -1564,13 +1563,6 @@ function extraCareSummary(draft: TaskRoutingController["draft"]) {
   }
 
   return items.length ? items.join(", ") : "No extra checks selected";
-}
-
-function formatTimestamp(timestamp: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(timestamp));
 }
 
 function taskSourceLabel(source: SourcePermission) {

@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.7.0
+Version: 1.8.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
-Next Review: When chunk R5 completes or the owner reprioritises
-Last Updated: 2026-07-25T10:33:23-06:00
-Status Updated: 2026-07-25T10:33:23-06:00
+Next Review: When chunk R7 completes or the owner reprioritises
+Last Updated: 2026-07-25T11:07:22-06:00
+Status Updated: 2026-07-25T11:07:22-06:00
 
 ## Purpose
 
@@ -63,7 +63,7 @@ Close-out for each chunk:
 | R2 | Honest impact numbers | complete | Medium | Credibility: the app currently credits users with savings they did not make. |
 | R3 | First-run honesty | complete | Small | A new user with no tools gets a confident answer built on an empty inventory. |
 | R4 | Clean the copied prompt text | complete | Small | Internal IDs appear in the product's flagship deliverable. |
-| R5 | Dead code and lint feedback loop | not started | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
+| R5 | Dead code and lint feedback loop | complete | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
 | R6 | Catalog staleness signal | not started | Small | Hardcoded model names decay monthly with nothing to notice it. |
 | R7 | Help screen | not started | Small | A developer placeholder is live in production nav. |
 | R8 | Real first-run E2E coverage | not started | Medium | The journey every real user takes is not tested end to end. |
@@ -72,9 +72,9 @@ Close-out for each chunk:
 | R11 | Price each step by the model it names | complete | Medium | Owner found Lean priced above Balanced. Cost was blind to which mode a step uses, so effort alone decided the number. |
 | R12 | Name the lean style by what it actually does | complete | Small | The lean style was labelled "Save time and cost". It weights speed lower than balanced does and leans on human review, so it promised the one axis it does not deliver. |
 
-Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → R5 → R7 → R6 → R9 → R8.
+Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → R7 → R6 → R9 → R8.
 
-R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely; R5 is next.
+R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 is done and installed the compiler feedback loop that will catch the next dead branch; R7 is next, and it is the only remaining chunk a user can actually bump into.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -363,7 +363,7 @@ Tests added: `promptPackageGenerator.test.ts` asserts across three task shapes t
 
 ## Chunk R5 - Dead Code And Lint Feedback Loop
 
-Status: not started
+Status: complete - 2026-07-25T11:07:22-06:00
 Budget class: Small
 
 Objective:
@@ -406,6 +406,53 @@ Validation:
 Stop condition:
 
 Stop when the build is clean under the new flags. Do not refactor live routing code in this chunk.
+
+Acceptance Result, 2026-07-25T11:07:22-06:00: met.
+
+Pure deletion plus config: 388 lines removed, 2 lines of `tsconfig` added, 1 lockfile bump. No line of live logic
+was rewritten and no test changed, so the 134 tests that passed before the chunk are the same 134 that pass after it.
+
+Deleted from `candidateGeneration.ts` (223 lines): the eight-function cluster the audit named - `selectPreferredModel`,
+`primaryModelTiersForStrategy`, `selectPremiumBenchmarkModel`, `buildResearchStep`, `selectResearchModel`,
+`buildPrimaryStep`, `primaryActionLabel`, `buildArtifactStep`. Confirmed unreachable before deleting, not after: a
+repo-wide grep for each name returned only the definitions and calls **inside the cluster itself**, so it was a closed
+island with no entry point. The `buildPrimaryStep` comment claiming compatibility with "older route construction paths"
+was false - no such path existed. Their private helpers `taskNeedsEvidenceFromDecomposition` (a one-line pass-through
+to `taskNeedsEvidenceCheck`) and `averageCapability` fell with them, as did three now-unused imports
+(`everydayToolFrequencyRank`, `modelLabelWithMinimum`, `modelInstructionGuidance`).
+
+Deleted from `taskDecomposition.ts` (4 lines): unused `uniqueLabels`. Note `stageGuidance.ts` has its own local
+`uniqueLabels` which is live - the duplicate is real but out of scope here, since removing it means choosing a shared
+home for it and that is a refactor this chunk's stop condition forbids.
+
+`noUnusedLocals` and `noUnusedParameters` are now on in `tsconfig.json`. As predicted, they surfaced their own
+fallout, and this is the substance of the chunk rather than a side effect - none of it had ever been flagged by
+anything:
+
+- `everydayToolCatalog.ts`, 153 lines: `researchProvider`, `artifactProvider`, and `codingProvider` factories, plus
+  the `researchAccountOptions`, `artifactAccountOptions`, and `codingAccountOptions` tables that only they read.
+  Generic per-class builders superseded by the per-provider ones (`perplexityAccountOptions`, `canvaAccountOptions`,
+  `githubCopilotAccountOptions`) and left behind. Removing the factories made the tables unused, which the flags then
+  caught in a second pass - the cascade is the loop working.
+- `TaskRoutingScreens.tsx`, 8 lines: `endY`, a computed chart coordinate nothing rendered, and `formatTimestamp`,
+  a dead formatter.
+
+`npm audit fix` cleared the postcss path-traversal advisory (GHSA-r28c-9q8g-f849) by moving the transitive
+`vite` -> `postcss` pin from 8.5.16 to 8.5.23. Lockfile only; `package.json` is unchanged. `npm audit
+--audit-level=moderate` now reports 0 vulnerabilities, and the build was re-run after the bump.
+
+Not done, deliberately:
+
+- **ESLint deferred.** The chunk offers it "only if the diff stays small". A flat config for this stack needs
+  `eslint`, `typescript-eslint`, `eslint-plugin-react-hooks`, and `eslint-plugin-react-refresh`, a config file, and
+  a triage pass over whatever the first run reports. That is a chunk, not a footnote. The compiler flags already
+  close the specific feedback gap the defect described, so the loop is installed either way.
+- **The five deprecated savings fields in `routeOptionSchema` are still there.** The R10 handoff floated R5 as a
+  place to drop them. They are not dead code - `routeOptionSchema` still accepts them so pre-2026-07-25 route cards
+  keep parsing, and removing them without a store migration would break exactly the saved cards they exist for.
+  Still waiting on a migration chunk.
+- No live routing code was refactored, per the stop condition.
+
 
 ---
 
@@ -828,17 +875,30 @@ Not changed, deliberately:
 | 2026-07-25T10:33:23-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
 | 2026-07-25T10:33:23-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R10. |
 
+| 2026-07-25T11:07:22-06:00 | each deleted function grepped repo-wide before removal | pass | All eight `candidateGeneration.ts` functions referenced only from inside their own cluster; `uniqueLabels` in `taskDecomposition.ts` had zero references. Unreachability was proven, not assumed. |
+| 2026-07-25T11:07:22-06:00 | `npx tsc --noEmit` with `noUnusedLocals` + `noUnusedParameters` | pass | Clean after two cascade passes. First pass surfaced 7 findings, second surfaced the 3 option tables orphaned by removing their factories. |
+| 2026-07-25T11:07:22-06:00 | `npm run test` | pass | 14 files, 134 tests - identical to the pre-chunk baseline. No test file was touched. (The chunk spec's "119 tests at time of writing" predates R4, R11, and R12; 134 is the current baseline, not a regression.) |
+| 2026-07-25T11:07:22-06:00 | `npm run build` | pass | `tsc --noEmit && vite build`; 135 modules, built in 225ms. Re-run after `npm audit fix` to confirm the postcss bump did not affect the build. |
+| 2026-07-25T11:07:22-06:00 | `npm audit --audit-level=moderate` | pass | 0 vulnerabilities. postcss moved 8.5.16 -> 8.5.23 in the lockfile only; `package.json` unchanged. |
+| 2026-07-25T11:07:22-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
+| 2026-07-25T11:07:22-06:00 | `git diff --stat` reviewed for behaviour change | pass | 9 insertions, 395 deletions across 6 files. The only insertions are 2 `tsconfig` flags and 7 lockfile lines, so nothing executable was added. |
+| 2026-07-25T11:07:22-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R5. |
+
 ## Next Handoff
 
-R1, R2, R3, R4, R10, R11, and R12 are complete as of 2026-07-25T10:33:23-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has seven chunks' worth of user-visible fixes waiting behind it.
+R1, R2, R3, R4, R5, R10, R11, and R12 are complete as of 2026-07-25T11:07:22-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it still has seven chunks' worth of user-visible fixes waiting behind it, since R5 changed nothing a user sees.
 
-Next coder chunk is R5, dead code and the lint feedback loop. It is the first chunk in a while that touches source without changing what a user sees, and it has one piece of found work waiting for it: `noUnusedLocals` is off in `tsconfig`, which is why R12 found a second unused copy of the policy labels that nothing had flagged. Turning it on is in scope for R5 and will surface its own fallout.
+Next coder chunk is R7, the help screen. It is the last remaining item a user can actually walk into: a developer placeholder sitting in production nav. R6, R9, and R8 follow and can be reordered freely.
+
+`noUnusedLocals` and `noUnusedParameters` are now on. Any new chunk that leaves a local, an import, or a non-underscore parameter unused will fail `npm run build`, not just `npm run test` - `build` runs `tsc --noEmit` first. That is deliberate: it is the loop whose absence let 388 lines of dead code accumulate unnoticed.
 
 The user-facing vocabulary is now fixed across code and docs and should not be reinvented: **"if you were paying per token"** for the API-equivalent figure, **"added to your bill"** for what a metered account is charged, and **no use of "saved", "savings", or "avoided" for money**. `docs/2026-07-05-impact-estimator-methodology.md` v0.6.0 has the full framing under "What A Dollar Figure Means" and is the source of truth for it.
 
 Notes for whoever picks up the next code chunk:
 
 - The router recommends a tier and a shape of work, not a vendor. That is now stated in README, the product brief, and the manual. Any new copy that implies the app knows which provider suits a task contradicts `everydayToolCatalog.ts`, where same-class accounts share one capability vector.
+- Unused code now fails the build. Prefix a genuinely-needed unused parameter with `_` (as `routeEconomics.ts` already does for `_task`); do not disable the flags.
+- `stageGuidance.ts` and `taskDecomposition.ts` each still define a local `inlineList`, and `stageGuidance.ts` keeps a local `uniqueLabels`. All are live, so the flags cannot see the duplication. Giving them one home is a refactor, not a deletion, and needs its own chunk.
 - `noToolsConfiguredMessage` is exported from `hardGates.ts` if another surface needs to match on it.
 - Prompt and export text names tools by `modeLabel`; reuse `toolLabelForRouteStep` in `promptPackageGenerator.ts` rather than reaching for `step.modelId` in any user-facing string.
 - Any new dollar figure must come from `apiEquivalentCostUsd` or `estimatedCostUsd`, never from the five deprecated savings fields still accepted by `routeOptionSchema`. Those exist only so pre-2026-07-25 route cards keep parsing; R5 or a later migration chunk can drop them once a store migration exists.
