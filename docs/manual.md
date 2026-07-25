@@ -2,9 +2,11 @@
 
 ## What This Project Is
 
-AI Task Router is a local-first browser app for one person deciding how to use AI help on a task.
+AI Task Router is a local-first browser app that guides one person toward using AI more efficiently and with lower environmental impact on a given task.
 
-The app does not do the work for the user. It helps them choose the right helper, model tier, mode, or manual step for each stage of the work, then prepares local guidance they can use outside the app.
+The app does not do the work for the user. It helps them choose a model tier, a mode, or a manual step for each stage of the work, then prepares local guidance they can use outside the app.
+
+It recommends a tier and a shape of work, not a vendor. Capability data is bucketed by plan class, so accounts of the same class carry the same capability profile and the app cannot say one provider suits a task better than another.
 
 In ordinary use, a person enters the task, chooses what information and tools are allowed, compares lean, balanced, and premium routes, reviews the staged project plan, and saves a Decision Card plus copy-ready prompts. The app stays recommendation-only: it does not call AI providers, connect accounts, scan files, send prompts, publish, deploy, purchase, or execute external actions.
 
@@ -13,7 +15,10 @@ The practical outcome should be easy to explain:
 - start with the smallest adequate helper
 - use research-capable help only when current facts or citations are needed
 - reserve stronger models for review, risk, complex synthesis, or expensive mistakes
+- see what the work would cost if it were metered per token at public API list prices, which a monthly subscription otherwise hides
 - carry a manual plan and prompt package into the user's chosen tools
+
+Dollar figures answer one question: if this work were metered per token at public API list prices, roughly what would it come to? A monthly subscription hides that number, which is why it is worth seeing. It is not your bill, not money you saved, and not a guarantee.
 
 ## How To Work In This Repo
 

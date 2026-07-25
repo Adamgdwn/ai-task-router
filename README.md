@@ -1,17 +1,26 @@
 # 2026-07-09T03:04:01+00:00 - AI Task Router
 
-AI Task Router is a local-first decision helper for choosing the right AI helper, model, or mode at the right moment in a task.
+AI Task Router is a local-first guide that helps people use AI more efficiently and with lower environmental impact, by staging the work and right-sizing the tool.
 
-For an individual user, the core value is practical: start with the smallest adequate help, upgrade only when the task needs it, and leave with a staged plan that can be followed manually outside the app.
+For an individual user, the core value is practical: break the task into stages, start each stage with the smallest adequate help, upgrade only when the task shows it needs more, and leave with a staged plan that can be followed manually outside the app.
 
-It recommends lean, balanced, and premium tool/model routes while respecting task information choices, sensitivity, privacy posture, cost, energy, quality needs, and user-configured tool availability.
+It recommends lean, balanced, and premium routes while respecting task information choices, sensitivity, privacy posture, cost, energy, quality needs, and user-configured tool availability.
+
+## What It Recommends, And What It Does Not
+
+It recommends a **tier** — small, mid, frontier, research, or artifact — and a **shape of work**: which weight of help belongs at which stage, and where a person should review.
+
+It does not know which vendor suits your task. Capability data is bucketed by plan class, not by vendor, so a paid ChatGPT plan and a paid Claude plan carry the same capability profile in the scoring. Where a route names a specific app, that is because you told the app which tools you have, not because it judged one provider better than another for this task.
 
 ## What It Helps You Do
 
-- choose which helper or model tier belongs at each stage of the work
-- separate framing, fact-checking, drafting, reviewing, and packaging instead of using one tool for everything
+- see which weight of help belongs at each stage of the work, instead of using one tool for everything
+- separate framing, fact-checking, drafting, reviewing, and packaging
 - see when a lighter route is enough and when a stronger model or research-capable tool earns its cost
+- see what the work would cost if it were metered per token at public API list prices, which a monthly subscription otherwise hides
 - save a local Decision Card and copy-ready prompt package without sending the task anywhere
+
+Dollar figures answer one question: if this work were metered per token at public API list prices, roughly what would it come to? A monthly subscription hides that number, which is why it is worth seeing. It is not your bill, not money you saved, and not a guarantee.
 
 ## Product Boundary
 
@@ -38,8 +47,8 @@ The MVP must not:
 
 ## Current Status
 
-Status: v0.2 browser/PWA app is live. The current product focus is making the individual user story clear: pick the right helper at the right stage, then save local guidance for manual use. Social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
-Status Updated: 2026-07-08T21:43:43-06:00
+Status: v0.2 browser/PWA app is live. The current product focus is making the individual user story clear: choose the right weight of help at the right stage, then save local guidance for manual use. Social launch, custom domains, live pricing/model fetches, exact public savings claims, and public desktop downloads remain separate gated chunks.
+Status Updated: 2026-07-25T10:33:23-06:00
 
 Public repository: https://github.com/Adamgdwn/ai-task-router
 

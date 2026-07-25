@@ -9,11 +9,32 @@ Source inputs:
 
 ## Purpose
 
-AI Task Router is a local-first, single-user decision helper that recommends the right AI helper, model tier, mode, or manual step for each stage of a task.
+AI Task Router is a guide that helps one person use AI more efficiently and with lower environmental impact, by staging the work and right-sizing the tool.
+
+It is local-first and single-user. It recommends a model tier, a mode, or a manual step for each stage of a task.
 
 It evaluates the user's available tools, source permissions, task details, sensitivity, privacy posture, cost preference, energy preference, and quality needs. It then produces lean, balanced, and premium route options with warnings, blocked routes, a staged project plan, a Decision Card, and a prompt package.
 
 The product promise for an individual user is simple: do not use one AI helper for everything. Frame the job, gather evidence, create, package, review, and act with the lightest safe helper for that stage, then upgrade only when the checks show the task needs stronger help.
+
+## What The Router Knows, And What It Does Not
+
+Tool selection is a teaching device, not a precision instrument. Owner decision, 2026-07-25T08:27:12-06:00, recorded in `docs/2026-07-25-audit-remediation-plan.md`.
+
+Capability data in `everydayToolCatalog.ts` is bucketed by plan class, not by vendor. Every account of the same class shares one capability vector, so a paid ChatGPT plan and a paid Claude plan score identically. The router recommends a tier and a shape of work. It cannot express "this provider is better for this task, that one for that", because it never encodes it, and no user-facing copy may imply otherwise.
+
+Claims that are earned and should be made:
+
+- staged prompt packages, so the user carries a plan into whichever tools they already have
+- sensitivity, privacy-posture, and source-permission gating that overrides scoring
+- right-sizing away from oversized models, which is the efficiency lesson the product exists to teach
+- local-first operation: no provider calls, no credentials, no execution, no data leaving the device
+
+Impact figures use one vocabulary, stated the same way here, in the README, in the manual, and in the app UI:
+
+> Dollar figures answer one question: if this work were metered per token at public API list prices, roughly what would it come to? A monthly subscription hides that number, which is why it is worth seeing. It is not your bill, not money you saved, and not a guarantee.
+
+Richer per-provider capability data remains a separate future decision, not part of the current queue.
 
 ## Product Boundary
 
