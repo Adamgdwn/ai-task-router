@@ -679,6 +679,37 @@ describe("route card generator", () => {
     expect(balanced?.apiEquivalentCostUsd).toBeCloseTo(stepTotal, 3);
   });
 
+  it("keeps the lean route lower on the two axes its style is named for", () => {
+    // The lean style is labelled "Lower energy and cost" in setup. Nothing held that label to the
+    // routes it produces, and the previous label ("Save time and cost") named an axis the lean policy
+    // weights *lower* than balanced does. A name the generated routes do not support teaches the
+    // wrong lesson, so it is asserted here rather than left to review.
+    const task = buildTask({
+      id: "task-card-lean-claim",
+      title: "Draft a public FAQ answer",
+      requestedSourceIds: ["web"],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "least-resource");
+
+    const card = generateRouteCard({
+      task,
+      models: routeReadyModels,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+    const lean = card.options.find((option) => option.strategy === "lean");
+    const premium = card.options.find((option) => option.strategy === "premium");
+
+    expectValidRouteCard(card);
+    expect(lean?.apiEquivalentCostUsd).toBeDefined();
+    expect(premium?.apiEquivalentCostUsd).toBeDefined();
+
+    expect(lean?.apiEquivalentCostUsd ?? 0).toBeLessThan(premium?.apiEquivalentCostUsd ?? 0);
+    expect(lean?.estimatedEnergyWh ?? 0).toBeLessThan(premium?.estimatedEnergyWh ?? 0);
+  });
+
   it("keeps human approval requirements visible on card and option records", () => {
     const task = buildTask({
       id: "task-card-public-facing",

@@ -1069,9 +1069,16 @@ function EmptySetupState({ label }: { label: string }) {
   return <p className="emptySetupState">{label}</p>;
 }
 
+/**
+ * A style's name has to be true to the weights it actually scores by, or it teaches the wrong lesson.
+ *
+ * `least-resource` weights cost and energy highest and speed *lower* than `balanced` does, and it
+ * leans on human review for anything risky. It was labelled "Save time and cost", which named the one
+ * thing it does not give you and omitted the one it is for.
+ */
 function friendlyPolicyLabel(policy: PolicyDefault) {
   if (policy.id === "least-resource") {
-    return "Save time and cost";
+    return "Lower energy and cost";
   }
 
   if (policy.id === "quality-first") {
@@ -1083,7 +1090,7 @@ function friendlyPolicyLabel(policy: PolicyDefault) {
 
 function friendlyPolicyDescription(policy: PolicyDefault) {
   if (policy.id === "least-resource") {
-    return "Prefer the simplest good-enough option and avoid extra effort.";
+    return "Prefer the simplest good-enough option. Expect to spend more of your own time checking the result.";
   }
 
   if (policy.id === "quality-first") {

@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.5.0
+Version: 1.6.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
 Next Review: When chunk R10 completes or the owner reprioritises
-Last Updated: 2026-07-25T10:01:49-06:00
-Status Updated: 2026-07-25T10:01:49-06:00
+Last Updated: 2026-07-25T10:31:44-06:00
+Status Updated: 2026-07-25T10:31:44-06:00
 
 ## Purpose
 
@@ -70,10 +70,11 @@ Close-out for each chunk:
 | R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
 | R10 | Reframe the product promise | not started | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
 | R11 | Price each step by the model it names | complete | Medium | Owner found Lean priced above Balanced. Cost was blind to which mode a step uses, so effort alone decided the number. |
+| R12 | Name the lean style by what it actually does | complete | Small | The lean style was labelled "Save time and cost". It weights speed lower than balanced does and leans on human review, so it promised the one axis it does not deliver. |
 
-Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → R10 → R5 → R7 → R6 → R9 → R8.
+Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → R10 → R5 → R7 → R6 → R9 → R8.
 
-R1, R2, R3, R4, and R11 were the user-visible correctness wins and are done. R11 was not in the original audit; the owner found it by reading R2's own output table and asking why Lean priced above Balanced. R10 is next: it carries the same reframe into the docs, and R2 has already established the in-app language it should match. R5 through R9 are hygiene and can be reordered freely.
+R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 is next: it carries the same reframe into the docs, and R2 has already established the in-app language it should match. R5 through R9 are hygiene and can be reordered freely.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -707,6 +708,52 @@ Not changed, deliberately:
 - The Gemini reasoning pass and Gemini premium benchmark still share an anchor because only two Gemini anchors are on file. Recorded as an anchor-set gap in the methodology rather than filled with an invented price.
 - No schema break. The three new step fields are optional, so route cards saved before today still parse under `.strict()`.
 
+---
+
+## Chunk R12 - Name The Lean Style By What It Actually Does
+
+Status: complete - 2026-07-25T10:31:44-06:00
+Budget class: Small
+
+Objective:
+
+Make the lean style's name and description true to the weights it scores by, so the option that carries the product's environmental point is not sold on a benefit it does not provide.
+
+User outcome:
+
+A user choosing a style sees what that style trades away, not only what it gives.
+
+Trigger:
+
+Not from the original audit. The owner recalled that the lean choice was described as saving time and money, and said it saves energy and money at the expense of time.
+
+Defect:
+
+The `least-resource` policy weights `cost` at 0.30 and `energy` at 0.25, its two highest, and weights `speed` at 0.15 - *lower* than `balanced` at 0.18. Its own catalog description reads "low cost, low energy use, and human review for risky output", and the route comparison screen already told users to choose it "if you want to test the lightest path first and are comfortable reviewing more yourself".
+
+It was labelled "Save time and cost". That named the one axis the policy de-prioritises, omitted energy entirely - the axis the product exists to teach - and contradicted the app's own route-level copy. The description, "Prefer the simplest good-enough option and avoid extra effort", reads as though it saves the *user* effort, when the lean route adds human review.
+
+Change:
+
+- `friendlyPolicyLabel` in `SetupScreens.tsx`: "Save time and cost" becomes "Lower energy and cost".
+- `friendlyPolicyDescription` in `SetupScreens.tsx`: the lean description now states the trade directly - "Prefer the simplest good-enough option. Expect to spend more of your own time checking the result."
+- Deleted `friendlyPolicyName` from `TaskRoutingScreens.tsx`. It was a second, unused copy of the same three labels, carrying the same wrong claim. Nothing referenced it.
+- Corrected the same claim in the Chunk 5 user outcome in `docs/2026-07-09-current-build-pathway.md`, which read "may save time, cost, or compute". Chunk 5 is paused, not complete, so this is a live objective rather than a historical record.
+- Added a test asserting the lean route is strictly below the premium route on both API-equivalent cost and estimated energy, so the label is held to the routes the engine actually generates.
+
+Acceptance Result:
+
+Pass, 2026-07-25T10:31:44-06:00.
+
+The lean route on the standard writing fixture is strictly below the premium route on both named axes, verified by assertion rather than by reading. The two duplicated label sets are now one.
+
+Not changed, deliberately:
+
+- No policy weights changed. The label was wrong about the policy; the policy was not wrong.
+- The `balanced` and `quality-first` labels and descriptions are untouched. Only the claim the owner identified was false.
+- `policyPlainLanguageSummary` for the lean style is unchanged. It already describes when to choose the style and makes no time claim.
+- `noUnusedLocals` is still off in `tsconfig`, which is why the dead second copy of the labels went unnoticed. Turning it on is a separate chunk with its own fallout to clear.
+
 ## Validation Log
 
 | Timestamp | Command | Result | Notes |
@@ -745,9 +792,17 @@ Not changed, deliberately:
 | 2026-07-25T10:01:49-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
 | 2026-07-25T10:01:49-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R11. |
 
+| 2026-07-25T10:31:44-06:00 | `npm run test` | pass | 14 files, 134 tests, after R12. Up from 133; 1 new test holding the lean label to the routes the engine generates. |
+| 2026-07-25T10:31:44-06:00 | `npx tsc --noEmit` | pass | Clean. |
+| 2026-07-25T10:31:44-06:00 | `npm run build` | pass | TypeScript and Vite build clean; existing large chunk warning remains. |
+| 2026-07-25T10:31:44-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. No E2E assertion referenced the changed label. |
+| 2026-07-25T10:31:44-06:00 | lean-versus-premium claim checked strictly, not with a tolerance | pass | Asserted with `toBeLessThan` rather than `toBeLessThanOrEqual` after confirming the two routes are not tied, so a lean route that stopped being lighter would fail. |
+| 2026-07-25T10:31:44-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
+| 2026-07-25T10:31:44-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R12. |
+
 ## Next Handoff
 
-R1, R2, R3, R4, and R11 are complete as of 2026-07-25T10:01:49-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has five chunks' worth of user-visible fixes waiting behind it.
+R1, R2, R3, R4, R11, and R12 are complete as of 2026-07-25T10:31:44-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has six chunks' worth of user-visible fixes waiting behind it.
 
 Next coder chunk is R10, the docs-side reframe. R2 has already set the in-app language, so R10's job is to make README, the product brief, and the manual say the same thing rather than invent new wording. The vocabulary to match: **"if you were paying per token"** for the API-equivalent figure, **"added to your bill"** for what a metered account is charged, and **no use of "saved", "savings", or "avoided" for money**. `docs/2026-07-05-impact-estimator-methodology.md` v0.6.0 has the full framing under "What A Dollar Figure Means" and is the source of truth for it.
 
@@ -757,6 +812,7 @@ Notes for whoever picks up the next code chunk:
 - Prompt and export text names tools by `modeLabel`; reuse `toolLabelForRouteStep` in `promptPackageGenerator.ts` rather than reaching for `step.modelId` in any user-facing string.
 - Any new dollar figure must come from `apiEquivalentCostUsd` or `estimatedCostUsd`, never from the five deprecated savings fields still accepted by `routeOptionSchema`. Those exist only so pre-2026-07-25 route cards keep parsing; R5 or a later migration chunk can drop them once a store migration exists.
 - `accountIsMeteredPerUse` in `modelGuidance.ts` is the predicate for "does this add to the bill". Do not use the routing layer's `zeroMarginalCost` for that question — it carries a scoring bonus and only covers free tiers.
+- User-facing style labels live once, in `friendlyPolicyLabel` in `SetupScreens.tsx`. A label must be true to the scoring weights in `defaultPolicies.ts`; if the two disagree, that is a defect in one of them, not a wording preference.
 - `modeEstimateProfile` in `toolModeCatalog.ts` is the only place a mode's pricing anchor, energy anchor, or energy profile may be decided. Do not re-derive any of the three anywhere else; that duplication is exactly what R11 removed, and the two copies had already drifted by 5x on a Claude execution step.
 - Anchors describe the model class a mode names, not the plan tier it is reached through. If a future chunk needs finer price resolution, add a reviewed anchor with its source; do not invent a value to fill a gap. The Gemini benchmark understatement is a known open gap of this kind.
 

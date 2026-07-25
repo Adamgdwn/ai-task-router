@@ -1310,22 +1310,6 @@ function optionLabel(value: string) {
     .join(" ");
 }
 
-function friendlyPolicyName(policyId: string, fallbackLabel: string) {
-  if (policyId === "least-resource") {
-    return "Save time and cost";
-  }
-
-  if (policyId === "quality-first") {
-    return "Best quality when it matters";
-  }
-
-  if (policyId === "balanced") {
-    return "Balanced for everyday work";
-  }
-
-  return fallbackLabel;
-}
-
 function fitLabel(score: number) {
   if (score >= 90) {
     return "Strong fit";
