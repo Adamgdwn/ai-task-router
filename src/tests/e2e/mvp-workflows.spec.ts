@@ -156,7 +156,7 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await page.getByRole("button", { name: "Show me my best options" }).click();
 
   await expect(page.getByRole("heading", { name: "Best Options", level: 2 })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "What this route can save" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What this route costs to run" })).toBeVisible();
   await expect(page.locator("dt").filter({ hasText: "100k-token example" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Suggested AI toolkit" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Build the drafting prompt" })).toBeVisible();
@@ -180,9 +180,14 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByRole("heading", { name: "Lean route", level: 4 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Balanced route", level: 4 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Premium route", level: 4 })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Cost and savings" })).toHaveCount(3);
-  await expect(page.getByText("Estimated energy")).toHaveCount(3);
-  await expect(page.getByText("Energy saved")).toHaveCount(3);
+  await expect(page.getByRole("heading", { name: "Cost and energy" })).toHaveCount(3);
+  await expect(page.getByText("Estimated energy", { exact: true })).toHaveCount(3);
+  await expect(page.locator("dt").filter({ hasText: "If you paid per token" })).toHaveCount(6);
+  await expect(page.locator("dt").filter({ hasText: "Added to your bill" })).toHaveCount(6);
+  await expect(page.locator("dt").filter({ hasText: "Energy compared with" })).toHaveCount(3);
+  await expect(page.getByText("Estimated savings")).toHaveCount(0);
+  await expect(page.getByText("Energy saved")).toHaveCount(0);
+  await expect(page.getByText("Est. saved")).toHaveCount(0);
   await expect(page.getByText(/Human approval is required before using public-facing/)).toBeVisible();
   await expectNoHorizontalOverflow(page);
 

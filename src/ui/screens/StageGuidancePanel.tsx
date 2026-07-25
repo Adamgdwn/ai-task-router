@@ -125,7 +125,7 @@ function StageGuidanceItem({
                     </div>
                   ) : null}
                   <div>
-                    <dt>Estimate</dt>
+                    <dt>If metered</dt>
                     <dd>{workItemEstimateLabel(item)}</dd>
                   </div>
                   {item.selectionReasons[0] ? (
@@ -181,18 +181,18 @@ function workRoleLabel(workRole: ProjectStageGuidance["workItems"][number]["work
 }
 
 function workItemEstimateLabel(item: ProjectStageGuidance["workItems"][number]) {
-  const cost = item.estimatedCostUsd === undefined ? null : formatUsd(item.estimatedCostUsd);
+  const cost = item.estimatedCostUsd === undefined ? null : `about ${formatUsd(item.estimatedCostUsd)}`;
   const energy = item.estimatedEnergyWh === undefined ? null : `${formatNumber(item.estimatedEnergyWh)} Wh`;
 
   if (!cost && !energy) {
-    return "No extra estimate";
+    return "No estimate";
   }
 
   if (cost && energy) {
     return `${cost}; ${energy}`;
   }
 
-  return cost ?? energy ?? "No extra estimate";
+  return cost ?? energy ?? "No estimate";
 }
 
 function formatUsd(value: number) {

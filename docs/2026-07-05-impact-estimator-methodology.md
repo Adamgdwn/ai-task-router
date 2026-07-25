@@ -1,15 +1,15 @@
 # 2026-07-08T22:07:13-06:00 - AI Task Router Impact Estimator Methodology
 
 Document ID: GUI-ENG-002
-Version: 0.4.0
+Version: 0.5.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-05
-Last Reviewed: 2026-07-08
+Last Reviewed: 2026-07-25
 Next Review: Before source refresh, exact public savings claims, social launch copy, live pricing tables, or opt-in estimator release
 Timestamp: 2026-07-08T22:07:13-06:00
-Last Updated: 2026-07-09T11:06:44-06:00
+Last Updated: 2026-07-25T09:40:19-06:00
 
 ## Purpose
 
@@ -18,6 +18,27 @@ This document explains how AI Task Router frames right-sized help and cautious i
 The product promise is not "always use the cheapest model." The product promise is that an individual user can break a task into stages, choose the lightest safe helper for each stage, and upgrade only when the work actually earns stronger help.
 
 Impact estimates are secondary. They explain why right-sized routing may reduce paid-tool waste, retries, and unnecessary heavyweight compute. They are local decision-support scenarios, not provider billing records, live pricing tables, telemetry, environmental proof, or guaranteed savings.
+
+## What A Dollar Figure Means
+
+Decided by the owner on 2026-07-25 and shipped in chunk R2 of the audit remediation plan.
+
+Every dollar figure in the app answers one question: **if this work were metered per token at public API list prices, roughly what would it come to?** It is never presented as money the user saved.
+
+The app reports two figures per route:
+
+- **API-equivalent cost.** What the route's steps would cost at reviewed public API list prices for a 100k-token run, scaled by role, **including steps a plan the user already pays for would cover.** A monthly subscription hides what a single task consumes; making that visible is the teaching point.
+- **Added to your bill.** What the route adds to a real bill, which is zero unless the account is metered per use. Free tiers and flat monthly plans are already paid for, so one more task on them costs nothing extra.
+
+The gap between the two is the lesson, not a saving.
+
+There is no premium baseline. Before 2026-07-25 the app compared every route against a premium API anchor the user was never going to buy, so a fresh install doing the work by hand was told it had saved $1.125 and 21.366 Wh. That baseline is gone. The comparison the app now offers is between the routes on the user's own screen, computed at display time from the sibling options, because those are the only routes the user can actually choose between.
+
+Precision is capped at two significant figures. The estimates come from hand-tuned role and mode multipliers over public anchors; `$0.051` is as much precision as that method earns, and `$0.0512` was overstating it.
+
+The lifetime counter totals the API-equivalent estimate and energy of the routes the user actually followed. It no longer accumulates dollars from a fixed illustrative scenario. Followed routes saved before per-token estimates existed are counted separately and excluded from the totals rather than being credited with an invented figure.
+
+The illustrative scenarios on the impact panel (100k-token example, right-sizing example, energy example) stay, and are labelled as examples that are not the user's own usage.
 
 ## Current Status
 
@@ -104,12 +125,12 @@ The app may show qualitative or scenario-based impact only when assumptions, sou
 
 Accepted routes are local records of the route the user chose to follow. The saved-choice count is useful as a behavior signal: it says the user accepted a route and saved its prompts or handoff on this device.
 
-Avoided-cost and energy numbers are different. They should appear only when the selected route has enough reviewed scenario data to calculate a comparison. If the app cannot calculate a meaningful estimate, it should prefer clear unavailable or not-estimated language over implying that the accepted route avoided exactly zero cost or zero watt hours.
+Per-token cost and energy numbers are different. They appear only when the followed route carries its own estimate. A followed route with no estimate is counted in a separate `plansWithoutEstimateCount` and shown to the user as such, so the totals are never quietly padded to look larger than the evidence.
 
 This distinction keeps the product honest:
 
 - tracked choice count = local user action
-- avoided cost or energy = scenario estimate from visible assumptions
+- API-equivalent cost or energy = scenario estimate from visible assumptions
 - actual provider bill, energy, water, or carbon result = not known by the app
 
 ## Cost Formula
@@ -236,7 +257,7 @@ Near-term product:
 - keep the app focused on right-helper-by-stage guidance
 - keep cost and energy impact qualitative or clearly scenario-based
 - keep Decision Cards and prompt packages manual-use only
-- do not show exact user savings unless the user enters assumptions
+- never present any figure as money the user saved; every dollar figure is an API-equivalent per-token estimate
 - do not connect provider accounts, import usage history, or fetch live pricing
 
 Future opt-in estimator:
@@ -258,6 +279,7 @@ Future opt-in estimator:
 | 2026-07-05T09:01:13-06:00 | `bash scripts/governance-preflight.sh`; `git diff --check` | passed | Governance preflight reported 0 warnings; whitespace check reported only normal Windows LF-to-CRLF notices. |
 | 2026-07-05T09:30:02-06:00 | `npm run test -- impactEstimator`; `npm run test -- App` | passed | Focused D16 tests passed: impact suite 1 file and 7 tests; App suite 1 file and 14 tests. |
 | 2026-07-05T09:30:21-06:00 | `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test` | passed with existing build warning | Full Vitest passed 13 files and 95 tests; production build passed with existing Vite chunk-size warning; web RC scan passed; local Playwright passed 6 Chromium tests. |
+| 2026-07-25T09:40:19-06:00 | Chunk R2 rewrite of the impact framing | passed | Removed the premium-API baseline and all savings fields; added the API-equivalent per-token figure beside the billed figure; capped display precision at two significant figures; rebuilt the lifetime counter on followed-route estimates. Doc updated in the same task. |
 | 2026-07-05T09:34:16-06:00 | Local visual smoke and hosted production smoke | passed | Desktop/mobile preview checks had no horizontal overflow; source details opened cleanly on mobile; Cloudflare production deployment and hosted Playwright/Chromium impact smoke passed. |
 
 ## Handoff

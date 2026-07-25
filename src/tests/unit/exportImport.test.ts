@@ -76,6 +76,14 @@ describe("export and import utilities", () => {
     expect(routeCardMarkdown).toContain("### 1. Balanced route");
     expect(routeCardMarkdown).toContain("- Tool or mode: build mode");
     expect(routeCardMarkdown).not.toContain("local-export-model");
+
+    // Dollar figures are per-token estimates, rounded to the precision the method earns, and no
+    // exported line credits the user with a saving. See chunk R2 in the audit remediation plan.
+    // Currency symbol follows the runtime locale, so assert the rounded figure rather than "$".
+    expect(routeCardMarkdown).toMatch(/- If you paid per token: about \D*0\.051$/m);
+    expect(routeCardMarkdown).toContain("- Added to your bill: $0.00 (covered by tools you already have)");
+    expect(routeCardMarkdown).toContain("- Estimated energy: about 12 Wh per use");
+    expect(routeCardMarkdown).not.toMatch(/saved|savings|avoided/i);
     expect(routeCardMarkdown).toContain("## Prompt package: Export fixture");
     expect(routeCardMarkdown).toContain("Use this local prompt fixture manually.");
     expect(routeCardMarkdown).toContain("None.");
@@ -288,6 +296,9 @@ function buildRouteCard(): RouteCard {
         score: 88,
         estimatedCostLevel: "medium",
         estimatedEffortLevel: "medium",
+        estimatedCostUsd: 0,
+        apiEquivalentCostUsd: 0.0512,
+        estimatedEnergyWh: 11.619,
         steps: [
           {
             id: "route-export-fixture-balanced-step",

@@ -479,13 +479,20 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
     `- Score: ${option.score}/100`,
     `- Cost: ${option.estimatedCostLevel}`,
     `- Effort: ${option.estimatedEffortLevel}`,
-    ...(option.estimatedCostUsd !== undefined ? [`- Estimated API-equivalent cost: ${formatUsd(option.estimatedCostUsd)}`] : []),
-    ...(option.estimatedSavingsUsd !== undefined && option.estimatedSavingsPercent !== undefined
+    ...(option.apiEquivalentCostUsd !== undefined
+      ? [`- If you paid per token: about ${formatUsd(option.apiEquivalentCostUsd)}`]
+      : []),
+    ...(option.estimatedCostUsd !== undefined
       ? [
-          `- Estimated savings: ${formatUsd(option.estimatedSavingsUsd)} (${option.estimatedSavingsPercent}%) vs ${
-            option.savingsComparedWith ?? "the heavier route"
+          `- Added to your bill: ${
+            option.estimatedCostUsd === 0
+              ? "$0.00 (covered by tools you already have)"
+              : `about ${formatUsd(option.estimatedCostUsd)}`
           }`,
         ]
+      : []),
+    ...(option.estimatedEnergyWh !== undefined
+      ? [`- Estimated energy: about ${formatWattHours(option.estimatedEnergyWh)} per use`]
       : []),
     ...(option.costEstimateBasis ? [`- Estimate basis: ${option.costEstimateBasis}`] : []),
     "",
@@ -507,15 +514,32 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
   ];
 }
 
+// Two significant figures; the underlying multipliers do not earn any more precision than that.
+function toSignificantFigures(value: number, figures: number) {
+  if (!Number.isFinite(value) || value === 0) {
+    return 0;
+  }
+
+  return Number(value.toPrecision(figures));
+}
+
 function formatUsd(value: number) {
-  const minimumFractionDigits = value > 0 && value < 0.1 ? 3 : 2;
+  const rounded = toSignificantFigures(value, 2);
 
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits,
-    maximumFractionDigits: 3,
-  }).format(value);
+    minimumFractionDigits: 2,
+    maximumFractionDigits: Math.abs(rounded) > 0 && Math.abs(rounded) < 0.1 ? 3 : 2,
+  }).format(rounded);
+}
+
+function formatWattHours(value: number) {
+  const rounded = toSignificantFigures(value, 2);
+  const absValue = Math.abs(rounded);
+  const maximumFractionDigits = absValue >= 10 ? 0 : absValue >= 1 ? 1 : 3;
+
+  return `${new Intl.NumberFormat(undefined, { maximumFractionDigits }).format(rounded)} Wh`;
 }
 
 function stageGuidanceMarkdown(routeCard: RouteCard): string {

@@ -133,11 +133,14 @@ describe("route card generator", () => {
     expect(card.options.map((option) => option.strategy)).toEqual(["lean", "balanced", "premium"]);
     expect(card.options.map((option) => option.id)).toEqual(scoringResult.scoredCandidates.map((candidate) => candidate.id));
     expect(card.options.every((option) => option.estimatedCostUsd !== undefined)).toBe(true);
-    expect(card.options.every((option) => option.estimatedSavingsUsd !== undefined)).toBe(true);
-    expect(card.options.every((option) => option.costEstimateBasis?.includes("100k-token API-equivalent"))).toBe(true);
+    expect(card.options.every((option) => option.apiEquivalentCostUsd !== undefined)).toBe(true);
+    expect(card.options.every((option) => option.costEstimateBasis?.includes("prices a 100k-token run"))).toBe(true);
     expect(card.options.every((option) => option.estimatedEnergyWh !== undefined)).toBe(true);
     expect(card.options.every((option) => (option.estimatedEnergyWh ?? 0) > 0)).toBe(true);
-    expect(card.options.every((option) => option.estimatedEnergySavingsWh !== undefined)).toBe(true);
+    // No route may claim the user saved money. See the R2 chunk in the audit remediation plan.
+    expect(card.options.every((option) => option.estimatedSavingsUsd === undefined)).toBe(true);
+    expect(card.options.every((option) => option.estimatedEnergySavingsWh === undefined)).toBe(true);
+    expect(card.options.every((option) => option.savingsComparedWith === undefined)).toBe(true);
     expect(card.options.every((option) => option.energyEstimateBasis?.includes("compute-energy estimate"))).toBe(true);
     expect(card.options.find((option) => option.id === card.recommendedOptionId)?.score).toBe(
       scoringResult.recommendedCandidate?.score,
@@ -559,7 +562,7 @@ describe("route card generator", () => {
     expect(card.stageGuidance.map((stage) => stage.stage)).toContain("act");
   });
 
-  it("keeps a free research lean route at zero dollars while energy remains nonzero", () => {
+  it("bills a flat-plan user nothing while still showing what each route would cost per token", () => {
     const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
     if (!manualReviewModel) {
       throw new Error("Manual review model is required for this test.");
@@ -604,11 +607,19 @@ describe("route card generator", () => {
     const premium = card.options.find((option) => option.strategy === "premium");
 
     expectValidRouteCard(card);
+
+    // ChatGPT Go and Perplexity free are both flat-rate, so no route adds anything to the bill.
     expect(lean?.estimatedCostUsd).toBe(0);
+    expect(balanced?.estimatedCostUsd).toBe(0);
+    expect(premium?.estimatedCostUsd).toBe(0);
+
+    // The per-token figure is the point: a plan the user already pays for still consumes compute,
+    // and the heavier route consumes more of it.
+    expect(premium?.apiEquivalentCostUsd).toBeGreaterThan(balanced?.apiEquivalentCostUsd ?? 0);
+    expect(balanced?.apiEquivalentCostUsd).toBeGreaterThan(0);
+
     expect(lean?.estimatedEnergyWh).toBeGreaterThan(0);
-    expect(balanced?.estimatedCostUsd).toBeGreaterThan(lean?.estimatedCostUsd ?? 0);
     expect(balanced?.estimatedEnergyWh).toBeGreaterThan(lean?.estimatedEnergyWh ?? 0);
-    expect(premium?.estimatedCostUsd).toBeGreaterThan(balanced?.estimatedCostUsd ?? 0);
     expect(premium?.estimatedEnergyWh).toBeGreaterThan(balanced?.estimatedEnergyWh ?? 0);
   });
 

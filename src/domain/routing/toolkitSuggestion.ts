@@ -17,7 +17,7 @@ export type SuggestedToolkitItem = {
   alreadySelected: boolean;
   localOnly: boolean;
   reason: string;
-  savingsAngle: string;
+  impactAngle: string;
 };
 
 export type SuggestedToolkit = {
@@ -101,7 +101,7 @@ function toolkitCandidatesForProvider(
         alreadySelected: selectedProviderIds.has(provider.id),
         localOnly,
         reason: toolkitReason(provider, accountOption, task),
-        savingsAngle: toolkitSavingsAngle(accountOption, localOnly, paid),
+        impactAngle: toolkitImpactAngle(accountOption, localOnly, paid),
       };
     });
 }
@@ -307,9 +307,9 @@ function toolkitReason(
   return accountOption.note;
 }
 
-function toolkitSavingsAngle(accountOption: EverydayToolAccountOption, localOnly: boolean, paid: boolean) {
+function toolkitImpactAngle(accountOption: EverydayToolAccountOption, localOnly: boolean, paid: boolean) {
   if (localOnly) {
-    return "Potentially saves provider spend and protects sensitive context, with more setup effort.";
+    return "Keeps sensitive context on your own machine and off provider servers, with more setup effort.";
   }
 
   if (!paid) {
@@ -317,10 +317,10 @@ function toolkitSavingsAngle(accountOption: EverydayToolAccountOption, localOnly
   }
 
   if (accountOption.tier === "frontier") {
-    return "Reserve for quality, risk, or rework savings when simpler tools are not enough.";
+    return "Reserve for quality, risk, or repeat-work reasons when simpler tools are not enough.";
   }
 
-  return "Use when modest paid capacity saves time compared with repeated free-tool attempts.";
+  return "Use when modest paid capacity beats repeated free-tool attempts on your own time.";
 }
 
 function toolkitSummary(

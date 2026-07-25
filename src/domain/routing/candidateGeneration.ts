@@ -510,7 +510,7 @@ function roleInstruction(input: {
     case "build-slice":
       return `Run the approved master prompt in ${mode.displayLabel} to produce the first usable build slice for ${deliverableSummary}. Include data flow, files or screens, acceptance checks, deferred features, and what to do if the first pass fails. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
     case "artifact-package":
-      return `Use ${mode.displayLabel} to package the reviewed result as ${task.outputType}. Keep sources limited to (${sourceText}) and keep warnings, checks, savings, and next action visible. ${reasonText}`;
+      return `Use ${mode.displayLabel} to package the reviewed result as ${task.outputType}. Keep sources limited to (${sourceText}) and keep warnings, checks, impact notes, and next action visible. ${reasonText}`;
     case "quality-review":
       return `Use ${mode.displayLabel} to check the result against the original task, promised deliverables, privacy limits, and acceptance checks. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
     case "next-action":
@@ -685,7 +685,7 @@ function buildPrimaryStep(input: {
     label: `${modelLabelWithMinimumForTask(model, task)}: ${primaryActionLabel(task, kind, usesPremiumBenchmark)}`,
     instruction: `${usesPremiumBenchmark ? "Premium comparison route: if you choose this path, use the strongest paid or premium mode you actually have access to; otherwise treat it as a cost and effort benchmark. " : ""}Use ${model.label} manually outside the app in two passes: first create the master prompt with the prompt-building mode, then run that prompt with the execution mode. The result must cover ${requestedDeliverableSummary(
       task,
-    )}. ${taskHasBuildIntent(task) ? "For build-shaped work, include the first usable slice, data flow, acceptance checks, and what can wait. " : ""}${taskHasModelSelectionIntent(task) ? "Name the minimum execution model or mode and the upgrade trigger. " : ""}Call out savings or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidanceForTask(
+    )}. ${taskHasBuildIntent(task) ? "For build-shaped work, include the first usable slice, data flow, acceptance checks, and what can wait. " : ""}${taskHasModelSelectionIntent(task) ? "Name the minimum execution model or mode and the upgrade trigger. " : ""}Call out lower-impact or upgrade points for this ${task.knowledgeWorkType} task from allowed source IDs (${sourceText}). ${modelInstructionGuidanceForTask(
       model,
       task,
     )} The app does not send task data to the model.`,

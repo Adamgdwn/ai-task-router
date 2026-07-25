@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.3.0
+Version: 1.4.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
-Next Review: When chunk R2 completes or the owner reprioritises
-Last Updated: 2026-07-25T09:08:00-06:00
-Status Updated: 2026-07-25T09:08:00-06:00
+Next Review: When chunk R10 completes or the owner reprioritises
+Last Updated: 2026-07-25T09:40:19-06:00
+Status Updated: 2026-07-25T09:40:19-06:00
 
 ## Purpose
 
@@ -60,7 +60,7 @@ Close-out for each chunk:
 |---:|---|---|---|---|
 | R0 | Deploy current `main` | blocked - operator | Small | The fixes already written are not in front of users. |
 | R1 | Artifacts follow the chosen route | complete | Medium | Correctness: the saved card currently documents a different plan than the user accepted. |
-| R2 | Honest impact numbers | not started - decision recorded | Medium | Credibility: the app currently credits users with savings they did not make. |
+| R2 | Honest impact numbers | complete | Medium | Credibility: the app currently credits users with savings they did not make. |
 | R3 | First-run honesty | complete | Small | A new user with no tools gets a confident answer built on an empty inventory. |
 | R4 | Clean the copied prompt text | complete | Small | Internal IDs appear in the product's flagship deliverable. |
 | R5 | Dead code and lint feedback loop | not started | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
@@ -70,9 +70,9 @@ Close-out for each chunk:
 | R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
 | R10 | Reframe the product promise | not started | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
 
-Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → R2 → R10 → R5 → R7 → R6 → R9 → R8.
+Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → R10 → R5 → R7 → R6 → R9 → R8.
 
-R1, R3, and R4 were the user-visible correctness wins and are done. R2 is the most valuable remaining chunk, and its owner decision is recorded below, so it is ready to start. R10 lands directly after R2 because both change user-facing copy about impact. R5 through R9 are hygiene and can be reordered freely.
+R1, R2, R3, and R4 were the user-visible correctness wins and are done. R10 is next: it carries the same reframe into the docs, and R2 has already established the in-app language it should match. R5 through R9 are hygiene and can be reordered freely.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -164,7 +164,7 @@ Tests added: `routeCardGenerator.test.ts` covers rebuild-follows-selection and r
 
 ## Chunk R2 - Honest Impact Numbers
 
-Status: not started - owner decision recorded, ready to start
+Status: complete - 2026-07-25T09:40:19-06:00
 Budget class: Medium
 
 Owner decision, 2026-07-25T08:27:12-06:00: option (1), with the comparison number kept and reframed. Every cost figure is presented as an API-equivalent per-token estimate — "if you were paying per token, this route would cost about X" — never as money the user saved. Subscriptions mask real per-task cost, and making that hidden cost visible is the teaching point. Options (2) and (3) are not taken.
@@ -224,6 +224,30 @@ Validation:
 Stop condition:
 
 Stop at honest numbers and matching docs. Do not build a new estimator surface — that is the paused Chunk 5 in the active pathway.
+
+Acceptance Result, 2026-07-25T09:40:19-06:00: met.
+
+Two figures replaced the savings machinery. `apiEquivalentCostUsd` is what the route's steps would cost at reviewed public API list prices for a 100k-token run, **including steps a plan the user already pays for covers**. `estimatedCostUsd` keeps its meaning of what actually lands on the bill. The gap between them is the lesson the owner asked for, and it needed no new comparison field.
+
+- The premium baseline is gone. `attachRouteEconomics` no longer computes a shared baseline, no longer floors the premium route at the `openai-premium-text-anchor` figure, and no longer writes `estimatedSavingsUsd`, `estimatedSavingsPercent`, `savingsComparedWith`, `estimatedEnergySavingsWh`, or `estimatedEnergySavingsPercent`. The premium floor went with it: fabricating a number to preserve an expected ordering is the same dishonesty in a smaller place. Premium now prices at whatever its own anchors say, which on the standard fixture is about $2.20 rather than the floored $1.125.
+- Verified against real generated output before settling the copy. A ChatGPT Plus / Claude Max user now sees lean about $0.06, balanced about $0.05, premium about $2.20, all with **$0.00 added to the bill**. A fresh install with only manual review sees $0.00 / $0.00 / 0.048 Wh. The old build told that same fresh install it had saved $1.125 and 21.366 Wh.
+- Subscription coverage got its own predicate. `accountIsMeteredPerUse` in `modelGuidance.ts` treats only pay-as-you-go and API accounts as adding to the bill; flat consumer plans and free tiers do not. The routing layer's existing `zeroMarginalCost` was left untouched on purpose — it carries a +9 scoring bonus, and widening it would have changed which tools get recommended, which is outside this chunk. This predicate changes only what the user is told they will pay.
+- `modeEstimateAnchorsForRouteStep` no longer folds `zeroMarginalCost` into `pricingAnchorId`. The anchor prices the work; the flag says whether a plan covers it. Conflating them was why a subscription route reported no cost at all rather than a covered one.
+- Precision capped at two significant figures in every formatter (routing screen, impact panel, export). `$0.0512` became `$0.051` and `11.619 Wh` became `12 Wh`. Stored values keep full precision so totals still sum correctly; the rounding is at display only.
+- The lifetime counter was rebuilt. `buildTrackedImpactSummary` no longer takes a `PublicImpactSnapshot` and no longer derives dollars from a fixed illustrative scenario. It totals the followed routes' own estimates, and counts followed routes that carry no estimate in a separate `plansWithoutEstimateCount` that the UI surfaces, so old records cannot silently pad the total.
+- The route comparison moved to display time. `heaviestSiblingRoute` in `TaskRoutingScreens.tsx` reads the other options on screen, which are the only routes the user can actually choose between. Nothing about a comparison is stored on the option any more.
+- No schema-breaking change. `apiEquivalentCostUsd` was added as optional; the five savings fields remain accepted by `routeOptionSchema` with a dated deprecation comment so route cards saved before today still parse under `.strict()`. Nothing writes or reads them.
+
+Declared extensions beyond the chunk's Context Load, each the same defect on an adjacent line:
+
+- Stage guidance per-work-item cost now uses the API-equivalent figure (`stageGuidance.ts`), and `StageGuidancePanel.tsx` labels it "If metered". Leaving it on the billed figure would have shown $0.00 per item beside a route saying "about $0.42".
+- The exported Markdown replaced "Estimated savings ... vs ..." with the two per-token lines plus energy.
+- Prospective savings language in generated prompt and stage text was reworded to impact language (`promptPackageGenerator.ts`, `candidateGeneration.ts`, `stageGuidance.ts`), because the prompt package is a saved record and told the external model to write savings claims.
+- `SuggestedToolkitItem.savingsAngle` was renamed to `impactAngle` and its copy reworded; a field name that asserts a saving was the thing this chunk set out to remove.
+
+Not changed, deliberately: the "cost, savings, or energy comparison" deliverable label in `taskDecomposition.ts` names something the *user* asked for, not a claim the app makes, and the regex behind it must keep matching users who type "savings". `estimatedCostLevel` and `estimatedEffortLevel` are unchanged — they are qualitative and were never dishonest. Scoring, tie-breaking, and recommendation are untouched.
+
+Tests: one existing test was asserting the old ordering of billed costs across strategies and now asserts that a flat-plan user is billed nothing on every route while the per-token figure still rises; a new counter test proves a followed route with no estimate is set aside rather than credited with an invented figure; `App.test.tsx` and `exportImport.test.ts` gained assertions that no surface says "savings" or "avoided"; the E2E copy assertions were updated in the same pass.
 
 ---
 
@@ -644,11 +668,25 @@ The reframe is the recorded decision above. Do not start engine work under any c
 | 2026-07-25T09:08:00-06:00 | generated prompt text read end to end, sourced and source-free tasks | pass | Confirmed the reworded tool-use and source-use lines read as plain instructions, not as a malfunction. Throwaway harness deleted, not committed. |
 | 2026-07-25T09:08:00-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
 | 2026-07-25T09:08:00-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R4. |
+| 2026-07-25T09:40:19-06:00 | `npm run test` | pass | 14 files, 130 tests, after R2. Up from 129; 1 new counter test, plus strengthened assertions across `routeCardGenerator`, `App`, `exportImport`, and `impactEstimator`. |
+| 2026-07-25T09:40:19-06:00 | `npx tsc --noEmit` | pass | Clean. |
+| 2026-07-25T09:40:19-06:00 | `npm run build` | pass | TypeScript and Vite build clean; existing large chunk warning remains. |
+| 2026-07-25T09:40:19-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. The `Cost and savings`, `Energy saved`, and `What this route can save` assertions were updated to the new copy, and `Estimated savings` / `Energy saved` / `Est. saved` are now asserted absent. |
+| 2026-07-25T09:40:19-06:00 | route economics read end to end, subscription and fresh-install inventories | pass | ChatGPT Plus / Claude Max: about $0.06 / $0.05 / $2.20 per token, $0.00 billed on all three. Fresh install, manual only: $0.00 and 0.048 Wh with no saving claimed. Throwaway harness deleted, not committed. |
+| 2026-07-25T09:40:19-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
+| 2026-07-25T09:40:19-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R2. |
 
 ## Next Handoff
 
-R1, R3, and R4 are complete as of 2026-07-25T09:08:00-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has more worth deploying.
+R1, R2, R3, and R4 are complete as of 2026-07-25T09:40:19-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has four chunks' worth of user-visible fixes waiting behind it.
 
-Next coder chunk is R2, then R10 directly after it, since both change user-facing copy about impact. Notes for whoever picks up R2: `noToolsConfiguredMessage` is exported from `hardGates.ts` if another surface needs to match on it, and prompt/export text now names tools by `modeLabel` rather than model ID — reuse `toolLabelForRouteStep` in `promptPackageGenerator.ts` rather than reaching for `step.modelId` in any new user-facing string.
+Next coder chunk is R10, the docs-side reframe. R2 has already set the in-app language, so R10's job is to make README, the product brief, and the manual say the same thing rather than invent new wording. The vocabulary to match: **"if you were paying per token"** for the API-equivalent figure, **"added to your bill"** for what a metered account is charged, and **no use of "saved", "savings", or "avoided" for money**. `docs/2026-07-05-impact-estimator-methodology.md` v0.5.0 has the full framing under "What A Dollar Figure Means" and is the source of truth for it.
 
-Both owner decisions are recorded and no chunk is waiting on input. R2 remains unblocked: present every cost figure as an API-equivalent per-token estimate, never as a saving. R10 carries the reframe into the docs. The whole queue serves one goal — teach people to make more efficient, lower-impact AI decisions, without adding friction.
+Notes for whoever picks up the next code chunk:
+
+- `noToolsConfiguredMessage` is exported from `hardGates.ts` if another surface needs to match on it.
+- Prompt and export text names tools by `modeLabel`; reuse `toolLabelForRouteStep` in `promptPackageGenerator.ts` rather than reaching for `step.modelId` in any user-facing string.
+- Any new dollar figure must come from `apiEquivalentCostUsd` or `estimatedCostUsd`, never from the five deprecated savings fields still accepted by `routeOptionSchema`. Those exist only so pre-2026-07-25 route cards keep parsing; R5 or a later migration chunk can drop them once a store migration exists.
+- `accountIsMeteredPerUse` in `modelGuidance.ts` is the predicate for "does this add to the bill". Do not use the routing layer's `zeroMarginalCost` for that question — it carries a scoring bonus and only covers free tiers.
+
+Both owner decisions are recorded and no chunk is waiting on input. The whole queue serves one goal — teach people to make more efficient, lower-impact AI decisions, without adding friction.

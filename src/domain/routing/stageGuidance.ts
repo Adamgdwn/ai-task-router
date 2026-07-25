@@ -7,7 +7,7 @@ import type {
   TaskIntake,
   WorkRole,
 } from "../types";
-import { estimateRouteStepCostUsd, estimateRouteStepEnergyWh } from "./routeEconomics";
+import { estimateRouteStepApiEquivalentCostUsd, estimateRouteStepEnergyWh } from "./routeEconomics";
 import {
   modelLabelForExecutionForTask,
   modelLabelForPromptDesignForTask,
@@ -278,7 +278,8 @@ function buildStageWorkItems(input: {
   const { task, decomposition, stage, workRole, routeStep, modelById, manualReviewModel, fallbackModelLabel } = input;
   const deliverables = deliverablesForStageRole(decomposition, workRole);
   const targets = targetDeliverableGroups(task, workRole, deliverables);
-  const estimatedCostUsd = routeStep ? estimateRouteStepCostUsd(routeStep, modelById) : undefined;
+  // Per-token, not per-bill, so a work item reads the same way as the route it belongs to.
+  const estimatedCostUsd = routeStep ? estimateRouteStepApiEquivalentCostUsd(routeStep, modelById) : undefined;
   const estimatedEnergyWh = routeStep ? estimateRouteStepEnergyWh(routeStep, modelById) : undefined;
   const perItemCost = estimatedCostUsd !== undefined ? estimatedCostUsd / targets.length : undefined;
   const perItemEnergy = estimatedEnergyWh !== undefined ? estimatedEnergyWh / targets.length : undefined;
@@ -427,7 +428,7 @@ function reviewChecksForWorkItem(
         taskHasBuildIntent(task) ? "The first slice is small enough to review before adding features." : "The first result is ready for review.",
       ];
     case "artifact-package":
-      return ["The package keeps warnings, checks, savings, and next action visible."];
+      return ["The package keeps warnings, checks, impact notes, and next action visible."];
     case "quality-review":
       return ["Every requested deliverable is present or explicitly marked as missing.", "Privacy and sensitivity limits are still respected."];
     case "next-action":
@@ -854,7 +855,7 @@ function packageStageChecks(task: TaskIntake) {
 
   if (needsFullBuildPlan(task)) {
     return [
-      "The output includes the master prompt, execution model choice, build sequence, checks, privacy limits, and savings comparison.",
+      "The output includes the master prompt, execution model choice, build sequence, checks, privacy limits, and impact comparison.",
       "The first build slice is small enough to start without trying to build the whole product at once.",
     ];
   }
@@ -989,7 +990,7 @@ function actStageActions(task: TaskIntake) {
     return [
       "Choose one first build action, such as the spreadsheet import, category rules, or first tracking view.",
       "Save the master prompt and the execution model choice beside the plan.",
-      "Record the expected cost, energy, or rework savings so the route can be learned from later.",
+      "Record what this route was expected to cost in tool use, energy, and your own time, so the route can be learned from later.",
     ];
   }
 

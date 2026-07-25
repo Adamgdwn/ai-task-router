@@ -6,15 +6,13 @@ import {
   type TokenRun,
 } from "../impact/impactEstimator";
 import type { ModelInventoryItem, RouteOption, RouteStep, TaskIntake, WorkRole } from "../types";
-import { pricingAnchorIdForModel } from "./modelGuidance";
+import { accountIsMeteredPerUse, apiEquivalentPricingAnchorIdForModel } from "./modelGuidance";
 import { modeEstimateAnchorsForRouteStep } from "./toolModeCatalog";
 
 type RouteCostBasis = {
-  costUsd: number;
-  comparedWithCostUsd: number;
-  comparedWithLabel: string;
+  apiEquivalentCostUsd: number;
+  billedCostUsd: number;
   energyWh: number;
-  comparedWithEnergyWh: number;
 };
 
 const stepCostMultipliers: Record<RouteStep["kind"], number> = {
@@ -45,48 +43,32 @@ const energyProfileMultipliers = {
 
 const minimumActionableRouteEnergyWh = 0.024;
 
+/**
+ * Prices each route two ways: what a metered API run of the same steps would cost, and what the
+ * user is actually billed given the plans they already pay for.
+ *
+ * There is deliberately no baseline here. An earlier version compared every route against a
+ * premium API anchor the user was never going to buy, which turned a $0 manual route into
+ * "$1.125 saved". The routes a user can compare are the other routes on the same screen, so the
+ * comparison belongs at the point of display, not baked into each stored option.
+ */
 export function attachRouteEconomics(
   options: RouteOption[],
   models: readonly ModelInventoryItem[],
   task?: TaskIntake,
 ): RouteOption[] {
   const modelById = new Map(models.map((model) => [model.id, model]));
-  const premiumBenchmarkCostUsd = estimatePricingAnchorCost("openai-premium-text-anchor", defaultHundredThousandTokenRun);
-  const premiumBenchmarkEnergyWh = estimateEnergyAnchorWh("o3-medium-estimate", 1);
-  const optionCosts = options.map((option) => ({
-    option,
-    costUsd:
-      option.strategy === "premium"
-        ? Math.max(estimateRouteCostUsd(option, modelById, task), premiumBenchmarkCostUsd)
-        : estimateRouteCostUsd(option, modelById, task),
-    energyWh:
-      option.strategy === "premium"
-        ? Math.max(estimateRouteEnergyWh(option, modelById, task), premiumBenchmarkEnergyWh)
-        : estimateRouteEnergyWh(option, modelById, task),
-  }));
-  const baseline = optionCosts.reduce(
-    (currentBaseline, candidate) =>
-      candidate.costUsd > currentBaseline.costUsd || candidate.energyWh > currentBaseline.energyWh
-        ? { costUsd: candidate.costUsd, energyWh: candidate.energyWh, label: candidate.option.label }
-        : currentBaseline,
-    { costUsd: 0, energyWh: 0, label: "the heaviest safe option" },
-  );
-  const usesPremiumBenchmark = baseline.costUsd < premiumBenchmarkCostUsd || baseline.energyWh < premiumBenchmarkEnergyWh;
-  const comparedWithLabel = usesPremiumBenchmark ? "premium API-equivalent help" : baseline.label;
-  const comparedWithCostUsd = usesPremiumBenchmark ? premiumBenchmarkCostUsd : baseline.costUsd;
-  const comparedWithEnergyWh = usesPremiumBenchmark ? premiumBenchmarkEnergyWh : baseline.energyWh;
 
-  return optionCosts.map(({ option, costUsd, energyWh }) =>
+  return options.map((option) =>
     attachEconomicsToOption(option, {
-      costUsd,
-      comparedWithCostUsd,
-      comparedWithLabel,
-      energyWh,
-      comparedWithEnergyWh,
+      apiEquivalentCostUsd: estimateRouteApiEquivalentCostUsd(option, modelById, task),
+      billedCostUsd: estimateRouteCostUsd(option, modelById, task),
+      energyWh: estimateRouteEnergyWh(option, modelById, task),
     }),
   );
 }
 
+/** What the route adds to the user's bill, given the accounts they already pay for. */
 export function estimateRouteCostUsd(
   option: Pick<RouteOption, "steps">,
   modelById: ReadonlyMap<string, ModelInventoryItem>,
@@ -94,6 +76,23 @@ export function estimateRouteCostUsd(
 ): number {
   const total = option.steps.reduce((sum, step) => {
     return sum + estimateRouteStepCostUsd(step, modelById);
+  }, 0);
+
+  return roundUsd(total);
+}
+
+/**
+ * What the same steps would cost if every one of them were metered per token at public API list
+ * prices, including the steps a subscription covers. A monthly plan hides what one task consumes,
+ * and this is the figure that makes that visible.
+ */
+export function estimateRouteApiEquivalentCostUsd(
+  option: Pick<RouteOption, "steps">,
+  modelById: ReadonlyMap<string, ModelInventoryItem>,
+  _task?: TaskIntake,
+): number {
+  const total = option.steps.reduce((sum, step) => {
+    return sum + estimateRouteStepApiEquivalentCostUsd(step, modelById);
   }, 0);
 
   return roundUsd(total);
@@ -119,6 +118,21 @@ export function estimateRouteStepCostUsd(
   step: RouteStep,
   modelById: ReadonlyMap<string, ModelInventoryItem>,
 ): number {
+  return stepCostUsd(step, modelById, billedPricingAnchorIdForStep);
+}
+
+export function estimateRouteStepApiEquivalentCostUsd(
+  step: RouteStep,
+  modelById: ReadonlyMap<string, ModelInventoryItem>,
+): number {
+  return stepCostUsd(step, modelById, apiEquivalentPricingAnchorIdForStep);
+}
+
+function stepCostUsd(
+  step: RouteStep,
+  modelById: ReadonlyMap<string, ModelInventoryItem>,
+  resolvePricingAnchorId: (step: RouteStep, model: ModelInventoryItem) => string | null,
+): number {
   if (!step.modelId) {
     return 0;
   }
@@ -128,7 +142,7 @@ export function estimateRouteStepCostUsd(
     return 0;
   }
 
-  const pricingAnchorId = pricingAnchorIdForStep(step, model);
+  const pricingAnchorId = resolvePricingAnchorId(step, model);
   if (!pricingAnchorId) {
     return 0;
   }
@@ -160,24 +174,13 @@ export function estimateRouteStepEnergyWh(
 }
 
 function attachEconomicsToOption(option: RouteOption, basis: RouteCostBasis): RouteOption {
-  const estimatedSavingsUsd = Math.max(0, basis.comparedWithCostUsd - basis.costUsd);
-  const estimatedSavingsPercent =
-    basis.comparedWithCostUsd > 0 ? (estimatedSavingsUsd / basis.comparedWithCostUsd) * 100 : 0;
-  const estimatedEnergySavingsWh = Math.max(0, basis.comparedWithEnergyWh - basis.energyWh);
-  const estimatedEnergySavingsPercent =
-    basis.comparedWithEnergyWh > 0 ? (estimatedEnergySavingsWh / basis.comparedWithEnergyWh) * 100 : 0;
-
   return {
     ...option,
-    estimatedCostUsd: roundUsd(basis.costUsd),
-    estimatedSavingsUsd: roundUsd(estimatedSavingsUsd),
-    estimatedSavingsPercent: roundPercent(estimatedSavingsPercent),
-    savingsComparedWith: basis.comparedWithLabel,
+    estimatedCostUsd: roundUsd(basis.billedCostUsd),
+    apiEquivalentCostUsd: roundUsd(basis.apiEquivalentCostUsd),
     costEstimateBasis:
-      "Per-use estimate using zero marginal dollars for selected free/basic tools and 100k-token API-equivalent pricing anchors for paid or premium model-equivalent work; subscriptions, search add-ons, taxes, caching, and provider limits can change the real bill.",
+      "The per-token figure prices a 100k-token run of these steps (75k in, 25k out) against reviewed public API list prices, including steps a plan you already pay for would cover. The billed figure counts only what a metered account would add to your bill. Subscriptions, search add-ons, taxes, caching, free tiers, and provider limits change the real bill.",
     estimatedEnergyWh: roundWh(basis.energyWh),
-    estimatedEnergySavingsWh: roundWh(estimatedEnergySavingsWh),
-    estimatedEnergySavingsPercent: roundPercent(estimatedEnergySavingsPercent),
     energyEstimateBasis:
       "Per-use compute-energy estimate using representative public inference energy anchors, with a small nonzero floor for manual or local routes because real device use is not zero. Local device energy, provider routing, media generation, caching, data-center conditions, and repeated retries can change the real footprint.",
   };
@@ -198,14 +201,23 @@ function scaledTokenRun(multiplier: number): TokenRun {
   };
 }
 
-function pricingAnchorIdForStep(step: RouteStep, model: ModelInventoryItem) {
-  const anchors = modeEstimateAnchorsForRouteStep(step, model);
-
-  if (anchors.zeroMarginalCost) {
+function billedPricingAnchorIdForStep(step: RouteStep, model: ModelInventoryItem) {
+  // A free tier or a flat monthly plan is already paid for; only a metered account adds to the
+  // bill for this one task.
+  if (!accountIsMeteredPerUse(model)) {
     return null;
   }
 
-  return anchors.pricingAnchorId ?? pricingAnchorIdForModel(model);
+  return modeEstimateAnchorsForRouteStep(step, model).pricingAnchorId ?? apiEquivalentPricingAnchorIdForModel(model);
+}
+
+function apiEquivalentPricingAnchorIdForStep(step: RouteStep, model: ModelInventoryItem) {
+  // Work done by hand, or by a model on the user's own machine, has no per-token price to quote.
+  if (model.tier === "human" || model.localOnly) {
+    return null;
+  }
+
+  return modeEstimateAnchorsForRouteStep(step, model).pricingAnchorId ?? apiEquivalentPricingAnchorIdForModel(model);
 }
 
 function multiplierForStep(step: RouteStep) {
@@ -234,8 +246,4 @@ function roundUsd(value: number) {
 
 function roundWh(value: number) {
   return Math.round(value * 1000) / 1000;
-}
-
-function roundPercent(value: number) {
-  return Math.round(value);
 }

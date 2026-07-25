@@ -221,7 +221,7 @@ function reviewChecksForPromptHandoff(routeStep: RouteStep): string[] {
       ],
       execution: ["The output follows the approved master prompt and is ready for review, not another layer of prompt advice."],
       "build-slice": ["The first usable slice is small enough to review before adding features."],
-      "artifact-package": ["Warnings, checks, savings notes, and next action remain visible in the package."],
+      "artifact-package": ["Warnings, checks, impact notes, and next action remain visible in the package."],
       "quality-review": ["Every requested deliverable is present or explicitly marked missing, and privacy limits are still respected."],
       "next-action": ["The next action is small, visible, and tied to a measure."],
     };
@@ -307,7 +307,7 @@ function promptTextForStep(input: {
     "Create a novice-friendly project plan:",
     "- Use four sections only: Plan, Do, Check, Act.",
     "- For each section, name what I should do, what helper/model/mode to use, and what good enough looks like.",
-    "- Include a short savings recommendation: where this route saves time, cost, or rework, and when I should upgrade.",
+    "- Include a short impact note: where this route uses less tool capacity, where it costs more of my own time, and when I should upgrade.",
     "- End with the first action I should take next.",
     `Expected output: ${expectedOutput}`,
   ].filter((line) => line.length > 0).join("\n");
@@ -372,7 +372,7 @@ function promptTextForWorkRole(input: {
       return [
         "Packaging instruction:",
         "Package the reviewed result into the requested saved or copy-ready format.",
-        "Keep inputs, warnings, checks, savings, and next action visible.",
+        "Keep inputs, warnings, checks, impact notes, and next action visible.",
         `Expected output: ${expectedOutput}`,
       ].join("\n");
     case "quality-review":
@@ -461,7 +461,7 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
       case "build-slice":
         return `A first usable build-plan slice for "${task.title}" with data flow, screens or files, tests, acceptance checks, deferred work, and next action.`;
       case "artifact-package":
-        return `A packaged ${task.outputType} for "${task.title}" with route warnings, checks, savings, and next action visible.`;
+        return `A packaged ${task.outputType} for "${task.title}" with route warnings, checks, impact notes, and next action visible.`;
       case "quality-review":
         return `A review decision for "${task.title}" with required fixes, missing deliverables, privacy issues, and reroute or upgrade notes.`;
       case "next-action":
@@ -475,11 +475,11 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
         ? `A concise research note for "${task.title}" with current facts, source citations, and unresolved uncertainty.`
         : `A concise research note for "${task.title}" with current facts and unresolved uncertainty.`;
     case "artifact":
-      return `A packaged ${task.outputType} for "${task.title}" with a clear plan, review checks, and savings or upgrade notes.`;
+      return `A packaged ${task.outputType} for "${task.title}" with a clear plan, review checks, and impact or upgrade notes.`;
     case "human review":
       return `A human approval decision for "${task.title}" with any required revisions or stop/reroute notes.`;
     case "manual":
-      return `A manually prepared ${task.outputType} for "${task.title}" with task evaluation, ordered steps, review checks, and a savings recommendation.`;
+      return `A manually prepared ${task.outputType} for "${task.title}" with task evaluation, ordered steps, review checks, and an impact note.`;
     case "model":
       return `A master prompt plus a ${task.outputType} for "${task.title}" that covers ${requestedDeliverableSummary(task)}, gives a novice-friendly plan, respects source limits, and recommends where to save or upgrade.`;
   }

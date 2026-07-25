@@ -108,39 +108,70 @@ describe("impact estimator", () => {
     );
   });
 
-  it("uses route-specific savings when counting followed choices", () => {
+  it("totals the per-token estimate of the routes actually followed", () => {
     const selectedOption = {
       id: "route-option-lean",
       strategy: "lean",
       estimatedCostLevel: "low",
       estimatedEffortLevel: "low",
-      estimatedSavingsUsd: 1.23,
-      estimatedEnergySavingsWh: 4.56,
+      apiEquivalentCostUsd: 1.23,
+      estimatedCostUsd: 0,
+      estimatedEnergyWh: 4.56,
     } as RouteOption;
-    const summary = buildTrackedImpactSummary(
-      {
-        routeCards: [
-          {
-            id: "route-card-impact",
-            options: [selectedOption],
-          } as RouteCard,
-        ],
-        routeLogEntries: [
-          {
-            id: "route-log-impact",
-            routeCardId: "route-card-impact",
-            selectedOptionId: selectedOption.id,
-            selectedStrategy: "lean",
-            outcome: "accepted",
-          } as RouteLogEntry,
-        ],
-      },
-      buildDefaultPublicImpactSnapshot(),
-    );
+    const summary = buildTrackedImpactSummary({
+      routeCards: [
+        {
+          id: "route-card-impact",
+          options: [selectedOption],
+        } as RouteCard,
+      ],
+      routeLogEntries: [
+        {
+          id: "route-log-impact",
+          routeCardId: "route-card-impact",
+          selectedOptionId: selectedOption.id,
+          selectedStrategy: "lean",
+          outcome: "accepted",
+        } as RouteLogEntry,
+      ],
+    });
 
     expect(summary.followedPlanCount).toBe(1);
     expect(summary.followedByStrategy.lean).toBe(1);
-    expect(summary.estimatedAvoidedCostUsd).toBeCloseTo(1.23);
-    expect(summary.estimatedAvoidedWattHours).toBeCloseTo(4.56);
+    expect(summary.apiEquivalentCostUsd).toBeCloseTo(1.23);
+    expect(summary.estimatedEnergyWh).toBeCloseTo(4.56);
+    expect(summary.plansWithoutEstimateCount).toBe(0);
+  });
+
+  it("counts a followed route with no per-token estimate separately instead of inventing one", () => {
+    const legacyOption = {
+      id: "route-option-legacy",
+      strategy: "balanced",
+      estimatedCostLevel: "medium",
+      estimatedEffortLevel: "medium",
+    } as RouteOption;
+    const summary = buildTrackedImpactSummary({
+      routeCards: [
+        {
+          id: "route-card-legacy",
+          options: [legacyOption],
+        } as RouteCard,
+      ],
+      routeLogEntries: [
+        {
+          id: "route-log-legacy",
+          routeCardId: "route-card-legacy",
+          selectedOptionId: legacyOption.id,
+          selectedStrategy: "balanced",
+          outcome: "accepted",
+        } as RouteLogEntry,
+      ],
+    });
+
+    expect(summary.followedPlanCount).toBe(1);
+    // The old counter would have credited this plan with a share of a fixed illustrative scenario.
+    expect(summary.apiEquivalentCostUsd).toBe(0);
+    expect(summary.estimatedEnergyWh).toBe(0);
+    expect(summary.plansWithoutEstimateCount).toBe(1);
   });
 });

@@ -185,7 +185,9 @@ export function modeEstimateAnchorsForRouteStep(
   }
 
   return {
-    pricingAnchorId: zeroMarginalCost ? null : pricingAnchorForProviderMode(providerId, accountId, modeId, model),
+    // The anchor prices the work; `zeroMarginalCost` says whether the user's plan already covers
+    // it. Callers need both facts separately, so this no longer folds one into the other.
+    pricingAnchorId: pricingAnchorForProviderMode(providerId, accountId, modeId, model),
     energyAnchorId: energyAnchorForMode(providerId, modeId, model),
     energyProfile: energyProfileForMode(modeId, model),
     zeroMarginalCost,

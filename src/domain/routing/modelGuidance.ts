@@ -110,6 +110,40 @@ export function pricingAnchorIdForModel(model: ModelInventoryItem): string | nul
   return modelUseGuidance(model).pricingAnchorId;
 }
 
+/**
+ * The anchor for "what would this work cost per token", whether or not a plan the user already
+ * pays for covers it. Use `pricingAnchorIdForModel` for the different question of what the user
+ * is actually billed. Human and local-only work has no per-token price under either question.
+ */
+export function apiEquivalentPricingAnchorIdForModel(model: ModelInventoryItem): string | null {
+  return modelUseGuidance(model).pricingAnchorId;
+}
+
+/**
+ * True only for accounts billed per use. A flat-rate plan is already paid for, so one more task on
+ * it adds nothing to the bill however much compute it consumes — which is exactly why the
+ * per-token figure beside it is worth showing.
+ *
+ * Deliberately separate from the routing layer's `zeroMarginalCost`, which carries a scoring bonus
+ * and covers only free tiers. Widening that would change which tools get recommended; this
+ * predicate only changes what the user is told they will pay.
+ */
+export function accountIsMeteredPerUse(model: ModelInventoryItem): boolean {
+  if (model.tier === "human" || model.localOnly) {
+    return false;
+  }
+
+  const selection = inferEverydayToolSelection(model);
+  if (selection.providerId === "none") {
+    return false;
+  }
+
+  const provider = getEverydayToolProvider(selection.providerId);
+  const accountOption = provider.accountOptions.find((option) => option.id === selection.accountId);
+
+  return /\bapi\b|pay-as-you-go|recharged|credits/i.test(accountOption?.label ?? selection.accountId);
+}
+
 function hasZeroMarginalCostAccount(model: ModelInventoryItem) {
   if (model.localOnly || model.tier === "human") {
     return false;

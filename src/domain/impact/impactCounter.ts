@@ -1,11 +1,11 @@
-import type { PublicImpactSnapshot } from "./publicImpactSnapshot";
 import type { RouteCard, RouteLogEntry, RouteOption } from "../types";
 
 export type TrackedImpactSummary = {
   savedPlanCount: number;
   followedPlanCount: number;
-  estimatedAvoidedCostUsd: number;
-  estimatedAvoidedWattHours: number;
+  apiEquivalentCostUsd: number;
+  estimatedEnergyWh: number;
+  plansWithoutEstimateCount: number;
   followedByStrategy: Record<RouteOption["strategy"], number>;
 };
 
@@ -23,22 +23,26 @@ const emptyFollowedByStrategy: TrackedImpactSummary["followedByStrategy"] = {
 export const emptyTrackedImpactSummary: TrackedImpactSummary = {
   savedPlanCount: 0,
   followedPlanCount: 0,
-  estimatedAvoidedCostUsd: 0,
-  estimatedAvoidedWattHours: 0,
+  apiEquivalentCostUsd: 0,
+  estimatedEnergyWh: 0,
+  plansWithoutEstimateCount: 0,
   followedByStrategy: emptyFollowedByStrategy,
 };
 
-export function buildTrackedImpactSummary(
-  routeRecords: ImpactCounterRouteRecords,
-  snapshot: PublicImpactSnapshot,
-): TrackedImpactSummary {
+/**
+ * Totals what the routes the user actually followed would have cost and consumed.
+ *
+ * This used to accumulate dollars from a fixed illustrative scenario whenever a route carried no
+ * figure of its own, which meant the counter grew even when nothing had been measured. Now a route
+ * contributes only its own estimate, and routes saved before those estimates existed are counted
+ * separately so the total is never quietly padded.
+ */
+export function buildTrackedImpactSummary(routeRecords: ImpactCounterRouteRecords): TrackedImpactSummary {
   const routeCardsById = new Map(routeRecords.routeCards.map((routeCard) => [routeCard.id, routeCard]));
-  const perTaskCostUsd = snapshot.rightSizingExample.netAvoidedCostUsd / snapshot.rightSizingExample.taskCount;
-  const perTaskWattHours =
-    snapshot.environmentalExample.netAvoidedWattHours / snapshot.environmentalExample.taskCount;
   const followedByStrategy = { ...emptyFollowedByStrategy };
-  let estimatedAvoidedCostUsd = 0;
-  let estimatedAvoidedWattHours = 0;
+  let apiEquivalentCostUsd = 0;
+  let estimatedEnergyWh = 0;
+  let plansWithoutEstimateCount = 0;
   let followedPlanCount = 0;
 
   for (const routeLogEntry of routeRecords.routeLogEntries) {
@@ -49,39 +53,29 @@ export function buildTrackedImpactSummary(
     const routeCard = routeCardsById.get(routeLogEntry.routeCardId);
     const selectedOption = routeCard?.options.find((option) => option.id === routeLogEntry.selectedOptionId);
     const strategy = selectedOption?.strategy ?? routeLogEntry.selectedStrategy;
-    const multiplier = routeImpactMultiplier(selectedOption);
 
     followedPlanCount += 1;
     followedByStrategy[strategy] += 1;
-    estimatedAvoidedCostUsd += selectedOption?.estimatedSavingsUsd ?? perTaskCostUsd * multiplier;
-    estimatedAvoidedWattHours += selectedOption?.estimatedEnergySavingsWh ?? perTaskWattHours * multiplier;
+
+    if (selectedOption?.apiEquivalentCostUsd === undefined) {
+      plansWithoutEstimateCount += 1;
+      continue;
+    }
+
+    apiEquivalentCostUsd += selectedOption.apiEquivalentCostUsd;
+    estimatedEnergyWh += selectedOption.estimatedEnergyWh ?? 0;
   }
 
   return {
     savedPlanCount: routeRecords.routeLogEntries.length,
     followedPlanCount,
-    estimatedAvoidedCostUsd,
-    estimatedAvoidedWattHours,
+    apiEquivalentCostUsd,
+    estimatedEnergyWh,
+    plansWithoutEstimateCount,
     followedByStrategy,
   };
 }
 
 function countsAsFollowed(routeLogEntry: RouteLogEntry) {
   return routeLogEntry.outcome === "accepted" || routeLogEntry.outcome === "edited";
-}
-
-function routeImpactMultiplier(option: RouteOption | undefined) {
-  if (!option) {
-    return 0.5;
-  }
-
-  if (option.estimatedCostLevel === "low") {
-    return option.estimatedEffortLevel === "high" ? 0.85 : 1;
-  }
-
-  if (option.estimatedCostLevel === "medium") {
-    return 0.55;
-  }
-
-  return 0.2;
 }

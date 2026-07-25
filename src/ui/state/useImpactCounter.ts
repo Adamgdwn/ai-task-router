@@ -4,7 +4,6 @@ import {
   emptyTrackedImpactSummary,
   type TrackedImpactSummary,
 } from "../../domain/impact/impactCounter";
-import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import type { LocalStore } from "../../storage/localStore";
 
 export type ImpactCounterController = {
@@ -13,8 +12,6 @@ export type ImpactCounterController = {
   message: string;
   refresh: () => Promise<void>;
 };
-
-const publicImpactSnapshot = buildDefaultPublicImpactSnapshot();
 
 export function useImpactCounter(store: LocalStore): ImpactCounterController {
   const [summary, setSummary] = useState<TrackedImpactSummary>(emptyTrackedImpactSummary);
@@ -27,7 +24,7 @@ export function useImpactCounter(store: LocalStore): ImpactCounterController {
 
     try {
       const routeRecords = await store.loadRouteRecords();
-      const nextSummary = buildTrackedImpactSummary(routeRecords, publicImpactSnapshot);
+      const nextSummary = buildTrackedImpactSummary(routeRecords);
 
       setSummary(nextSummary);
       setStatus("ready");

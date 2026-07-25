@@ -256,14 +256,18 @@ export const routeOptionSchema = z
     estimatedCostLevel: z.enum(["low", "medium", "high"]),
     estimatedEffortLevel: z.enum(["low", "medium", "high"]),
     estimatedCostUsd: z.number().min(0).optional(),
+    apiEquivalentCostUsd: z.number().min(0).optional(),
+    costEstimateBasis: nonEmptyTextSchema.optional(),
+    estimatedEnergyWh: z.number().min(0).optional(),
+    energyEstimateBasis: nonEmptyTextSchema.optional(),
+    // Deprecated 2026-07-25. These claimed the user saved money against a premium API baseline
+    // they were never going to pay. Nothing writes or reads them; they stay accepted only so
+    // route cards saved before that date still parse under .strict(). Remove with a migration.
     estimatedSavingsUsd: z.number().min(0).optional(),
     estimatedSavingsPercent: z.number().min(0).max(100).optional(),
     savingsComparedWith: nonEmptyTextSchema.optional(),
-    costEstimateBasis: nonEmptyTextSchema.optional(),
-    estimatedEnergyWh: z.number().min(0).optional(),
     estimatedEnergySavingsWh: z.number().min(0).optional(),
     estimatedEnergySavingsPercent: z.number().min(0).max(100).optional(),
-    energyEstimateBasis: nonEmptyTextSchema.optional(),
     steps: z.array(routeStepSchema).min(1),
     warnings: z.array(nonEmptyTextSchema).default([]),
     blockedReason: nonEmptyTextSchema.optional(),

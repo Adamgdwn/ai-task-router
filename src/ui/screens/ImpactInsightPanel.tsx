@@ -23,12 +23,13 @@ export function ImpactInsightPanel({
   return (
     <section className="impactSection" aria-labelledby="impact-insight-heading">
       <div className="impactLead">
-        <p className="screenKicker">Savings recommendation</p>
-        <h3 id="impact-insight-heading">What this route can save</h3>
-        <p>{savingsLead(recommended, task)}</p>
+        <p className="screenKicker">Impact estimate</p>
+        <h3 id="impact-insight-heading">What this route costs to run</h3>
+        <p>{routeImpactLead(recommended, task)}</p>
         <p className="impactCaveat">
-          Example estimates use reviewed public API pricing and energy research. They are not your bill, and they are not
-          a guarantee.
+          Dollar figures answer one question: if this work were metered per token at public API list prices, roughly what
+          would it come to? A monthly subscription hides that number, which is why it is worth seeing. It is not your
+          bill, not money you saved, and not a guarantee.
         </p>
       </div>
 
@@ -41,51 +42,59 @@ export function ImpactInsightPanel({
           </div>
           <dl>
             <div>
-              <dt>Estimated avoided cost</dt>
-              <dd>{formatUsd(trackedImpact.estimatedAvoidedCostUsd)}</dd>
+              <dt>If those runs were metered</dt>
+              <dd>{formatUsd(trackedImpact.apiEquivalentCostUsd)}</dd>
             </div>
             <div>
-              <dt>Estimated avoided energy</dt>
-              <dd>{formatWattHours(trackedImpact.estimatedAvoidedWattHours)}</dd>
+              <dt>Estimated energy used</dt>
+              <dd>{formatWattHours(trackedImpact.estimatedEnergyWh)}</dd>
             </div>
             <div>
               <dt>Saved plans</dt>
               <dd>{formatInteger(trackedImpact.savedPlanCount)}</dd>
             </div>
           </dl>
+          {trackedImpact.plansWithoutEstimateCount > 0 ? (
+            <p className="impactCaveat">
+              {formatInteger(trackedImpact.plansWithoutEstimateCount)} followed plan(s) were saved before per-token
+              estimates existed and are not included in these totals.
+            </p>
+          ) : null}
         </div>
       ) : null}
 
       <dl className="impactMetricGrid">
+        <div>
+          <dt>This route, if metered</dt>
+          <dd>{routeCostHeadline(recommended)}</dd>
+          <span>{routeCostDetail(recommended)}</span>
+        </div>
         <div>
           <dt>100k-token example</dt>
           <dd>
             {formatUsd(snapshot.tokenBenchmark.lowerCostUsd)} vs {formatUsd(snapshot.tokenBenchmark.comparisonCostUsd)}
           </dd>
           <span>
-            {snapshot.tokenBenchmark.lowerCostModelLabel} compared with {snapshot.tokenBenchmark.comparisonModelLabel}.
+            Textbook example, not your usage: {snapshot.tokenBenchmark.lowerCostModelLabel} compared with{" "}
+            {snapshot.tokenBenchmark.comparisonModelLabel} on the same 100k-token run.
           </span>
         </div>
         <div>
-          <dt>Right-sizing scenario</dt>
+          <dt>Right-sizing example</dt>
           <dd>{formatUsd(snapshot.rightSizingExample.netAvoidedCostUsd)}</dd>
           <span>
-            Example net avoided API cost across {snapshot.rightSizingExample.taskCount} similar tasks after{" "}
-            {snapshot.rightSizingExample.inducedExtraRuns} extra smaller-model runs.
+            Illustrative only: the difference a smaller model makes across {snapshot.rightSizingExample.taskCount}{" "}
+            similar tasks, after {snapshot.rightSizingExample.inducedExtraRuns} extra smaller-model runs. Nobody is
+            claiming you ran these.
           </span>
         </div>
         <div>
-          <dt>Energy scenario</dt>
+          <dt>Energy example</dt>
           <dd>{formatWattHours(snapshot.environmentalExample.netAvoidedWattHours)}</dd>
           <span>
-            Example avoided compute for {snapshot.environmentalExample.taskCount} reasoning tasks when half route to a
-            lighter text workload.
+            Illustrative only: the compute difference across {snapshot.environmentalExample.taskCount} reasoning tasks
+            when half route to a lighter text workload.
           </span>
-        </div>
-        <div>
-          <dt>Skill payoff</dt>
-          <dd>{savingsHeadline(recommended)}</dd>
-          <span>{savingsDetail(recommended)}</span>
         </div>
       </dl>
 
@@ -125,20 +134,35 @@ function formatInteger(value: number) {
   }).format(value);
 }
 
+// Two significant figures; the underlying multipliers do not earn any more precision than that.
+function toSignificantFigures(value: number, figures: number) {
+  if (!Number.isFinite(value) || value === 0) {
+    return 0;
+  }
+
+  return Number(value.toPrecision(figures));
+}
+
 function formatUsd(value: number) {
+  const rounded = toSignificantFigures(value, 2);
+
   return new Intl.NumberFormat(undefined, {
     currency: "USD",
-    maximumFractionDigits: Math.abs(value) < 1 ? 3 : 2,
-    minimumFractionDigits: Math.abs(value) < 1 ? 3 : 2,
+    maximumFractionDigits: Math.abs(rounded) > 0 && Math.abs(rounded) < 0.1 ? 3 : 2,
+    minimumFractionDigits: 2,
     style: "currency",
-  }).format(value);
+  }).format(rounded);
 }
 
 function formatWattHours(value: number) {
-  return `${formatInteger(Math.round(value))} Wh`;
+  const rounded = toSignificantFigures(value, 2);
+  const absValue = Math.abs(rounded);
+  const maximumFractionDigits = absValue >= 10 ? 0 : absValue >= 1 ? 1 : 3;
+
+  return `${new Intl.NumberFormat(undefined, { maximumFractionDigits }).format(rounded)} Wh`;
 }
 
-function savingsLead(
+function routeImpactLead(
   recommended: RouteOption | undefined,
   task: ImpactInsightPanelProps["task"],
 ) {
@@ -149,7 +173,7 @@ function savingsLead(
     : "For this saved plan, use the selected route as the starting point.";
 
   if (!recommended) {
-    return `${taskShape} The savings move is to pause before using a tool that does not fit the setup.`;
+    return `${taskShape} The lower-impact move is to pause before using a tool that does not fit the setup.`;
   }
 
   if (recommended.estimatedCostLevel === "low") {
@@ -157,7 +181,7 @@ function savingsLead(
   }
 
   if (recommended.estimatedCostLevel === "medium") {
-    return `${taskShape} Use the everyday helper to save rework while avoiding the heaviest option as the default.`;
+    return `${taskShape} Use the everyday helper to cut rework while avoiding the heaviest option as the default.`;
   }
 
   return `${taskShape} Spend the extra helper effort where quality or risk makes mistakes more expensive than the tool cost.`;
@@ -179,40 +203,42 @@ function routeImpactMessage(recommended: RouteOption | undefined) {
   return "Your current best option spends more resource because quality or risk appears to matter. Use it intentionally, then keep lighter routes for simpler follow-ups.";
 }
 
-function savingsHeadline(recommended: RouteOption | undefined) {
+function routeCostHeadline(recommended: RouteOption | undefined) {
   if (!recommended) {
     return "Pause first";
   }
 
-  if (recommended.estimatedSavingsUsd !== undefined) {
-    return `${formatUsd(recommended.estimatedSavingsUsd)} est. saved`;
+  if (recommended.apiEquivalentCostUsd !== undefined) {
+    return `about ${formatUsd(recommended.apiEquivalentCostUsd)}`;
   }
 
   if (recommended.estimatedCostLevel === "low") {
-    return recommended.estimatedEffortLevel === "high" ? "Tool cost down" : "Start small";
+    return recommended.estimatedEffortLevel === "high" ? "Light on compute" : "Start small";
   }
 
   if (recommended.estimatedCostLevel === "medium") {
-    return "Avoid rework";
+    return "Everyday helper";
   }
 
-  return "Pay for certainty";
+  return "Heaviest helper";
 }
 
-function savingsDetail(recommended: RouteOption | undefined) {
+function routeCostDetail(recommended: RouteOption | undefined) {
   if (!recommended) {
     return "Changing the setup is cheaper than forcing a blocked or unclear route.";
   }
 
-  if (recommended.estimatedCostUsd !== undefined && recommended.estimatedSavingsPercent !== undefined) {
-    return `${formatUsd(recommended.estimatedCostUsd)} estimated route cost; ${recommended.estimatedSavingsPercent}% below ${
-      recommended.savingsComparedWith ?? "the heavier route"
-    }.`;
+  if (recommended.apiEquivalentCostUsd !== undefined && recommended.estimatedCostUsd !== undefined) {
+    // The gap between the two figures is the whole lesson: a plan already paid for still consumes
+    // something, and this is the only place the user gets to see how much.
+    return recommended.estimatedCostUsd === 0
+      ? "Tools you already have cover this run, so nothing is added to your bill. The figure is what the same work costs at API list prices."
+      : `About ${formatUsd(recommended.estimatedCostUsd)} of that would be added to your bill on a metered account.`;
   }
 
   if (recommended.estimatedCostLevel === "low") {
     return recommended.estimatedEffortLevel === "high"
-      ? "This saves provider spend, but it costs more of your attention."
+      ? "This spends less compute, but it costs more of your attention."
       : "Use lightweight help first and reserve stronger tools for gaps.";
   }
 

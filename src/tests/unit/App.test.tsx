@@ -438,15 +438,27 @@ describe("App", () => {
     expect(screen.getAllByRole("button", { name: "Choose this route" }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Selected route" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Accept selected route and save prompts" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "What this route can save" })).toBeInTheDocument();
-    expect(screen.getByText("Savings recommendation")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What this route costs to run" })).toBeInTheDocument();
+    expect(screen.getByText("Impact estimate")).toBeInTheDocument();
     expect(screen.getByText("100k-token example")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Suggested AI toolkit" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Close-enough starters" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Paid upgrades" })).toBeInTheDocument();
-    expect(screen.getByText(/not your bill, and they are not a guarantee/)).toBeInTheDocument();
+    expect(screen.getByText(/not your bill, not money you saved, and not a guarantee/)).toBeInTheDocument();
+    expect(screen.getByText(/if this work were metered per token at public API list prices/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Warnings" })).toBeInTheDocument();
     expect(screen.getByText(/Human approval is required before using public-facing/)).toBeInTheDocument();
+
+    // Chunk R2: the results screen prices routes per token and never credits the user with a
+    // saving. The only permitted "saved" is the app's own wording for stored plans.
+    expect(screen.getAllByText("If you paid per token").length).toBe(6);
+    expect(screen.getAllByText("Added to your bill").length).toBe(6);
+    expect(screen.getAllByText(/covered by tools you already have/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/est\. saved|Estimated savings|Energy saved|Savings aim|Savings recommendation/i)).toBeNull();
+    expect(document.body.textContent).not.toMatch(/\bavoided\b/i);
+    expect(document.body.textContent).not.toMatch(/\bsavings\b/i);
+    // "Saved" survives only where it means a stored plan, never money kept.
+    expect(document.body.textContent).not.toMatch(/saved?\s+(you\s+)?\$/i);
 
     await user.click(screen.getByRole("button", { name: "Accept selected route and save prompts" }));
 
@@ -726,7 +738,7 @@ describe("App", () => {
     expect(screen.getByText("Options and tradeoffs")).toBeInTheDocument();
     expect(screen.getByText("Left out for safety")).toBeInTheDocument();
     expect(screen.getByText("Warnings")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "What this route can save" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What this route costs to run" })).toBeInTheDocument();
     expect(screen.getByText("100k-token example")).toBeInTheDocument();
 
     const markdownPreview = screen.getByLabelText("Prepared route card Markdown") as HTMLTextAreaElement;

@@ -511,8 +511,8 @@ function GeneratedResults({
             <dd>{primaryHelperLabel(recommended)}</dd>
           </div>
           <div>
-            <dt>Savings aim</dt>
-            <dd>{savingsAimLabel(recommended)}</dd>
+            <dt>Route aim</dt>
+            <dd>{routeAimLabel(recommended)}</dd>
           </div>
         </dl>
       </section>
@@ -650,7 +650,7 @@ function ToolkitColumn({
               <span>{item.alreadySelected ? "Already in My AI Tools" : item.role}</span>
             </div>
             <p>{item.reason}</p>
-            <small>{item.savingsAngle}</small>
+            <small>{item.impactAngle}</small>
           </li>
         ))}
       </ol>
@@ -705,48 +705,80 @@ function primaryHelperLabel(recommended: RouteOption | undefined) {
   return firstWorkStep.label;
 }
 
-function savingsAimLabel(recommended: RouteOption | undefined) {
+function routeAimLabel(recommended: RouteOption | undefined) {
   if (!recommended) {
     return "Avoid unsafe rework";
   }
 
   if (recommended.estimatedCostLevel === "low") {
-    return recommended.estimatedEffortLevel === "high" ? "Save tool cost" : "Save paid-tool use";
+    return recommended.estimatedEffortLevel === "high" ? "Keep tool use light" : "Start with the smallest helper";
   }
 
   if (recommended.estimatedCostLevel === "medium") {
-    return "Save rework";
+    return "Cut rework";
   }
 
   return "Reduce risk";
 }
 
-function routeCostLabel(candidate: RouteOption) {
-  return candidate.estimatedCostUsd === undefined
-    ? candidate.estimatedCostLevel
-    : `${formatUsd(candidate.estimatedCostUsd)} (${candidate.estimatedCostLevel})`;
+/** What the route would cost if every step were metered per token, subscriptions included. */
+function routeApiEquivalentCostLabel(candidate: RouteOption) {
+  return candidate.apiEquivalentCostUsd === undefined
+    ? "Estimate unavailable"
+    : `about ${formatUsd(candidate.apiEquivalentCostUsd)} (${candidate.estimatedCostLevel})`;
 }
 
-function routeSavingsLabel(candidate: RouteOption) {
-  if (candidate.estimatedSavingsUsd === undefined || candidate.estimatedSavingsPercent === undefined) {
+/** What the route adds to the user's bill on the accounts they already have. */
+function routeBilledCostLabel(candidate: RouteOption) {
+  if (candidate.estimatedCostUsd === undefined) {
     return "Estimate unavailable";
   }
 
-  return `${formatUsd(candidate.estimatedSavingsUsd)} (${candidate.estimatedSavingsPercent}%)`;
+  return candidate.estimatedCostUsd === 0
+    ? "$0.00 - covered by tools you already have"
+    : `about ${formatUsd(candidate.estimatedCostUsd)}`;
 }
 
 function routeEnergyLabel(candidate: RouteOption) {
   return candidate.estimatedEnergyWh === undefined
     ? "Estimate unavailable"
-    : `${formatWattHours(candidate.estimatedEnergyWh)} per use`;
+    : `about ${formatWattHours(candidate.estimatedEnergyWh)} per use`;
 }
 
-function routeEnergySavingsLabel(candidate: RouteOption) {
-  if (candidate.estimatedEnergySavingsWh === undefined || candidate.estimatedEnergySavingsPercent === undefined) {
-    return "Estimate unavailable";
+/**
+ * The only comparison a user can act on is between the routes in front of them, so this reads the
+ * siblings rather than a stored figure measured against a premium baseline they never chose.
+ */
+function heaviestSiblingRoute(candidate: RouteOption, options: readonly RouteOption[]) {
+  const heaviest = options.reduce<RouteOption | undefined>(
+    (currentHeaviest, option) =>
+      (option.apiEquivalentCostUsd ?? 0) > (currentHeaviest?.apiEquivalentCostUsd ?? 0) ? option : currentHeaviest,
+    undefined,
+  );
+
+  return heaviest && heaviest.id !== candidate.id ? heaviest : undefined;
+}
+
+function routeCostComparisonLabel(candidate: RouteOption, options: readonly RouteOption[]) {
+  const heaviest = heaviestSiblingRoute(candidate, options);
+
+  if (!heaviest || heaviest.apiEquivalentCostUsd === undefined) {
+    return "This is the heaviest route you were offered for this task.";
   }
 
-  return `${formatWattHours(candidate.estimatedEnergySavingsWh)} (${candidate.estimatedEnergySavingsPercent}%)`;
+  return `The heaviest route you were offered, ${heaviest.label}, is about ${formatUsd(
+    heaviest.apiEquivalentCostUsd,
+  )} on the same basis.`;
+}
+
+function routeEnergyComparisonLabel(candidate: RouteOption, options: readonly RouteOption[]) {
+  const heaviest = heaviestSiblingRoute(candidate, options);
+
+  if (!heaviest || heaviest.estimatedEnergyWh === undefined) {
+    return "This is the heaviest route you were offered for this task.";
+  }
+
+  return `${heaviest.label} is about ${formatWattHours(heaviest.estimatedEnergyWh)} per use.`;
 }
 
 function RouteTrustPanel({
@@ -1094,8 +1126,7 @@ function RouteStrategyCard({
         </div>
         <p>{plainRouteSummary(unavailable?.reason ?? "No safe route is available for this strategy.")}</p>
         <p className="routeSavingsDetail">
-          Savings: this option is left out so the user does not spend time or money on a route that conflicts with the
-          current setup.
+          This option is left out so you do not spend time or money on a route that conflicts with the current setup.
         </p>
       </section>
     );
@@ -1113,12 +1144,12 @@ function RouteStrategyCard({
       <p>{plainRouteSummary(candidate.summary)}</p>
       <dl>
         <div>
-          <dt>Est. cost</dt>
-          <dd>{routeCostLabel(candidate)}</dd>
+          <dt>If you paid per token</dt>
+          <dd>{routeApiEquivalentCostLabel(candidate)}</dd>
         </div>
         <div>
-          <dt>Est. saved</dt>
-          <dd>{routeSavingsLabel(candidate)}</dd>
+          <dt>Added to your bill</dt>
+          <dd>{routeBilledCostLabel(candidate)}</dd>
         </div>
         <div>
           <dt>Est. energy</dt>
@@ -1146,49 +1177,51 @@ function RouteStrategyCard({
       >
         {selected ? "Selected route" : "Choose this route"}
       </button>
-      <RouteCostSavingsDetail candidate={candidate} recommended={recommended} />
+      <RouteCostDetail candidate={candidate} options={result.routeCard.options} recommended={recommended} />
     </section>
   );
 }
 
-function RouteCostSavingsDetail({
+function RouteCostDetail({
   candidate,
+  options,
   recommended,
 }: {
   candidate: RouteOption;
+  options: readonly RouteOption[];
   recommended: boolean;
 }) {
   return (
-    <div className="routeSavingsDetail" aria-label={`${candidate.label} cost and savings detail`}>
-      <h5>Cost and savings</h5>
+    <div className="routeSavingsDetail" aria-label={`${candidate.label} cost and energy detail`}>
+      <h5>Cost and energy</h5>
       <dl>
         <div>
-          <dt>Estimated cost</dt>
-          <dd>{routeCostLabel(candidate)}</dd>
+          <dt>If you paid per token</dt>
+          <dd>{routeApiEquivalentCostLabel(candidate)}</dd>
         </div>
         <div>
-          <dt>Estimated savings</dt>
-          <dd>
-            {routeSavingsLabel(candidate)} vs {candidate.savingsComparedWith ?? "the heavier route"}
-          </dd>
+          <dt>Compared with</dt>
+          <dd>{routeCostComparisonLabel(candidate, options)}</dd>
+        </div>
+        <div>
+          <dt>Added to your bill</dt>
+          <dd>{routeBilledCostLabel(candidate)}</dd>
         </div>
         <div>
           <dt>Estimated energy</dt>
           <dd>{routeEnergyLabel(candidate)}</dd>
         </div>
         <div>
-          <dt>Energy saved</dt>
-          <dd>
-            {routeEnergySavingsLabel(candidate)} vs {candidate.savingsComparedWith ?? "the heavier route"}
-          </dd>
+          <dt>Energy compared with</dt>
+          <dd>{routeEnergyComparisonLabel(candidate, options)}</dd>
         </div>
         <div>
           <dt>Use this when</dt>
           <dd>{routeUseCase(candidate)}</dd>
         </div>
         <div>
-          <dt>What it can save</dt>
-          <dd>{routeSavingsExplanation(candidate)}</dd>
+          <dt>What it trades</dt>
+          <dd>{routeResourceExplanation(candidate)}</dd>
         </div>
         <div>
           <dt>Tradeoff</dt>
@@ -1301,18 +1334,18 @@ function routeUseCase(candidate: RouteOption) {
   return "Use when risk, quality, visibility, or complexity makes mistakes more expensive than the extra helper cost.";
 }
 
-function routeSavingsExplanation(candidate: RouteOption) {
+function routeResourceExplanation(candidate: RouteOption) {
   if (candidate.estimatedCostLevel === "low") {
     return candidate.estimatedEffortLevel === "high"
-      ? "Provider spend stays low because you do more framing and review yourself."
-      : "Paid or premium use stays lower by starting with the smallest adequate helper.";
+      ? "It spends less compute and more of your own framing and review time."
+      : "It starts with the smallest adequate helper, so it uses less compute than a premium pass.";
   }
 
   if (candidate.estimatedCostLevel === "medium") {
-    return "Time and rework may drop because the route uses enough help to produce a cleaner first plan.";
+    return "It spends more compute than the lean route to produce a cleaner first pass, which can mean fewer repeat runs.";
   }
 
-  return "The savings are mostly risk savings: fewer expensive mistakes, missed checks, or weak public-facing outputs.";
+  return "It spends the most compute, and it earns that mainly by reducing risk: fewer expensive mistakes, missed checks, or weak public-facing outputs.";
 }
 
 function routeTradeoff(candidate: RouteOption) {
@@ -1343,25 +1376,36 @@ function routeSelectionCue(candidate: RouteOption, recommended: boolean) {
   return "Choose it if the result will be public, critical, complex, or expensive to fix later.";
 }
 
+/**
+ * These estimates come from hand-tuned role multipliers over public pricing and energy anchors.
+ * Two significant figures is as much precision as that method earns; "$0.051" is honest, the
+ * "$0.0512" it replaces was not.
+ */
+function toSignificantFigures(value: number, figures: number) {
+  if (!Number.isFinite(value) || value === 0) {
+    return 0;
+  }
+
+  return Number(value.toPrecision(figures));
+}
+
 function formatUsd(value: number) {
-  const minimumFractionDigits = value > 0 && value < 0.1 ? 3 : 2;
+  const rounded = toSignificantFigures(value, 2);
 
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits,
-    maximumFractionDigits: 3,
-  }).format(value);
+    minimumFractionDigits: 2,
+    maximumFractionDigits: Math.abs(rounded) > 0 && Math.abs(rounded) < 0.1 ? 3 : 2,
+  }).format(rounded);
 }
 
 function formatWattHours(value: number) {
-  const absValue = Math.abs(value);
-  const maximumFractionDigits = absValue > 100 ? 0 : absValue >= 10 ? 1 : 3;
+  const rounded = toSignificantFigures(value, 2);
+  const absValue = Math.abs(rounded);
+  const maximumFractionDigits = absValue >= 10 ? 0 : absValue >= 1 ? 1 : 3;
 
-  return `${new Intl.NumberFormat(undefined, {
-    maximumFractionDigits,
-    minimumFractionDigits: absValue > 0 && absValue < 1 ? 3 : 0,
-  }).format(value)} Wh`;
+  return `${new Intl.NumberFormat(undefined, { maximumFractionDigits }).format(rounded)} Wh`;
 }
 
 function formatEnergyAxis(value: number) {
@@ -1388,11 +1432,11 @@ function impactDataFreshnessLabel(reviewedAt: string) {
   const reviewedLabel = formatReviewedDate(reviewedAt);
 
   if (ageInDays === null) {
-    return "Static public pricing and energy snapshot; verify exact provider pricing before relying on exact savings.";
+    return "Static public pricing and energy snapshot; check current provider pricing before relying on exact figures.";
   }
 
   if (ageInDays > 30) {
-    return `Reviewed ${reviewedLabel}; ${ageInDays} days old, so refresh provider pricing before quoting exact savings.`;
+    return `Reviewed ${reviewedLabel}; ${ageInDays} days old, so check current provider pricing before quoting exact figures.`;
   }
 
   return `Reviewed ${reviewedLabel}; useful for comparison, not a live provider quote.`;
