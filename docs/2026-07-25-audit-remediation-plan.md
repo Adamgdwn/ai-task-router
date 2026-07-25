@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.9.0
+Version: 1.10.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
-Next Review: When chunk R7 completes or the owner reprioritises
-Last Updated: 2026-07-25T16:28:35-06:00
-Status Updated: 2026-07-25T16:28:35-06:00
+Next Review: When chunk R6 completes or the owner reprioritises
+Last Updated: 2026-07-25T16:41:27-06:00
+Status Updated: 2026-07-25T16:41:27-06:00
 
 ## Purpose
 
@@ -65,16 +65,16 @@ Close-out for each chunk:
 | R4 | Clean the copied prompt text | complete | Small | Internal IDs appear in the product's flagship deliverable. |
 | R5 | Dead code and lint feedback loop | complete | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
 | R6 | Catalog staleness signal | not started | Small | Hardcoded model names decay monthly with nothing to notice it. |
-| R7 | Help screen | not started | Small | A developer placeholder is live in production nav. |
+| R7 | Help screen | complete | Small | A developer placeholder is live in production nav. |
 | R8 | Real first-run E2E coverage | not started | Medium | The journey every real user takes is not tested end to end. |
 | R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
 | R10 | Reframe the product promise | complete | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
 | R11 | Price each step by the model it names | complete | Medium | Owner found Lean priced above Balanced. Cost was blind to which mode a step uses, so effort alone decided the number. |
 | R12 | Name the lean style by what it actually does | complete | Small | The lean style was labelled "Save time and cost". It weights speed lower than balanced does and leans on human review, so it promised the one axis it does not deliver. |
 
-Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → R7 → R6 → R9 → R8.
+Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → ~~R7~~ → R6 → R9 → R8.
 
-R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 is done and installed the compiler feedback loop that will catch the next dead branch; R7 is next, and it is the only remaining chunk a user can actually bump into.
+R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 installed the compiler feedback loop that will catch the next dead branch, and R7 replaced the last developer-facing screen with a real one. R6, R9, and R8 remain; none of them is a screen a user walks into, so the queue is now internal-quality work.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -534,7 +534,7 @@ Stop at the notice and the risk entries. Do not refresh the catalog contents in 
 
 ## Chunk R7 - Help Screen
 
-Status: not started
+Status: complete - 2026-07-25T16:41:27-06:00
 Budget class: Small
 
 Objective:
@@ -573,6 +573,45 @@ Validation:
 Stop condition:
 
 Stop at one screen. No help system, search, or linked reference pages.
+
+Acceptance Result, 2026-07-25T16:41:27-06:00: met. Help was written rather than the tab removed, which the chunk preferred.
+
+`HelpScreen.tsx` is a new static screen answering the five questions the chunk named, in the order a stuck user
+asks them: what the app does, what it will never do, what the three routes mean, what "How To Choose" changes,
+what the numbers mean, and where the data lives. A sixth section, "If something looks wrong", covers the three
+states most likely to read as a bug - no options at all, a premium route shown as a comparison benchmark, and a
+model or price that looks stale. Each of those is real app behaviour, not a hypothetical.
+
+Every claim on the screen was checked against the code that produces it rather than written from memory:
+
+- Route descriptions come from `strategyDefinitions` in `candidateGeneration.ts`, including the lean route's real
+  tradeoff - it costs the least and costs you the most time, which is the R12 correction restated where a confused
+  user will actually meet it.
+- Style descriptions match `friendlyPolicyDescription` in `SetupScreens.tsx` word for word in substance, so the
+  Help text cannot drift from the labels on `How To Choose`.
+- The number definitions use the exact `dt` labels the routing screens render - "If you paid per token", "Added to
+  your bill", "Est. energy", "Followed choices" - so a user can map a phrase on Help to the figure in front of
+  them. The per-token framing and the energy basis are restatements of `routeEconomics.ts`, including its own
+  caveats about caching, free tiers, taxes, and retries.
+- The route-unavailable explanation points at the Recommendation audit that already exists on Best Options.
+- "Nothing is fetched live" matches the no-execution boundary and the hand-reviewed catalog date.
+
+Deleted with the placeholder: `PlaceholderScreen` (18 lines), the `placeholderState` field and all nine of its
+values, and the `purpose` field. `purpose` was not named in the chunk, but `PlaceholderScreen` was its only
+consumer, so leaving it would have left a field nothing reads on every screen definition - the same dead weight
+R5 spent a chunk removing. Removing them makes `ScreenDefinition` exactly the five fields the nav and the screen
+header actually use.
+
+`App.tsx` lost the `![...].includes(activeScreen.id)` fallback list, because every screen id now has an explicit
+branch. That list was itself a small liability: it had to be kept in step with `screenDefinitions` by hand, and
+nothing checked it. The invariant is now enforced by the existing App test that walks every tab and asserts a
+level-2 heading and summary render, plus a comment at the branch site saying so.
+
+Not done, per the stop condition: no help system, no search, no linked reference pages, no version-gate diagrams.
+The placeholder promised those; promising them again in different words would have been the same defect.
+
+Worth noting for the next deploy: this is user-visible, so it is not live until someone runs the deploy runbook.
+
 
 ---
 
@@ -917,11 +956,21 @@ Not changed, deliberately:
 | 2026-07-25T11:07:22-06:00 | `git diff --stat` reviewed for behaviour change | pass | 9 insertions, 395 deletions across 6 files. The only insertions are 2 `tsconfig` flags and 7 lockfile lines, so nothing executable was added. |
 | 2026-07-25T11:07:22-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R5. |
 
+| 2026-07-25T16:41:27-06:00 | `npx tsc --noEmit` | pass | Clean after removing `PlaceholderScreen`, `placeholderState`, and `purpose`. With `noUnusedLocals` on since R5, an orphaned import or local from the deletion would have failed here. |
+| 2026-07-25T16:41:27-06:00 | `npm run test` | pass | 14 files, 135 tests, after R7. Up from 134; 1 new App test asserting the Help content renders and no placeholder copy survives. |
+| 2026-07-25T16:41:27-06:00 | `npm run build` | pass | TypeScript and Vite build clean; existing large chunk warning remains. |
+| 2026-07-25T16:41:27-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. The narrow-viewport test now also opens Help at 390x844 and checks for horizontal overflow, since the new screen is the widest block of prose in the app. |
+| 2026-07-25T16:41:27-06:00 | `npm run scan:web-rc` | pass | No release-blocking findings. |
+| 2026-07-25T16:41:27-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
+| 2026-07-25T16:41:27-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R7. |
+
 ## Next Handoff
 
-R0, R1, R2, R3, R4, R5, R10, R11, and R12 are complete as of 2026-07-25T16:28:35-06:00. R0 shipped the other eight to production, so `main` and the live site now agree and no completed work is sitting invisible. Any future user-visible chunk needs its own deploy; the runbook is `docs/2026-07-09-cloudflare-deploy-turnover.md` and it is now proven rather than theoretical.
+R0, R1, R2, R3, R4, R5, R7, R10, R11, and R12 are complete as of 2026-07-25T16:41:27-06:00. R0 shipped the first eight of those to production; **R7 is not deployed**. It is user-visible, so the live site still shows the developer placeholder on the Help tab until someone runs the deploy runbook at `docs/2026-07-09-cloudflare-deploy-turnover.md`. That runbook is proven rather than theoretical as of the R0 deploy, and the deploy is an owner decision, not something a coder chunk should take on its own.
 
-Next coder chunk is R7, the help screen. It is the last remaining item a user can actually walk into: a developer placeholder sitting in production nav. R6, R9, and R8 follow and can be reordered freely.
+Next coder chunk is R6, the everyday tool catalog notice. R9 and R8 follow and can be reordered freely. None of the three is a screen a user walks into, so nothing else in the queue is urgent to deploy on its own.
+
+`ScreenDefinition` is now exactly `id`, `label`, `title`, `stage`, and `summary`. Adding a screen means adding a definition **and** a branch in `App.tsx`; there is no placeholder fallback to catch a missing branch, and a missing branch renders an empty workspace. The App test that walks every tab is the guard.
 
 `noUnusedLocals` and `noUnusedParameters` are now on. Any new chunk that leaves a local, an import, or a non-underscore parameter unused will fail `npm run build`, not just `npm run test` - `build` runs `tsc --noEmit` first. That is deliberate: it is the loop whose absence let 388 lines of dead code accumulate unnoticed.
 

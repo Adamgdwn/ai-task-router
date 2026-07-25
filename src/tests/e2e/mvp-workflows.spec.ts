@@ -236,6 +236,10 @@ test("corrected screens do not overflow on a narrow viewport", async ({ page }) 
 
   await page.getByRole("button", { name: "My Task", exact: true }).click();
   await expectNoHorizontalOverflow(page);
+
+  await page.getByRole("button", { name: "Help", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "What the three routes mean", level: 3 })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
 });
 
 async function openApp(page: Page) {

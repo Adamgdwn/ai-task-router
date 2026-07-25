@@ -67,6 +67,31 @@ describe("App", () => {
     }
   });
 
+  it("answers the basic questions on Help instead of showing developer placeholder copy", async () => {
+    const user = userEvent.setup();
+
+    render(<App store={buildTestStore()} />);
+
+    await user.click(screen.getByRole("button", { name: "Help" }));
+
+    expect(screen.queryByRole("heading", { name: "Placeholder State" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Future reference pages/)).not.toBeInTheDocument();
+
+    for (const heading of [
+      "What this app does",
+      "What it will never do",
+      "What the three routes mean",
+      "What the numbers mean",
+      "Where your data lives",
+    ]) {
+      expect(screen.getByRole("heading", { name: heading, level: 3 })).toBeInTheDocument();
+    }
+
+    expect(screen.getByText(/never sends your task anywhere/)).toBeInTheDocument();
+    expect(screen.getByText(/not your bill and not money you saved/)).toBeInTheDocument();
+    expect(screen.getByText(/stored in this browser, on this device/)).toBeInTheDocument();
+  });
+
   it("offers browser install when the browser exposes the install prompt", async () => {
     const user = userEvent.setup();
     const prompt = vi.fn().mockResolvedValue(undefined);

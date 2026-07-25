@@ -368,26 +368,6 @@ export function PolicySettingsScreen({ definition, setup, onNextStep }: PolicySe
   );
 }
 
-export function PlaceholderScreen({ definition }: { definition: ScreenDefinition }) {
-  return (
-    <article className="screenPanel">
-      <ScreenHeader definition={definition} />
-
-      <div className="detailGrid">
-        <section aria-labelledby="screen-purpose">
-          <h3 id="screen-purpose">Purpose</h3>
-          <p>{definition.purpose}</p>
-        </section>
-
-        <section aria-labelledby="screen-placeholder-state">
-          <h3 id="screen-placeholder-state">Placeholder State</h3>
-          <p>{definition.placeholderState}</p>
-        </section>
-      </div>
-    </article>
-  );
-}
-
 function SetupScreenLayout({
   children,
   definition,

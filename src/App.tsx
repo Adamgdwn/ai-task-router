@@ -2,12 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createLocalStore, type LocalStore } from "./storage/localStore";
 import { SavedPromptPackageScreen, SavedRouteCardScreen } from "./ui/screens/RouteArtifactScreens";
 import { RouteLogScreen } from "./ui/screens/RouteLogScreen";
-import {
-  PlaceholderScreen,
-  PolicySettingsScreen,
-  StartHereScreen,
-  ToolInventoryScreen,
-} from "./ui/screens/SetupScreens";
+import { HelpScreen } from "./ui/screens/HelpScreen";
+import { PolicySettingsScreen, StartHereScreen, ToolInventoryScreen } from "./ui/screens/SetupScreens";
 import { RouteResultsScreen, TaskIntakeScreen } from "./ui/screens/TaskRoutingScreens";
 import { screenDefinitions } from "./ui/screens/screenDefinitions";
 import { useRouteArtifacts } from "./ui/state/useRouteArtifacts";
@@ -142,18 +138,12 @@ export function App({ store = browserLocalStore }: AppProps) {
             store={store}
           />
         ) : null}
-        {![
-          "welcome",
-          "tool-inventory",
-          "policy-settings",
-          "task-intake",
-          "route-results",
-          "route-card",
-          "prompt-package",
-          "route-log",
-        ].includes(activeScreen.id) ? (
-          <PlaceholderScreen definition={activeScreen} />
-        ) : null}
+        {/*
+          Every id in `screenDefinitions` needs a branch here. There is no placeholder fallback any
+          more, so a definition without a branch renders an empty workspace; the App test that walks
+          every tab is what catches it.
+        */}
+        {activeScreen.id === "reference" ? <HelpScreen definition={activeScreen} /> : null}
       </section>
     </main>
   );

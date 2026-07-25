@@ -4,8 +4,6 @@ export type ScreenDefinition = {
   title: string;
   stage: string;
   summary: string;
-  purpose: string;
-  placeholderState: string;
 };
 
 export const screenDefinitions: ScreenDefinition[] = [
@@ -15,8 +13,6 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "Start Here",
     stage: "Setup",
     summary: "Walk the aisles: choose your tools, pick how recommendations should choose, then describe the job.",
-    purpose: "Give everyday users a natural path into the router without asking abstract privacy questions up front.",
-    placeholderState: "The guided path now opens each useful aisle directly.",
   },
   {
     id: "tool-inventory",
@@ -24,8 +20,6 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "My AI Tools",
     stage: "Setup",
     summary: "Add the AI apps you recognize, then choose account level and how often you use each one.",
-    purpose: "Prepare an editable local tool list without connecting accounts, calling providers, or storing credentials.",
-    placeholderState: "The screen adds one app row at a time and keeps account level plus frequency up front.",
   },
   {
     id: "policy-settings",
@@ -33,8 +27,6 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "How To Choose",
     stage: "Setup",
     summary: "Tell the app whether to favor lower cost, everyday balance, or stronger quality when options compete.",
-    purpose: "Translate routing policy into everyday choices about speed, cost, quality, and caution.",
-    placeholderState: "Future policy presets will stay plain-language first and weight-based only in advanced details.",
   },
   {
     id: "task-intake",
@@ -42,8 +34,6 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "My Task",
     stage: "Route Planning",
     summary: "Describe the job in normal language, answer a few quick questions, and optionally choose what to include.",
-    purpose: "Create a clear local task record before any options are generated.",
-    placeholderState: "The page now derives the local record from the user description instead of asking for internal IDs.",
   },
   {
     id: "route-results",
@@ -51,8 +41,6 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "Best Options",
     stage: "Recommendation",
     summary: "Compare the practical ways to get the job done before you paste anything into an AI tool.",
-    purpose: "Explain why each option fits, what tradeoffs shaped it, and where human review is needed.",
-    placeholderState: "Future results will keep plain names on top of hard gates, candidate generation, and scoring.",
   },
   {
     id: "route-card",
@@ -60,8 +48,6 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "Decision Card",
     stage: "Recommendation",
     summary: "Keep a readable record of the option you chose and the checks that came with it.",
-    purpose: "Give the user a durable decision artifact without executing anything.",
-    placeholderState: "Future route cards will be exportable as Markdown and JSON.",
   },
   {
     id: "prompt-package",
@@ -69,8 +55,6 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "Copy-Ready Prompts",
     stage: "Execution Support",
     summary: "Review the prompts you can copy manually into the AI tool you choose.",
-    purpose: "Support human-led execution while keeping the router out of external systems.",
-    placeholderState: "Future prompt steps will include inputs, constraints, review points, and stop criteria.",
   },
   {
     id: "route-log",
@@ -78,16 +62,12 @@ export const screenDefinitions: ScreenDefinition[] = [
     title: "Past Choices",
     stage: "Local Record",
     summary: "Look back at saved decisions and note whether the recommendation helped.",
-    purpose: "Preserve local decisions and lightweight feedback without sending notes anywhere.",
-    placeholderState: "Past Choices now use browser-local saved records and quick feedback.",
   },
   {
     id: "reference",
     label: "Help",
     title: "Help",
     stage: "Reference",
-    summary: "Plain-language explanations for the privacy, quality, and recommendation choices.",
-    purpose: "Keep product language visible to users and future builders.",
-    placeholderState: "Future reference pages will mirror the product brief and version-gate diagrams.",
+    summary: "Plain-language answers about what this app does, what the routes and numbers mean, and where your saved choices live.",
   },
 ];
