@@ -227,6 +227,67 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expectNoExecutionControls(page);
 });
 
+/**
+ * The cold path, with no IndexedDB injection anywhere in it. Every other routing test starts from
+ * the `routeReadyModels` fixture, which is an inventory no user has ever produced by hand, so the
+ * journey a real person takes - open the app, add one tool through the picker, type a task in their
+ * own words, get a route, save it - was never actually exercised.
+ *
+ * It also covers the fresh-install case from R3: before any tool is added, the app has to say the
+ * plan is the user doing the work by hand rather than quietly presenting a route.
+ */
+test("cold start: add one tool through the picker, describe a task in free text, route it, save it", async ({
+  page,
+}) => {
+  await openApp(page);
+
+  // R3 first-run honesty: routing before any tool exists must admit there is no AI in the plan.
+  await page.getByRole("button", { name: "My Task", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "What do you need help with?" })
+    .fill("I need to turn six pages of messy meeting notes into a short summary my team can read.");
+  await page.getByRole("button", { name: "Show me my best options" }).click();
+
+  await expect(page.getByRole("heading", { name: "Best Options", level: 2 })).toBeVisible();
+  await expect(page.getByText(/You have not added any AI tools yet, so this plan is you doing the work by hand/)).toBeVisible();
+
+  // Now add a tool the way a user does: through the picker, with no fixture in sight.
+  await page.getByRole("button", { name: "Add my AI tools" }).click();
+  await expect(page.getByRole("heading", { name: "My AI Tools", level: 2 })).toBeVisible();
+
+  const toolRow = toolRows(page).first();
+  await toolRow.getByRole("combobox", { name: "AI app for user-mid-synthesis-model" }).selectOption("chatgpt");
+  await toolRow.getByRole("combobox", { name: "Account level for user-mid-synthesis-model" }).selectOption("plus");
+  await expect(page.getByText("1 selected")).toBeVisible();
+
+  await page.getByRole("button", { name: "Save my choices" }).click();
+  await expect(page.getByRole("button", { name: "Save my choices" })).toBeDisabled();
+
+  // Same free-text task, now with a real tool behind it.
+  await page.getByRole("button", { name: "My Task", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "What do you need help with?" })
+    .fill("I need to turn six pages of messy meeting notes into a short summary my team can read.");
+  await page.getByRole("button", { name: "Show me my best options" }).click();
+
+  await expect(page.getByRole("heading", { name: "Best Options", level: 2 })).toBeVisible();
+  await expect(page.getByText(/You have not added any AI tools yet/)).toHaveCount(0);
+
+  // The route has to name the tool the user actually picked, not a fixture's.
+  await expect(page.locator(".stageGuidanceSection").getByText(/ChatGPT/).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Selected route", exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Accept selected route and save prompts" }).click();
+  await expect(
+    page.getByText("Selected route, decision card, prompts, and followed-choice impact saved on this device."),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Decision Card", exact: true }).click();
+  await expect(page.getByLabel("Prepared route card Markdown")).toContainText("ChatGPT");
+  await expectNoExecutionControls(page);
+});
+
 test("corrected screens do not overflow on a narrow viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openAppWithRouteReadyModels(page);

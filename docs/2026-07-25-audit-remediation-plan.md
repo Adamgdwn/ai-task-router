@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.12.0
-Status: active
+Version: 1.13.0
+Status: complete
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
-Next Review: When chunk R8 completes or the owner reprioritises
-Last Updated: 2026-07-25T16:54:26-06:00
-Status Updated: 2026-07-25T16:54:26-06:00
+Next Review: When the owner reopens the queue or a new audit runs
+Last Updated: 2026-07-25T16:58:01-06:00
+Status Updated: 2026-07-25T16:58:01-06:00
 
 ## Purpose
 
@@ -66,15 +66,15 @@ Close-out for each chunk:
 | R5 | Dead code and lint feedback loop | complete | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
 | R6 | Catalog staleness signal | complete | Small | Hardcoded model names decay monthly with nothing to notice it. |
 | R7 | Help screen | complete | Small | A developer placeholder is live in production nav. |
-| R8 | Real first-run E2E coverage | not started | Medium | The journey every real user takes is not tested end to end. |
+| R8 | Real first-run E2E coverage | complete | Medium | The journey every real user takes is not tested end to end. |
 | R9 | Resolve the frequency question | complete | Small | Users answer a question that changes nothing. |
 | R10 | Reframe the product promise | complete | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
 | R11 | Price each step by the model it names | complete | Medium | Owner found Lean priced above Balanced. Cost was blind to which mode a step uses, so effort alone decided the number. |
 | R12 | Name the lean style by what it actually does | complete | Small | The lean style was labelled "Save time and cost". It weights speed lower than balanced does and leans on human review, so it promised the one axis it does not deliver. |
 
-Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → ~~R7~~ → ~~R6~~ → ~~R9~~ → R8.
+Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → ~~R7~~ → ~~R6~~ → ~~R9~~ → ~~R8~~. All thirteen chunks are complete.
 
-R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 installed the compiler feedback loop that will catch the next dead branch, and R7 replaced the last developer-facing screen with a real one. R6 gave the app a way to admit its model knowledge is ageing. R9 made the frequency question honest. R8 is the last one, and it is the only remaining chunk about whether the tests prove what they claim.
+R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 installed the compiler feedback loop that will catch the next dead branch, and R7 replaced the last developer-facing screen with a real one. R6 gave the app a way to admit its model knowledge is ageing. R9 made the frequency question honest, and R8 closed the last gap by testing the journey a real user takes rather than one assembled from a fixture. The queue is finished.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -648,7 +648,7 @@ Worth noting for the next deploy: this is user-visible, so it is not live until 
 
 ## Chunk R8 - Real First-Run E2E Coverage
 
-Status: not started
+Status: complete - 2026-07-25T16:58:01-06:00
 Budget class: Medium
 
 Objective:
@@ -684,6 +684,28 @@ Validation:
 Stop condition:
 
 Stop at one cold-path test. Do not restructure the E2E suite.
+
+Acceptance Result, 2026-07-25T16:58:01-06:00: met.
+
+One new Playwright test, no IndexedDB injection anywhere in it, walking the path a real person takes: open the
+app, describe a task in free text, add ChatGPT Plus through the picker, route it, save it, and open the saved
+decision card. Nothing was restructured; the five existing tests are untouched and still pass.
+
+It also folds in the fresh-install assertion the chunk suggested once R3 landed. The test routes **before** adding
+any tool and asserts the app says "You have not added any AI tools yet, so this plan is you doing the work by
+hand" - then adds a tool via the notice's own "Add my AI tools" button and asserts that message is gone on the
+second run. Both halves of R3's honesty claim are now covered by a test that reaches them the way a user does.
+
+The tool-naming assertion is real, not incidental. It was verified with a negative control: swapping ChatGPT for
+Claude in both assertions makes the test fail on the stage guidance locator and on the decision card Markdown.
+That matters because the whole point of the chunk is that routing assertions had only ever run against a
+hand-built inventory - an assertion that passes regardless of which tool was picked would have reproduced the
+defect in a new place.
+
+The free-text description is deliberately not a shortcut template. The existing routing test uses "Use shortcut
+Draft public-facing copy"; this one types a sentence a person would actually write about messy meeting notes, so
+the intake parsing is exercised rather than bypassed.
+
 
 ---
 
@@ -1044,11 +1066,18 @@ Not changed, deliberately:
 | 2026-07-25T16:54:26-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. The My AI Tools stable-layout case still passes with the frequency control unchanged in place. |
 | 2026-07-25T16:54:26-06:00 | `npm run scan:web-rc`; `git diff --check`; `bash scripts/governance-preflight.sh` | pass | No release-blocking findings; whitespace check exit 0 with the usual Windows LF-to-CRLF notices; governance preflight 0 warnings after R9. |
 
+| 2026-07-25T16:58:01-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 7 tests, up from 6. The new cold-path test runs in under a second and needs no fixture. |
+| 2026-07-25T16:58:01-06:00 | Negative control on the new test | pass | Swapping ChatGPT for Claude in the two tool-naming assertions fails the test on both the stage guidance locator and the decision card Markdown, so the assertion is not incidentally true. |
+| 2026-07-25T16:58:01-06:00 | `npm run test`; `npm run build` | pass | 15 files, 143 tests unchanged - R8 adds no unit tests; production build clean. |
+| 2026-07-25T16:58:01-06:00 | `npm run scan:web-rc`; `git diff --check`; `bash scripts/governance-preflight.sh` | pass | No release-blocking findings; whitespace check exit 0 with the usual Windows LF-to-CRLF notices; governance preflight 0 warnings after R8. |
+
 ## Next Handoff
 
-R0, R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, and R12 are complete as of 2026-07-25T16:54:26-06:00. R0 shipped the first eight of those to production; **R6 and R7 are not deployed**. R7 is user-visible, so the live site still shows the developer placeholder on the Help tab until someone runs the deploy runbook at `docs/2026-07-09-cloudflare-deploy-turnover.md`. That runbook is proven rather than theoretical as of the R0 deploy, and the deploy is an owner decision, not something a coder chunk should take on its own.
+**All thirteen chunks are complete as of 2026-07-25T16:58:01-06:00.** R0 through R12. R0 shipped the first eight of those to production; **R6 and R7 are not deployed**. R7 is user-visible, so the live site still shows the developer placeholder on the Help tab until someone runs the deploy runbook at `docs/2026-07-09-cloudflare-deploy-turnover.md`. That runbook is proven rather than theoretical as of the R0 deploy, and the deploy is an owner decision, not something a coder chunk should take on its own.
 
-Next coder chunk is R8, the last one: real first-run E2E coverage. It is test work, so it adds nothing to the pending deploy.
+There is no next coder chunk. The 2026-07-25 audit queue is finished.
+
+**The open item is a deploy, and it is the owner's call.** R6, R7, R8, and R9 landed after the R0 deploy. R7 is user-visible: the live site still shows the developer placeholder on the Help tab. The runbook is `docs/2026-07-09-cloudflare-deploy-turnover.md` and it is proven rather than theoretical. Alongside the hosted smoke it asks for human eyes on wording the E2E suite cannot judge - routing detail visible by default, route selection and save panel naming the chosen route, followed-choice impact incrementing, ordinary planning language staying out of app-build routing, and now the new Help screen reading as plain language.
 
 R9 chose option 1 and left option 2 open. If a familiarity tie-break is ever wanted, the removed `rank` and `everydayToolFrequencyRank` are in this commit's history, and the condition still holds: the tie-break must be visible in the route's selection reasons, because "the tool you already use most wins" is the habit this product exists to counter. The guard test in `routeCandidates.test.ts` is what would fail first, and it should be updated deliberately rather than deleted.
 
