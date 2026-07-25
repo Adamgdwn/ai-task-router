@@ -1,23 +1,37 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.0.0
-Status: active
+Version: 1.1.0
+Status: resolved
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-09
-Next Review: During the next production deploy attempt
-Last Updated: 2026-07-09T12:41:50-06:00
-Status Updated: 2026-07-09T12:41:50-06:00
+Next Review: During the next production deploy attempt; the recovery path in this note is now proven
+Last Updated: 2026-07-25T16:28:35-06:00
+Status Updated: 2026-07-25T16:28:35-06:00
 
 ## Purpose
 
-This turnover note records the Cloudflare production deploy blocker and the next safe recovery path after the owner decided to wait until returning to a less restricted network.
+This turnover note recorded the Cloudflare production deploy blocker and the next safe recovery path after the owner decided to wait until returning to a less restricted network.
+
+**Resolved 2026-07-25T16:28:35-06:00.** The preferred recovery path worked on the first attempt from the owner's home network. Keep this note as the runbook for the next deploy and as the record of what the failure actually was.
 
 Use this note with the active pathway, [2026-07-09-current-build-pathway.md](2026-07-09-current-build-pathway.md), when resuming production deployment of the latest pushed `main`.
 
-## Current State
+## Outcome
+
+| Item | Result |
+|---|---|
+| Root cause | Network location only. Cloudflare's token location policy did not include public IP `184.67.69.66`. |
+| Fix | None applied. The same token, the same secure env file, and the same `wrangler pages deploy` command shape succeeded unchanged from public IP `70.65.205.71`. |
+| Deployed | Source `ab329e5` to `https://7c570b1d.ai-task-router.pages.dev`, Environment `Production`, Branch `main`, at 2026-07-25T16:28:35-06:00. |
+| Token changes | None. The token was not broadened, reissued, or allowlisted, and no app code was changed. |
+| Attempts | One, per this note's stop rule. |
+
+If a future deploy hits `9109` again, the token's allowed-IP list is the thing to look at first, and recovery option 4 below (CI-based deploys with a stable egress) is the durable fix.
+
+## Current State As Of The Blocker
 
 | Item | Status | Notes |
 |---|---|---|

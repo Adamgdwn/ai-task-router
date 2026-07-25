@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.8.0
+Version: 1.9.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
 Next Review: When chunk R7 completes or the owner reprioritises
-Last Updated: 2026-07-25T11:07:22-06:00
-Status Updated: 2026-07-25T11:07:22-06:00
+Last Updated: 2026-07-25T16:28:35-06:00
+Status Updated: 2026-07-25T16:28:35-06:00
 
 ## Purpose
 
@@ -58,7 +58,7 @@ Close-out for each chunk:
 
 | Order | Chunk | Status | Budget | Why it matters |
 |---:|---|---|---|---|
-| R0 | Deploy current `main` | blocked - operator | Small | The fixes already written are not in front of users. |
+| R0 | Deploy current `main` | complete | Small | The fixes already written are not in front of users. |
 | R1 | Artifacts follow the chosen route | complete | Medium | Correctness: the saved card currently documents a different plan than the user accepted. |
 | R2 | Honest impact numbers | complete | Medium | Credibility: the app currently credits users with savings they did not make. |
 | R3 | First-run honesty | complete | Small | A new user with no tools gets a confident answer built on an empty inventory. |
@@ -72,7 +72,7 @@ Close-out for each chunk:
 | R11 | Price each step by the model it names | complete | Medium | Owner found Lean priced above Balanced. Cost was blind to which mode a step uses, so effort alone decided the number. |
 | R12 | Name the lean style by what it actually does | complete | Small | The lean style was labelled "Save time and cost". It weights speed lower than balanced does and leans on human review, so it promised the one axis it does not deliver. |
 
-Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → R7 → R6 → R9 → R8.
+Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → R7 → R6 → R9 → R8.
 
 R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 is done and installed the compiler feedback loop that will catch the next dead branch; R7 is next, and it is the only remaining chunk a user can actually bump into.
 
@@ -82,7 +82,7 @@ Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and 
 
 ## Chunk R0 - Deploy Current `main`
 
-Status: blocked - operator
+Status: complete - 2026-07-25T16:28:35-06:00
 Budget class: Small
 
 This is operator work, not coder work. No code changes.
@@ -92,6 +92,39 @@ Production serves `9639840`. Current `main` is `59dd849`. The undeployed delta i
 Follow [2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) exactly. Do not retry from public IP `184.67.69.66`.
 
 Note: `npm audit --audit-level=moderate` now reports 1 high finding (postcss, build-time only). The turnover checklist includes that command. Either clear it in R5 first or record the finding and proceed; it is a dev-dependency advisory, not a shipped-code risk.
+
+Acceptance Result, 2026-07-25T16:28:35-06:00: met.
+
+The blocker was network location and nothing else. The same token, the same secure env file, and the same
+`wrangler pages deploy` command shape that Cloudflare rejected twice with code `9109` from public IP
+`184.67.69.66` succeeded on the first attempt from the owner's home network at public IP `70.65.205.71`. No token was
+reissued or broadened, no IP was allowlisted, and no app code was changed - which is what the turnover note
+required, since this was an operator/auth-location problem rather than a build artifact problem.
+
+Deployed source `ab329e5` to `https://7c570b1d.ai-task-router.pages.dev`, confirmed `Environment: Production`, `Branch: main` by
+`wrangler pages deployment list`, ahead of `ef92b270` from `9639840`. That closes a 16-commit undeployed delta.
+Production now carries the route-selection UI, visible routing detail, and the completed work from R1, R2, R3,
+R4, R5, R10, R11, and R12 - the remediation queue is visible to users for the first time.
+
+Pre-deploy checklist ran clean: governance preflight 0 warnings, `npm audit --audit-level=moderate` 0
+vulnerabilities, 134 tests across 14 files, production build clean, `npm run scan:web-rc` no release-blocking
+findings. The postcss high finding noted against this chunk was cleared by R5, so there was nothing to record
+and proceed on.
+
+Hosted smoke passed on the canonical URL: root, manifest, and service worker all HTTP 200, and all 6 Chromium
+E2E tests passed against `https://ai-task-router.pages.dev`.
+
+One thing worth knowing for next time: the first canonical root fetch returned the **previous** bundle from a
+stale edge-cache hit, while the immutable deployment URL served the correct one. A cache-busted refetch showed
+the new bundle. The same false alarm is already in the pathway validation log from 2026-07-08. Check the
+immutable deployment URL before concluding a deploy did not land.
+
+Still owner-facing rather than automated: the hosted smoke focus list in the turnover note asks a human to
+confirm routing detail is visible by default, that route selection and the save panel name the chosen route,
+that followed-choice impact increments, and that ordinary planning language stays out of app-build routing.
+The E2E suite covers intake through save and export, but it does not judge the wording. Worth ten minutes on
+the live site.
+
 
 ---
 
@@ -886,7 +919,7 @@ Not changed, deliberately:
 
 ## Next Handoff
 
-R1, R2, R3, R4, R5, R10, R11, and R12 are complete as of 2026-07-25T11:07:22-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it still has seven chunks' worth of user-visible fixes waiting behind it, since R5 changed nothing a user sees.
+R0, R1, R2, R3, R4, R5, R10, R11, and R12 are complete as of 2026-07-25T16:28:35-06:00. R0 shipped the other eight to production, so `main` and the live site now agree and no completed work is sitting invisible. Any future user-visible chunk needs its own deploy; the runbook is `docs/2026-07-09-cloudflare-deploy-turnover.md` and it is now proven rather than theoretical.
 
 Next coder chunk is R7, the help screen. It is the last remaining item a user can actually walk into: a developer placeholder sitting in production nav. R6, R9, and R8 follow and can be reordered freely.
 

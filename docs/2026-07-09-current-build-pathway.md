@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.6.7
+Version: 1.6.8
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-25
 Next Review: During the next substantial build session
-Last Updated: 2026-07-25T10:33:23-06:00
-Status Updated: 2026-07-25T09:40:19-06:00
+Last Updated: 2026-07-25T16:28:35-06:00
+Status Updated: 2026-07-25T16:28:35-06:00
 
 ## Purpose
 
@@ -31,14 +31,14 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://ef92b270.ai-task-router.pages.dev` from source `9639840` includes the average-person routing probe fix, routing-feedback fix, and prior PWA cache-bust fix. |
+| Browser/PWA app | live and current | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://7c570b1d.ai-task-router.pages.dev` from source `ab329e5`. This is the first production deploy since `9639840` and carries 16 commits, including the audit remediation work from R1, R2, R3, R4, R5, R10, R11, and R12. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Public desktop downloads | held | Windows Store/MSIX is the preferred first trusted Windows path; ordinary-user downloads remain gated. |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Production deploy blocked | Current `main` includes commit `f8e0a40`, which removes the remaining stage-path disclosure affordance, plus docs-only deploy blocker and Chunk 4 review notes. Release checks passed from HEAD before the latest docs-only review pass, but Cloudflare still rejected the production deploy token from public IP `184.67.69.66` with code `9109`. The owner decided to wait until returning to the home network because the current network is restrictive. Use the turnover note at `docs/2026-07-09-cloudflare-deploy-turnover.md` for the next deploy attempt from an allowed IP/session. |
+| Active chunk | Production deploy unblocked and shipped | Chunk R0 is complete as of 2026-07-25T16:28:35-06:00. The blocker was network location, not the token or the build: Cloudflare rejected the token from public IP `184.67.69.66` with code `9109`, and the same token, command shape, and secure env file succeeded unchanged from the owner's home network at public IP `70.65.205.71`. Production now serves source `ab329e5`. Nothing in the app, the build, or the token was modified to make this work. |
 
 ## Product Boundary
 
@@ -93,7 +93,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 4 | Reviewed methodology page | draft complete; owner-review ready | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
 | 5 | Opt-in local estimator UI | paused | Draft complete | Optional enhancement; only start if the owner explicitly wants a local impact-estimate surface. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
-| 7 | Audit remediation queue (R0-R12) | in progress | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. R1 (artifacts follow the chosen route), R2 (honest impact numbers), R3 (first-run honesty), R4 (clean the copied prompt text), R10 (reframe the product promise), R11 (price each step by the model it names), and R12 (name the lean style by what it actually does), and R5 (dead code and lint feedback loop) are complete; R7 is next. The docs now say the app recommends a tier and a shape of work, not a vendor, and use one impact vocabulary shared with the app UI. Each step is now priced against the model that step tells the user to open, and the per-step figures are shown so a route total can be checked against its parts. Cost figures are now API-equivalent per-token estimates shown beside what is actually billed, and no surface claims the user saved money. R5 removed 388 lines of unreachable code and turned on `noUnusedLocals` and `noUnusedParameters`, so unused code now fails `npm run build`; it changed nothing a user sees. Owner decisions on impact framing and product promise are recorded; no chunk is blocked on input. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
+| 7 | Audit remediation queue (R0-R12) | in progress | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. R0 (deploy current `main`), R1 (artifacts follow the chosen route), R2 (honest impact numbers), R3 (first-run honesty), R4 (clean the copied prompt text), R10 (reframe the product promise), R11 (price each step by the model it names), and R12 (name the lean style by what it actually does), and R5 (dead code and lint feedback loop) are complete; R7 is next. R0 shipped all of the above to production, so the remediation work is now visible to users rather than sitting on `main`. The docs now say the app recommends a tier and a shape of work, not a vendor, and use one impact vocabulary shared with the app UI. Each step is now priced against the model that step tells the user to open, and the per-step figures are shown so a route total can be checked against its parts. Cost figures are now API-equivalent per-token estimates shown beside what is actually billed, and no surface claims the user saved money. R5 removed 388 lines of unreachable code and turned on `noUnusedLocals` and `noUnusedParameters`, so unused code now fails `npm run build`; it changed nothing a user sees. Owner decisions on impact framing and product promise are recorded; no chunk is blocked on input. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
 
 ## Plan Chunks
 
@@ -465,6 +465,13 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-09T10:14:22-06:00 | Direct-link fallback check | blocked | `ssh linux-direct` to `10.77.77.2` timed out and the Windows direct-link status script could not find the configured `Ethernet 2` adapter, so no alternate allowed-location deploy host was reachable from this session. |
 | 2026-07-09T11:06:44-06:00 | `bash scripts/governance-preflight.sh`; Chunk 4 methodology claim-boundary `rg`; `git diff --check` | pass | Governance preflight reported 0 warnings; methodology review found route-contract, saved-choice, source-snapshot, manual-use, and forbidden-claim boundary language; whitespace check reported only normal Windows LF-to-CRLF notices. |
 | 2026-07-09T12:41:50-06:00 | `bash scripts/governance-preflight.sh`; deploy turnover doc review; `git diff --check` | pass | Governance preflight reported 0 warnings before boxing up the Cloudflare deploy blocker. Turnover note records the blocked public IP, Cloudflare code `9109`, secure-token handling, allowed-location recovery options, deploy command shape, and hosted smoke checklist. |
+| 2026-07-25T16:28:35-06:00 | `git status --short --branch`; `git pull --ff-only`; `bash scripts/governance-preflight.sh` | pass | Working tree clean, `main` level with `origin/main`, governance preflight 0 warnings before the deploy attempt. |
+| 2026-07-25T16:28:35-06:00 | `npm audit --audit-level=moderate`; `npm run test`; `npm run build`; `npm run scan:web-rc` | pass | 0 vulnerabilities (the postcss high finding recorded against R0 was cleared by R5); Vitest 14 files and 134 tests; production build from `ab329e5` with the existing Vite chunk-size warning only; web release-candidate scan found no release-blocking findings. |
+| 2026-07-25T16:28:35-06:00 | Public IP confirmed before retry | pass | Current public IP `70.65.205.71` differs from the blocked `184.67.69.66`, which is the precondition the turnover note sets before any retry. One attempt only, per the note's stop rule. |
+| 2026-07-25T16:28:35-06:00 | `npx --yes wrangler pages deploy dist --project-name ai-task-router --branch main --commit-hash ab329e5 --commit-message ... --env-file ...` | pass | Deployed source `ab329e5` to `https://7c570b1d.ai-task-router.pages.dev`; 3 new files uploaded, 6 already present. Same token, same command shape, same secure env file as the two blocked attempts; only the network location changed. Token values were not printed. |
+| 2026-07-25T16:28:35-06:00 | `npx --yes wrangler pages deployment list --project-name ai-task-router` | pass | Confirms the new deployment is `Environment: Production`, `Branch: main`, `Source: ab329e5`, and is the most recent deployment ahead of `ef92b270` from `9639840`. |
+| 2026-07-25T16:28:35-06:00 | Canonical hosted smoke on `https://ai-task-router.pages.dev` | pass | Root, `/manifest.webmanifest`, and `/service-worker.js` all returned HTTP 200. First canonical root fetch returned the previous bundle from a stale edge-cache hit; a cache-busted no-cache refetch returned the `ab329e5` bundle, and the immutable deployment URL served the correct bundle throughout. |
+| 2026-07-25T16:28:35-06:00 | Hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 Chromium tests passed against the canonical production URL, covering first-run setup, My AI Tools, the stale five-row migration, task intake through save and export with feedback and no provider execution, and narrow-viewport layout. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 

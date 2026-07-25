@@ -1,6 +1,6 @@
 # 2026-07-09T03:04:01+00:00 - Start Here
 
-Last Updated: 2026-07-09T12:41:50-06:00
+Last Updated: 2026-07-25T16:28:35-06:00
 Status: draft
 Status Updated: 2026-07-09T12:41:50-06:00
 Owner: Project Owner
@@ -27,7 +27,7 @@ Current priorities:
 
 Default live build route: [docs/2026-07-09-current-build-pathway.md](docs/2026-07-09-current-build-pathway.md).
 
-Current coder queue: [docs/2026-07-25-audit-remediation-plan.md](docs/2026-07-25-audit-remediation-plan.md), chunks R0 through R12 from the 2026-07-25 functional audit. Each chunk names its own context load. R1, R2, R3, R4, R5, R10, R11, and R12 are complete; start at R7. Both owner decisions are recorded in that file, so no chunk is waiting on input. Note that R5 turned on `noUnusedLocals` and `noUnusedParameters`, so unused code now fails `npm run build`.
+Current coder queue: [docs/2026-07-25-audit-remediation-plan.md](docs/2026-07-25-audit-remediation-plan.md), chunks R0 through R12 from the 2026-07-25 functional audit. Each chunk names its own context load. R0, R1, R2, R3, R4, R5, R10, R11, and R12 are complete; start at R7. Both owner decisions are recorded in that file, so no chunk is waiting on input. Note that R5 turned on `noUnusedLocals` and `noUnusedParameters`, so unused code now fails `npm run build`.
 
 Do not load superseded pathway archives during normal startup. Use the active pathway above for current chunks, validation expectations, and handoff.
 
@@ -57,7 +57,7 @@ Risk-triggering work includes production, deployment, authentication, authorizat
 
 ## Agent Handoff
 
-The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Latest production deployment: `https://ef92b270.ai-task-router.pages.dev` from source `9639840`. Current `main` includes functional commit `f8e0a40`, which removes the remaining stage-path disclosure affordance, plus docs-only deploy blocker, Chunk 4 methodology review notes, and the Cloudflare deploy turnover note at `docs/2026-07-09-cloudflare-deploy-turnover.md`; production deploy is blocked until Cloudflare accepts the secure token from an allowed location/session. The latest retry from public IP `184.67.69.66` failed with Cloudflare code `9109`, and the owner plans to retry from the home network. The direct-link Linux fallback was unreachable. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`. The latest routing-feedback fix makes chart points expose hover/focus values, makes routing detail show concrete decision/reason/check/upgrade fields, makes complex build-planning tasks split the build stage into concrete build items instead of collapsing into prompting only, and keeps ordinary planning wording like "build an itinerary" out of app-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. The PWA service worker uses the `ai-task-router-pwa-v2` cache and network-first same-origin asset fetching so returning browsers do not prefer stale app bundles after a release.
+The browser/PWA app is live at `https://ai-task-router.pages.dev/`, the Old Skool AI public hub is live at `https://oldskoolai.com/ai-task-router/`, and public desktop downloads remain held. Latest production deployment: `https://7c570b1d.ai-task-router.pages.dev` from source `ab329e5`, deployed 2026-07-25T16:28:35-06:00. Production and `main` now agree; no completed work is sitting undeployed. The Cloudflare deploy blocker is resolved — the token was never the problem, only the network location it was used from, and the recovery path in `docs/2026-07-09-cloudflare-deploy-turnover.md` worked unchanged from the home network. Use that note as the deploy runbook for the next release. Suggested-stage guidance currently lives in `src/domain/routing/stageGuidance.ts` and `src/ui/screens/StageGuidancePanel.tsx`. The latest routing-feedback fix makes chart points expose hover/focus values, makes routing detail show concrete decision/reason/check/upgrade fields, makes complex build-planning tasks split the build stage into concrete build items instead of collapsing into prompting only, and keeps ordinary planning wording like "build an itinerary" out of app-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. The PWA service worker uses the `ai-task-router-pwa-v2` cache and network-first same-origin asset fetching so returning browsers do not prefer stale app bundles after a release.
 
 The compact active pathway now lives in `docs/2026-07-09-current-build-pathway.md`. Superseded pathway archives are not part of startup or normal work routing. The core web/PWA route is ready for owner testing with Chunks 1 through 4 complete enough for the current web product decision; Chunk 4 is owner-review ready and now includes the user-visible route contract plus saved-choice impact boundaries. Chunk 5, the opt-in local estimator UI slice, is paused until the owner explicitly wants that extra surface. Chunk 6 remains held.
 
