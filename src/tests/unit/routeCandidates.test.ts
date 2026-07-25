@@ -680,4 +680,52 @@ describe("route candidate generation", () => {
       expect(mode.pricingAnchorId).not.toBeNull();
     }
   });
+
+  /**
+   * The setup screen asks how often you use each tool and now says plainly that the answer does not
+   * change any recommendation. This is the assertion behind that promise: flip every tool from its
+   * least-used setting to its most-used one and the routing decisions must come out identical.
+   *
+   * Familiarity is not evidence that a tool suits the task, so "the one you already use most" must
+   * never win a route on that basis alone.
+   */
+  it("routes identically no matter how often the user says they use each tool", () => {
+    function inventoryAtFrequency(frequencyId: "rarely" | "hourly"): ModelInventoryItem[] {
+      return [
+        createEverydayToolModel({ id: "user-free-small-model", providerId: "gemini", accountId: "basic", frequencyId }),
+        createEverydayToolModel({ id: "user-mid-synthesis-model", providerId: "chatgpt", accountId: "plus", frequencyId }),
+        createEverydayToolModel({ id: "user-research-model", providerId: "perplexity", accountId: "pro", frequencyId }),
+      ];
+    }
+
+    const task = buildTask({ id: "task-frequency-neutrality" });
+    const rarelyUsed = generateForTask(task, inventoryAtFrequency("rarely")).candidateResult;
+    const constantlyUsed = generateForTask(task, inventoryAtFrequency("hourly")).candidateResult;
+
+    // Labels legitimately echo the user's own answer ("ChatGPT: Plus - Daily"), so compare the
+    // decisions rather than the display strings.
+    function decisionsOf(result: RouteCandidateGenerationResult) {
+      return {
+        candidates: result.candidates.map((candidate) => ({
+          strategy: candidate.strategy,
+          estimatedCostLevel: candidate.estimatedCostLevel,
+          estimatedEffortLevel: candidate.estimatedEffortLevel,
+          warnings: candidate.warnings,
+          steps: candidate.steps.map((step) => ({
+            kind: step.kind,
+            modelId: step.modelId,
+            modeId: step.modeId,
+            requiredPermissionLevel: step.requiredPermissionLevel,
+          })),
+        })),
+        unavailable: result.unavailable.map((candidate) => candidate.strategy),
+      };
+    }
+
+    // Guard against a vacuous pass: there has to be real routing to compare.
+    expect(rarelyUsed.candidates.length).toBeGreaterThan(0);
+    expect(rarelyUsed.candidates.some((candidate) => candidate.steps.length > 0)).toBe(true);
+
+    expect(decisionsOf(rarelyUsed)).toEqual(decisionsOf(constantlyUsed));
+  });
 });

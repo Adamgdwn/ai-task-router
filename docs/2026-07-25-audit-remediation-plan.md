@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.11.0
+Version: 1.12.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
-Next Review: When chunk R9 completes or the owner reprioritises
-Last Updated: 2026-07-25T16:47:39-06:00
-Status Updated: 2026-07-25T16:47:39-06:00
+Next Review: When chunk R8 completes or the owner reprioritises
+Last Updated: 2026-07-25T16:54:26-06:00
+Status Updated: 2026-07-25T16:54:26-06:00
 
 ## Purpose
 
@@ -67,14 +67,14 @@ Close-out for each chunk:
 | R6 | Catalog staleness signal | complete | Small | Hardcoded model names decay monthly with nothing to notice it. |
 | R7 | Help screen | complete | Small | A developer placeholder is live in production nav. |
 | R8 | Real first-run E2E coverage | not started | Medium | The journey every real user takes is not tested end to end. |
-| R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
+| R9 | Resolve the frequency question | complete | Small | Users answer a question that changes nothing. |
 | R10 | Reframe the product promise | complete | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
 | R11 | Price each step by the model it names | complete | Medium | Owner found Lean priced above Balanced. Cost was blind to which mode a step uses, so effort alone decided the number. |
 | R12 | Name the lean style by what it actually does | complete | Small | The lean style was labelled "Save time and cost". It weights speed lower than balanced does and leans on human review, so it promised the one axis it does not deliver. |
 
-Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → ~~R7~~ → ~~R6~~ → R9 → R8.
+Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → ~~R7~~ → ~~R6~~ → ~~R9~~ → R8.
 
-R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 installed the compiler feedback loop that will catch the next dead branch, and R7 replaced the last developer-facing screen with a real one. R6 gave the app a way to admit its model knowledge is ageing. R9 and R8 remain, both test and hygiene work.
+R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 installed the compiler feedback loop that will catch the next dead branch, and R7 replaced the last developer-facing screen with a real one. R6 gave the app a way to admit its model knowledge is ageing. R9 made the frequency question honest. R8 is the last one, and it is the only remaining chunk about whether the tests prove what they claim.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -689,7 +689,7 @@ Stop at one cold-path test. Do not restructure the E2E suite.
 
 ## Chunk R9 - Resolve The Frequency Question
 
-Status: not started
+Status: complete - 2026-07-25T16:54:26-06:00
 Budget class: Small
 
 Objective:
@@ -727,6 +727,44 @@ Validation:
 Stop condition:
 
 Stop at one option. Do not extend into other setup fields.
+
+Acceptance Result, 2026-07-25T16:54:26-06:00: met by option 1, the chunk's own recommendation. Routing output is unchanged.
+
+The audit understated the problem slightly. Frequency was not only feeding two dead functions - it was also
+computing `preferredModelId` in setup preferences on every tool change, add, and remove. Nothing reads
+`preferredModelId`: `localStore.ts` validates and prunes it, `useSetupConfiguration.ts` normalises it, and no
+routing code ever asks for it. So the app was silently deciding which tool the user "prefers", writing it to
+browser storage, and never using it. That is worse than a question that does nothing, because the next reader
+would reasonably assume it mattered.
+
+Removed: the three `updateSetupPreferences` calls that wrote it, `preferredToolIdFromFrequency`, and
+`everydayToolFrequencyRank` with the `rank` field it read. The `updateSetupPreferences` calls were redundant
+anyway - `updateModelInventory` already normalises preferences against the new inventory, so removing them
+changes no state and no dirty-flag behaviour. `preferredModelId` stays in the store schema as an optional field
+so pre-R9 saved records keep parsing; nothing writes it any more.
+
+Kept and made honest, which is the substance of option 1:
+
+- The tool inventory boundary note now separates the two questions: "Account level shapes what gets recommended;
+  how often is your own note about your habits and changes nothing about the recommendation."
+- The method note says why, not just what: frequency is deliberately kept out of the tool's capability profile,
+  because the tool you reach for most is not evidence that it suits the task, and treating it as evidence is the
+  habit this app exists to counter.
+- A comment on `EverydayToolFrequencyOption` records the same reasoning, names the removed `rank`, and states the
+  condition on option 2 - if a tie-break by familiarity is ever wanted, it has to be visible in the route's
+  selection reasons.
+
+The frequency answer still does two real things, which is why option 3 was wrong: it appears in the tool's label
+("ChatGPT: Plus - Daily") so a user can tell two saved accounts apart, and it is kept in the saved record.
+
+Guard test, in `routeCandidates.test.ts`: build the same three-tool inventory twice, once with every tool set to
+"Rarely" and once with every tool set to "Many times a day", and assert the routing decisions are identical -
+strategy, cost and effort levels, warnings, and each step's kind, model, mode, and permission level. Display
+labels are excluded from the comparison on purpose, since they legitimately echo the user's own answer. The test
+also asserts there are candidates with steps, so it cannot pass by comparing two empty results.
+
+Not done, per the stop condition: option 2 was not taken, and no other setup field was touched.
+
 
 ---
 
@@ -1000,11 +1038,19 @@ Not changed, deliberately:
 | 2026-07-25T16:47:39-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. No E2E change needed: the notice is correctly absent at today's catalog age, and the fake-clock cases live in the unit suite. |
 | 2026-07-25T16:47:39-06:00 | `npm run scan:web-rc`; `git diff --check`; `bash scripts/governance-preflight.sh` | pass | No release-blocking findings; whitespace check exit 0 with the usual Windows LF-to-CRLF notices; governance preflight 0 warnings after R6. |
 
+| 2026-07-25T16:54:26-06:00 | `npx tsc --noEmit` | pass | Clean. Caught a first draft of the neutrality test asserting two fields that do not exist on `RouteCandidate` and `RouteStep`; Vitest had passed it, because Vitest does not typecheck. |
+| 2026-07-25T16:54:26-06:00 | `npm run test` | pass | 15 files, 143 tests, after R9. Up from 141; the routing-neutrality guard plus an App assertion that the setup screen states the frequency answer changes no recommendation. |
+| 2026-07-25T16:54:26-06:00 | `npm run build` | pass | TypeScript and Vite build clean; existing large chunk warning remains. |
+| 2026-07-25T16:54:26-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. The My AI Tools stable-layout case still passes with the frequency control unchanged in place. |
+| 2026-07-25T16:54:26-06:00 | `npm run scan:web-rc`; `git diff --check`; `bash scripts/governance-preflight.sh` | pass | No release-blocking findings; whitespace check exit 0 with the usual Windows LF-to-CRLF notices; governance preflight 0 warnings after R9. |
+
 ## Next Handoff
 
-R0, R1, R2, R3, R4, R5, R6, R7, R10, R11, and R12 are complete as of 2026-07-25T16:47:39-06:00. R0 shipped the first eight of those to production; **R6 and R7 are not deployed**. R7 is user-visible, so the live site still shows the developer placeholder on the Help tab until someone runs the deploy runbook at `docs/2026-07-09-cloudflare-deploy-turnover.md`. That runbook is proven rather than theoretical as of the R0 deploy, and the deploy is an owner decision, not something a coder chunk should take on its own.
+R0, R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, and R12 are complete as of 2026-07-25T16:54:26-06:00. R0 shipped the first eight of those to production; **R6 and R7 are not deployed**. R7 is user-visible, so the live site still shows the developer placeholder on the Help tab until someone runs the deploy runbook at `docs/2026-07-09-cloudflare-deploy-turnover.md`. That runbook is proven rather than theoretical as of the R0 deploy, and the deploy is an owner decision, not something a coder chunk should take on its own.
 
-Next coder chunk is R9. R8 follows. Both are test and hygiene work with no user-visible surface, so neither adds urgency to the pending deploy.
+Next coder chunk is R8, the last one: real first-run E2E coverage. It is test work, so it adds nothing to the pending deploy.
+
+R9 chose option 1 and left option 2 open. If a familiarity tie-break is ever wanted, the removed `rank` and `everydayToolFrequencyRank` are in this commit's history, and the condition still holds: the tie-break must be visible in the route's selection reasons, because "the tool you already use most wins" is the habit this product exists to counter. The guard test in `routeCandidates.test.ts` is what would fail first, and it should be updated deliberately rather than deleted.
 
 The catalog now has a review cadence, recorded as R-009 in `docs/risks/risk-register.md`: re-review every 90 days, next due 2026-10-03. Refreshing catalog contents is that deliberate pass, not something to fold into an unrelated chunk. If the review happens, move `everydayToolCatalogReviewedAt` and `impactCatalogReviewedAt` together, or the freshness module will keep measuring from whichever one lagged.
 

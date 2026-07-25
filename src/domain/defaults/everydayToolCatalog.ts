@@ -49,10 +49,16 @@ export type EverydayToolAccountOption = {
   note: string;
 };
 
+/**
+ * How often a user reaches for a tool is recorded and shown in the tool label, and it is deliberately
+ * not scored. There was a `rank` here and an `everydayToolFrequencyRank` reader for it; both were
+ * removed in chunk R9. Familiarity is not evidence that a tool suits the task, and letting it break a
+ * tie would quietly teach the habit this app exists to counter. If that tradeoff is ever reconsidered,
+ * the tie-break has to be visible in the route's selection reasons.
+ */
 export type EverydayToolFrequencyOption = {
   id: EverydayToolFrequencyId;
   label: string;
-  rank: number;
   note: string;
 };
 
@@ -1297,37 +1303,31 @@ export const everydayToolFrequencyOptions = [
   {
     id: "not-selected",
     label: "Pick an app first",
-    rank: 0,
     note: "No usage frequency has been selected.",
   },
   {
     id: "hourly",
     label: "Many times a day",
-    rank: 5,
     note: "This is one of the user's most familiar tools.",
   },
   {
     id: "daily",
     label: "Daily",
-    rank: 4,
     note: "The user reaches for this tool most days.",
   },
   {
     id: "weekly",
     label: "A few times a week",
-    rank: 3,
     note: "The user uses this tool regularly.",
   },
   {
     id: "monthly",
     label: "Now and then",
-    rank: 2,
     note: "The user knows this tool but does not rely on it daily.",
   },
   {
     id: "rarely",
     label: "Rarely",
-    rank: 1,
     note: "The user only occasionally uses this tool.",
   },
 ] satisfies EverydayToolFrequencyOption[];
@@ -1641,17 +1641,6 @@ export function isLegacyPrefilledEverydayTool(model: ModelInventoryItem): boolea
       model.label === legacyDefault.label &&
       model.provider === legacyDefault.provider,
   );
-}
-
-export function everydayToolFrequencyRank(model: ModelInventoryItem): number {
-  const selection = inferEverydayToolSelection(model);
-  const provider = getEverydayToolProvider(selection.providerId);
-  const frequencyOption =
-    provider.frequencyOptions.find((option) => option.id === selection.frequencyId) ??
-    everydayToolFrequencyOptions.find((option) => option.id === selection.frequencyId) ??
-    everydayToolFrequencyOptions[0];
-
-  return isEverydayToolSelected(model) ? frequencyOption.rank : 0;
 }
 
 export function everydayToolSummary(model: ModelInventoryItem): string {

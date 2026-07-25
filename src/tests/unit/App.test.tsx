@@ -92,6 +92,20 @@ describe("App", () => {
     expect(screen.getByText(/stored in this browser, on this device/)).toBeInTheDocument();
   });
 
+  it("says plainly that how often a tool is used does not change recommendations", async () => {
+    const user = userEvent.setup();
+
+    render(<App store={buildTestStore()} />);
+
+    await user.click(screen.getByRole("button", { name: "My AI Tools" }));
+
+    expect(
+      await screen.findByText(/how often is your own note about your habits and changes nothing about the recommendation/),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText(/the tool you reach for most is not evidence that it suits the task/)).toBeInTheDocument();
+  });
+
   it("offers browser install when the browser exposes the install prompt", async () => {
     const user = userEvent.setup();
     const prompt = vi.fn().mockResolvedValue(undefined);

@@ -7,7 +7,6 @@ import {
 import {
   applyEverydayToolSelection,
   everydayToolCatalogReviewedAt,
-  everydayToolFrequencyRank,
   everydayToolProviders,
   everydayToolSummary,
   getEverydayToolProvider,
@@ -237,9 +236,10 @@ export function ToolInventoryScreen({ definition, setup, onNextStep }: ToolInven
   return (
     <SetupScreenLayout definition={definition} setup={setup} showPrimarySaveAction={false}>
       <SetupBoundaryNote>
-        Add one AI app at a time. Pick the app, the account level you use, and how often you reach for it. Use Add
-        another tool only when you want another row. The app does not sign in, verify paid plans, call providers, or
-        store credentials.
+        Add one AI app at a time. Pick the app, the account level you use, and how often you reach for it. Account
+        level shapes what gets recommended; how often is your own note about your habits and changes nothing about the
+        recommendation. Use Add another tool only when you want another row. The app does not sign in, verify paid
+        plans, call providers, or store credentials.
       </SetupBoundaryNote>
 
       <section className="conversationCard" aria-labelledby="tool-quick-check-heading">
@@ -271,8 +271,10 @@ function ToolCatalogMethodNote() {
       <summary>How this treats tools, models, and privacy</summary>
       <ul>
         <li>
-          Each saved app becomes a simple profile: account level, use frequency, capability fit, research fit, and
-          privacy ceiling.
+          Each saved app becomes a simple profile: account level, capability fit, research fit, and privacy ceiling.
+          How often you use a tool is recorded with it but is deliberately kept out of that profile - the tool you
+          reach for most is not evidence that it suits the task, and treating it as evidence is the habit this app
+          exists to counter.
         </li>
         <li>
           The app does not read live provider model menus. Model labels are minimum capability guidance, with an upgrade
@@ -466,10 +468,6 @@ function InventoryGroup({
     }
 
     setup.updateModelInventory(nextModels);
-    setup.updateSetupPreferences({
-      ...setup.preferences,
-      preferredModelId: preferredToolIdFromFrequency(nextModels),
-    });
   }
 
   function addToolRow() {
@@ -502,10 +500,6 @@ function InventoryGroup({
     );
 
     setup.updateModelInventory(nextModels);
-    setup.updateSetupPreferences({
-      ...setup.preferences,
-      preferredModelId: preferredToolIdFromFrequency(nextModels),
-    });
   }
 
   function addDiscoveredTool(result: DesktopDiscoveryToolResult) {
@@ -545,10 +539,6 @@ function InventoryGroup({
 
     setExtraEmptyRows((currentRows) => Math.max(0, currentRows - 1));
     setup.updateModelInventory(nextModels);
-    setup.updateSetupPreferences({
-      ...setup.preferences,
-      preferredModelId: preferredToolIdFromFrequency(nextModels),
-    });
     setDesktopDiscoveryAddMessage(`${result.label} was added. Save my choices when you are ready.`);
   }
 
@@ -1097,20 +1087,6 @@ function visibleToolRows(models: ModelInventoryItem[], emptyRowsToShow: number):
   const emptyModels = models.filter((model) => !isEverydayToolSelected(model)).slice(0, emptyRowsToShow);
 
   return [...selectedModels, ...emptyModels];
-}
-
-function preferredToolIdFromFrequency(models: ModelInventoryItem[]): ModelInventoryItem["id"] | undefined {
-  const selectedModels = models.filter((model) => model.id !== "manual-human-review" && isEverydayToolSelected(model));
-
-  if (selectedModels.length === 0) {
-    return undefined;
-  }
-
-  return [...selectedModels].sort((left, right) => {
-    const frequencyComparison = everydayToolFrequencyRank(right) - everydayToolFrequencyRank(left);
-
-    return frequencyComparison || left.id.localeCompare(right.id);
-  })[0]?.id;
 }
 
 function localAccountIdForDesktopTool(toolId: DesktopDiscoveryToolResult["toolId"]): EverydayToolAccountId | undefined {
