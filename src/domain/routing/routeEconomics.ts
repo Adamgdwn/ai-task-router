@@ -60,11 +60,15 @@ export function attachRouteEconomics(
   const modelById = new Map(models.map((model) => [model.id, model]));
 
   return options.map((option) =>
-    attachEconomicsToOption(option, {
-      apiEquivalentCostUsd: estimateRouteApiEquivalentCostUsd(option, modelById, task),
-      billedCostUsd: estimateRouteCostUsd(option, modelById, task),
-      energyWh: estimateRouteEnergyWh(option, modelById, task),
-    }),
+    attachEconomicsToOption(
+      option,
+      {
+        apiEquivalentCostUsd: estimateRouteApiEquivalentCostUsd(option, modelById, task),
+        billedCostUsd: estimateRouteCostUsd(option, modelById, task),
+        energyWh: estimateRouteEnergyWh(option, modelById, task),
+      },
+      modelById,
+    ),
   );
 }
 
@@ -173,13 +177,46 @@ export function estimateRouteStepEnergyWh(
   return roundWh(estimateEnergyAnchorWh(energyAnchorId, multiplierForStep(step) * profileMultiplier));
 }
 
-function attachEconomicsToOption(option: RouteOption, basis: RouteCostBasis): RouteOption {
+/**
+ * Records what each step would meter at, what it consumes, and which reviewed anchor priced it.
+ *
+ * A route total is only worth trusting if the user can see which step carries it. On a typical
+ * balanced route the reasoning pass is roughly seventeen times the cost of the execution pass that
+ * follows it, and that ratio is the lesson — a total alone hides it.
+ */
+function attachEconomicsToStep(
+  step: RouteStep,
+  modelById: ReadonlyMap<string, ModelInventoryItem>,
+): RouteStep {
+  const model = step.modelId ? modelById.get(step.modelId) : undefined;
+  const pricingAnchorId = model ? apiEquivalentPricingAnchorIdForStep(step, model) : null;
+
+  return {
+    ...step,
+    apiEquivalentCostUsd: estimateRouteStepApiEquivalentCostUsd(step, modelById),
+    estimatedEnergyWh: estimateRouteStepEnergyWh(step, modelById),
+    ...(pricingAnchorId ? { pricingAnchorLabel: pricingAnchorLabel(pricingAnchorId) } : {}),
+  };
+}
+
+/** Reads as "OpenAI premium text API anchor" — the reference price, named so it can be checked. */
+function pricingAnchorLabel(pricingAnchorId: string) {
+  const anchor = requirePricingAnchor(pricingAnchorId);
+  return `${anchor.provider} ${anchor.model}`;
+}
+
+function attachEconomicsToOption(
+  option: RouteOption,
+  basis: RouteCostBasis,
+  modelById: ReadonlyMap<string, ModelInventoryItem>,
+): RouteOption {
   return {
     ...option,
+    steps: option.steps.map((step) => attachEconomicsToStep(step, modelById)),
     estimatedCostUsd: roundUsd(basis.billedCostUsd),
     apiEquivalentCostUsd: roundUsd(basis.apiEquivalentCostUsd),
     costEstimateBasis:
-      "The per-token figure prices a 100k-token run of these steps (75k in, 25k out) against reviewed public API list prices, including steps a plan you already pay for would cover. The billed figure counts only what a metered account would add to your bill. Subscriptions, search add-ons, taxes, caching, free tiers, and provider limits change the real bill.",
+      "The per-token figure prices a 100k-token run of these steps (75k in, 25k out) against reviewed public API list prices, including steps a plan you already pay for would cover. Each step is priced against the model that step tells you to open, so a thinking pass and a fast execution pass are not charged alike. The billed figure counts only what a metered account would add to your bill. Subscriptions, search add-ons, taxes, caching, free tiers, and provider limits change the real bill.",
     estimatedEnergyWh: roundWh(basis.energyWh),
     energyEstimateBasis:
       "Per-use compute-energy estimate using representative public inference energy anchors, with a small nonzero floor for manual or local routes because real device use is not zero. Local device energy, provider routing, media generation, caching, data-center conditions, and repeated retries can change the real footprint.",

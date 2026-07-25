@@ -623,6 +623,62 @@ describe("route card generator", () => {
     expect(premium?.estimatedEnergyWh).toBeGreaterThan(balanced?.estimatedEnergyWh ?? 0);
   });
 
+  it("prices each step by the model that step names, not by the plan it is reached through", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-plus",
+        providerId: "chatgpt",
+        accountId: "plus",
+        frequencyId: "daily",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-card-step-pricing",
+      title: "Draft a public FAQ answer",
+      requestedSourceIds: ["web"],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "balanced", models);
+
+    const card = generateRouteCard({
+      task,
+      models,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+    const balanced = card.options.find((option) => option.strategy === "balanced");
+    const promptStep = balanced?.steps.find((step) => step.workRole === "prompt-design");
+    const executionStep = balanced?.steps.find((step) => step.workRole === "execution");
+
+    expectValidRouteCard(card);
+
+    // Guard the guard: this route must really run a thinking pass and a fast pass on the same plan,
+    // or the comparison below would pass without proving anything.
+    expect(promptStep?.modeId).toBe("chatgpt-plus:prompt-reasoning");
+    expect(executionStep?.modeId).toBe("chatgpt-plus:execution-fast");
+
+    // Both modes are reached through one ChatGPT Plus subscription. They used to share a pricing
+    // anchor, which left the role's token multiplier as the only thing separating them and made the
+    // cheap execution pass price *higher* than the reasoning pass it follows.
+    expect(promptStep?.apiEquivalentCostUsd).toBeGreaterThan(executionStep?.apiEquivalentCostUsd ?? 0);
+    expect(promptStep?.estimatedEnergyWh).toBeGreaterThan(executionStep?.estimatedEnergyWh ?? 0);
+    expect(promptStep?.pricingAnchorLabel).not.toBe(executionStep?.pricingAnchorLabel);
+
+    // The anchor is named on the step so the figure can be checked rather than trusted.
+    expect(promptStep?.pricingAnchorLabel).toContain("OpenAI");
+    expect(executionStep?.pricingAnchorLabel).toContain("OpenAI");
+
+    // Step figures must add up to the route total the card advertises.
+    const stepTotal = (balanced?.steps ?? []).reduce((sum, step) => sum + (step.apiEquivalentCostUsd ?? 0), 0);
+    expect(balanced?.apiEquivalentCostUsd).toBeCloseTo(stepTotal, 3);
+  });
+
   it("keeps human approval requirements visible on card and option records", () => {
     const task = buildTask({
       id: "task-card-public-facing",

@@ -243,6 +243,12 @@ export const routeStepSchema = z
     selectionReasons: z.array(nonEmptyTextSchema).default([]),
     sourceIds: z.array(nonEmptyIdSchema).default([]),
     warnings: z.array(nonEmptyTextSchema).default([]),
+    // Per-step economics, added 2026-07-25. A route total is only trustworthy if the user can see
+    // which step carries it, so each step records what it would meter at, what it consumes, and
+    // which reviewed anchor priced it. Optional so cards saved before this date still parse.
+    apiEquivalentCostUsd: z.number().min(0).optional(),
+    estimatedEnergyWh: z.number().min(0).optional(),
+    pricingAnchorLabel: nonEmptyTextSchema.optional(),
   })
   .strict();
 

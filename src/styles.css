@@ -2263,6 +2263,12 @@ button:focus-visible {
   font-size: 0.82rem;
 }
 
+/* The per-step figures sit under the step they explain and stay quieter than the step itself. */
+.routeStepEstimate {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
 .routeSelectButton {
   align-self: end;
   background: #ffffff;

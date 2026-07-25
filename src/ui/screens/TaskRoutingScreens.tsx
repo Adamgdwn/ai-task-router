@@ -739,6 +739,25 @@ function routeBilledCostLabel(candidate: RouteOption) {
     : `about ${formatUsd(candidate.estimatedCostUsd)}`;
 }
 
+/**
+ * The per-step line that makes a route total checkable: what this one step would meter at, what it
+ * consumes, and which reviewed list price produced the figure. Naming the anchor matters — it is the
+ * difference between a number the user has to trust and one they can go and verify.
+ */
+function routeStepEstimateLabel(step: RouteOption["steps"][number]) {
+  if (step.apiEquivalentCostUsd === undefined) {
+    return "No estimate for this step";
+  }
+
+  const parts = [
+    `${formatUsd(step.apiEquivalentCostUsd)} per token`,
+    ...(step.estimatedEnergyWh === undefined ? [] : [formatWattHours(step.estimatedEnergyWh)]),
+    ...(step.pricingAnchorLabel ? [`priced as ${step.pricingAnchorLabel}`] : ["no per-token price to quote"]),
+  ];
+
+  return parts.join(" - ");
+}
+
 function routeEnergyLabel(candidate: RouteOption) {
   return candidate.estimatedEnergyWh === undefined
     ? "Estimate unavailable"
@@ -1165,6 +1184,7 @@ function RouteStrategyCard({
           <li key={step.id}>
             <strong>{step.label}</strong>
             <span>{routeStepKindLabel(step.kind)}</span>
+            <span className="routeStepEstimate">{routeStepEstimateLabel(step)}</span>
           </li>
         ))}
       </ol>

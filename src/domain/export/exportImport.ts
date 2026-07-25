@@ -504,6 +504,16 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
       `   - Instruction: ${step.instruction}`,
       `   - Permission level: ${step.requiredPermissionLevel}`,
       `   - Tool or mode: ${step.modeLabel ?? "None"}`,
+      ...(step.apiEquivalentCostUsd === undefined
+        ? []
+        : [
+            `   - If you paid per token: about ${formatUsd(step.apiEquivalentCostUsd)}${
+              step.pricingAnchorLabel ? ` (priced as ${step.pricingAnchorLabel})` : ""
+            }`,
+          ]),
+      ...(step.estimatedEnergyWh === undefined
+        ? []
+        : [`   - Estimated energy: about ${formatWattHours(step.estimatedEnergyWh)}`]),
       `   - Sources: ${inlineList(step.sourceIds)}`,
       `   - Warnings: ${inlineList(step.warnings)}`,
     ]),

@@ -4,7 +4,7 @@ import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generateRouteCandidates, type RouteCandidate, type RouteCandidateGenerationResult } from "../../domain/routing/candidateGeneration";
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
 import { decomposeTask } from "../../domain/routing/taskDecomposition";
-import { buildToolModeCatalog } from "../../domain/routing/toolModeCatalog";
+import { buildToolModeCatalog, modeEstimateAnchorsForRouteStep } from "../../domain/routing/toolModeCatalog";
 import { routeStepSchema } from "../../domain/schemas";
 import type { ModelInventoryItem, SourcePermission, TaskIntake } from "../../domain/types";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
@@ -632,6 +632,52 @@ describe("route candidate generation", () => {
           expect(step.modelId).toBe("manual-human-review");
         }
       }
+    }
+  });
+  it("prices a saved step with the same anchors the catalog gave that step's mode", () => {
+    // One source of truth. These were computed separately once and had already drifted: the catalog
+    // declared a Claude execution pass at Haiku prices while route pricing charged it at frontier
+    // prices, a 5x gap on the same step, and Gemini's execution pass had the same defect.
+    const models = [
+      createEverydayToolModel({ id: "chatgpt-plus", providerId: "chatgpt", accountId: "plus", frequencyId: "daily" }),
+      createEverydayToolModel({ id: "claude-max", providerId: "claude", accountId: "max-20x", frequencyId: "daily" }),
+      createEverydayToolModel({ id: "gemini-pro", providerId: "gemini", accountId: "google-ai-pro", frequencyId: "weekly" }),
+      createEverydayToolModel({ id: "perplexity-free", providerId: "perplexity", accountId: "basic", frequencyId: "weekly" }),
+      createEverydayToolModel({ id: "grok-super", providerId: "grok", accountId: "supergrok", frequencyId: "weekly" }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({ id: "task-anchor-agreement", knowledgeWorkType: "coding", outputType: "code" });
+    const modes = buildToolModeCatalog(models, task);
+    const modelById = new Map(models.map((model) => [model.id, model]));
+
+    expect(modes.length).toBeGreaterThan(10);
+
+    for (const mode of modes) {
+      const model = modelById.get(mode.modelId);
+      if (!model) {
+        throw new Error(`Mode ${mode.id} names a model that is not in the inventory.`);
+      }
+
+      const anchors = modeEstimateAnchorsForRouteStep({ modeId: mode.id, modelId: mode.modelId }, model);
+
+      expect(anchors.pricingAnchorId).toBe(mode.pricingAnchorId);
+      expect(anchors.energyAnchorId).toBe(mode.energyAnchorId);
+      expect(anchors.energyProfile).toBe(mode.energyProfile);
+    }
+  });
+
+  it("keeps a per-token price on a free tier because free compute is not free to run", () => {
+    const models = [
+      createEverydayToolModel({ id: "perplexity-free", providerId: "perplexity", accountId: "basic", frequencyId: "weekly" }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({ id: "task-free-tier-anchor" });
+    const modes = buildToolModeCatalog(models, task);
+
+    expect(modes.length).toBeGreaterThan(0);
+    for (const mode of modes) {
+      expect(mode.zeroMarginalCost).toBe(true);
+      // The plan adds nothing to the bill, but the compute still has a list price, and showing it
+      // is the whole point of the per-token figure.
+      expect(mode.pricingAnchorId).not.toBeNull();
     }
   });
 });

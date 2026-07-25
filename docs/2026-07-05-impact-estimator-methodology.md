@@ -1,7 +1,7 @@
 # 2026-07-08T22:07:13-06:00 - AI Task Router Impact Estimator Methodology
 
 Document ID: GUI-ENG-002
-Version: 0.5.0
+Version: 0.6.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,7 +9,7 @@ Effective Date: 2026-07-05
 Last Reviewed: 2026-07-25
 Next Review: Before source refresh, exact public savings claims, social launch copy, live pricing tables, or opt-in estimator release
 Timestamp: 2026-07-08T22:07:13-06:00
-Last Updated: 2026-07-25T09:40:19-06:00
+Last Updated: 2026-07-25T10:01:49-06:00
 
 ## Purpose
 
@@ -39,6 +39,25 @@ Precision is capped at two significant figures. The estimates come from hand-tun
 The lifetime counter totals the API-equivalent estimate and energy of the routes the user actually followed. It no longer accumulates dollars from a fixed illustrative scenario. Followed routes saved before per-token estimates existed are counted separately and excluded from the totals rather than being credited with an invented figure.
 
 The illustrative scenarios on the impact panel (100k-token example, right-sizing example, energy example) stay, and are labelled as examples that are not the user's own usage.
+
+## Which Price Applies To Which Step
+
+Added in chunk R11 of the audit remediation plan, 2026-07-25, after the owner found a route where the Lean option priced above the Balanced option.
+
+**A step is priced against the model that step tells the user to open, not against the plan they reached it through.** A thinking pass costs what a thinking model costs whether it is opened from Plus or from Pro. Whether the user is *billed* for it is a separate question, decided by `accountIsMeteredPerUse`.
+
+Before this rule, the anchor was chosen by provider and account tier. On ChatGPT Plus that gave the thinking pass and the fast execution pass the same anchor, so the only thing left to separate them was the role's token multiplier — and because execution is assumed to move more tokens than prompt design, the cheap instant pass priced *higher* than the reasoning pass it follows. The energy model, which has always been mode-aware, disagreed with the cost model by a factor of 210 on the same pair of steps.
+
+There is one source of truth for a mode's anchors, `modeEstimateProfile` in `toolModeCatalog.ts`. It is used both when the catalog builds a mode and when the economics layer prices a saved step. These were computed separately until 2026-07-25 and had already drifted: the catalog declared a Claude execution pass at Haiku prices while route pricing charged it at frontier prices, a 5x gap on the same step, and Gemini's execution pass had the same defect.
+
+A free tier still carries a pricing anchor. Free compute is not free to run, and showing what it would meter at is the entire point of the per-token figure; the billing question is answered separately.
+
+Known coarseness, recorded rather than papered over:
+
+- Only two Gemini anchors are on file, so the Gemini reasoning pass and the Gemini premium benchmark share one and the benchmark is understated. This is an anchor-set gap. Closing it needs a pricing review, not a mapping change, and no price may be invented to fill it.
+- The anchors themselves were reviewed on 2026-07-05 and are representative tiers, not per-model prices. Re-reviewing them is a separate task with its own source snapshot; nothing in this chunk changed an anchor's value.
+
+Each step records what it would meter at, what it consumes, and which anchor priced it, so a route total can be checked against its parts rather than trusted.
 
 ## Current Status
 
@@ -258,6 +277,7 @@ Near-term product:
 - keep cost and energy impact qualitative or clearly scenario-based
 - keep Decision Cards and prompt packages manual-use only
 - never present any figure as money the user saved; every dollar figure is an API-equivalent per-token estimate
+- price each step against the model that step names, and show the per-step figures so a route total can be checked against its parts
 - do not connect provider accounts, import usage history, or fetch live pricing
 
 Future opt-in estimator:

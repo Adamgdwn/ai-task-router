@@ -1,14 +1,14 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.6.4
+Version: 1.6.5
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-25
 Next Review: During the next substantial build session
-Last Updated: 2026-07-25T09:40:19-06:00
+Last Updated: 2026-07-25T10:01:49-06:00
 Status Updated: 2026-07-25T09:40:19-06:00
 
 ## Purpose
@@ -93,7 +93,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 4 | Reviewed methodology page | draft complete; owner-review ready | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
 | 5 | Opt-in local estimator UI | paused | Draft complete | Optional enhancement; only start if the owner explicitly wants a local impact-estimate surface. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
-| 7 | Audit remediation queue (R0-R10) | in progress | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. R1 (artifacts follow the chosen route), R2 (honest impact numbers), R3 (first-run honesty), and R4 (clean the copied prompt text) are complete; R10 is next. Cost figures are now API-equivalent per-token estimates shown beside what is actually billed, and no surface claims the user saved money. Owner decisions on impact framing and product promise are recorded; no chunk is blocked on input. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
+| 7 | Audit remediation queue (R0-R11) | in progress | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. R1 (artifacts follow the chosen route), R2 (honest impact numbers), R3 (first-run honesty), R4 (clean the copied prompt text), and R11 (price each step by the model it names) are complete; R10 is next. Each step is now priced against the model that step tells the user to open, and the per-step figures are shown so a route total can be checked against its parts. Cost figures are now API-equivalent per-token estimates shown beside what is actually billed, and no surface claims the user saved money. Owner decisions on impact framing and product promise are recorded; no chunk is blocked on input. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
 
 ## Plan Chunks
 

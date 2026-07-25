@@ -5,7 +5,7 @@ import {
   type EverydayToolProviderId,
 } from "../defaults/everydayToolCatalog";
 import type { CapabilityScores, ModelInventoryItem, PermissionLevel, RouteStep, TaskIntake, WorkRole } from "../types";
-import { pricingAnchorIdForModel } from "./modelGuidance";
+import { apiEquivalentPricingAnchorIdForModel } from "./modelGuidance";
 import {
   chatGptGuidanceLabels,
   claudeGuidanceLabels,
@@ -165,33 +165,50 @@ export function modeForRouteStep(
   return buildToolModeCatalog(models, task).find((mode) => mode.id === step.modeId) ?? null;
 }
 
-export function modeEstimateAnchorsForRouteStep(
-  step: Pick<RouteStep, "modeId" | "modelId" | "workRole">,
-  model: ModelInventoryItem,
-): Pick<ToolModeCandidate, "pricingAnchorId" | "energyAnchorId" | "energyProfile" | "zeroMarginalCost"> {
-  const selection = inferEverydayToolSelection(model);
-  const providerId = selection.providerId;
-  const accountId = selection.accountId;
-  const modeId = step.modeId ?? "";
-  const zeroMarginalCost = hasZeroMarginalCostAccount(providerId, accountId, model);
+export type ModeEstimateProfile = Pick<ToolModeCandidate, "pricingAnchorId" | "energyAnchorId" | "energyProfile">;
 
+/**
+ * What one mode costs and consumes per unit of work — the single source of truth for both callers.
+ *
+ * The catalog needs it when it builds a mode; the economics layer needs it when it prices a saved
+ * step that carries only a mode ID. They used to answer it independently and had already drifted:
+ * the catalog declared a Claude execution pass at Haiku prices while route pricing charged it at
+ * frontier prices, a 5x gap on the same step, and Gemini's execution pass had the same problem.
+ */
+export function modeEstimateProfile(
+  providerId: EverydayToolProviderId,
+  accountId: EverydayToolAccountId,
+  suffix: string,
+  model: ModelInventoryItem,
+): ModeEstimateProfile {
   if (model.tier === "human" || model.localOnly) {
-    return {
-      pricingAnchorId: null,
-      energyAnchorId: null,
-      energyProfile: "none",
-      zeroMarginalCost,
-    };
+    return { pricingAnchorId: null, energyAnchorId: null, energyProfile: "none" };
   }
 
   return {
-    // The anchor prices the work; `zeroMarginalCost` says whether the user's plan already covers
-    // it. Callers need both facts separately, so this no longer folds one into the other.
-    pricingAnchorId: pricingAnchorForProviderMode(providerId, accountId, modeId, model),
-    energyAnchorId: energyAnchorForMode(providerId, modeId, model),
-    energyProfile: energyProfileForMode(modeId, model),
-    zeroMarginalCost,
+    pricingAnchorId: pricingAnchorForMode(providerId, accountId, suffix, model),
+    energyAnchorId: energyAnchorForMode(providerId, suffix, model),
+    energyProfile: energyProfileForMode(suffix, model),
   };
+}
+
+export function modeEstimateAnchorsForRouteStep(
+  step: Pick<RouteStep, "modeId" | "modelId" | "workRole">,
+  model: ModelInventoryItem,
+): ModeEstimateProfile & Pick<ToolModeCandidate, "zeroMarginalCost"> {
+  const selection = inferEverydayToolSelection(model);
+
+  return {
+    // The anchor prices the work; `zeroMarginalCost` says whether the user's plan already covers
+    // it. Callers need both facts separately, so this does not fold one into the other.
+    ...modeEstimateProfile(selection.providerId, selection.accountId, modeSuffix(step.modeId), model),
+    zeroMarginalCost: hasZeroMarginalCostAccount(selection.providerId, selection.accountId, model),
+  };
+}
+
+/** Mode IDs are `${modelId}:${suffix}`, and no suffix contains a colon. */
+function modeSuffix(modeId: string | undefined) {
+  return modeId ? modeId.slice(modeId.lastIndexOf(":") + 1) : "";
 }
 
 function modesForModel(model: ModelInventoryItem, task: TaskIntake): ToolModeCandidate[] {
@@ -234,9 +251,6 @@ function manualMode(model: ModelInventoryItem): ToolModeCandidate {
     roles: ["prompt-design", "execution", "build-slice", "quality-review", "next-action"],
     capabilityScores: manualCapabilities,
     resourceProfile: "manual",
-    energyProfile: "none",
-    pricingAnchorId: null,
-    energyAnchorId: null,
     selectionReasons: ["No provider call is required; this is the safest route when privacy or setup blocks AI use."],
   });
 }
@@ -258,9 +272,6 @@ function chatGptModes(model: ModelInventoryItem, accountId: EverydayToolAccountI
       modeLabel: profile.promptBuilderModelLabel,
       roles: ["prompt-design", "quality-review"],
       resourceProfile: promptIsReasoning ? "reasoning" : "standard",
-      energyProfile: promptIsReasoning ? "reasoning" : "medium",
-      pricingAnchorId: paidReasoning ? "openai-premium-text-anchor" : "openai-low-cost-text-anchor",
-      energyAnchorId: promptIsReasoning ? "o3-medium-estimate" : "gpt-4o-medium-estimate",
       selectionReasons: [
         "Use the stronger thinking pass once to make the downstream prompt precise enough for cheaper execution.",
         "Use the actual ChatGPT picker label: Instant for cheap execution; Medium, High, Extra High, or Pro for the thinking pass when your account exposes it.",
@@ -276,9 +287,6 @@ function chatGptModes(model: ModelInventoryItem, accountId: EverydayToolAccountI
       modeLabel: profile.executionModelLabel,
       roles: ["execution", "build-slice"],
       resourceProfile: accountId === "basic" ? "free" : "light",
-      energyProfile: "low",
-      pricingAnchorId: "openai-low-cost-text-anchor",
-      energyAnchorId: "google-median-gemini-apps-text-prompt",
       selectionReasons: [
         "After the master prompt is clear, execution should start on the fastest adequate lower-resource mode.",
       ],
@@ -293,9 +301,6 @@ function chatGptModes(model: ModelInventoryItem, accountId: EverydayToolAccountI
       modeLabel: `premium comparison using ${profile.upgradeModelLabel}`,
       roles: ["prompt-design", "execution", "build-slice", "quality-review"],
       resourceProfile: "premium",
-      energyProfile: "reasoning",
-      pricingAnchorId: paidReasoning ? "openai-frontier-reasoning-anchor" : "openai-premium-text-anchor",
-      energyAnchorId: "o3-medium-estimate",
       selectionReasons: ["This shows the cost and energy benchmark for using high reasoning through the whole task."],
     }),
   ];
@@ -320,9 +325,6 @@ function claudeModes(
       modeLabel: profile.promptBuilderModelLabel,
       roles: ["prompt-design", "quality-review"],
       resourceProfile: maxOrTeam ? "reasoning" : "standard",
-      energyProfile: maxOrTeam ? "reasoning" : "medium",
-      pricingAnchorId: maxOrTeam ? "anthropic-frontier-text-anchor" : "anthropic-premium-text-anchor",
-      energyAnchorId: maxOrTeam ? "o3-medium-estimate" : "gpt-4o-medium-estimate",
       selectionReasons: ["Use Claude's stronger reasoning pass when prompt quality or architecture judgment prevents rework."],
     }),
     mode({
@@ -335,9 +337,6 @@ function claudeModes(
       modeLabel: profile.executionModelLabel,
       roles: ["execution"],
       resourceProfile: "light",
-      energyProfile: "low",
-      pricingAnchorId: "anthropic-low-cost-text-anchor",
-      energyAnchorId: "google-median-gemini-apps-text-prompt",
       selectionReasons: ["Use the lower-resource Claude pass only after the master prompt has removed ambiguity."],
     }),
     mode({
@@ -350,9 +349,6 @@ function claudeModes(
       modeLabel: `premium comparison using ${profile.upgradeModelLabel}`,
       roles: ["prompt-design", "execution", "build-slice", "quality-review"],
       resourceProfile: "premium",
-      energyProfile: "reasoning",
-      pricingAnchorId: maxOrTeam ? "anthropic-highest-cost-anchor" : "anthropic-frontier-text-anchor",
-      energyAnchorId: "o3-medium-estimate",
       selectionReasons: ["This benchmarks the heavier route where Claude is used at high intensity throughout."],
     }),
   ];
@@ -373,9 +369,6 @@ function claudeModes(
       modeLabel: `Claude Code via this Claude subscription using ${maxOrTeam ? "Sonnet 5 for most coding; Opus 4.8 effort xhigh only when stuck or wide" : "Sonnet 5 for most coding when available"}`,
       roles: ["build-slice", "execution"],
       resourceProfile: maxOrTeam ? "reasoning" : "standard",
-      energyProfile: "medium",
-      pricingAnchorId: maxOrTeam ? "anthropic-frontier-text-anchor" : "anthropic-premium-text-anchor",
-      energyAnchorId: "gpt-4o-medium-estimate",
       selectionReasons: [
         "Claude Code is treated as the build surface available through the selected Claude subscription, not as a separate subscription.",
         "Claude Code note: use the subscription's Claude Code surface when installed and authenticated; do not model it as a separate subscription or unrelated paid tool.",
@@ -400,9 +393,6 @@ function perplexityModes(model: ModelInventoryItem, accountId: EverydayToolAccou
       modeLabel: profile.promptBuilderModelLabel,
       roles: ["evidence-check", "quality-review"],
       resourceProfile: paid ? "standard" : "free",
-      energyProfile: "medium",
-      pricingAnchorId: paid ? "perplexity-sonar-pro" : "perplexity-sonar",
-      energyAnchorId: "gpt-4o-medium-estimate",
       selectionReasons: [
         "Use Perplexity for current facts, citations, and source-backed framing.",
         "Do not use Perplexity as the final app-build executor unless the task is primarily research.",
@@ -426,9 +416,6 @@ function geminiModes(model: ModelInventoryItem, accountId: EverydayToolAccountId
       modeLabel: profile.promptBuilderModelLabel,
       roles: ["prompt-design", "quality-review"],
       resourceProfile: strong ? "reasoning" : "standard",
-      energyProfile: strong ? "reasoning" : "medium",
-      pricingAnchorId: strong ? "google-premium-text-anchor" : "google-low-cost-text-anchor",
-      energyAnchorId: strong ? "o3-medium-estimate" : "gpt-4o-medium-estimate",
       selectionReasons: ["Use Gemini's stronger reasoning mode when the prompt is the hard part."],
     }),
     mode({
@@ -441,9 +428,6 @@ function geminiModes(model: ModelInventoryItem, accountId: EverydayToolAccountId
       modeLabel: profile.executionModelLabel,
       roles: ["execution", "build-slice"],
       resourceProfile: accountId === "basic" ? "free" : "light",
-      energyProfile: "low",
-      pricingAnchorId: "google-low-cost-text-anchor",
-      energyAnchorId: "google-median-gemini-apps-text-prompt",
       selectionReasons: ["Gemini Flash-style modes are the lower-resource execution pass after prompt design."],
     }),
     mode({
@@ -456,9 +440,6 @@ function geminiModes(model: ModelInventoryItem, accountId: EverydayToolAccountId
       modeLabel: `premium comparison using ${profile.upgradeModelLabel}`,
       roles: ["prompt-design", "execution", "build-slice", "quality-review"],
       resourceProfile: "premium",
-      energyProfile: "reasoning",
-      pricingAnchorId: "google-premium-text-anchor",
-      energyAnchorId: "o3-medium-estimate",
       selectionReasons: ["This benchmarks keeping the task on a heavier Gemini reasoning mode."],
     }),
   ];
@@ -483,9 +464,6 @@ function grokModes(
       modeLabel: "Grok 4.3 with Web Search or X Search enabled for evidence checks",
       roles: ["evidence-check", "quality-review"],
       resourceProfile: paid ? "standard" : "free",
-      energyProfile: "medium",
-      pricingAnchorId: "xai-premium-text-anchor",
-      energyAnchorId: "gpt-4o-medium-estimate",
       selectionReasons: [
         "Grok needs Web Search or X Search enabled for current facts; without search, do not treat it as current.",
         "Use Perplexity instead when it is available and the task is mainly research or citations.",
@@ -501,9 +479,6 @@ function grokModes(
       modeLabel: profile.promptBuilderModelLabel,
       roles: ["prompt-design", "quality-review"],
       resourceProfile: paid ? "reasoning" : "standard",
-      energyProfile: paid ? "reasoning" : "medium",
-      pricingAnchorId: "xai-premium-text-anchor",
-      energyAnchorId: paid ? "o3-medium-estimate" : "gpt-4o-medium-estimate",
       selectionReasons: [
         "Use Grok 4.3's named reasoning setting for the thinking-heavy prompt pass instead of a generic best-model label.",
         "Set reasoning lower for repeated execution once the prompt is clear.",
@@ -519,9 +494,6 @@ function grokModes(
       modeLabel: profile.executionModelLabel,
       roles: ["execution"],
       resourceProfile: paid ? "light" : "free",
-      energyProfile: "low",
-      pricingAnchorId: "xai-low-cost-text-anchor",
-      energyAnchorId: "google-median-gemini-apps-text-prompt",
       selectionReasons: [
         "After prompt design, use Grok 4.3 with reasoning none or low so execution does not burn the heavy setting unnecessarily.",
       ],
@@ -536,9 +508,6 @@ function grokModes(
       modeLabel: `premium comparison using ${profile.upgradeModelLabel}`,
       roles: ["prompt-design", "execution", "build-slice", "quality-review"],
       resourceProfile: "premium",
-      energyProfile: "reasoning",
-      pricingAnchorId: "xai-premium-text-anchor",
-      energyAnchorId: "o3-medium-estimate",
       selectionReasons: ["This benchmarks leaving the whole task on Grok's heavier reasoning or code mode."],
     }),
   ];
@@ -559,9 +528,6 @@ function grokModes(
       modeLabel: "Grok Build 0.1 (grok-code-fast) for code/build execution",
       roles: ["build-slice", "execution"],
       resourceProfile: paid ? "standard" : "light",
-      energyProfile: "medium",
-      pricingAnchorId: "xai-premium-text-anchor",
-      energyAnchorId: "gpt-4o-medium-estimate",
       selectionReasons: [
         "xAI names Grok Build as the coding model; use it for build execution when Grok is the chosen build helper.",
         "Keep Grok 4.3 reasoning high for prompt design, then switch to Grok Build for the code/build slice.",
@@ -598,9 +564,6 @@ function genericModes(
       modeLabel: profile.modeLabel,
       roles: profile.roles ?? [...baseRoles, ...codingRoles],
       resourceProfile,
-      energyProfile: model.tier === "frontier" ? "reasoning" : model.tier === "small" ? "low" : "medium",
-      pricingAnchorId: pricingAnchorIdForModel(model),
-      energyAnchorId: model.tier === "frontier" ? "o3-medium-estimate" : model.tier === "small" ? "google-median-gemini-apps-text-prompt" : "gpt-4o-medium-estimate",
       selectionReasons: profile.selectionReasons,
     }),
   ];
@@ -843,13 +806,11 @@ function mode(input: {
   roles: WorkRole[];
   capabilityScores?: CapabilityScores;
   resourceProfile: ToolModeResourceProfile;
-  energyProfile: ToolModeEnergyProfile;
-  pricingAnchorId: string | null;
-  energyAnchorId: string | null;
   selectionReasons: string[];
 }): ToolModeCandidate {
   const zeroMarginalCost = hasZeroMarginalCostAccount(input.providerId, input.accountId, input.model);
   const providerLabel = input.providerId === "none" ? "You" : getEverydayToolProvider(input.providerId).label;
+  const estimateProfile = modeEstimateProfile(input.providerId, input.accountId, input.suffix, input.model);
 
   return {
     id: `${input.model.id}:${input.suffix}`,
@@ -868,9 +829,10 @@ function mode(input: {
     localOnly: input.model.localOnly,
     requiresExternalCall: input.model.requiresExternalCall ?? !input.model.localOnly,
     zeroMarginalCost,
-    pricingAnchorId: zeroMarginalCost ? null : input.pricingAnchorId,
-    energyAnchorId: input.energyAnchorId,
-    energyProfile: input.energyProfile,
+    // The anchor stays even on a free tier. Free compute still costs the provider something to run,
+    // and showing what it would meter at is the entire point of the per-token figure; whether the
+    // user is billed is decided separately when a route is priced.
+    ...estimateProfile,
     resourceProfile: zeroMarginalCost && input.resourceProfile !== "manual" ? "free" : input.resourceProfile,
     catalogReviewedAt: toolModeCatalogReviewedAt,
     sourceIds: officialSourceIdsByProvider[input.providerId] ?? [],
@@ -1015,69 +977,77 @@ function hasZeroMarginalCostAccount(providerId: EverydayToolProviderId, accountI
   return accountId === "basic" || /\bfree\b|\bbasic\b/i.test(accountLabel);
 }
 
-function pricingAnchorForProviderMode(
+/**
+ * The pricing anchor for a mode names the class of model the mode actually tells the user to open,
+ * not the plan they reached it through. A thinking pass costs what a thinking model costs whether it
+ * is opened from Plus or from Pro; whether the user is *billed* for it is a separate question,
+ * answered by `accountIsMeteredPerUse` in the economics layer.
+ *
+ * Tying the anchor to the plan tier is what produced the defect this replaces: on ChatGPT Plus the
+ * thinking pass and the instant pass were given the same anchor, so the only thing left to separate
+ * them was the role's token multiplier — and that made the cheap instant pass price *higher* than the
+ * reasoning pass it was supposed to be cheaper than.
+ *
+ * Perplexity is the one place account still decides the anchor, because Sonar and Sonar Pro are
+ * genuinely different models rather than different doors onto the same one.
+ */
+function pricingAnchorForMode(
   providerId: EverydayToolProviderId,
   accountId: EverydayToolAccountId,
-  modeId: string,
+  suffix: string,
   model: ModelInventoryItem,
-) {
-  if (modeId.endsWith(":premium-benchmark")) {
-    switch (providerId) {
-      case "chatgpt":
-        return accountId === "pro" || accountId === "business" || accountId === "enterprise"
-          ? "openai-frontier-reasoning-anchor"
-          : "openai-premium-text-anchor";
-      case "claude":
-        return accountId === "max-5x" || accountId === "max-20x" ? "anthropic-highest-cost-anchor" : "anthropic-frontier-text-anchor";
-      case "gemini":
-        return "google-premium-text-anchor";
-      case "grok":
-        return "xai-premium-text-anchor";
-      default:
-        return pricingAnchorIdForModel(model);
-    }
+): string | null {
+  switch (providerId) {
+    case "chatgpt":
+      switch (suffix) {
+        case "execution-fast":
+          return "openai-low-cost-text-anchor";
+        case "prompt-reasoning":
+          return "openai-premium-text-anchor";
+        case "premium-benchmark":
+          return "openai-frontier-reasoning-anchor";
+        default:
+          return apiEquivalentPricingAnchorIdForModel(model);
+      }
+    case "claude":
+      switch (suffix) {
+        case "execution-fast":
+          return "anthropic-low-cost-text-anchor";
+        case "claude-code-build":
+          return "anthropic-premium-text-anchor";
+        case "prompt-reasoning":
+          return "anthropic-frontier-text-anchor";
+        case "premium-benchmark":
+          return "anthropic-highest-cost-anchor";
+        default:
+          return apiEquivalentPricingAnchorIdForModel(model);
+      }
+    case "gemini":
+      // Only two Gemini anchors are on file, so the reasoning pass and the premium benchmark share
+      // one. That understates the benchmark; it is an anchor-set gap, not a mapping choice, and is
+      // recorded as such in the impact methodology rather than papered over with an invented price.
+      return suffix === "execution-flash" ? "google-low-cost-text-anchor" : "google-premium-text-anchor";
+    case "grok":
+      return suffix === "execution-fast" ? "xai-low-cost-text-anchor" : "xai-premium-text-anchor";
+    case "perplexity":
+      return accountId === "pro" || accountId === "max" || accountId === "enterprise-pro" || accountId === "enterprise-max"
+        ? "perplexity-sonar-pro"
+        : "perplexity-sonar";
+    default:
+      return apiEquivalentPricingAnchorIdForModel(model);
   }
-
-  if (providerId === "grok") {
-    if (modeId.endsWith(":execution-fast")) {
-      return "xai-low-cost-text-anchor";
-    }
-
-    return "xai-premium-text-anchor";
-  }
-
-  if (modeId.endsWith(":prompt-reasoning") || modeId.endsWith(":prompt-pro")) {
-    switch (providerId) {
-      case "chatgpt":
-        return accountId === "pro" || accountId === "business" || accountId === "enterprise"
-          ? "openai-premium-text-anchor"
-          : "openai-low-cost-text-anchor";
-      case "claude":
-        return accountId === "max-5x" || accountId === "max-20x" ? "anthropic-frontier-text-anchor" : "anthropic-premium-text-anchor";
-      case "gemini":
-        return accountId === "google-ai-pro" || accountId === "google-ai-ultra" ? "google-premium-text-anchor" : "google-low-cost-text-anchor";
-      default:
-        return pricingAnchorIdForModel(model);
-    }
-  }
-
-  if (modeId.endsWith(":claude-code-build")) {
-    return accountId === "max-5x" || accountId === "max-20x" ? "anthropic-frontier-text-anchor" : "anthropic-premium-text-anchor";
-  }
-
-  return pricingAnchorIdForModel(model);
 }
 
-function energyAnchorForMode(providerId: EverydayToolProviderId, modeId: string, model: ModelInventoryItem) {
-  if (providerId === "grok" && (modeId.endsWith(":execution-fast") || modeId.endsWith(":grok-build"))) {
-    return modeId.endsWith(":execution-fast") ? "google-median-gemini-apps-text-prompt" : "gpt-4o-medium-estimate";
+function energyAnchorForMode(providerId: EverydayToolProviderId, suffix: string, model: ModelInventoryItem) {
+  if (providerId === "grok" && (suffix === "execution-fast" || suffix === "grok-build")) {
+    return suffix === "execution-fast" ? "google-median-gemini-apps-text-prompt" : "gpt-4o-medium-estimate";
   }
 
-  if (modeId.endsWith(":premium-benchmark") || modeId.endsWith(":prompt-reasoning") || modeId.endsWith(":prompt-pro")) {
+  if (suffix === "premium-benchmark" || suffix === "prompt-reasoning" || suffix === "prompt-pro") {
     return "o3-medium-estimate";
   }
 
-  if (modeId.endsWith(":execution-fast") || modeId.endsWith(":execution-flash")) {
+  if (suffix === "execution-fast" || suffix === "execution-flash") {
     return "google-median-gemini-apps-text-prompt";
   }
 
@@ -1092,16 +1062,16 @@ function energyAnchorForMode(providerId: EverydayToolProviderId, modeId: string,
   return "google-median-gemini-apps-text-prompt";
 }
 
-function energyProfileForMode(modeId: string, model: ModelInventoryItem): ToolModeEnergyProfile {
-  if (modeId.endsWith(":grok-search-evidence") || modeId.endsWith(":grok-build")) {
+function energyProfileForMode(suffix: string, model: ModelInventoryItem): ToolModeEnergyProfile {
+  if (suffix === "grok-search-evidence" || suffix === "grok-build") {
     return "medium";
   }
 
-  if (modeId.endsWith(":premium-benchmark") || modeId.endsWith(":prompt-reasoning") || modeId.endsWith(":prompt-pro")) {
+  if (suffix === "premium-benchmark" || suffix === "prompt-reasoning" || suffix === "prompt-pro") {
     return "reasoning";
   }
 
-  if (modeId.endsWith(":execution-fast") || modeId.endsWith(":execution-flash")) {
+  if (suffix === "execution-fast" || suffix === "execution-flash") {
     return "low";
   }
 

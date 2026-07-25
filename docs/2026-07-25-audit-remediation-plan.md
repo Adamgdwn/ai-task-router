@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.4.0
+Version: 1.5.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
 Next Review: When chunk R10 completes or the owner reprioritises
-Last Updated: 2026-07-25T09:40:19-06:00
-Status Updated: 2026-07-25T09:40:19-06:00
+Last Updated: 2026-07-25T10:01:49-06:00
+Status Updated: 2026-07-25T10:01:49-06:00
 
 ## Purpose
 
@@ -69,10 +69,11 @@ Close-out for each chunk:
 | R8 | Real first-run E2E coverage | not started | Medium | The journey every real user takes is not tested end to end. |
 | R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
 | R10 | Reframe the product promise | not started | Small | Docs promise provider-level judgement the engine does not have; the product's real value is teaching lower-impact choices. |
+| R11 | Price each step by the model it names | complete | Medium | Owner found Lean priced above Balanced. Cost was blind to which mode a step uses, so effort alone decided the number. |
 
-Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → R10 → R5 → R7 → R6 → R9 → R8.
+Recommended order: R0 (operator, parallel) → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → R10 → R5 → R7 → R6 → R9 → R8.
 
-R1, R2, R3, and R4 were the user-visible correctness wins and are done. R10 is next: it carries the same reframe into the docs, and R2 has already established the in-app language it should match. R5 through R9 are hygiene and can be reordered freely.
+R1, R2, R3, R4, and R11 were the user-visible correctness wins and are done. R11 was not in the original audit; the owner found it by reading R2's own output table and asking why Lean priced above Balanced. R10 is next: it carries the same reframe into the docs, and R2 has already established the in-app language it should match. R5 through R9 are hygiene and can be reordered freely.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -646,6 +647,66 @@ Two honest paths:
 
 The reframe is the recorded decision above. Do not start engine work under any chunk in this file.
 
+---
+
+## Chunk R11 - Price Each Step By The Model It Names
+
+Status: complete - 2026-07-25T10:01:49-06:00
+Budget class: Medium
+
+Objective:
+
+Make the per-token figure reflect which model each step actually uses, and show the per-step figures so a route total can be checked against its parts.
+
+User outcome:
+
+A user comparing routes sees numbers that move with the models being recommended, and can see which step carries the cost.
+
+Trigger:
+
+Not from the original audit. The owner read the R2 acceptance table, saw Lean at about $0.06 against Balanced at about $0.05, and asked why a lighter route priced higher.
+
+Defect:
+
+Two defects, one causing the other.
+
+1. **Cost was blind to the mode.** `pricingAnchorForProviderMode` chose an anchor from provider and account tier only. On ChatGPT Plus the thinking pass and the fast execution pass got the same anchor, so the only thing left to separate them was the role's token multiplier. Because execution is assumed to move more tokens than prompt design, the cheap instant pass priced *higher* than the reasoning pass it follows: $0.030 against $0.021, while the energy model put the same pair at 0.055 Wh against 11.564 Wh. Cost and energy disagreed by a factor of 210 on which step was heavy.
+
+2. **The mapping was duplicated and had already drifted.** Every mode declared `pricingAnchorId`, `energyAnchorId`, and `energyProfile` inline in `toolModeCatalog.ts`, and `modeEstimateAnchorsForRouteStep` re-derived all three by parsing the mode ID. The two copies disagreed: a Claude execution pass was declared at Haiku prices and charged at frontier prices, a 5x gap on the same step; Gemini's execution pass had the same defect; and Claude `team`/`enterprise` accounts resolved differently in each copy.
+
+Change:
+
+- Added `modeEstimateProfile` in `toolModeCatalog.ts` as the single source of truth for a mode's pricing anchor, energy anchor, and energy profile. Both the catalog builder and the economics layer call it. Deleted `pricingAnchorForProviderMode` and folded the two energy helpers into it.
+- Anchors now follow the model class the mode names, not the plan tier it is reached through. Perplexity is the deliberate exception: Sonar and Sonar Pro are genuinely different models, so the account still decides.
+- Removed the zero-marginal-cost null-out in `mode()`. A free tier keeps its anchor, because free compute still has a list price and showing it is the point; the billing question is answered separately by `accountIsMeteredPerUse`.
+- Added optional `apiEquivalentCostUsd`, `estimatedEnergyWh`, and `pricingAnchorLabel` to `routeStepSchema`, written by `attachRouteEconomics` in the same pass that computes the totals.
+- Surfaced the per-step line in the route card step list and in the exported Markdown, naming the anchor so the figure can be checked rather than trusted.
+
+Acceptance Result:
+
+Pass, 2026-07-25T10:01:49-06:00.
+
+Verified against real generated output before and after, ChatGPT Plus plus Claude Max:
+
+| Route | Step | Before | After |
+|---|---|---|---|
+| Balanced, writing task | prompt-design, GPT-5.5 Thinking Medium | $0.021 | $0.506 |
+| Balanced, writing task | execution, GPT-5.5 Instant | $0.030 | $0.030 |
+
+The reasoning pass now prices seventeen times the execution pass that follows it, in the same direction as the energy model. On the build task the route totals are monotonic for the first time: Lean $0.489, Balanced $0.79, Premium $1.24.
+
+Declared extensions beyond the stated objective:
+
+- Export Markdown gained the per-step lines. The route card and the export are the same record; showing the breakdown in one and not the other would have made them disagree.
+- `costEstimateBasis` gained a sentence saying each step is priced against the model that step names, because the previous wording implied a single blended rate.
+
+Not changed, deliberately:
+
+- No anchor value was altered. The anchors were reviewed on 2026-07-05 and re-reviewing them is a separate task with its own source snapshot. This chunk changed only which existing anchor applies to which mode.
+- No routing or scoring change. The Lean route still selects a frontier thinking model for prompt design, which is why Lean is not far below Balanced on the build task. That is a routing question, out of scope here, and it is now visible rather than hidden behind a flat price.
+- The Gemini reasoning pass and Gemini premium benchmark still share an anchor because only two Gemini anchors are on file. Recorded as an anchor-set gap in the methodology rather than filled with an invented price.
+- No schema break. The three new step fields are optional, so route cards saved before today still parse under `.strict()`.
+
 ## Validation Log
 
 | Timestamp | Command | Result | Notes |
@@ -676,11 +737,19 @@ The reframe is the recorded decision above. Do not start engine work under any c
 | 2026-07-25T09:40:19-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
 | 2026-07-25T09:40:19-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R2. |
 
+| 2026-07-25T10:01:49-06:00 | `npm run test` | pass | 14 files, 133 tests, after R11. Up from 130; 3 new tests covering per-step pricing, catalog/estimator anchor agreement, and free-tier anchors. |
+| 2026-07-25T10:01:49-06:00 | `npx tsc --noEmit` | pass | Clean. |
+| 2026-07-25T10:01:49-06:00 | `npm run build` | pass | TypeScript and Vite build clean; existing large chunk warning remains. |
+| 2026-07-25T10:01:49-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. No E2E assertion needed changing; the per-step line is additive. |
+| 2026-07-25T10:01:49-06:00 | per-step economics read end to end, before and after | pass | ChatGPT Plus balanced route: reasoning pass moved from $0.021 to $0.506 against a $0.030 execution pass, matching the 11.564 Wh against 0.055 Wh energy split. Build-task totals became monotonic. Throwaway harness deleted, not committed. |
+| 2026-07-25T10:01:49-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
+| 2026-07-25T10:01:49-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R11. |
+
 ## Next Handoff
 
-R1, R2, R3, and R4 are complete as of 2026-07-25T09:40:19-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has four chunks' worth of user-visible fixes waiting behind it.
+R1, R2, R3, R4, and R11 are complete as of 2026-07-25T10:01:49-06:00. R0 is still operator work and can proceed in parallel with any coder chunk; it now has five chunks' worth of user-visible fixes waiting behind it.
 
-Next coder chunk is R10, the docs-side reframe. R2 has already set the in-app language, so R10's job is to make README, the product brief, and the manual say the same thing rather than invent new wording. The vocabulary to match: **"if you were paying per token"** for the API-equivalent figure, **"added to your bill"** for what a metered account is charged, and **no use of "saved", "savings", or "avoided" for money**. `docs/2026-07-05-impact-estimator-methodology.md` v0.5.0 has the full framing under "What A Dollar Figure Means" and is the source of truth for it.
+Next coder chunk is R10, the docs-side reframe. R2 has already set the in-app language, so R10's job is to make README, the product brief, and the manual say the same thing rather than invent new wording. The vocabulary to match: **"if you were paying per token"** for the API-equivalent figure, **"added to your bill"** for what a metered account is charged, and **no use of "saved", "savings", or "avoided" for money**. `docs/2026-07-05-impact-estimator-methodology.md` v0.6.0 has the full framing under "What A Dollar Figure Means" and is the source of truth for it.
 
 Notes for whoever picks up the next code chunk:
 
@@ -688,5 +757,7 @@ Notes for whoever picks up the next code chunk:
 - Prompt and export text names tools by `modeLabel`; reuse `toolLabelForRouteStep` in `promptPackageGenerator.ts` rather than reaching for `step.modelId` in any user-facing string.
 - Any new dollar figure must come from `apiEquivalentCostUsd` or `estimatedCostUsd`, never from the five deprecated savings fields still accepted by `routeOptionSchema`. Those exist only so pre-2026-07-25 route cards keep parsing; R5 or a later migration chunk can drop them once a store migration exists.
 - `accountIsMeteredPerUse` in `modelGuidance.ts` is the predicate for "does this add to the bill". Do not use the routing layer's `zeroMarginalCost` for that question — it carries a scoring bonus and only covers free tiers.
+- `modeEstimateProfile` in `toolModeCatalog.ts` is the only place a mode's pricing anchor, energy anchor, or energy profile may be decided. Do not re-derive any of the three anywhere else; that duplication is exactly what R11 removed, and the two copies had already drifted by 5x on a Claude execution step.
+- Anchors describe the model class a mode names, not the plan tier it is reached through. If a future chunk needs finer price resolution, add a reviewed anchor with its source; do not invent a value to fill a gap. The Gemini benchmark understatement is a known open gap of this kind.
 
 Both owner decisions are recorded and no chunk is waiting on input. The whole queue serves one goal — teach people to make more efficient, lower-impact AI decisions, without adding friction.
