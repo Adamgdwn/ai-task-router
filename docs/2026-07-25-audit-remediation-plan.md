@@ -1,15 +1,15 @@
 # 2026-07-25T08:17:12-06:00 - Audit Remediation Plan
 
 Document ID: PATH-ENG-004
-Version: 1.10.0
+Version: 1.11.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-25
 Last Reviewed: 2026-07-25
-Next Review: When chunk R6 completes or the owner reprioritises
-Last Updated: 2026-07-25T16:41:27-06:00
-Status Updated: 2026-07-25T16:41:27-06:00
+Next Review: When chunk R9 completes or the owner reprioritises
+Last Updated: 2026-07-25T16:47:39-06:00
+Status Updated: 2026-07-25T16:47:39-06:00
 
 ## Purpose
 
@@ -64,7 +64,7 @@ Close-out for each chunk:
 | R3 | First-run honesty | complete | Small | A new user with no tools gets a confident answer built on an empty inventory. |
 | R4 | Clean the copied prompt text | complete | Small | Internal IDs appear in the product's flagship deliverable. |
 | R5 | Dead code and lint feedback loop | complete | Small | Removes ~200 lines of unreachable routing code and closes the missing feedback loop. |
-| R6 | Catalog staleness signal | not started | Small | Hardcoded model names decay monthly with nothing to notice it. |
+| R6 | Catalog staleness signal | complete | Small | Hardcoded model names decay monthly with nothing to notice it. |
 | R7 | Help screen | complete | Small | A developer placeholder is live in production nav. |
 | R8 | Real first-run E2E coverage | not started | Medium | The journey every real user takes is not tested end to end. |
 | R9 | Resolve the frequency question | not started | Small | Users answer a question that changes nothing. |
@@ -72,9 +72,9 @@ Close-out for each chunk:
 | R11 | Price each step by the model it names | complete | Medium | Owner found Lean priced above Balanced. Cost was blind to which mode a step uses, so effort alone decided the number. |
 | R12 | Name the lean style by what it actually does | complete | Small | The lean style was labelled "Save time and cost". It weights speed lower than balanced does and leans on human review, so it promised the one axis it does not deliver. |
 
-Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → ~~R7~~ → R6 → R9 → R8.
+Recommended order: ~~R0~~ → ~~R1~~ → ~~R3~~ → ~~R4~~ → ~~R2~~ → ~~R11~~ → ~~R12~~ → ~~R10~~ → ~~R5~~ → ~~R7~~ → ~~R6~~ → R9 → R8.
 
-R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 installed the compiler feedback loop that will catch the next dead branch, and R7 replaced the last developer-facing screen with a real one. R6, R9, and R8 remain; none of them is a screen a user walks into, so the queue is now internal-quality work.
+R1, R2, R3, R4, R11, and R12 were the user-visible correctness wins and are done. R11 and R12 were not in the original audit; the owner found both, R11 by reading R2's own output table and asking why Lean priced above Balanced, R12 by recalling that the lean style claimed to save time. R10 carried the same reframe into the docs, reusing the language R2 had already set rather than inventing a second vocabulary. R5 through R9 are hygiene and can be reordered freely. R5 installed the compiler feedback loop that will catch the next dead branch, and R7 replaced the last developer-facing screen with a real one. R6 gave the app a way to admit its model knowledge is ageing. R9 and R8 remain, both test and hygiene work.
 
 Every chunk serves one end goal, recorded by the owner on 2026-07-25: teach and guide people toward more efficient, lower-impact AI decisions, with as little friction as possible. If a change makes the app more accurate but harder to get through, it is the wrong change.
 
@@ -491,7 +491,7 @@ Not done, deliberately:
 
 ## Chunk R6 - Catalog Staleness Signal
 
-Status: not started
+Status: complete - 2026-07-25T16:47:39-06:00
 Budget class: Small
 
 Objective:
@@ -529,6 +529,37 @@ Validation:
 Stop condition:
 
 Stop at the notice and the risk entries. Do not refresh the catalog contents in this chunk — that is a separate, deliberate review pass.
+
+Acceptance Result, 2026-07-25T16:47:39-06:00: met.
+
+`catalogFreshness.ts` is a new domain module computing age from the review dates already recorded beside the two
+catalogs. It measures from the **older** of `everydayToolCatalogReviewedAt` and `impactCatalogReviewedAt`. They are
+the same date today and nothing forces that, so taking the older one means a half-refreshed catalog cannot read as
+fresh. Threshold is 90 days, as suggested.
+
+`CatalogStalenessNotice` renders on Best Options only when the catalog is past the threshold. Silence is the normal
+state, so a user with a current catalog never reads a caveat that does not apply to them. **The notice does not
+appear today** - the catalog was reviewed 2026-07-05 and is 20 days old - which is the correct behaviour and is why
+the tests drive the clock rather than trusting today's date.
+
+The wording had to admit the age without implying the app could fix it by checking: "Model and pricing details were
+last reviewed [date], [n] days ago. This app never reads live provider menus or prices, so check your tool's current
+model list before relying on a specific model name here." A test asserts the notice never contains the words
+update, refresh, latest, or fetch, because any of those would read as a promise the boundary forbids.
+
+Risk register gained two entries, neither of which had any coverage before:
+
+- **R-009, recommendation-quality drift from a stale catalog.** Likelihood High - the catalog can only age, by
+  design. The review cadence the chunk asked for is attached: re-review every 90 days or sooner on a provider model
+  line change, next due 2026-10-03, which is the same 90 days the notice threshold uses so the control and the
+  signal cannot drift apart.
+- **R-010, impact-claim accuracy.** Records the fixed vocabulary, the on-screen basis and caveats, the
+  single-source-of-truth rule for anchors in `modeEstimateProfile`, and the known Gemini benchmark understatement as
+  an open gap rather than a silent one.
+
+Not done, per the stop condition: no catalog contents were refreshed, and no model name was checked against a
+current provider menu. That is the deliberate review pass R-009 now schedules.
+
 
 ---
 
@@ -964,11 +995,18 @@ Not changed, deliberately:
 | 2026-07-25T16:41:27-06:00 | `git diff --check` | pass | Exit 0; only the usual Windows LF/CRLF notices. |
 | 2026-07-25T16:41:27-06:00 | `bash scripts/governance-preflight.sh` | pass | 0 warnings, after R7. |
 
+| 2026-07-25T16:47:39-06:00 | `npm run test` | pass | 15 files, 141 tests, after R6. Up from 135; 6 new tests covering the threshold boundary, the older-date rule, a clock behind the review date, and both rendered states of the notice. |
+| 2026-07-25T16:47:39-06:00 | `npm run build` | pass | TypeScript and Vite build clean; existing large chunk warning remains. |
+| 2026-07-25T16:47:39-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. No E2E change needed: the notice is correctly absent at today's catalog age, and the fake-clock cases live in the unit suite. |
+| 2026-07-25T16:47:39-06:00 | `npm run scan:web-rc`; `git diff --check`; `bash scripts/governance-preflight.sh` | pass | No release-blocking findings; whitespace check exit 0 with the usual Windows LF-to-CRLF notices; governance preflight 0 warnings after R6. |
+
 ## Next Handoff
 
-R0, R1, R2, R3, R4, R5, R7, R10, R11, and R12 are complete as of 2026-07-25T16:41:27-06:00. R0 shipped the first eight of those to production; **R7 is not deployed**. It is user-visible, so the live site still shows the developer placeholder on the Help tab until someone runs the deploy runbook at `docs/2026-07-09-cloudflare-deploy-turnover.md`. That runbook is proven rather than theoretical as of the R0 deploy, and the deploy is an owner decision, not something a coder chunk should take on its own.
+R0, R1, R2, R3, R4, R5, R6, R7, R10, R11, and R12 are complete as of 2026-07-25T16:47:39-06:00. R0 shipped the first eight of those to production; **R6 and R7 are not deployed**. R7 is user-visible, so the live site still shows the developer placeholder on the Help tab until someone runs the deploy runbook at `docs/2026-07-09-cloudflare-deploy-turnover.md`. That runbook is proven rather than theoretical as of the R0 deploy, and the deploy is an owner decision, not something a coder chunk should take on its own.
 
-Next coder chunk is R6, the everyday tool catalog notice. R9 and R8 follow and can be reordered freely. None of the three is a screen a user walks into, so nothing else in the queue is urgent to deploy on its own.
+Next coder chunk is R9. R8 follows. Both are test and hygiene work with no user-visible surface, so neither adds urgency to the pending deploy.
+
+The catalog now has a review cadence, recorded as R-009 in `docs/risks/risk-register.md`: re-review every 90 days, next due 2026-10-03. Refreshing catalog contents is that deliberate pass, not something to fold into an unrelated chunk. If the review happens, move `everydayToolCatalogReviewedAt` and `impactCatalogReviewedAt` together, or the freshness module will keep measuring from whichever one lagged.
 
 `ScreenDefinition` is now exactly `id`, `label`, `title`, `stage`, and `summary`. Adding a screen means adding a definition **and** a branch in `App.tsx`; there is no placeholder fallback to catch a missing branch, and a missing branch renders an empty workspace. The App test that walks every tab is the guard.
 

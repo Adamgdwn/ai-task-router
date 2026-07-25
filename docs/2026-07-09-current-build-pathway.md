@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.6.9
+Version: 1.6.10
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-25
 Next Review: During the next substantial build session
-Last Updated: 2026-07-25T16:41:27-06:00
-Status Updated: 2026-07-25T16:41:27-06:00
+Last Updated: 2026-07-25T16:47:39-06:00
+Status Updated: 2026-07-25T16:47:39-06:00
 
 ## Purpose
 
@@ -31,14 +31,14 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live, one chunk behind `main` | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://7c570b1d.ai-task-router.pages.dev` from source `ab329e5`, which carried the audit remediation work from R1, R2, R3, R4, R5, R10, R11, and R12. R7 landed after that deploy and is user-visible, so the live Help tab still shows the developer placeholder until the next deploy. |
+| Browser/PWA app | live, one chunk behind `main` | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://7c570b1d.ai-task-router.pages.dev` from source `ab329e5`, which carried the audit remediation work from R1, R2, R3, R4, R5, R10, R11, and R12. R6 and R7 landed after that deploy. R7 is user-visible, so the live Help tab still shows the developer placeholder until the next deploy. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Public desktop downloads | held | Windows Store/MSIX is the preferred first trusted Windows path; ordinary-user downloads remain gated. |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | R7 complete, undeployed | Chunk R0 is complete as of 2026-07-25T16:28:35-06:00. The blocker was network location, not the token or the build: Cloudflare rejected the token from public IP `184.67.69.66` with code `9109`, and the same token, command shape, and secure env file succeeded unchanged from the owner's home network at public IP `70.65.205.71`. Production now serves source `ab329e5`. Nothing in the app, the build, or the token was modified to make this work. R7 then replaced the Help placeholder with a real screen; that change is on `main` and not yet deployed. |
+| Active chunk | R6 and R7 complete, undeployed | Chunk R0 is complete as of 2026-07-25T16:28:35-06:00. The blocker was network location, not the token or the build: Cloudflare rejected the token from public IP `184.67.69.66` with code `9109`, and the same token, command shape, and secure env file succeeded unchanged from the owner's home network at public IP `70.65.205.71`. Production now serves source `ab329e5`. Nothing in the app, the build, or the token was modified to make this work. R7 then replaced the Help placeholder with a real screen and R6 added the catalog staleness signal; both are on `main` and not yet deployed. |
 
 ## Product Boundary
 
@@ -93,7 +93,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 4 | Reviewed methodology page | draft complete; owner-review ready | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
 | 5 | Opt-in local estimator UI | paused | Draft complete | Optional enhancement; only start if the owner explicitly wants a local impact-estimate surface. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
-| 7 | Audit remediation queue (R0-R12) | in progress | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. R0 (deploy current `main`), R1 (artifacts follow the chosen route), R2 (honest impact numbers), R3 (first-run honesty), R4 (clean the copied prompt text), R10 (reframe the product promise), R11 (price each step by the model it names), and R12 (name the lean style by what it actually does), R5 (dead code and lint feedback loop), and R7 (help screen) are complete; R6 is next. R0 shipped all of the above to production, so the remediation work is now visible to users rather than sitting on `main`. The docs now say the app recommends a tier and a shape of work, not a vendor, and use one impact vocabulary shared with the app UI. Each step is now priced against the model that step tells the user to open, and the per-step figures are shown so a route total can be checked against its parts. Cost figures are now API-equivalent per-token estimates shown beside what is actually billed, and no surface claims the user saved money. R5 removed 388 lines of unreachable code and turned on `noUnusedLocals` and `noUnusedParameters`, so unused code now fails `npm run build`; it changed nothing a user sees. R7 replaced the developer placeholder on the Help tab with a real screen explaining what the app does, what it will never do, what the three routes and the numbers mean, and where saved choices live, and deleted `PlaceholderScreen` with it. Owner decisions on impact framing and product promise are recorded; no chunk is blocked on input. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
+| 7 | Audit remediation queue (R0-R12) | in progress | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. R0 (deploy current `main`), R1 (artifacts follow the chosen route), R2 (honest impact numbers), R3 (first-run honesty), R4 (clean the copied prompt text), R10 (reframe the product promise), R11 (price each step by the model it names), and R12 (name the lean style by what it actually does), R5 (dead code and lint feedback loop), R6 (catalog staleness signal), and R7 (help screen) are complete; R9 is next. R0 shipped all of the above to production, so the remediation work is now visible to users rather than sitting on `main`. The docs now say the app recommends a tier and a shape of work, not a vendor, and use one impact vocabulary shared with the app UI. Each step is now priced against the model that step tells the user to open, and the per-step figures are shown so a route total can be checked against its parts. Cost figures are now API-equivalent per-token estimates shown beside what is actually billed, and no surface claims the user saved money. R5 removed 388 lines of unreachable code and turned on `noUnusedLocals` and `noUnusedParameters`, so unused code now fails `npm run build`; it changed nothing a user sees. R7 replaced the developer placeholder on the Help tab with a real screen explaining what the app does, what it will never do, what the three routes and the numbers mean, and where saved choices live, and deleted `PlaceholderScreen` with it. R6 gave the app a way to admit its model knowledge is ageing: catalog age is computed from the review dates already recorded beside the catalogs, and Best Options shows a notice past 90 days telling the user to check their tool's current model list. The catalog is 20 days old, so the notice is correctly silent today. Two risks were added to the register, R-009 for recommendation-quality drift with a 90-day review cadence and R-010 for impact-claim accuracy. Owner decisions on impact framing and product promise are recorded; no chunk is blocked on input. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
 
 ## Plan Chunks
 
@@ -477,6 +477,10 @@ Stop before public submission, publishing, or any secret/private account handlin
 | 2026-07-25T16:41:27-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. The narrow-viewport case now also opens Help at 390x844 and checks for horizontal overflow, since the new screen is the app's widest block of prose. |
 | 2026-07-25T16:41:27-06:00 | `npm run scan:web-rc`; `git diff --check`; `bash scripts/governance-preflight.sh` | pass | No release-blocking findings; whitespace check reported only the usual Windows LF-to-CRLF notices; governance preflight 0 warnings after R7. |
 
+| 2026-07-25T16:47:39-06:00 | `npm run test`; `npm run build` | pass | R6. Vitest 15 files and 141 tests, up 6 for catalog freshness and both rendered states of the staleness notice; production build clean with the existing Vite chunk-size warning only. |
+| 2026-07-25T16:47:39-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 6 tests. No E2E change needed: at today's catalog age the notice is correctly absent, and the fake-clock cases live in the unit suite. |
+| 2026-07-25T16:47:39-06:00 | `npm run scan:web-rc`; `git diff --check`; `bash scripts/governance-preflight.sh` | pass | No release-blocking findings; whitespace check reported only the usual Windows LF-to-CRLF notices; governance preflight 0 warnings after R6. |
+
 ## Completed Chunk - Compact Active Pathway Extraction
 
 Status: task complete
@@ -538,11 +542,11 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 ## Next Handoff
 
-A functional audit of `59dd849` on 2026-07-25 found gaps between what the app claims and what it does. The remediation queue is [2026-07-25-audit-remediation-plan.md](2026-07-25-audit-remediation-plan.md); start coder work at chunk R6. R0, R1, R2, R3, R4, R5, R7, R10, R11, and R12 are complete. The audit chunks are self-contained and name their own context load, so do not read this pathway's history to work them.
+A functional audit of `59dd849` on 2026-07-25 found gaps between what the app claims and what it does. The remediation queue is [2026-07-25-audit-remediation-plan.md](2026-07-25-audit-remediation-plan.md); start coder work at chunk R9. R0, R1, R2, R3, R4, R5, R6, R7, R10, R11, and R12 are complete. The audit chunks are self-contained and name their own context load, so do not read this pathway's history to work them.
 
 The Cloudflare deploy blocker is resolved. It was the network location the token was used from, not the token or the build, and the recovery path in [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) worked unchanged from the owner's home network. Use that note as the deploy runbook.
 
-**There is undeployed user-visible work on `main`.** R7's Help screen is not live; production still shows the developer placeholder on that tab. Deploying is an owner decision, so a coder chunk should leave it alone and say so in its handoff rather than deploying on its own.
+**There is undeployed user-visible work on `main`.** R7's Help screen is not live; production still shows the developer placeholder on that tab. R6's catalog staleness notice is also undeployed, though it is silent until the catalog passes 90 days on 2026-10-03. Deploying is an owner decision, so a coder chunk should leave it alone and say so in its handoff rather than deploying on its own.
 
 At the next deploy, alongside the hosted smoke in the runbook, verify by hand what the E2E suite cannot judge: that each stage shows a visible path with no disclosure/pull-down, that route cards let the user choose which route to accept, that the save panel names the selected route, that the followed-choice impact counter increments after saving, and that the new Help tab reads as plain language rather than product copy. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 

@@ -1,4 +1,5 @@
 import { type FormEvent, type ReactNode } from "react";
+import { assessCatalogFreshness } from "../../domain/catalog/catalogFreshness";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import { noToolsConfiguredMessage } from "../../domain/routing/hardGates";
 import {
@@ -438,6 +439,33 @@ function TaskStructurePreview({
   );
 }
 
+/**
+ * Shown only once the catalog is past its review threshold. Silence is the normal state, so a user
+ * whose catalog is current never reads a caveat that does not apply to them.
+ *
+ * The wording has to admit the age without implying the app could fix it by checking. It cannot
+ * check; not checking is the product boundary, not a missing feature.
+ */
+export function CatalogStalenessNotice() {
+  const freshness = assessCatalogFreshness();
+
+  if (!freshness.stale) {
+    return null;
+  }
+
+  return (
+    <p className="setupBoundaryNote" role="status">
+      Model and pricing details were last reviewed {formatReviewDate(freshness.reviewedAt)}, {freshness.ageDays} days
+      ago. This app never reads live provider menus or prices, so check your tool's current model list before relying
+      on a specific model name here.
+    </p>
+  );
+}
+
+function formatReviewDate(timestamp: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(timestamp));
+}
+
 function GeneratedResults({
   result,
   impactCounter,
@@ -472,6 +500,8 @@ function GeneratedResults({
 
   return (
     <div className="resultsStack">
+      <CatalogStalenessNotice />
+
       {result.noSafeGeneratedRoute ? (
         <div className="setupAlert" role="alert">
           No safe option is available yet. Use manual review only until the task details or information choices are adjusted.
