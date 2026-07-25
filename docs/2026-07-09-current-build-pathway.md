@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.5.3
+Version: 1.6.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
-Last Reviewed: 2026-07-08
+Last Reviewed: 2026-07-25
 Next Review: During the next substantial build session
-Last Updated: 2026-07-09T12:41:50-06:00
-Status Updated: 2026-07-09T12:41:50-06:00
+Last Updated: 2026-07-25T08:17:12-06:00
+Status Updated: 2026-07-25T08:17:12-06:00
 
 ## Purpose
 
@@ -93,6 +93,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 4 | Reviewed methodology page | draft complete; owner-review ready | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
 | 5 | Opt-in local estimator UI | paused | Draft complete | Optional enhancement; only start if the owner explicitly wants a local impact-estimate surface. |
 | 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
+| 7 | Audit remediation queue (R0-R9) | not started | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
 
 ## Plan Chunks
 
@@ -525,6 +526,8 @@ Acceptance result:
 The active pathway now includes a chunk queue and six plan chunks with objective, user outcome, likely files, non-goals, acceptance criteria, validation expectations, and stop condition. `START_HERE.md` now points new sessions to the chunk queue and names Chunk 1 as the recommended next build chunk.
 
 ## Next Handoff
+
+A functional audit of `59dd849` on 2026-07-25 found gaps between what the app claims and what it does. The remediation queue is [2026-07-25-audit-remediation-plan.md](2026-07-25-audit-remediation-plan.md); start coder work at chunk R1, which fixes saved artifacts describing the recommended route instead of the route the user chose. Chunk R2 needs an owner framing decision before code starts. The audit chunks are self-contained and name their own context load, so do not read this pathway's history to work them.
 
 Immediate next step is production deployment of latest pushed `main`, including functional commit `f8e0a40` and the Chunk 4 methodology review pass, from an allowed Cloudflare token location/session, then hosted smoke of `https://ai-task-router.pages.dev/`. The production app still serves the previous deployment until that succeeds. The local Windows session is not an allowed token location at public IP `184.67.69.66`, and the direct-link Linux fallback was unreachable during the latest retry. The owner plans to retry from the home network; use [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) as the operator checklist. Verify that each stage shows a visible path with no disclosure/pull-down, route cards let the user choose which route to accept, the save panel names the selected route, and the followed-choice impact counter increments after saving. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 

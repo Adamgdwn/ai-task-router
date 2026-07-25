@@ -27,6 +27,8 @@ Current priorities:
 
 Default live build route: [docs/2026-07-09-current-build-pathway.md](docs/2026-07-09-current-build-pathway.md).
 
+Current coder queue: [docs/2026-07-25-audit-remediation-plan.md](docs/2026-07-25-audit-remediation-plan.md), chunks R0 through R9 from the 2026-07-25 functional audit. Each chunk names its own context load; start at R1.
+
 Do not load superseded pathway archives during normal startup. Use the active pathway above for current chunks, validation expectations, and handoff.
 
 For ordinary scoped work:
