@@ -15,11 +15,19 @@ import path from "node:path";
  * Raising a budget is a deliberate act. When this fails, look at what was added first. If the growth is
  * genuinely earned, raise the number here in the same commit that earned it and say so in the message.
  */
+/**
+ * Sizes are kB - 1000 bytes - because that is the unit Vite prints in the build log directly above
+ * this check. An earlier version of this file divided by 1024 and labelled the result "kB", so one
+ * build reported the same file as both "649.58 kB" and "634.36 kB" and the stated 700 kB ceiling was
+ * really 716.8 kB. Two numbers for one file is how a budget stops being believed.
+ */
+const kB = 1000;
+
 const budgets = {
-  // Measured 2026-07-26 at 661.30 kB raw / 188.91 kB gzip, from 519.84 kB raw on 2026-07-05.
+  // Measured 2026-07-26 at 649.58 kB raw / 185.84 kB gzip, from 519.84 kB raw on 2026-07-05.
   // Headroom is deliberately tight - roughly one feature's worth, not one release's worth.
-  javascript: { rawBytes: 700 * 1024, gzipBytes: 200 * 1024 },
-  stylesheet: { rawBytes: 60 * 1024, gzipBytes: 12 * 1024 },
+  javascript: { rawBytes: 700 * kB, gzipBytes: 200 * kB },
+  stylesheet: { rawBytes: 60 * kB, gzipBytes: 12 * kB },
 };
 
 /**
@@ -49,7 +57,7 @@ export function evaluateBundleBudget(assets, limits = budgets) {
 }
 
 function formatKb(bytes) {
-  return `${(bytes / 1024).toFixed(2)} kB`;
+  return `${(bytes / kB).toFixed(2)} kB`;
 }
 
 async function readAssets(distDir) {
