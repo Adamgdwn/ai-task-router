@@ -414,30 +414,11 @@ button:focus-visible {
   padding-left: 20px;
 }
 
-.detailGrid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 8px;
-}
-
-.detailGrid section {
-  border-top: 2px solid var(--brand-teal);
-  padding-top: 14px;
-}
-
-.detailGrid h3,
 .setupGroup h3,
 .setupRecord h4 {
   margin: 0;
 }
 
-.detailGrid h3 {
-  font-size: 0.95rem;
-  margin-bottom: 8px;
-}
-
-.detailGrid p,
 .recordHeader p,
 .setupBoundaryNote,
 .emptySetupState {
@@ -767,12 +748,9 @@ button:focus-visible {
 }
 
 .formGrid,
-.capabilityGrid,
 .weightGrid,
 .checkboxGrid,
-.quickQuestionGrid,
-.toolChoiceGrid,
-.sourceIncludeGrid {
+.toolChoiceGrid {
   display: grid;
   gap: 10px;
 }
@@ -781,26 +759,13 @@ button:focus-visible {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.quickQuestionGrid {
-  grid-template-columns: minmax(220px, 0.75fr) minmax(240px, 1.25fr);
-}
-
 .toolChoiceGrid {
   align-items: end;
   grid-template-columns: minmax(220px, 1.1fr) minmax(178px, 0.8fr) minmax(178px, 0.7fr);
 }
 
-.sourceIncludeGrid {
-  align-items: end;
-  grid-template-columns: minmax(126px, 0.45fr) minmax(220px, 0.85fr) minmax(220px, 1fr);
-}
-
 .compactFormGrid {
   grid-template-columns: minmax(180px, 0.8fr) minmax(220px, 1.2fr);
-}
-
-.capabilityGrid {
-  grid-template-columns: repeat(5, minmax(92px, 1fr));
 }
 
 .weightGrid {
@@ -808,11 +773,8 @@ button:focus-visible {
 }
 
 .formGrid label,
-.capabilityGrid label,
 .weightGrid label,
-.quickQuestionGrid label,
 .toolChoiceGrid label,
-.sourceIncludeGrid label,
 .advancedDrawer > label,
 .setupRecord > label {
   display: grid;
@@ -821,48 +783,20 @@ button:focus-visible {
 }
 
 .formGrid span,
-.capabilityGrid span,
 .weightGrid span,
-.quickQuestionGrid span,
 .toolChoiceGrid label > span,
-.sourceIncludeGrid label > span,
 .advancedDrawer > label > span,
 .setupRecord > label > span,
 .checkboxGrid legend,
-.segmentedControl legend,
 .choiceCardGrid legend {
   color: #334b5a;
   font-size: 0.78rem;
   font-weight: 800;
 }
 
-.toggleField {
-  align-items: center;
-  color: #243442;
-  display: inline-flex;
-  gap: 8px;
-}
-
-.toolUseToggle,
-.toolUseMost,
-.sourceIncludeToggle {
-  background: var(--panel-soft);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  min-height: 40px;
-  padding: 8px 10px;
-}
-
-.toggleField input,
-.checkboxGrid input,
-.segmentedOption input,
-.comingLaterControl input {
+.checkboxGrid input {
   min-height: auto;
   width: auto;
-}
-
-.localOnlyToggle {
-  width: fit-content;
 }
 
 .checkboxGrid {
@@ -877,9 +811,7 @@ button:focus-visible {
   margin-bottom: 2px;
 }
 
-.checkboxGrid label,
-.segmentedOption,
-.comingLaterControl {
+.checkboxGrid label {
   align-items: center;
   background: var(--panel-soft);
   border: 1px solid var(--line);
@@ -888,20 +820,6 @@ button:focus-visible {
   gap: 8px;
   min-height: 38px;
   padding: 8px 10px;
-}
-
-.segmentedControl {
-  border: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-}
-
-.segmentedControl legend {
-  flex-basis: 100%;
-  margin-bottom: 2px;
 }
 
 .choiceCardGrid {
@@ -968,13 +886,6 @@ button:focus-visible {
   padding: 10px 12px;
 }
 
-.segmentedOption:has(input:checked) {
-  background: #eef8fb;
-  border-color: var(--brand-teal);
-  box-shadow: inset 0 -3px 0 var(--brand-teal-bright);
-  color: var(--brand-navy);
-}
-
 .advancedDrawer {
   border-top: 1px solid var(--line);
   display: grid;
@@ -994,22 +905,6 @@ button:focus-visible {
 }
 
 .weightGrid small {
-  color: var(--muted-ink);
-  line-height: 1.35;
-}
-
-.comingLaterControl {
-  align-items: flex-start;
-  border-left: 4px solid var(--review-amber);
-  max-width: 620px;
-}
-
-.comingLaterControl span {
-  display: grid;
-  gap: 2px;
-}
-
-.comingLaterControl small {
   color: var(--muted-ink);
   line-height: 1.35;
 }
@@ -1142,14 +1037,12 @@ button:focus-visible {
   margin: 0;
 }
 
-.wideField,
 .fieldShell {
   display: grid;
   gap: 5px;
   min-width: 0;
 }
 
-.wideField > span,
 .fieldShell > span,
 .sourceChoiceGrid legend {
   color: #334b5a;
@@ -2728,11 +2621,8 @@ button:focus-visible {
   .boundaryStrip,
   .marketPath,
   .formGrid,
-  .capabilityGrid,
   .weightGrid,
-  .quickQuestionGrid,
   .toolChoiceGrid,
-  .sourceIncludeGrid,
   .choiceCardGrid,
   .checkboxGrid,
   .sourceChoiceGrid,
@@ -2797,14 +2687,10 @@ button:focus-visible {
   .boundaryStrip,
   .browserStorageNotice,
   .marketPath,
-  .detailGrid,
   .formGrid,
   .compactFormGrid,
-  .capabilityGrid,
   .weightGrid,
-  .quickQuestionGrid,
   .toolChoiceGrid,
-  .sourceIncludeGrid,
   .choiceCardGrid,
   .checkboxGrid,
   .sourceChoiceGrid,
