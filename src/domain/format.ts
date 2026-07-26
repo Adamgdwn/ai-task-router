@@ -53,6 +53,65 @@ export function formatWattHours(value: number): string {
   return `${new Intl.NumberFormat("en-US", { maximumFractionDigits }).format(rounded)} Wh`;
 }
 
+/**
+ * The device a watt-hour is restated against.
+ *
+ * One device across the whole range, deliberately. Switching between bulbs, kettles, and phone
+ * charges to keep each number in a pretty range would make two routes incomparable at the glance
+ * this restatement exists to serve.
+ */
+export const everydayEnergyReference = {
+  label: "10-watt LED bulb",
+  watts: 10,
+} as const;
+
+/**
+ * A watt-hour restated as something a person can picture.
+ *
+ * This is not a second estimate and it adds no uncertainty of its own. A watt-hour is one watt for
+ * one hour, so this is arithmetic over a stated device rating, not a new claim about the world. The
+ * energy figure it restates carries all the caveats.
+ *
+ * It exists because the environmental half of this app was, until now, entirely unreadable. "1.2 Wh"
+ * is honest and sourced and teaches nothing, because almost nobody holds an intuition for a
+ * watt-hour. An unreadable number is not a smaller claim than a readable one; it is the same claim
+ * with the lesson removed.
+ *
+ * Returns null rather than a phrase for zero or non-finite input, so callers show the bare figure
+ * instead of asserting a bulb ran for no time.
+ */
+export function formatEnergyAsEverydayEquivalent(wattHours: number): string | null {
+  if (!Number.isFinite(wattHours) || wattHours <= 0) {
+    return null;
+  }
+
+  const minutes = (wattHours / everydayEnergyReference.watts) * 60;
+
+  if (minutes < 1) {
+    return `a ${everydayEnergyReference.label} for under a minute`;
+  }
+
+  return minutes < 90
+    ? `a ${everydayEnergyReference.label} for ${formatDuration(minutes, "minute")}`
+    : `a ${everydayEnergyReference.label} for ${formatDuration(minutes / 60, "hour")}`;
+}
+
+/** The figure and its plain-language restatement together, for the places a user is deciding. */
+export function formatWattHoursWithEveryday(value: number): string {
+  const everyday = formatEnergyAsEverydayEquivalent(value);
+
+  return everyday ? `${formatWattHours(value)} - about ${everyday}` : formatWattHours(value);
+}
+
+function formatDuration(value: number, unit: "minute" | "hour") {
+  const rounded = toSignificantFigures(value, 2);
+  const text = new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: Math.abs(rounded) >= 10 ? 0 : 1,
+  }).format(rounded);
+
+  return `${text} ${text === "1" ? unit : `${unit}s`}`;
+}
+
 export function formatTimestamp(timestamp: string): string {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",

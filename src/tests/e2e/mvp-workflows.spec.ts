@@ -188,12 +188,20 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByText("Estimated savings")).toHaveCount(0);
   await expect(page.getByText("Energy saved")).toHaveCount(0);
   await expect(page.getByText("Est. saved")).toHaveCount(0);
+  // Watt-hours alone taught nothing, so every energy figure a user decides on carries a unit they
+  // can picture. The multiple does the division the reader was previously left to do, and neither
+  // may reintroduce the savings vocabulary R-010 forbids.
+  await expect(page.getByText(/10-watt LED bulb/).first()).toBeVisible();
+  await expect(page.getByText(/roughly [\d.]+x this route|about the same as this route/).first()).toBeVisible();
   await expect(page.getByText(/Human approval is required before using public-facing/)).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await page.getByRole("button", { name: "Accept selected route and save prompts" }).click();
   await expect(page.getByText("Selected route, decision card, prompts, and followed-choice impact saved on this device.")).toBeVisible();
   await expect(page.getByText("1 followed recommendation(s) counted on this device.")).toBeVisible();
+  // The lean/balanced/premium split was computed and discarded before this; it is the only surface
+  // that answers "am I always reaching for the heaviest option?"
+  await expect(page.locator("dt").filter({ hasText: "Which routes you followed" })).toBeVisible();
 
   await page.getByRole("button", { name: "Decision Card", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeVisible();

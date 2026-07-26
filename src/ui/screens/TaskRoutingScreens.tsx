@@ -1,6 +1,11 @@
 import { type FormEvent, type ReactNode } from "react";
 import { assessCatalogFreshness } from "../../domain/catalog/catalogFreshness";
-import { formatUsd, formatWattHours } from "../../domain/format";
+import {
+  formatEnergyAsEverydayEquivalent,
+  formatUsd,
+  formatWattHours,
+  formatWattHoursWithEveryday,
+} from "../../domain/format";
 import { domIdFor } from "../domId";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import { noToolsConfiguredMessage } from "../../domain/routing/hardGates";
@@ -791,9 +796,14 @@ function routeStepEstimateLabel(step: RouteOption["steps"][number]) {
 }
 
 function routeEnergyLabel(candidate: RouteOption) {
-  return candidate.estimatedEnergyWh === undefined
-    ? "Estimate unavailable"
-    : `about ${formatWattHours(candidate.estimatedEnergyWh)} per use`;
+  if (candidate.estimatedEnergyWh === undefined) {
+    return "Estimate unavailable";
+  }
+
+  const everyday = formatEnergyAsEverydayEquivalent(candidate.estimatedEnergyWh);
+  const perUse = `about ${formatWattHours(candidate.estimatedEnergyWh)} per use`;
+
+  return everyday ? `${perUse} - about ${everyday}` : perUse;
 }
 
 /**
@@ -810,6 +820,32 @@ function heaviestSiblingRoute(candidate: RouteOption, options: readonly RouteOpt
   return heaviest && heaviest.id !== candidate.id ? heaviest : undefined;
 }
 
+/**
+ * Two figures side by side still leave the reader doing the division, and the division is the
+ * lesson. A multiple is a comparison between two estimates on the same basis, not a claim about
+ * money kept, so it stays inside the fixed impact vocabulary in R-010.
+ *
+ * Returns null when the multiple would overstate what the estimates support: a zero or missing
+ * candidate figure has no meaningful ratio, and near-equal routes should read as near-equal rather
+ * than as "1.1x".
+ */
+function comparisonMultipleClause(candidateValue: number | undefined, heaviestValue: number) {
+  if (candidateValue === undefined || candidateValue <= 0 || !Number.isFinite(candidateValue)) {
+    return null;
+  }
+
+  const multiple = heaviestValue / candidateValue;
+
+  if (!Number.isFinite(multiple) || multiple < 1.1) {
+    return "about the same as this route";
+  }
+
+  const rounded = Number(multiple.toPrecision(2));
+  const text = new Intl.NumberFormat("en-US", { maximumFractionDigits: rounded >= 10 ? 0 : 1 }).format(rounded);
+
+  return `roughly ${text}x this route`;
+}
+
 function routeCostComparisonLabel(candidate: RouteOption, options: readonly RouteOption[]) {
   const heaviest = heaviestSiblingRoute(candidate, options);
 
@@ -817,9 +853,12 @@ function routeCostComparisonLabel(candidate: RouteOption, options: readonly Rout
     return "This is the heaviest route you were offered for this task.";
   }
 
-  return `The heaviest route you were offered, ${heaviest.label}, is about ${formatUsd(
+  const multiple = comparisonMultipleClause(candidate.apiEquivalentCostUsd, heaviest.apiEquivalentCostUsd);
+  const headline = `The heaviest route you were offered, ${heaviest.label}, is about ${formatUsd(
     heaviest.apiEquivalentCostUsd,
-  )} on the same basis.`;
+  )} on the same basis`;
+
+  return multiple ? `${headline} - ${multiple}.` : `${headline}.`;
 }
 
 function routeEnergyComparisonLabel(candidate: RouteOption, options: readonly RouteOption[]) {
@@ -829,7 +868,10 @@ function routeEnergyComparisonLabel(candidate: RouteOption, options: readonly Ro
     return "This is the heaviest route you were offered for this task.";
   }
 
-  return `${heaviest.label} is about ${formatWattHours(heaviest.estimatedEnergyWh)} per use.`;
+  const multiple = comparisonMultipleClause(candidate.estimatedEnergyWh, heaviest.estimatedEnergyWh);
+  const headline = `${heaviest.label} is about ${formatWattHours(heaviest.estimatedEnergyWh)} per use`;
+
+  return multiple ? `${headline} - ${multiple}.` : `${headline}.`;
 }
 
 function RouteTrustPanel({
@@ -1115,7 +1157,7 @@ function chartCostTotalLabel(costPerUse: number | null) {
 }
 
 function chartEnergyTotalLabel(energyPerUse: number | null) {
-  return energyPerUse === null ? "energy not estimated" : formatWattHours(energyPerUse * 100);
+  return energyPerUse === null ? "energy not estimated" : formatWattHoursWithEveryday(energyPerUse * 100);
 }
 
 function ChartPanelAxes({

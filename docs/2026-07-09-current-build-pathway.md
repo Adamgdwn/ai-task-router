@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.6.13
+Version: 1.6.14
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-26
 Next Review: During the next substantial build session
-Last Updated: 2026-07-26T10:21:53-06:00
-Status Updated: 2026-07-26T10:21:53-06:00
+Last Updated: 2026-07-26T10:52:00-06:00
+Status Updated: 2026-07-26T10:52:00-06:00
 
 ## Purpose
 
@@ -38,7 +38,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Audit queue complete and deployed | Chunk R0 is complete as of 2026-07-25T16:28:35-06:00. The blocker was network location, not the token or the build: Cloudflare rejected the token from public IP `184.67.69.66` with code `9109`, and the same token, command shape, and secure env file succeeded unchanged from the owner's home network at public IP `70.65.205.71`. Production now serves source `ab329e5`. Nothing in the app, the build, or the token was modified to make this work. R7 then replaced the Help placeholder with a real screen, R6 added the catalog staleness signal, R9 made the tool frequency question honest, and R8 added cold-path E2E coverage. All four went live in the 2026-07-26 deploy of `69b31a2`, along with the bundle budget gate, the desktop-track removal, and the leanness pass that gave money a single formatter. The whole audit remediation queue, R0 through R12, is now complete and visible to users. |
+| Active chunk | Teaching audit: 3 of 6 findings fixed, undeployed | Chunk R0 is complete as of 2026-07-25T16:28:35-06:00. The blocker was network location, not the token or the build: Cloudflare rejected the token from public IP `184.67.69.66` with code `9109`, and the same token, command shape, and secure env file succeeded unchanged from the owner's home network at public IP `70.65.205.71`. Production now serves source `ab329e5`. Nothing in the app, the build, or the token was modified to make this work. R7 then replaced the Help placeholder with a real screen, R6 added the catalog staleness signal, R9 made the tool frequency question honest, and R8 added cold-path E2E coverage. All four went live in the 2026-07-26 deploy of `69b31a2`, along with the bundle budget gate, the desktop-track removal, and the leanness pass that gave money a single formatter. The whole audit remediation queue, R0 through R12, is now complete and visible to users. A separate teaching audit on 2026-07-26 asked the narrower question of whether the app teaches why right-sizing matters, and found six gaps. Three are fixed here - readable energy, the rendered lean/balanced/premium split, and comparison multiples - and three remain open in the Next Handoff. These changes are on `main` but not yet deployed. |
 
 ## Product Boundary
 
@@ -451,6 +451,12 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 | 2026-07-26T10:21:53-06:00 | Canonical hosted smoke on `https://ai-task-router.pages.dev` | pass | Root, `/manifest.webmanifest`, and `/service-worker.js` returned HTTP 200. The canonical URL served asset `index-CBWnLbEK.js` on the first fetch with no stale edge-cache hit, unlike 2026-07-25. The live asset contains `What this app does` and not `Placeholder State`, proving the R7 Help screen is the one visitors now see. |
 | 2026-07-26T10:21:53-06:00 | Hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass on re-run | First hosted run was 6 passed, 1 failed: the route-selection case did not find `Choose this route` within its timeout on a cold edge. The same test passed alone in 1.9s immediately after, and a full re-run passed 7/7 in 9.3s. Read as cold-start latency on first hosted paint, not a product defect; if it recurs on a warm edge it is a real timing bug in that screen. |
 
+| 2026-07-26T10:52:00-06:00 | Teaching audit of the impact and routing surfaces | complete | Read-only pass over `HelpScreen`, `ImpactInsightPanel`, `TaskRoutingScreens`, `StageGuidancePanel`, `RouteLogScreen`, and the estimator. Six gaps found against the goal "teach why right-sizing matters". Three fixed in this chunk; three remain open, listed in the Next Handoff. Also confirmed the water ranges are unrendered by governed decision, not oversight, and that the R-010 vocabulary is being honored throughout the existing copy. |
+| 2026-07-26T10:52:00-06:00 | `npx vitest run src/tests/unit/format.test.ts` | pass | 14 tests, up from 7. Covers the everyday energy restatement across sub-minute, minute, and hour scales, singular units, the null return for zero and non-finite input, and the combined figure-plus-restatement formatter. One expectation was wrong on first run: 10 Wh is 60 minutes, below the 90-minute switch to hours, so "60 minutes" is correct and the test was corrected rather than the threshold. |
+| 2026-07-26T10:52:00-06:00 | `npm run test` | pass | 16 files and 154 tests, up from 147. No existing assertion needed changing, which confirms the three changes are additive to the impact vocabulary rather than a rewrite of it. |
+| 2026-07-26T10:52:00-06:00 | `npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass | 7/7 in 9.8s with three new assertions: the everyday energy restatement renders on the route cards, the comparison multiple renders, and the lean/balanced/premium split appears in the followed-choice counter after a route is saved. The existing R-010 guards for "Estimated savings", "Energy saved", and "Est. saved" still report zero occurrences, so the new copy did not reintroduce savings vocabulary. |
+| 2026-07-26T10:52:00-06:00 | `npm run build` | pass | Typecheck clean under `noUnusedLocals`; budget gate reported javascript raw 651.58 kB / 700.00 kB and stylesheet raw 41.56 kB / 60.00 kB. The 2 kB growth is the new copy and formatter. |
+
 ## Completed Chunk - Compact Active Pathway Extraction
 
 Status: task complete
@@ -517,6 +523,14 @@ A functional audit of `59dd849` on 2026-07-25 found gaps between what the app cl
 The Cloudflare deploy blocker is resolved. It was the network location the token was used from, not the token or the build, and the recovery path in [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) has now worked unchanged from the owner's home network twice. Use that note as the deploy runbook.
 
 **Production is current with `main`.** The owner authorized the deploy on 2026-07-26 and source `69b31a2` is live. Nothing is sitting undeployed. R7's Help screen, R6's catalog staleness notice — silent until the catalog passes 90 days on 2026-10-03 — and the money formatter that shows real dollars and cents are all in front of users now.
+
+**A teaching audit on 2026-07-26 found six gaps; three are fixed and three are open.** The question asked was narrower than the 2026-07-25 functional audit: not "does the app work" but "does it teach why right-sizing matters". Fixed in this chunk, undeployed as of this writing: every energy figure a user decides on now carries an everyday restatement, because watt-hours alone were honest, sourced, and unreadable; the lean/balanced/premium split of followed routes is now rendered, having been computed and discarded since it was written; and heaviest-sibling comparisons now carry the multiple instead of leaving the reader to divide. Still open, in rough priority order:
+
+1. **The lesson arrives after the decision.** The entire pre-task curriculum is one hedged line on Start Here. A visitor who lands, looks around, and never describes a task learns nothing about why routing matters.
+2. **Past Choices teaches nothing.** It renders no cost and no energy at all — the file has zero calls to either formatter. It is the natural home for noticing a pattern across saved choices and is currently a filing cabinet.
+3. **Two of the four impact metrics are hedged into invisibility.** "Textbook example, not your usage" and "Illustrative only... Nobody is claiming you ran these" are honest but occupy half the panel's visual weight while teaching less than the two task-specific figures beside them. The right-sizing example is the strongest teaching content in the app — it nets out induced extra runs, so it admits that going too small costs more — and its label invites the reader to skip it.
+
+Note for whoever takes these: the owner's framing is "cost savings", and R-010 forbids "saved", "savings", and "avoided" for money. That control is currently honored everywhere. The reconciliation used in this chunk is comparison and ratio framing, which stays inside the fixed vocabulary; a multiple is a ratio between two estimates on the same basis, not a claim about money kept. Do not resolve this tension by loosening the vocabulary without an owner decision recorded in the risk register.
 
 **The hosted smoke still needs human eyes.** The automated half is done: 7/7 hosted E2E and the asset checks above. What no test can judge is wording and feel. On `https://ai-task-router.pages.dev/`, verify by hand that each stage shows a visible path with no disclosure/pull-down, that route cards let the user choose which route to accept, that the save panel names the selected route, that the followed-choice impact counter increments after saving, that the Help tab reads as plain language rather than product copy, and that route costs now read as ordinary dollars and cents in both the route card and the stage guidance panel, which used to disagree. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 

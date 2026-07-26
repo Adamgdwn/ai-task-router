@@ -1,15 +1,15 @@
 # 2026-07-08T22:07:13-06:00 - AI Task Router Impact Estimator Methodology
 
 Document ID: GUI-ENG-002
-Version: 0.7.0
+Version: 0.8.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-05
-Last Reviewed: 2026-07-25
+Last Reviewed: 2026-07-26
 Next Review: Before source refresh, exact public savings claims, social launch copy, live pricing tables, or opt-in estimator release
 Timestamp: 2026-07-08T22:07:13-06:00
-Last Updated: 2026-07-26T09:49:39-06:00
+Last Updated: 2026-07-26T10:52:00-06:00
 
 ## Purpose
 
@@ -219,7 +219,34 @@ direct_water_mL = net_avoided_Wh * 0.27 to 1.10
 broader_operational_water_mL = net_avoided_Wh * 3.0 to 4.5
 ```
 
-These ranges are scenario anchors. They should not be converted into public per-user water claims without a fresh source review, owner review, and release evidence.
+These ranges are scenario anchors. They should not be converted into public per-user water claims without a fresh source review, owner review, and release evidence. They remain computed but unrendered for that reason.
+
+## Everyday Restatement Of Energy
+
+Added 2026-07-26. Watt-hours were the entire environmental argument in the app and almost no reader holds an intuition for them, so an honest, sourced figure was teaching nothing. Every energy figure a user decides on is now shown twice: the watt-hour figure first, then the same quantity restated as time on a stated device.
+
+```text
+bulb_minutes = watt_hours / 10 W * 60
+```
+
+This is deliberately **not** a second estimate and it introduces no new source dependency:
+
+- A watt-hour is one watt for one hour. The conversion is arithmetic over a stated device rating, not a measurement or a research figure.
+- It cannot be more or less accurate than the watt-hour figure it restates. All caveats live on that figure.
+- One device is used across the whole range. Switching between bulbs, kettles, and phone charges to keep each number in a flattering range would make two routes incomparable at a glance, which is the only thing this restatement exists to serve.
+- Sub-minute values collapse to "under a minute" rather than printing false precision, and zero or non-finite energy produces no phrase at all rather than asserting a bulb ran for no time.
+
+The device rating is stated on screen and in Help, so a reader can check the arithmetic themselves. Changing the device is a copy change with no effect on any estimate.
+
+## Comparison Multiples
+
+Added 2026-07-26. Route comparisons previously printed two figures and left the reader to divide, which is where the lesson actually lives. The heaviest-sibling comparison now carries the multiple: "the heaviest route you were offered is about $2.40 on the same basis - roughly 8x this route."
+
+A multiple is a ratio between two estimates computed on the same basis. It is not a claim about money kept, so it stays inside the fixed vocabulary below. Guards:
+
+- no multiple when the candidate figure is zero, missing, or non-finite, because the ratio is undefined
+- routes within 10% read as "about the same as this route" rather than "1.1x", which would overstate what the estimates support
+- two significant figures, matching the display precision of the figures being compared
 
 ## Source Snapshot Policy
 
@@ -308,6 +335,7 @@ Future opt-in estimator:
 | 2026-07-25T09:40:19-06:00 | Chunk R2 rewrite of the impact framing | passed | Removed the premium-API baseline and all savings fields; added the API-equivalent per-token figure beside the billed figure; capped display precision at two significant figures; rebuilt the lifetime counter on followed-route estimates. Doc updated in the same task. |
 | 2026-07-26T09:49:39-06:00 | Money formatting unified and un-rounded | passed | Four divergent `formatUsd` copies collapsed into `src/domain/format.ts`. The stage guidance panel had been hardcoding `en-US` and skipping the significant-figure rounding, so it disagreed with the route card describing the same route. Money now shows real dollars and cents at owner direction; energy keeps the two-significant-figure cap. Fifteen assertions added in `src/tests/unit/format.test.ts`; `src/tests/unit/exportImport.test.ts` updated where the fixture's `$0.051` became `$0.05`. Full Vitest 16 files / 147 tests passed. Doc updated in the same task. |
 | 2026-07-05T09:34:16-06:00 | Local visual smoke and hosted production smoke | passed | Desktop/mobile preview checks had no horizontal overflow; source details opened cleanly on mobile; Cloudflare production deployment and hosted Playwright/Chromium impact smoke passed. |
+| 2026-07-26T10:52:00-06:00 | Usability audit remediation: readable energy, route mix, comparison multiples | passed | Three findings from the 2026-07-26 teaching audit. (1) Every energy figure a user decides on now carries an everyday restatement; see the section above for why this adds no estimate. (2) `followedByStrategy` was computed, tested, and never rendered - the lean/balanced/premium split now appears in the followed-choice counter, the only surface that answers "am I always reaching for the heaviest option?". (3) Heaviest-sibling comparisons now carry the multiple instead of leaving the reader to divide. Seven new assertions in `src/tests/unit/format.test.ts`, three in `src/tests/e2e/mvp-workflows.spec.ts` including a guard that the new copy did not reintroduce savings vocabulary. Full Vitest 16 files / 154 tests passed; Playwright 7/7; `npm run build` clean and within budget. Doc updated in the same task. |
 
 ## Handoff
 

@@ -106,8 +106,17 @@ export function HelpScreen({ definition }: { definition: ScreenDefinition }) {
             zero. It is an order-of-magnitude comparison between routes, not a measurement of your run.
           </li>
           <li>
+            <strong>The light-bulb comparison</strong> - the same energy figure said in a unit you can picture. A
+            watt-hour is one watt for one hour, so "a 10-watt LED bulb for 7 minutes" is arithmetic on the figure
+            beside it, not a second estimate. It adds no accuracy and claims nothing extra; it only makes the number
+            readable, because watt-hours are a unit almost nobody has a feel for.
+          </li>
+          <li>
             <strong>Followed choices</strong> - how many recommendations you accepted or edited on this device, with
-            their totals. It counts what you told the app you followed; it cannot see what you actually did.
+            their totals and how they split across lean, balanced, and premium. It counts what you told the app you
+            followed; it cannot see what you actually did. The split is there so you can notice your own pattern - if
+            every task is going premium, that is worth knowing, and if premium is genuinely what your work needs, that
+            is a fine answer too.
           </li>
         </ul>
         <p>

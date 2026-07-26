@@ -1,4 +1,4 @@
-import { formatUsd, formatWattHours } from "../../domain/format";
+import { formatUsd, formatWattHoursWithEveryday } from "../../domain/format";
 import type { PublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import type { TrackedImpactSummary } from "../../domain/impact/impactCounter";
 import type { RouteOption, TaskIntake } from "../../domain/types";
@@ -48,12 +48,18 @@ export function ImpactInsightPanel({
             </div>
             <div>
               <dt>Estimated energy used</dt>
-              <dd>{formatWattHours(trackedImpact.estimatedEnergyWh)}</dd>
+              <dd>{formatWattHoursWithEveryday(trackedImpact.estimatedEnergyWh)}</dd>
             </div>
             <div>
               <dt>Saved plans</dt>
               <dd>{formatInteger(trackedImpact.savedPlanCount)}</dd>
             </div>
+            {trackedImpact.followedPlanCount > 0 ? (
+              <div>
+                <dt>Which routes you followed</dt>
+                <dd>{followedStrategyMixLabel(trackedImpact.followedByStrategy)}</dd>
+              </div>
+            ) : null}
           </dl>
           {trackedImpact.plansWithoutEstimateCount > 0 ? (
             <p className="impactCaveat">
@@ -91,7 +97,7 @@ export function ImpactInsightPanel({
         </div>
         <div>
           <dt>Energy example</dt>
-          <dd>{formatWattHours(snapshot.environmentalExample.netAvoidedWattHours)}</dd>
+          <dd>{formatWattHoursWithEveryday(snapshot.environmentalExample.netAvoidedWattHours)}</dd>
           <span>
             Illustrative only: the compute difference across {snapshot.environmentalExample.taskCount} reasoning tasks
             when half route to a lighter text workload.
@@ -127,6 +133,24 @@ function formatReviewedDate(timestamp: string) {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
   }).format(new Date(timestamp));
+}
+
+/**
+ * The one place a user can see their own routing habit rather than a single task's estimate.
+ *
+ * This breakdown was computed and thrown away: the counter tracked lean/balanced/premium all along
+ * and the panel showed only a total, which is the number least able to answer "am I reaching for
+ * heavier help than the work needs?" - the question the app says it exists to build a habit around.
+ *
+ * Stated as a plain count, in route order, with no praise and no scolding. A user who legitimately
+ * needs premium every time should not read a nudge here, and the mix itself is the teaching.
+ */
+function followedStrategyMixLabel(followedByStrategy: TrackedImpactSummary["followedByStrategy"]) {
+  const parts = (["lean", "balanced", "premium"] as const)
+    .filter((strategy) => followedByStrategy[strategy] > 0)
+    .map((strategy) => `${formatInteger(followedByStrategy[strategy])} ${strategy}`);
+
+  return parts.length ? parts.join(", ") : "None counted yet";
 }
 
 function formatInteger(value: number) {
