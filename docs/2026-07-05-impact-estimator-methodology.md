@@ -1,7 +1,7 @@
 # 2026-07-08T22:07:13-06:00 - AI Task Router Impact Estimator Methodology
 
 Document ID: GUI-ENG-002
-Version: 0.8.0
+Version: 0.9.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,7 +9,7 @@ Effective Date: 2026-07-05
 Last Reviewed: 2026-07-26
 Next Review: Before source refresh, exact public savings claims, social launch copy, live pricing tables, or opt-in estimator release
 Timestamp: 2026-07-08T22:07:13-06:00
-Last Updated: 2026-07-26T10:52:00-06:00
+Last Updated: 2026-07-26T11:20:59-06:00
 
 ## Purpose
 
@@ -248,6 +248,29 @@ A multiple is a ratio between two estimates computed on the same basis. It is no
 - routes within 10% read as "about the same as this route" rather than "1.1x", which would overstate what the estimates support
 - two significant figures, matching the display precision of the figures being compared
 
+## Choice-Pattern Totals On Past Choices
+
+Added 2026-07-26. Past Choices held every figure needed to show a pattern and rendered none of them. It now totals two things side by side for the whole log: what the routes the user followed would come to if metered, and what the heaviest route offered on each of those same tasks would have come to.
+
+The pair is the same comparison as a single route's multiple, extended over the log. Both totals are API-equivalent estimates on the same basis, neither is a bill, and the second is a stated counterfactual over routes the app itself offered, not a reconstruction of what the user would otherwise have done. The rendered copy therefore uses comparison language only and stays inside the fixed vocabulary below.
+
+Inclusion rules, chosen so the comparison cannot be quietly flattened:
+
+- only choices the user marked `accepted` or `edited`, matching `plansWithoutEstimateCount` treatment elsewhere
+- only choices where the chosen route carries an API-equivalent figure; choices saved before estimates existed are excluded, not counted as zero
+- only choices where a heavier sibling was also on offer and carries a figure; a task with nothing heavier available has no comparison to make
+- computed over the whole log rather than the filtered view, because a pattern a user can reshape by changing a filter is not a pattern
+
+Excluding rather than zeroing matters in one direction specifically: a zero entry would add to the denominator of the comparison without adding to either total, dragging the pair toward "these routes barely differ" - the opposite of what the evidence supports.
+
+## Pre-Task Placement Of Worked Examples
+
+Added 2026-07-26. The three worked examples on Start Here - the 100k-token benchmark, the right-sizing example, and the environmental example - are the same figures from the same reviewed snapshot already rendered on Best Options. Showing them before a task is described is a placement change, not a new claim, and no figure is computed differently in the earlier position.
+
+The right-sizing example is deliberately the middle of the three. It nets out induced extra runs, so it is the one example in the app that can honestly say a too-small route costs more, and it is stated that way rather than as a disclaimer under a cheaper-is-better headline. An app whose only pre-task lesson is "smaller is cheaper" teaches a habit its own estimator contradicts.
+
+The panel repeats the existing hedges verbatim in substance: worked examples, not the user's usage, and nobody is claiming the reader ran them.
+
 ## Source Snapshot Policy
 
 The current public app uses a source snapshot reviewed on `2026-07-05T08:52:38-06:00`.
@@ -336,6 +359,7 @@ Future opt-in estimator:
 | 2026-07-26T09:49:39-06:00 | Money formatting unified and un-rounded | passed | Four divergent `formatUsd` copies collapsed into `src/domain/format.ts`. The stage guidance panel had been hardcoding `en-US` and skipping the significant-figure rounding, so it disagreed with the route card describing the same route. Money now shows real dollars and cents at owner direction; energy keeps the two-significant-figure cap. Fifteen assertions added in `src/tests/unit/format.test.ts`; `src/tests/unit/exportImport.test.ts` updated where the fixture's `$0.051` became `$0.05`. Full Vitest 16 files / 147 tests passed. Doc updated in the same task. |
 | 2026-07-05T09:34:16-06:00 | Local visual smoke and hosted production smoke | passed | Desktop/mobile preview checks had no horizontal overflow; source details opened cleanly on mobile; Cloudflare production deployment and hosted Playwright/Chromium impact smoke passed. |
 | 2026-07-26T10:52:00-06:00 | Usability audit remediation: readable energy, route mix, comparison multiples | passed | Three findings from the 2026-07-26 teaching audit. (1) Every energy figure a user decides on now carries an everyday restatement; see the section above for why this adds no estimate. (2) `followedByStrategy` was computed, tested, and never rendered - the lean/balanced/premium split now appears in the followed-choice counter, the only surface that answers "am I always reaching for the heaviest option?". (3) Heaviest-sibling comparisons now carry the multiple instead of leaving the reader to divide. Seven new assertions in `src/tests/unit/format.test.ts`, three in `src/tests/e2e/mvp-workflows.spec.ts` including a guard that the new copy did not reintroduce savings vocabulary. Full Vitest 16 files / 154 tests passed; Playwright 7/7; `npm run build` clean and within budget. Doc updated in the same task. |
+| 2026-07-26T11:20:59-06:00 | Usability audit remediation: pre-task lesson and log-level pattern | passed | Two further findings from the same audit. (1) The whole pre-task case for routing was one hedged line, so a visitor who never described a task learned nothing; Start Here now carries the three worked examples from the existing reviewed snapshot, with the right-sizing one placed in the middle precisely because it admits a too-small route costs more. (2) Past Choices rendered neither cost nor energy despite holding both; each row now shows what the followed route would cost metered and how it compares to the heaviest route offered, and the log carries the choice-pattern totals described above. `heaviestSiblingRoute` and `comparisonMultipleClause` were extracted from `TaskRoutingScreens.tsx` into `src/domain/impact/routeComparison.ts` so the second consumer reuses them rather than starting a fourth drifted copy, which is the defect `src/domain/format.ts` was created to fix. Twelve new assertions in `src/tests/unit/routeComparison.test.ts`, six in `src/tests/e2e/mvp-workflows.spec.ts` including a narrow-viewport check on Start Here. Full Vitest 17 files / 166 tests passed; Playwright 7/7; `npm run build` clean and within budget. Doc updated in the same task. |
 
 ## Handoff
 

@@ -118,6 +118,19 @@ export function HelpScreen({ definition }: { definition: ScreenDefinition }) {
             every task is going premium, that is worth knowing, and if premium is genuinely what your work needs, that
             is a fine answer too.
           </li>
+          <li>
+            <strong>Your pattern on Past Choices</strong> - the same idea across your whole log. It totals what the
+            routes you followed would come to if metered, next to what the heaviest route you were offered each time
+            would have come to. Both are estimates on the same basis, so the pair is a comparison, not money in your
+            pocket. Only choices where a heavier route was also on offer are counted, and choices saved before these
+            estimates existed are left out rather than counted as zero.
+          </li>
+          <li>
+            <strong>The three examples on Start Here</strong> - worked examples using published prices and inference
+            figures, shown before you describe anything so the idea is readable up front. They are not your usage. The
+            middle one nets out the extra runs a too-small tool causes, which is why it can say that routing everything
+            to the cheapest option is not the lesson.
+          </li>
         </ul>
         <p>
           Every figure is an estimate. Taxes, caching, free tiers, search add-ons, provider limits, retries, and how

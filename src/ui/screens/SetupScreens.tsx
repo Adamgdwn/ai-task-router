@@ -1,5 +1,8 @@
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import { domIdFor } from "../domId";
+import { formatUsd, formatWattHoursWithEveryday } from "../../domain/format";
+import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
+import { formatMultiple } from "../../domain/impact/routeComparison";
 import {
   applyEverydayToolSelection,
   everydayToolCatalogReviewedAt,
@@ -21,6 +24,7 @@ import type { SetupConfigurationController } from "../state/useSetupConfiguratio
 import type { ScreenDefinition } from "./screenDefinitions";
 
 const scoringWeightKeys = ["cost", "energy", "quality", "speed", "sourceFit", "sensitivityFit"] as const;
+const publicImpactSnapshot = buildDefaultPublicImpactSnapshot();
 const shoppingPathSteps = [
   {
     screenId: "tool-inventory",
@@ -89,17 +93,85 @@ export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps
         <PwaInstallPanel />
       </section>
 
+      <WhyRoutingMattersPanel />
+
       <section className="plainPromise" aria-labelledby="plain-promise-heading">
         <h3 id="plain-promise-heading">What this will and will not do</h3>
         <ul>
           <li>It helps choose a sensible AI path before you paste anything into a tool.</li>
-          <li>It helps build judgment about when a smaller route is enough, reducing waste in the right scenario.</li>
+          <li>It helps build judgment about when a smaller route is enough, and shows what each choice costs to run.</li>
           <li>It uses your browser storage for choices and saved plans.</li>
           <li>It does not log in, connect accounts, search files, send prompts, or run AI for you.</li>
         </ul>
       </section>
     </article>
   );
+}
+
+/**
+ * The lesson, before the decision.
+ *
+ * Everything the app knows about why routing matters used to arrive only after a user described a
+ * task - the entire pre-task case was one hedged line further down this screen, so a visitor who
+ * landed, looked around, and left learned nothing. These are the same governed figures already
+ * rendered on Best Options, from the same reviewed snapshot; showing them earlier is a placement
+ * change, not a new claim, and no figure here is computed differently than it is there.
+ *
+ * The middle point is the one worth keeping. An app that only ever says "smaller is cheaper" earns
+ * a reader who routes everything to the smallest tool and then re-runs half of it, which costs more
+ * than choosing well. The right-sizing figure already nets out those extra runs, so it can carry
+ * that caveat honestly rather than as a disclaimer.
+ */
+function WhyRoutingMattersPanel() {
+  const { tokenBenchmark, rightSizingExample, environmentalExample } = publicImpactSnapshot;
+  const benchmarkMultiple =
+    tokenBenchmark.lowerCostUsd > 0
+      ? formatMultiple(tokenBenchmark.comparisonCostUsd / tokenBenchmark.lowerCostUsd)
+      : null;
+
+  return (
+    <section className="whyRoutingMatters" aria-labelledby="why-routing-matters-heading">
+      <p className="screenKicker">Before you start</p>
+      <h3 id="why-routing-matters-heading">Why which tool you pick matters</h3>
+      <p>
+        You do not need to describe a task to see the idea. Here it is in three numbers, all measured at public API list
+        prices and published inference figures rather than anything about your own usage.
+      </p>
+
+      <ol className="whyRoutingMattersPoints">
+        <li>
+          <strong>The same job, two tools.</strong> One {formatInteger(tokenBenchmark.tokenCount)}-token run costs about{" "}
+          {formatUsd(tokenBenchmark.lowerCostUsd)} on {tokenBenchmark.lowerCostModelLabel} and about{" "}
+          {formatUsd(tokenBenchmark.comparisonCostUsd)} on {tokenBenchmark.comparisonModelLabel}
+          {benchmarkMultiple ? `, roughly ${benchmarkMultiple}x` : ""}. Same work, same tokens. The only difference is
+          which tool it was sent to.
+        </li>
+        <li>
+          <strong>Smaller is not automatically better.</strong> Across {rightSizingExample.taskCount} similar tasks,
+          sending the right ones to a lighter tool comes to about {formatUsd(rightSizingExample.netAvoidedCostUsd)} less
+          than sending all of them to the heavier one - and that is after paying for{" "}
+          {rightSizingExample.inducedExtraRuns} extra runs where the lighter tool was not enough. Routing well means
+          matching the tool to the job, not always reaching for the cheapest one.
+        </li>
+        <li>
+          <strong>Energy moves with it.</strong> Across {environmentalExample.taskCount} reasoning tasks, sending half to
+          a lighter workload is a difference of about{" "}
+          {formatWattHoursWithEveryday(environmentalExample.netAvoidedWattHours)}. Small per task, which is exactly why
+          it is easy to stop noticing.
+        </li>
+      </ol>
+
+      <p className="impactCaveat">
+        These are worked examples, not your usage, and nobody is claiming you ran them. They are here so the idea is
+        readable before you decide anything. Every route this app suggests later carries its own figures, and the Help
+        tab explains where all of them come from.
+      </p>
+    </section>
+  );
+}
+
+function formatInteger(value: number) {
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
 }
 
 function BrowserStorageNotice() {

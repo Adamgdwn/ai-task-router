@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { formatTimestamp } from "../../domain/format";
+import { formatTimestamp, formatUsd, formatWattHours, formatWattHoursWithEveryday } from "../../domain/format";
+import {
+  comparisonMultipleClause,
+  formatMultiple,
+  heaviestSiblingRoute,
+  summarizeFollowedChoicePattern,
+  type FollowedChoicePattern,
+} from "../../domain/impact/routeComparison";
 import type { RouteCard, RouteLogEntry, RouteOption } from "../../domain/types";
 import type { LocalRouteRecords, LocalStore } from "../../storage/localStore";
 import { ScreenHeader } from "./SetupScreens";
@@ -102,6 +109,10 @@ export function RouteLogScreen({
     () => filterAndSortRows(rows, { outcomeFilter, searchTerm, sortOrder }),
     [outcomeFilter, rows, searchTerm, sortOrder],
   );
+
+  // Deliberately over every saved choice, not the filtered view: a habit you can change the shape
+  // of by picking a filter is not a habit worth showing.
+  const choicePattern = useMemo(() => summarizeFollowedChoicePattern(routeRecords), [routeRecords]);
 
   const selectedRow = useMemo(
     () => rows.find((row) => row.entry.id === selectedEntryId) ?? null,
@@ -272,6 +283,8 @@ export function RouteLogScreen({
         Past Choices are local decision records. Your notes stay in this browser and are not sent anywhere.
       </p>
 
+      <ChoicePatternPanel pattern={choicePattern} />
+
       <RouteLogStatus
         onOpenTaskIntake={onOpenTaskIntake}
         routeCardCount={routeRecords.routeCards.length}
@@ -313,6 +326,78 @@ export function RouteLogScreen({
       ) : null}
     </article>
   );
+}
+
+/**
+ * The one thing a log can teach that a single decision card cannot.
+ *
+ * Past Choices held every figure needed for this and rendered none of them - it listed what was
+ * chosen without ever saying what choosing that way adds up to. A row teaches "this route was
+ * lighter than that one"; only the whole log can answer "is this how I tend to choose?", which is
+ * the habit the app says it exists to build.
+ *
+ * Both totals are API-equivalent estimates on the same basis, so the pair is a comparison rather
+ * than a claim that money changed hands, and the wording stays inside the fixed vocabulary in
+ * R-010. Nothing here congratulates the reader: a run of premium choices may be exactly right for
+ * the work, and the count is left to speak for itself.
+ */
+function ChoicePatternPanel({ pattern }: { pattern: FollowedChoicePattern }) {
+  if (pattern.comparedCount === 0) {
+    return null;
+  }
+
+  const multiple =
+    pattern.chosenCostUsd > 0 ? formatMultiple(pattern.heaviestOfferedCostUsd / pattern.chosenCostUsd) : null;
+
+  return (
+    <section className="choicePatternPanel" aria-labelledby="choice-pattern-heading">
+      <div>
+        <p className="screenKicker">Your pattern</p>
+        <h3 id="choice-pattern-heading">How you have been choosing</h3>
+        <p>{choicePatternLead(pattern)}</p>
+      </div>
+
+      <dl className="choicePatternGrid">
+        <div>
+          <dt>These runs, if metered</dt>
+          <dd>{formatUsd(pattern.chosenCostUsd)}</dd>
+          <span>{formatWattHoursWithEveryday(pattern.chosenEnergyWh)}</span>
+        </div>
+        <div>
+          <dt>The heaviest route offered each time</dt>
+          <dd>{formatUsd(pattern.heaviestOfferedCostUsd)}</dd>
+          <span>
+            {formatWattHoursWithEveryday(pattern.heaviestOfferedEnergyWh)}
+            {multiple ? ` - roughly ${multiple}x what you chose` : ""}
+          </span>
+        </div>
+      </dl>
+
+      <p className="impactCaveat">
+        Both totals answer the same question on the same basis: what these runs would come to if they were metered per
+        token at public list prices. The second is what the heaviest route on offer each time would have come to. Neither
+        is a bill, and choices made before per-token estimates existed are left out rather than counted as zero.
+      </p>
+    </section>
+  );
+}
+
+function choicePatternLead(pattern: FollowedChoicePattern) {
+  const scope = `Across ${pattern.comparedCount} followed choice${
+    pattern.comparedCount === 1 ? "" : "s"
+  } where something heavier was also on offer`;
+
+  if (pattern.lighterThanHeaviestCount === 0) {
+    return `${scope}, you took the heaviest route every time. That is the right answer when the work needs it.`;
+  }
+
+  if (pattern.lighterThanHeaviestCount === pattern.comparedCount) {
+    return `${scope}, you took a lighter route every time.`;
+  }
+
+  return `${scope}, you took a lighter route ${pattern.lighterThanHeaviestCount} time${
+    pattern.lighterThanHeaviestCount === 1 ? "" : "s"
+  }.`;
 }
 
 function RouteLogStatus({
@@ -389,6 +474,14 @@ function RouteLogListItem({
         <div>
           <dt>Choice</dt>
           <dd>{row.selectedOption?.label ?? strategyLabel(row.entry.selectedStrategy)}</dd>
+        </div>
+        <div>
+          <dt>If this run were metered</dt>
+          <dd>{routeLogCostLabel(row)}</dd>
+        </div>
+        <div>
+          <dt>Against the heaviest offered</dt>
+          <dd>{routeLogComparisonLabel(row)}</dd>
         </div>
         <div>
           <dt>Rating</dt>
@@ -563,6 +656,43 @@ function feedbackFromDraft(draft: FeedbackDraft): RouteLogEntry["feedback"] {
 
 function routeLogTitle(row: RouteLogRow) {
   return row.routeCard?.title ?? `Saved choice ${row.entry.routeCardId}`;
+}
+
+/**
+ * Saved choices from before per-token estimates existed say so rather than showing a zero. A zero
+ * would read as "this run cost nothing", which is a stronger claim than "this was never measured".
+ */
+function routeLogCostLabel(row: RouteLogRow) {
+  const chosen = row.selectedOption;
+
+  if (!chosen || chosen.apiEquivalentCostUsd === undefined) {
+    return "Not estimated for this saved choice";
+  }
+
+  const cost = `about ${formatUsd(chosen.apiEquivalentCostUsd)}`;
+
+  return chosen.estimatedEnergyWh === undefined
+    ? cost
+    : `${cost} and ${formatWattHours(chosen.estimatedEnergyWh)}`;
+}
+
+function routeLogComparisonLabel(row: RouteLogRow) {
+  const chosen = row.selectedOption;
+
+  if (!chosen || !row.routeCard) {
+    return "No comparison stored for this saved choice";
+  }
+
+  const heaviest = heaviestSiblingRoute(chosen, row.routeCard.options);
+
+  if (!heaviest || heaviest.apiEquivalentCostUsd === undefined) {
+    return "This was the heaviest route offered for that task.";
+  }
+
+  const multiple = comparisonMultipleClause(chosen.apiEquivalentCostUsd, heaviest.apiEquivalentCostUsd);
+  const headline = `${heaviest.label}, about ${formatUsd(heaviest.apiEquivalentCostUsd)} on the same basis`;
+
+  return multiple ? `${headline} - ${multiple}.` : `${headline}.`;
 }
 
 function strategyLabel(strategy: RouteLogEntry["selectedStrategy"]) {

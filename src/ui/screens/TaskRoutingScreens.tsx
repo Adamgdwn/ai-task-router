@@ -8,6 +8,7 @@ import {
 } from "../../domain/format";
 import { domIdFor } from "../domId";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
+import { comparisonMultipleClause, heaviestSiblingRoute } from "../../domain/impact/routeComparison";
 import { noToolsConfiguredMessage } from "../../domain/routing/hardGates";
 import {
   buildSuggestedToolkit,
@@ -804,46 +805,6 @@ function routeEnergyLabel(candidate: RouteOption) {
   const perUse = `about ${formatWattHours(candidate.estimatedEnergyWh)} per use`;
 
   return everyday ? `${perUse} - about ${everyday}` : perUse;
-}
-
-/**
- * The only comparison a user can act on is between the routes in front of them, so this reads the
- * siblings rather than a stored figure measured against a premium baseline they never chose.
- */
-function heaviestSiblingRoute(candidate: RouteOption, options: readonly RouteOption[]) {
-  const heaviest = options.reduce<RouteOption | undefined>(
-    (currentHeaviest, option) =>
-      (option.apiEquivalentCostUsd ?? 0) > (currentHeaviest?.apiEquivalentCostUsd ?? 0) ? option : currentHeaviest,
-    undefined,
-  );
-
-  return heaviest && heaviest.id !== candidate.id ? heaviest : undefined;
-}
-
-/**
- * Two figures side by side still leave the reader doing the division, and the division is the
- * lesson. A multiple is a comparison between two estimates on the same basis, not a claim about
- * money kept, so it stays inside the fixed impact vocabulary in R-010.
- *
- * Returns null when the multiple would overstate what the estimates support: a zero or missing
- * candidate figure has no meaningful ratio, and near-equal routes should read as near-equal rather
- * than as "1.1x".
- */
-function comparisonMultipleClause(candidateValue: number | undefined, heaviestValue: number) {
-  if (candidateValue === undefined || candidateValue <= 0 || !Number.isFinite(candidateValue)) {
-    return null;
-  }
-
-  const multiple = heaviestValue / candidateValue;
-
-  if (!Number.isFinite(multiple) || multiple < 1.1) {
-    return "about the same as this route";
-  }
-
-  const rounded = Number(multiple.toPrecision(2));
-  const text = new Intl.NumberFormat("en-US", { maximumFractionDigits: rounded >= 10 ? 0 : 1 }).format(rounded);
-
-  return `roughly ${text}x this route`;
 }
 
 function routeCostComparisonLabel(candidate: RouteOption, options: readonly RouteOption[]) {

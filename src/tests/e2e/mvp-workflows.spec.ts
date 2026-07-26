@@ -46,6 +46,13 @@ test("first-run setup stays guided and has no standalone include or execution wo
   await expect(page.getByText("Your browser only")).toBeVisible();
   await expect(page.getByText("No hidden AI calls or telemetry")).toBeVisible();
   await expect(page.getByText(/uses your browser storage to remember your AI tools/)).toBeVisible();
+  // The whole case for routing used to arrive only after a task was described, so a visitor who
+  // never described one learned nothing. These three worked examples are that case, before the
+  // decision, and the middle one has to survive: an app that only says "smaller is cheaper" teaches
+  // people to route everything to the smallest tool and re-run half of it.
+  await expect(page.getByRole("heading", { name: "Why which tool you pick matters" })).toBeVisible();
+  await expect(page.getByText("Smaller is not automatically better.")).toBeVisible();
+  await expect(page.getByText(/10-watt LED bulb/).first()).toBeVisible();
   await page.getByRole("button", { name: "Learn more" }).click();
   await expect(page.getByText(/does not use tracking cookies, analytics, or hidden uploads/)).toBeVisible();
   await expect(page.getByRole("button", { name: "What To Include" })).toHaveCount(0);
@@ -224,6 +231,12 @@ test("task intake routes, saves, prepares exports, and records feedback without 
 
   await page.getByRole("button", { name: "Past Choices", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Route card: Draft public-facing copy" })).toBeVisible();
+  // Past Choices rendered neither cost nor energy and had every figure needed for both. The row
+  // now carries what the choice would cost metered and what the heaviest option offered would have.
+  await expect(page.locator("dt").filter({ hasText: "If this run were metered" }).first()).toBeVisible();
+  await expect(page.locator("dt").filter({ hasText: "Against the heaviest offered" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "How you have been choosing" })).toBeVisible();
+  await expect(page.getByText(/Across \d+ followed choices? where something heavier was also on offer/)).toBeVisible();
   await page.getByRole("combobox", { name: "What happened?" }).selectOption("edited");
   await page.getByRole("combobox", { name: "Usefulness rating" }).selectOption("5");
   await page.getByRole("textbox", { name: "Private note" }).fill("Useful after a tiny wording change.");
@@ -299,6 +312,11 @@ test("cold start: add one tool through the picker, describe a task in free text,
 test("corrected screens do not overflow on a narrow viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openAppWithRouteReadyModels(page);
+
+  // Start Here now carries figures on a screen that used to hold only short prose, and this test
+  // was the one place a phone-width layout gets checked at all.
+  await expect(page.getByRole("heading", { name: "Why which tool you pick matters" })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
 
   await page.getByRole("button", { name: "My AI Tools", exact: true }).click();
   await expectNoHorizontalOverflow(page);
