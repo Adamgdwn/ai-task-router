@@ -73,7 +73,7 @@ export function attachRouteEconomics(
 }
 
 /** What the route adds to the user's bill, given the accounts they already pay for. */
-export function estimateRouteCostUsd(
+function estimateRouteCostUsd(
   option: Pick<RouteOption, "steps">,
   modelById: ReadonlyMap<string, ModelInventoryItem>,
   _task?: TaskIntake,
@@ -90,7 +90,7 @@ export function estimateRouteCostUsd(
  * prices, including the steps a subscription covers. A monthly plan hides what one task consumes,
  * and this is the figure that makes that visible.
  */
-export function estimateRouteApiEquivalentCostUsd(
+function estimateRouteApiEquivalentCostUsd(
   option: Pick<RouteOption, "steps">,
   modelById: ReadonlyMap<string, ModelInventoryItem>,
   _task?: TaskIntake,
@@ -102,7 +102,7 @@ export function estimateRouteApiEquivalentCostUsd(
   return roundUsd(total);
 }
 
-export function estimateRouteEnergyWh(
+function estimateRouteEnergyWh(
   option: Pick<RouteOption, "steps">,
   modelById: ReadonlyMap<string, ModelInventoryItem>,
   _task?: TaskIntake,
@@ -118,7 +118,7 @@ export function estimateRouteEnergyWh(
   return roundWh(total);
 }
 
-export function estimateRouteStepCostUsd(
+function estimateRouteStepCostUsd(
   step: RouteStep,
   modelById: ReadonlyMap<string, ModelInventoryItem>,
 ): number {
@@ -261,7 +261,7 @@ function multiplierForStep(step: RouteStep) {
   return step.workRole ? roleCostMultipliers[step.workRole] : stepCostMultipliers[step.kind];
 }
 
-export function energyAnchorIdForModel(model: ModelInventoryItem): string | null {
+function energyAnchorIdForModel(model: ModelInventoryItem): string | null {
   if (model.localOnly || model.tier === "human") {
     return null;
   }

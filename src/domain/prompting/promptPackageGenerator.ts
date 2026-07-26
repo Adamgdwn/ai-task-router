@@ -8,7 +8,7 @@ import {
   taskHasModelSelectionIntent,
 } from "../routing/taskDecomposition";
 
-export type GeneratePromptPackageInput = {
+type GeneratePromptPackageInput = {
   task: TaskIntake;
   selectedRoute: RouteOption;
   hardGateResult: HardGateResult;

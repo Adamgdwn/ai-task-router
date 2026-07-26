@@ -19,7 +19,7 @@ export const catalogStaleAfterDays = 90;
 export const catalogReviewedAt =
   everydayToolCatalogReviewedAt < impactCatalogReviewedAt ? everydayToolCatalogReviewedAt : impactCatalogReviewedAt;
 
-export type CatalogFreshness = {
+type CatalogFreshness = {
   reviewedAt: string;
   ageDays: number;
   stale: boolean;

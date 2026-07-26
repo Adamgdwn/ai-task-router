@@ -1,6 +1,6 @@
 import type { TaskIntake, WorkRole } from "../types";
 
-export type TaskDeliverableKind =
+type TaskDeliverableKind =
   | "prompt"
   | "build"
   | "data-flow"

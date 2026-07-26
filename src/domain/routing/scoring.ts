@@ -10,10 +10,10 @@ import type {
 
 const weightedComponentKeys = ["cost", "energy", "quality", "speed", "sourceFit", "sensitivityFit"] as const;
 
-export type WeightedScoreComponentKey = (typeof weightedComponentKeys)[number];
+type WeightedScoreComponentKey = (typeof weightedComponentKeys)[number];
 export type RouteScoreComponentKey = WeightedScoreComponentKey | "warningPenalty";
 
-export type RouteScoreComponent = {
+type RouteScoreComponent = {
   key: RouteScoreComponentKey;
   label: string;
   rawScore: number;
@@ -43,7 +43,7 @@ export type RouteScoringResult = {
   tieBreakersApplied: string[];
 };
 
-export type ScoreRouteCandidatesInput = {
+type ScoreRouteCandidatesInput = {
   task: TaskIntake;
   candidateResult: RouteCandidateGenerationResult;
   models: ModelInventoryItem[];

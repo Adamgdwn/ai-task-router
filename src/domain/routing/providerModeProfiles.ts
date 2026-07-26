@@ -1,6 +1,6 @@
 import type { EverydayToolAccountId } from "../defaults/everydayToolCatalog";
 
-export type ProviderGuidanceLabels = {
+type ProviderGuidanceLabels = {
   minimumModelLabel: string;
   promptBuilderModelLabel: string;
   executionModelLabel: string;

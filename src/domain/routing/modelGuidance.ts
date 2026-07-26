@@ -14,7 +14,7 @@ import {
 } from "./providerModeProfiles";
 import { taskHasBuildIntent } from "./taskDecomposition";
 
-export type ModelUseGuidance = {
+type ModelUseGuidance = {
   minimumModelLabel: string;
   promptBuilderModelLabel: string;
   executionModelLabel: string;
@@ -22,7 +22,7 @@ export type ModelUseGuidance = {
   pricingAnchorId: string | null;
 };
 
-export function modelUseGuidance(model: ModelInventoryItem): ModelUseGuidance {
+function modelUseGuidance(model: ModelInventoryItem): ModelUseGuidance {
   if (model.tier === "human") {
     return {
       minimumModelLabel: "human judgment",
@@ -55,11 +55,7 @@ export function modelLabelWithMinimum(model: ModelInventoryItem): string {
   return `${model.label} (minimum ${modelUseGuidance(model).minimumModelLabel})`;
 }
 
-export function modelLabelWithMinimumForTask(model: ModelInventoryItem, task: TaskIntake): string {
-  return appendTaskSurfaceLabel(modelLabelWithMinimum(model), model, task);
-}
-
-export function modelLabelForPromptDesign(model: ModelInventoryItem): string {
+function modelLabelForPromptDesign(model: ModelInventoryItem): string {
   if (model.tier === "human") {
     return model.label;
   }
@@ -72,7 +68,7 @@ export function modelLabelForPromptDesignForTask(model: ModelInventoryItem, task
   return appendTaskSurfaceLabel(modelLabelForPromptDesign(model), model, task);
 }
 
-export function modelLabelForExecution(model: ModelInventoryItem): string {
+function modelLabelForExecution(model: ModelInventoryItem): string {
   if (model.tier === "human") {
     return model.label;
   }
@@ -85,35 +81,10 @@ export function modelLabelForExecutionForTask(model: ModelInventoryItem, task: T
   return appendTaskSurfaceLabel(modelLabelForExecution(model), model, task);
 }
 
-export function modelInstructionGuidance(model: ModelInventoryItem): string {
-  const guidance = modelUseGuidance(model);
-
-  if (model.tier === "human") {
-    return "Use human review as the decision point.";
-  }
-
-  return `Minimum model/version: ${guidance.minimumModelLabel}. Prompt-building mode: ${guidance.promptBuilderModelLabel}. Execution mode: ${guidance.executionModelLabel}. Upgrade trigger: use ${guidance.upgradeModelLabel} if the checks find weak reasoning, missing facts, or too much rework.`;
-}
-
-export function modelInstructionGuidanceForTask(model: ModelInventoryItem, task: TaskIntake): string {
-  const baseGuidance = modelInstructionGuidance(model);
-  const surfaceNote = claudeCodeSubscriptionSurfaceNote(model, task);
-
-  return surfaceNote ? `${baseGuidance} ${surfaceNote}` : baseGuidance;
-}
-
-export function pricingAnchorIdForModel(model: ModelInventoryItem): string | null {
-  if (hasZeroMarginalCostAccount(model)) {
-    return null;
-  }
-
-  return modelUseGuidance(model).pricingAnchorId;
-}
-
 /**
  * The anchor for "what would this work cost per token", whether or not a plan the user already
- * pays for covers it. Use `pricingAnchorIdForModel` for the different question of what the user
- * is actually billed. Human and local-only work has no per-token price under either question.
+ * pays for covers it. `accountIsMeteredPerUse` below answers the different question of what the
+ * user is actually billed. Human and local-only work has no per-token price under either.
  */
 export function apiEquivalentPricingAnchorIdForModel(model: ModelInventoryItem): string | null {
   return modelUseGuidance(model).pricingAnchorId;
@@ -144,23 +115,6 @@ export function accountIsMeteredPerUse(model: ModelInventoryItem): boolean {
   return /\bapi\b|pay-as-you-go|recharged|credits/i.test(accountOption?.label ?? selection.accountId);
 }
 
-function hasZeroMarginalCostAccount(model: ModelInventoryItem) {
-  if (model.localOnly || model.tier === "human") {
-    return false;
-  }
-
-  const selection = inferEverydayToolSelection(model);
-  if (selection.providerId === "none") {
-    return false;
-  }
-
-  const provider = getEverydayToolProvider(selection.providerId);
-  const accountOption = provider.accountOptions.find((option) => option.id === selection.accountId);
-  const accountLabel = accountOption?.label ?? selection.accountId;
-
-  return selection.accountId === "basic" || /\bfree\b|\bbasic\b/i.test(accountLabel);
-}
-
 function appendTaskSurfaceLabel(label: string, model: ModelInventoryItem, task: TaskIntake): string {
   const surfaceLabel = claudeCodeSubscriptionSurfaceLabel(model, task);
 
@@ -173,14 +127,6 @@ function claudeCodeSubscriptionSurfaceLabel(model: ModelInventoryItem, task: Tas
   }
 
   return "Claude Code via this Claude subscription for build execution";
-}
-
-function claudeCodeSubscriptionSurfaceNote(model: ModelInventoryItem, task: TaskIntake): string | null {
-  if (!usesClaudeSubscriptionBuildSurface(model, task)) {
-    return null;
-  }
-
-  return "Claude Code note: for coding or app-build execution, treat Claude Code as the build surface available through the saved Claude subscription when installed and authenticated; do not model it as a separate subscription or unrelated paid tool.";
 }
 
 function usesClaudeSubscriptionBuildSurface(model: ModelInventoryItem, task: TaskIntake): boolean {

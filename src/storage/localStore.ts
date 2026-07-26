@@ -23,9 +23,9 @@ import type {
 } from "../domain/types";
 
 export const localStoreDatabaseName = "ai-task-router-local-store";
-export const localStoreSchemaVersion = 2;
+const localStoreSchemaVersion = 2;
 
-export type LocalStoreTableName =
+type LocalStoreTableName =
   | "modelInventory"
   | "sourcePermissions"
   | "policySettings"
@@ -52,7 +52,7 @@ export type LocalRouteRecords = {
   routeLogEntries: RouteLogEntry[];
 };
 
-export type LocalConfigurationSeedResult = {
+type LocalConfigurationSeedResult = {
   seeded: boolean;
   reason: "empty-configuration" | "existing-configuration" | "explicit-reseed";
   counts: {
@@ -62,13 +62,13 @@ export type LocalConfigurationSeedResult = {
   };
 };
 
-export type LocalStoreValidationIssue = {
+type LocalStoreValidationIssue = {
   path: string;
   message: string;
   code: string;
 };
 
-export type RouteLogFeedbackUpdate = {
+type RouteLogFeedbackUpdate = {
   outcome: RouteLogEntry["outcome"];
   feedback?: RouteLogEntry["feedback"];
 };
@@ -112,7 +112,7 @@ export class LocalStoreRecordNotFoundError extends Error {
   }
 }
 
-export class LocalStoreUnavailableError extends Error {
+class LocalStoreUnavailableError extends Error {
   readonly kind = "storage";
   readonly recoverable = true;
 

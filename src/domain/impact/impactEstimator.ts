@@ -1,4 +1,4 @@
-export type PricingSourceId =
+type PricingSourceId =
   | "openai-pricing-2026-07-05"
   | "anthropic-pricing-2026-07-05"
   | "google-gemini-pricing-2026-07-05"
@@ -7,14 +7,14 @@ export type PricingSourceId =
   | "deepseek-pricing-2026-07-05"
   | "xai-pricing-2026-07-05";
 
-export type PricingSource = {
+type PricingSource = {
   id: PricingSourceId;
   label: string;
   url: string;
   reviewedAt: string;
 };
 
-export type ModelPricingAnchor = {
+type ModelPricingAnchor = {
   id: string;
   provider: string;
   model: string;
@@ -31,7 +31,7 @@ export type TokenRun = {
   cachedInputTokens?: number;
 };
 
-export type RightSizingScenario = {
+type RightSizingScenario = {
   baselineModelId: string;
   routedModelId: string;
   tokenRun: TokenRun;
@@ -44,7 +44,7 @@ export type RightSizingScenario = {
   }>;
 };
 
-export type RightSizingEstimate = {
+type RightSizingEstimate = {
   baselineCostUsd: number;
   routedCostUsd: number;
   grossAvoidedCostUsd: number;
@@ -52,16 +52,16 @@ export type RightSizingEstimate = {
   netAvoidedCostUsd: number;
 };
 
-export type EnergySourceId = "google-ai-impact-2026-07-05" | "how-hungry-is-ai-2026-07-05";
+type EnergySourceId = "google-ai-impact-2026-07-05" | "how-hungry-is-ai-2026-07-05";
 
-export type EnergySource = {
+type EnergySource = {
   id: EnergySourceId;
   label: string;
   url: string;
   reviewedAt: string;
 };
 
-export type EnergyAnchor = {
+type EnergyAnchor = {
   id: string;
   label: string;
   sourceId: EnergySourceId;
@@ -69,7 +69,7 @@ export type EnergyAnchor = {
   notes: string;
 };
 
-export type EnergyScenario = {
+type EnergyScenario = {
   baselineEnergyAnchorId: string;
   routedEnergyAnchorId: string;
   taskCount: number;
@@ -77,7 +77,7 @@ export type EnergyScenario = {
   inducedExtraWattHours?: number;
 };
 
-export type AvoidedResourceEstimate = {
+type AvoidedResourceEstimate = {
   grossAvoidedWattHours: number;
   inducedExtraWattHours: number;
   netAvoidedWattHours: number;

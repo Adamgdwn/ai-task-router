@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-export const permissionLevels = [0, 1, 2, 3, 4] as const;
-
 export const sensitivityClasses = [
   "public",
   "internal",
@@ -11,9 +9,9 @@ export const sensitivityClasses = [
   "public-facing risk",
 ] as const;
 
-export const dmaicPhases = ["define", "measure", "analyze", "improve", "control", "not applicable"] as const;
+const dmaicPhases = ["define", "measure", "analyze", "improve", "control", "not applicable"] as const;
 
-export const lifecycleStages = ["idea", "draft", "review", "approval", "publish", "operate", "archive"] as const;
+const lifecycleStages = ["idea", "draft", "review", "approval", "publish", "operate", "archive"] as const;
 
 export const knowledgeWorkTypes = [
   "research",
@@ -42,9 +40,9 @@ export const qualityBars = ["quick", "standard", "high", "critical"] as const;
 
 export const routeStrategies = ["lean", "balanced", "premium"] as const;
 
-export const routeStepKinds = ["model", "research", "artifact", "human review", "manual"] as const;
+const routeStepKinds = ["model", "research", "artifact", "human review", "manual"] as const;
 
-export const projectStageKinds = ["frame", "gather", "create", "package", "review", "act"] as const;
+const projectStageKinds = ["frame", "gather", "create", "package", "review", "act"] as const;
 
 export const workRoles = [
   "evidence-check",

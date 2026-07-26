@@ -18,7 +18,7 @@ export type E2ETaskFixtureTag =
   | "synthesis"
   | "analysis";
 
-export type E2ETaskFixture = {
+type E2ETaskFixture = {
   id: string;
   title: string;
   description: string;

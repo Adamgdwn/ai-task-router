@@ -1,14 +1,14 @@
 import type { ModelInventoryItem, SourcePermission, TaskIntake } from "../types";
 import { taskNeedsEvidenceCheck } from "./taskDecomposition";
 
-export type HardGateBlockKind = "model" | "source";
-export type HardGateBlockReason =
+type HardGateBlockKind = "model" | "source";
+type HardGateBlockReason =
   | "model-disabled"
   | "model-permission-too-low"
   | "highly-restricted-non-local"
   | "source-no-access"
   | "source-sensitivity-blocked";
-export type HardGateWarningReason =
+type HardGateWarningReason =
   | "no-tools-configured"
   | "research-context-missing"
   | "human-approval-required";
@@ -21,7 +21,7 @@ export type HardGateBlock = {
   reason: string;
 };
 
-export type HardGateWarning = {
+type HardGateWarning = {
   reasonCode: HardGateWarningReason;
   message: string;
 };
@@ -35,7 +35,7 @@ export type HardGateResult = {
   requiresHumanApproval: boolean;
 };
 
-export type EvaluateHardGatesInput = {
+type EvaluateHardGatesInput = {
   task: TaskIntake;
   models: ModelInventoryItem[];
 };

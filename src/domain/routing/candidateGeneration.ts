@@ -14,13 +14,13 @@ import {
   type ToolModeCandidate,
 } from "./toolModeCatalog";
 
-export const routeCandidateStrategies = ["lean", "balanced", "premium"] as const;
+const routeCandidateStrategies = ["lean", "balanced", "premium"] as const;
 
 export type RouteCandidateStrategy = (typeof routeCandidateStrategies)[number];
 export type RouteCandidateCostLevel = "low" | "medium" | "high";
 export type RouteCandidateEffortLevel = "low" | "medium" | "high";
 
-export type RouteCandidateUnavailableReasonCode =
+type RouteCandidateUnavailableReasonCode =
   | "policy-default-missing"
   | "no-safe-lean-path"
   | "no-safe-balanced-path"
@@ -53,7 +53,7 @@ export type RouteCandidateGenerationResult = {
   unavailable: UnavailableRouteCandidate[];
 };
 
-export type GenerateRouteCandidatesInput = {
+type GenerateRouteCandidatesInput = {
   task: TaskIntake;
   models: ModelInventoryItem[];
   policies: PolicyDefault[];

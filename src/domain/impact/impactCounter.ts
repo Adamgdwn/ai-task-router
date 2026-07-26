@@ -9,7 +9,7 @@ export type TrackedImpactSummary = {
   followedByStrategy: Record<RouteOption["strategy"], number>;
 };
 
-export type ImpactCounterRouteRecords = {
+type ImpactCounterRouteRecords = {
   routeCards: readonly RouteCard[];
   routeLogEntries: readonly RouteLogEntry[];
 };

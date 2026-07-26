@@ -12,7 +12,7 @@ type SetupConfigurationDraft = {
   preferences: LocalSetupPreferences;
 };
 
-export type SetupConfigurationStatus = "loading" | "ready" | "saving" | "error";
+type SetupConfigurationStatus = "loading" | "ready" | "saving" | "error";
 
 export type SetupConfigurationController = {
   status: SetupConfigurationStatus;

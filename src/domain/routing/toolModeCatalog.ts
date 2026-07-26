@@ -15,9 +15,9 @@ import {
 } from "./providerModeProfiles";
 import { taskHasBuildIntent, taskNeedsFullBuildPlan } from "./taskDecomposition";
 
-export type ToolModeKind = "manual" | "research" | "prompt" | "execution" | "build" | "artifact" | "review" | "benchmark";
-export type ToolModeResourceProfile = "manual" | "free" | "light" | "standard" | "reasoning" | "premium";
-export type ToolModeEnergyProfile = "none" | "low" | "medium" | "high" | "reasoning";
+type ToolModeKind = "manual" | "research" | "prompt" | "execution" | "build" | "artifact" | "review" | "benchmark";
+type ToolModeResourceProfile = "manual" | "free" | "light" | "standard" | "reasoning" | "premium";
+type ToolModeEnergyProfile = "none" | "low" | "medium" | "high" | "reasoning";
 
 export type ToolModeCandidate = {
   id: string;
@@ -45,14 +45,14 @@ export type ToolModeCandidate = {
   selectionReasons: string[];
 };
 
-export type SelectToolModeInput = {
+type SelectToolModeInput = {
   task: TaskIntake;
   modes: readonly ToolModeCandidate[];
   role: WorkRole;
   strategy: "lean" | "balanced" | "premium";
 };
 
-export const toolModeCatalogReviewedAt = "2026-07-07T00:27:03-06:00";
+const toolModeCatalogReviewedAt = "2026-07-07T00:27:03-06:00";
 
 const officialSourceIdsByProvider: Partial<Record<EverydayToolProviderId, string[]>> = {
   chatgpt: ["openai-chatgpt-model-picker", "openai-chatgpt-go"],
@@ -153,19 +153,7 @@ function selectStrongestPromptDesignMode(
   })[0] ?? null;
 }
 
-export function modeForRouteStep(
-  step: Pick<RouteStep, "modeId" | "modelId" | "workRole">,
-  models: readonly ModelInventoryItem[],
-  task: TaskIntake,
-): ToolModeCandidate | null {
-  if (!step.modeId) {
-    return null;
-  }
-
-  return buildToolModeCatalog(models, task).find((mode) => mode.id === step.modeId) ?? null;
-}
-
-export type ModeEstimateProfile = Pick<ToolModeCandidate, "pricingAnchorId" | "energyAnchorId" | "energyProfile">;
+type ModeEstimateProfile = Pick<ToolModeCandidate, "pricingAnchorId" | "energyAnchorId" | "energyProfile">;
 
 /**
  * What one mode costs and consumes per unit of work — the single source of truth for both callers.
@@ -175,7 +163,7 @@ export type ModeEstimateProfile = Pick<ToolModeCandidate, "pricingAnchorId" | "e
  * the catalog declared a Claude execution pass at Haiku prices while route pricing charged it at
  * frontier prices, a 5x gap on the same step, and Gemini's execution pass had the same problem.
  */
-export function modeEstimateProfile(
+function modeEstimateProfile(
   providerId: EverydayToolProviderId,
   accountId: EverydayToolAccountId,
   suffix: string,

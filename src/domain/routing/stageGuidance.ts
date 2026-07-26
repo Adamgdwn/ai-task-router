@@ -24,7 +24,7 @@ import {
   type TaskDeliverable,
 } from "./taskDecomposition";
 
-export type BuildProjectStageGuidanceInput = {
+type BuildProjectStageGuidanceInput = {
   task: TaskIntake;
   selectedOption: RouteOption;
   models: readonly ModelInventoryItem[];

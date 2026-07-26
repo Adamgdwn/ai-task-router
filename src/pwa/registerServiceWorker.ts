@@ -1,11 +1,11 @@
-export type PwaServiceWorkerDecisionInput = {
+type PwaServiceWorkerDecisionInput = {
   hasServiceWorker?: boolean;
   hostname?: string;
   isProduction?: boolean;
   protocol?: string;
 };
 
-export type RegisterPwaServiceWorkerOptions = {
+type RegisterPwaServiceWorkerOptions = {
   isProduction?: boolean;
   navigatorRef?: Navigator;
   serviceWorker?: ServiceWorkerContainer;

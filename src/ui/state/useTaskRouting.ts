@@ -23,7 +23,7 @@ import type {
 import type { LocalStore } from "../../storage/localStore";
 import type { SetupConfigurationController } from "./useSetupConfiguration";
 
-export type TaskRoutingDraft = {
+type TaskRoutingDraft = {
   templateId: TaskTemplate["id"] | "custom";
   id: string;
   title: string;
@@ -48,7 +48,7 @@ export type TaskRoutingErrorField =
   | "createdAt"
   | "form";
 
-export type TaskRoutingValidationErrors = Partial<Record<TaskRoutingErrorField, string[]>>;
+type TaskRoutingValidationErrors = Partial<Record<TaskRoutingErrorField, string[]>>;
 
 export type GeneratedRouteResult = {
   task: TaskIntake;
@@ -62,8 +62,8 @@ export type GeneratedRouteResult = {
   noSafeGeneratedRoute: boolean;
 };
 
-export type TaskRoutingStatus = "idle" | "invalid" | "success" | "error";
-export type GeneratedRouteSaveStatus = "idle" | "saving" | "saved" | "error";
+type TaskRoutingStatus = "idle" | "invalid" | "success" | "error";
+type GeneratedRouteSaveStatus = "idle" | "saving" | "saved" | "error";
 
 export type TaskRoutingController = {
   draft: TaskRoutingDraft;

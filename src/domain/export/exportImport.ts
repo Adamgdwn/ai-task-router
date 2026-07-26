@@ -19,10 +19,10 @@ import type {
 } from "../types";
 
 export const exportImportSchemaVersion = 1;
-export const exportArtifactProduct = "ai-task-router";
-export const exportArtifactKinds = ["configuration", "route-records", "local-bundle"] as const;
+const exportArtifactProduct = "ai-task-router";
+const exportArtifactKinds = ["configuration", "route-records", "local-bundle"] as const;
 
-export type ExportArtifactKind = (typeof exportArtifactKinds)[number];
+type ExportArtifactKind = (typeof exportArtifactKinds)[number];
 
 export type ExportedLocalConfiguration = {
   modelInventory: ModelInventoryItem[];
@@ -30,49 +30,24 @@ export type ExportedLocalConfiguration = {
   policySettings: PolicyDefault[];
 };
 
-export type ExportedLocalRouteRecords = {
+type ExportedLocalRouteRecords = {
   routeCards: RouteCard[];
   promptPackages: PromptPackage[];
   routeLogEntries: RouteLogEntry[];
 };
 
-export type ConfigurationExportArtifact = {
-  product: typeof exportArtifactProduct;
-  artifactKind: "configuration";
-  schemaVersion: typeof exportImportSchemaVersion;
-  exportedAt: string;
-  configuration: ExportedLocalConfiguration;
-};
-
-export type RouteRecordsExportArtifact = {
-  product: typeof exportArtifactProduct;
-  artifactKind: "route-records";
-  schemaVersion: typeof exportImportSchemaVersion;
-  exportedAt: string;
-  routeRecords: ExportedLocalRouteRecords;
-};
-
-export type LocalExportBundleArtifact = {
-  product: typeof exportArtifactProduct;
-  artifactKind: "local-bundle";
-  schemaVersion: typeof exportImportSchemaVersion;
-  exportedAt: string;
+type LocalExportBundle = {
   configuration: ExportedLocalConfiguration;
   routeRecords: ExportedLocalRouteRecords;
 };
 
-export type LocalExportBundle = {
-  configuration: ExportedLocalConfiguration;
-  routeRecords: ExportedLocalRouteRecords;
-};
-
-export type ExportJsonOptions = {
+type ExportJsonOptions = {
   exportedAt?: string;
 };
 
-export type ExportImportOperation = "export" | "import";
+type ExportImportOperation = "export" | "import";
 
-export type ExportImportValidationIssue = {
+type ExportImportValidationIssue = {
   path: string;
   message: string;
   code: string;

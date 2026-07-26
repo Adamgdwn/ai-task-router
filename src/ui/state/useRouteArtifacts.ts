@@ -2,8 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import type { PromptPackage, RouteCard, RouteOption } from "../../domain/types";
 import type { LocalRouteRecords, LocalStore } from "../../storage/localStore";
 
-export type RouteArtifactsStatus = "idle" | "loading" | "ready" | "empty" | "error";
-export type RouteArtifactCopyStatus = "idle" | "copying" | "copied" | "unavailable" | "error";
+type RouteArtifactsStatus = "idle" | "loading" | "ready" | "empty" | "error";
+type RouteArtifactCopyStatus = "idle" | "copying" | "copied" | "unavailable" | "error";
 
 export type RouteArtifactsController = {
   status: RouteArtifactsStatus;

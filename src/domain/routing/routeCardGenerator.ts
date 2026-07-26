@@ -14,7 +14,7 @@ import type { RouteScoringResult, ScoredRouteCandidate } from "./scoring";
 import { buildProjectStageGuidance } from "./stageGuidance";
 import { attachRouteEconomics } from "./routeEconomics";
 
-export type GenerateRouteCardInput = {
+type GenerateRouteCardInput = {
   task: TaskIntake;
   models: ModelInventoryItem[];
   hardGateResult: HardGateResult;
@@ -77,7 +77,7 @@ export function generateRouteCard({
   return routeCardSchema.parse(card);
 }
 
-export type RebuildRouteCardForSelectedOptionInput = {
+type RebuildRouteCardForSelectedOptionInput = {
   card: RouteCard;
   task: TaskIntake;
   models: ModelInventoryItem[];

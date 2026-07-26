@@ -56,7 +56,7 @@ export type EverydayToolAccountOption = {
  * tie would quietly teach the habit this app exists to counter. If that tradeoff is ever reconsidered,
  * the tie-break has to be visible in the route's selection reasons.
  */
-export type EverydayToolFrequencyOption = {
+type EverydayToolFrequencyOption = {
   id: EverydayToolFrequencyId;
   label: string;
   note: string;
@@ -73,7 +73,7 @@ export type EverydayToolProvider = {
   frequencyOptions: EverydayToolFrequencyOption[];
 };
 
-export type EverydayToolSelection = {
+type EverydayToolSelection = {
   providerId: EverydayToolProviderId;
   accountId: EverydayToolAccountId;
   frequencyId: EverydayToolFrequencyId;
@@ -1299,7 +1299,7 @@ const localModelOptions = [
   },
 ] satisfies EverydayToolAccountOption[];
 
-export const everydayToolFrequencyOptions = [
+const everydayToolFrequencyOptions = [
   {
     id: "not-selected",
     label: "Pick an app first",
