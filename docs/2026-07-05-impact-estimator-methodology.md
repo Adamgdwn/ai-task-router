@@ -1,7 +1,7 @@
 # 2026-07-08T22:07:13-06:00 - AI Task Router Impact Estimator Methodology
 
 Document ID: GUI-ENG-002
-Version: 0.6.0
+Version: 0.7.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,7 +9,7 @@ Effective Date: 2026-07-05
 Last Reviewed: 2026-07-25
 Next Review: Before source refresh, exact public savings claims, social launch copy, live pricing tables, or opt-in estimator release
 Timestamp: 2026-07-08T22:07:13-06:00
-Last Updated: 2026-07-25T10:01:49-06:00
+Last Updated: 2026-07-26T09:49:39-06:00
 
 ## Purpose
 
@@ -34,7 +34,13 @@ The gap between the two is the lesson, not a saving.
 
 There is no premium baseline. Before 2026-07-25 the app compared every route against a premium API anchor the user was never going to buy, so a fresh install doing the work by hand was told it had saved $1.125 and 21.366 Wh. That baseline is gone. The comparison the app now offers is between the routes on the user's own screen, computed at display time from the sibling options, because those are the only routes the user can actually choose between.
 
-Precision is capped at two significant figures. The estimates come from hand-tuned role and mode multipliers over public anchors; `$0.051` is as much precision as that method earns, and `$0.0512` was overstating it.
+Precision is capped at two significant figures for energy. The estimates come from hand-tuned role and mode multipliers over public anchors, and there is no measured figure underneath the watt-hour numbers that a user could check, so `11.619 Wh` would be claiming an accuracy the method never had. It displays as `12 Wh`.
+
+Money is shown in real dollars and cents. Owner decision, 2026-07-26: *"I don't want rounding. I want dollars and cents. It absolutely is the way it needs to be."* The two-significant-figure cap introduced on 2026-07-25 applied to money as well, which meant a `$12.35` estimate reached the user as `$12.00` - it discarded real cents in the act of advertising the estimate's limits. Cents precision claims less than that rounding did, not more, so the argument above is unaffected: `$0.0512` now displays as `$0.05`, not as the `$0.051` the cap produced.
+
+Below one cent the decimals extend rather than collapsing to `$0.00`, because free and nearly free are different claims. Route-to-route comparison at that scale belongs to the per-100-uses figures, which are large enough for cents to separate them.
+
+All of this lives in one module, `src/domain/format.ts`. Four screens and the Markdown exporter previously each held their own copy, and they had drifted far enough that the stage guidance panel priced a route differently from the route card describing the same route.
 
 The lifetime counter totals the API-equivalent estimate and energy of the routes the user actually followed. It no longer accumulates dollars from a fixed illustrative scenario. Followed routes saved before per-token estimates existed are counted separately and excluded from the totals rather than being credited with an invented figure.
 
@@ -300,6 +306,7 @@ Future opt-in estimator:
 | 2026-07-05T09:30:02-06:00 | `npm run test -- impactEstimator`; `npm run test -- App` | passed | Focused D16 tests passed: impact suite 1 file and 7 tests; App suite 1 file and 14 tests. |
 | 2026-07-05T09:30:21-06:00 | `npm run test`; `npm run build`; `npm run scan:web-rc`; `npx playwright test` | passed with existing build warning | Full Vitest passed 13 files and 95 tests; production build passed with existing Vite chunk-size warning; web RC scan passed; local Playwright passed 6 Chromium tests. |
 | 2026-07-25T09:40:19-06:00 | Chunk R2 rewrite of the impact framing | passed | Removed the premium-API baseline and all savings fields; added the API-equivalent per-token figure beside the billed figure; capped display precision at two significant figures; rebuilt the lifetime counter on followed-route estimates. Doc updated in the same task. |
+| 2026-07-26T09:49:39-06:00 | Money formatting unified and un-rounded | passed | Four divergent `formatUsd` copies collapsed into `src/domain/format.ts`. The stage guidance panel had been hardcoding `en-US` and skipping the significant-figure rounding, so it disagreed with the route card describing the same route. Money now shows real dollars and cents at owner direction; energy keeps the two-significant-figure cap. Fifteen assertions added in `src/tests/unit/format.test.ts`; `src/tests/unit/exportImport.test.ts` updated where the fixture's `$0.051` became `$0.05`. Full Vitest 16 files / 147 tests passed. Doc updated in the same task. |
 | 2026-07-05T09:34:16-06:00 | Local visual smoke and hosted production smoke | passed | Desktop/mobile preview checks had no horizontal overflow; source details opened cleanly on mobile; Cloudflare production deployment and hosted Playwright/Chromium impact smoke passed. |
 
 ## Handoff

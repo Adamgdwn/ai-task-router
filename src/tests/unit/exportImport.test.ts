@@ -77,10 +77,11 @@ describe("export and import utilities", () => {
     expect(routeCardMarkdown).toContain("- Tool or mode: build mode");
     expect(routeCardMarkdown).not.toContain("local-export-model");
 
-    // Dollar figures are per-token estimates, rounded to the precision the method earns, and no
-    // exported line credits the user with a saving. See chunk R2 in the audit remediation plan.
-    // Currency symbol follows the runtime locale, so assert the rounded figure rather than "$".
-    expect(routeCardMarkdown).toMatch(/- If you paid per token: about \D*0\.051$/m);
+    // Dollar figures are per-token estimates shown in real dollars and cents, and no exported line
+    // credits the user with a saving. The fixture's 0.0512 renders as "$0.05": cents, not the
+    // two-significant-figure "$0.051" an earlier pass produced. Locale is pinned in
+    // src/domain/format.ts, so the "$" is safe to assert.
+    expect(routeCardMarkdown).toContain("- If you paid per token: about $0.05");
     expect(routeCardMarkdown).toContain("- Added to your bill: $0.00 (covered by tools you already have)");
     expect(routeCardMarkdown).toContain("- Estimated energy: about 12 Wh per use");
     expect(routeCardMarkdown).not.toMatch(/saved|savings|avoided/i);

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatUsd, formatWattHours } from "../format";
 import {
   modelInventoryItemSchema,
   policyDefaultSchema,
@@ -522,34 +523,6 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
     markdownList(option.warnings),
     "",
   ];
-}
-
-// Two significant figures; the underlying multipliers do not earn any more precision than that.
-function toSignificantFigures(value: number, figures: number) {
-  if (!Number.isFinite(value) || value === 0) {
-    return 0;
-  }
-
-  return Number(value.toPrecision(figures));
-}
-
-function formatUsd(value: number) {
-  const rounded = toSignificantFigures(value, 2);
-
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: Math.abs(rounded) > 0 && Math.abs(rounded) < 0.1 ? 3 : 2,
-  }).format(rounded);
-}
-
-function formatWattHours(value: number) {
-  const rounded = toSignificantFigures(value, 2);
-  const absValue = Math.abs(rounded);
-  const maximumFractionDigits = absValue >= 10 ? 0 : absValue >= 1 ? 1 : 3;
-
-  return `${new Intl.NumberFormat(undefined, { maximumFractionDigits }).format(rounded)} Wh`;
 }
 
 function stageGuidanceMarkdown(routeCard: RouteCard): string {

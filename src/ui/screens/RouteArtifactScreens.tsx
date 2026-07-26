@@ -3,7 +3,9 @@ import {
   serializePromptPackageMarkdown,
   serializeRouteCardMarkdown,
 } from "../../domain/export/exportImport";
+import { formatTimestamp } from "../../domain/format";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
+import { domIdFor } from "../domId";
 import type { PromptPackage, PromptStep, RouteCard, RouteOption, RouteStep } from "../../domain/types";
 import type { RouteArtifactsController } from "../state/useRouteArtifacts";
 import type { ImpactCounterController } from "../state/useImpactCounter";
@@ -577,13 +579,3 @@ function inlineList(values: readonly string[]) {
   return values.join(", ");
 }
 
-function formatTimestamp(timestamp: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(timestamp));
-}
-
-function domIdFor(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-}

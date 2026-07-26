@@ -1,3 +1,4 @@
+import { formatUsd, formatWattHours } from "../../domain/format";
 import type { ProjectStageGuidance } from "../../domain/types";
 
 type StageGuidancePanelProps = {
@@ -182,7 +183,7 @@ function workRoleLabel(workRole: ProjectStageGuidance["workItems"][number]["work
 
 function workItemEstimateLabel(item: ProjectStageGuidance["workItems"][number]) {
   const cost = item.estimatedCostUsd === undefined ? null : `about ${formatUsd(item.estimatedCostUsd)}`;
-  const energy = item.estimatedEnergyWh === undefined ? null : `${formatNumber(item.estimatedEnergyWh)} Wh`;
+  const energy = item.estimatedEnergyWh === undefined ? null : formatWattHours(item.estimatedEnergyWh);
 
   if (!cost && !energy) {
     return "No estimate";
@@ -195,16 +196,3 @@ function workItemEstimateLabel(item: ProjectStageGuidance["workItems"][number]) 
   return cost ?? energy ?? "No estimate";
 }
 
-function formatUsd(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: value >= 10 ? 2 : 3,
-  }).format(value);
-}
-
-function formatNumber(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: value >= 10 ? 1 : 3,
-  }).format(value);
-}

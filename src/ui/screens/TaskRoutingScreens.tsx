@@ -1,5 +1,7 @@
 import { type FormEvent, type ReactNode } from "react";
 import { assessCatalogFreshness } from "../../domain/catalog/catalogFreshness";
+import { formatUsd, formatWattHours } from "../../domain/format";
+import { domIdFor } from "../domId";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import { noToolsConfiguredMessage } from "../../domain/routing/hardGates";
 import {
@@ -1409,41 +1411,9 @@ function routeSelectionCue(candidate: RouteOption, recommended: boolean) {
   return "Choose it if the result will be public, critical, complex, or expensive to fix later.";
 }
 
-/**
- * These estimates come from hand-tuned role multipliers over public pricing and energy anchors.
- * Two significant figures is as much precision as that method earns; "$0.051" is honest, the
- * "$0.0512" it replaces was not.
- */
-function toSignificantFigures(value: number, figures: number) {
-  if (!Number.isFinite(value) || value === 0) {
-    return 0;
-  }
-
-  return Number(value.toPrecision(figures));
-}
-
-function formatUsd(value: number) {
-  const rounded = toSignificantFigures(value, 2);
-
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: Math.abs(rounded) > 0 && Math.abs(rounded) < 0.1 ? 3 : 2,
-  }).format(rounded);
-}
-
-function formatWattHours(value: number) {
-  const rounded = toSignificantFigures(value, 2);
-  const absValue = Math.abs(rounded);
-  const maximumFractionDigits = absValue >= 10 ? 0 : absValue >= 1 ? 1 : 3;
-
-  return `${new Intl.NumberFormat(undefined, { maximumFractionDigits }).format(rounded)} Wh`;
-}
-
 function formatEnergyAxis(value: number) {
   if (value >= 1000) {
-    return `${new Intl.NumberFormat(undefined, {
+    return `${new Intl.NumberFormat("en-US", {
       maximumFractionDigits: 1,
     }).format(value / 1000)} kWh`;
   }
@@ -1627,8 +1597,4 @@ function taskSourceHint(source: SourcePermission) {
   }
 
   return hints[source.id] ?? "Use when this information should shape the answer.";
-}
-
-function domIdFor(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }

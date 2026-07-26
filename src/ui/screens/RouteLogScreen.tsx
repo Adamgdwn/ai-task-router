@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { formatTimestamp } from "../../domain/format";
 import type { RouteCard, RouteLogEntry, RouteOption } from "../../domain/types";
 import type { LocalRouteRecords, LocalStore } from "../../storage/localStore";
 import { ScreenHeader } from "./SetupScreens";
@@ -579,13 +580,6 @@ function outcomeLabel(outcome: RouteLogEntry["outcome"]) {
     case "deferred":
       return "Deferred - still deciding";
   }
-}
-
-function formatTimestamp(timestamp: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(timestamp));
 }
 
 function routeLogErrorMessage(error: unknown) {

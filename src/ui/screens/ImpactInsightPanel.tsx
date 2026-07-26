@@ -1,3 +1,4 @@
+import { formatUsd, formatWattHours } from "../../domain/format";
 import type { PublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import type { TrackedImpactSummary } from "../../domain/impact/impactCounter";
 import type { RouteOption, TaskIntake } from "../../domain/types";
@@ -132,34 +133,6 @@ function formatInteger(value: number) {
   return new Intl.NumberFormat(undefined, {
     maximumFractionDigits: 0,
   }).format(value);
-}
-
-// Two significant figures; the underlying multipliers do not earn any more precision than that.
-function toSignificantFigures(value: number, figures: number) {
-  if (!Number.isFinite(value) || value === 0) {
-    return 0;
-  }
-
-  return Number(value.toPrecision(figures));
-}
-
-function formatUsd(value: number) {
-  const rounded = toSignificantFigures(value, 2);
-
-  return new Intl.NumberFormat(undefined, {
-    currency: "USD",
-    maximumFractionDigits: Math.abs(rounded) > 0 && Math.abs(rounded) < 0.1 ? 3 : 2,
-    minimumFractionDigits: 2,
-    style: "currency",
-  }).format(rounded);
-}
-
-function formatWattHours(value: number) {
-  const rounded = toSignificantFigures(value, 2);
-  const absValue = Math.abs(rounded);
-  const maximumFractionDigits = absValue >= 10 ? 0 : absValue >= 1 ? 1 : 3;
-
-  return `${new Intl.NumberFormat(undefined, { maximumFractionDigits }).format(rounded)} Wh`;
 }
 
 function routeImpactLead(

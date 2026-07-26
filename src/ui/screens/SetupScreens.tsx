@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
+import { domIdFor } from "../domId";
 import {
   applyEverydayToolSelection,
   everydayToolCatalogReviewedAt,
@@ -829,10 +830,6 @@ function boundedScaleValue(event: ChangeEvent<HTMLInputElement>) {
 
 function scaledWeightValue(value: number) {
   return Math.round(Math.min(1, Math.max(0, value)) * 5);
-}
-
-function domIdFor(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
 function weightLabel(weightKey: keyof ScoringWeights) {
