@@ -15,7 +15,7 @@ const ignoredDirectoryNames = new Set([
   "test-results",
 ]);
 
-const ignoredSourceDirectories = new Set(["dist", "src-tauri/target"]);
+const ignoredSourceDirectories = new Set(["dist"]);
 
 const textExtensions = new Set([
   ".conf",

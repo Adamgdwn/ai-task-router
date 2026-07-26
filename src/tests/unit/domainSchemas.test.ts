@@ -1,8 +1,4 @@
 import {
-  desktopDiscoveryErrorSchema,
-  desktopDiscoveryOptionsResponseSchema,
-  desktopDiscoveryRequestSchema,
-  desktopDiscoveryResponseSchema,
   permissionLevelSchema,
   promptStepSchema,
   routeCardSchema,
@@ -13,8 +9,6 @@ import {
   taskIntakeSchema,
 } from "../../domain/schemas";
 import type {
-  DesktopDiscoveryOptionsResponse,
-  DesktopDiscoveryResponse,
   PromptStep,
   RouteCard,
   RouteOption,
@@ -136,56 +130,6 @@ const validRouteCard = {
   createdAt,
 } satisfies RouteCard;
 
-const validDesktopDiscoveryOptions = {
-  schemaVersion: 1,
-  platform: "windows",
-  options: [
-    {
-      toolId: "ollama",
-      label: "Ollama",
-      summary: "Check whether Ollama is available on this computer.",
-      checkKinds: ["fixed-cli", "known-folder"],
-      defaultSelected: true,
-      detailsAvailable: true,
-    },
-  ],
-} satisfies DesktopDiscoveryOptionsResponse;
-
-const validDesktopDiscoveryResponse = {
-  schemaVersion: 1,
-  requestId: "desktop-discovery-001",
-  checkedAt: createdAt,
-  platform: "windows",
-  summary: {
-    toolsChecked: 2,
-    toolsDetected: 1,
-    modelsFound: 2,
-  },
-  results: [
-    {
-      toolId: "ollama",
-      label: "Ollama",
-      status: "models-found",
-      detected: true,
-      modelCount: 2,
-      modelNames: ["llama3.2", "mistral"],
-      checkedLocationCount: 2,
-      shownPathDetails: false,
-      note: "Detected with an allowlisted local check.",
-    },
-    {
-      toolId: "lm-studio",
-      label: "LM Studio",
-      status: "not-found",
-      detected: false,
-      modelCount: 0,
-      modelNames: [],
-      checkedLocationCount: 2,
-      shownPathDetails: false,
-    },
-  ],
-} satisfies DesktopDiscoveryResponse;
-
 describe("domain schemas", () => {
   it("accepts only permission levels 0 through 4", () => {
     for (const level of [0, 1, 2, 3, 4]) {
@@ -283,81 +227,6 @@ describe("domain schemas", () => {
       routeCardSchema.safeParse({
         ...validRouteCard,
         recommendedOptionId: "missing-route",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("validates desktop discovery options, request defaults, responses, and errors", () => {
-    expect(desktopDiscoveryOptionsResponseSchema.parse(validDesktopDiscoveryOptions)).toEqual(
-      validDesktopDiscoveryOptions,
-    );
-
-    expect(
-      desktopDiscoveryRequestSchema.parse({
-        requestId: "desktop-discovery-001",
-        selectedToolIds: ["ollama"],
-      }),
-    ).toEqual({
-      requestId: "desktop-discovery-001",
-      selectedToolIds: ["ollama"],
-      detailLevel: "summary",
-      includePathDetails: false,
-    });
-
-    expect(desktopDiscoveryResponseSchema.parse(validDesktopDiscoveryResponse)).toEqual(
-      validDesktopDiscoveryResponse,
-    );
-
-    expect(
-      desktopDiscoveryErrorSchema.parse({
-        schemaVersion: 1,
-        requestId: "desktop-discovery-001",
-        code: "tool-timeout",
-        message: "The local check took too long.",
-        safeDetail: "Try again or skip this tool.",
-        retryable: true,
-      }),
-    ).toMatchObject({
-      code: "tool-timeout",
-      retryable: true,
-    });
-  });
-
-  it("rejects unsafe or inconsistent desktop discovery payloads", () => {
-    expect(
-      desktopDiscoveryRequestSchema.safeParse({
-        requestId: "desktop-discovery-001",
-        selectedToolIds: ["ollama", "ollama"],
-      }).success,
-    ).toBe(false);
-
-    expect(
-      desktopDiscoveryRequestSchema.safeParse({
-        requestId: "desktop-discovery-001",
-        selectedToolIds: ["ollama"],
-        includePathDetails: true,
-      }).success,
-    ).toBe(false);
-
-    expect(
-      desktopDiscoveryResponseSchema.safeParse({
-        ...validDesktopDiscoveryResponse,
-        summary: {
-          ...validDesktopDiscoveryResponse.summary,
-          modelsFound: 999,
-        },
-      }).success,
-    ).toBe(false);
-
-    expect(
-      desktopDiscoveryResponseSchema.safeParse({
-        ...validDesktopDiscoveryResponse,
-        results: [
-          {
-            ...validDesktopDiscoveryResponse.results[1],
-            modelCount: 1,
-          },
-        ],
       }).success,
     ).toBe(false);
   });

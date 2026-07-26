@@ -2,7 +2,7 @@
 
 Document type: project context routing map
 Status: draft
-Status Updated: 2026-07-09T03:04:01+00:00
+Status Updated: 2026-07-26T09:31:44-06:00
 Owner: Technical Lead
 Audience: coding agents, human coders, reviewers, and project owners
 
@@ -45,6 +45,7 @@ Keep these files compact. They should route to durable docs, not duplicate them.
 - logs, generated reports, and command output
 - exported manifests
 - archived plans or superseded briefs
+- `docs/archive/`, which is closed history only. It holds the retired 2026-07-03 pathway and the abandoned desktop track (D0-D22). Nothing in it describes current work.
 
 Use `rg` or targeted file excerpts before opening long files.
 

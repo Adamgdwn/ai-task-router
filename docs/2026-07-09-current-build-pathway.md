@@ -33,7 +33,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 |---|---|---|
 | Browser/PWA app | live, one chunk behind `main` | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://7c570b1d.ai-task-router.pages.dev` from source `ab329e5`, which carried the audit remediation work from R1, R2, R3, R4, R5, R10, R11, and R12. R6, R7, R8, and R9 landed after that deploy. R7 is user-visible, so the live Help tab still shows the developer placeholder until the next deploy. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
-| Public desktop downloads | held | Windows Store/MSIX is the preferred first trusted Windows path; ordinary-user downloads remain gated. |
+| Desktop track | abandoned 2026-07-26T09:31:44-06:00 | Removed entirely: Tauri shell, local discovery, packaging and gate scripts, and the "Desktop app - Coming Soon!" card that promised computer checking on production. Planning and evidence docs are in `docs/archive/`. See [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
@@ -52,10 +52,10 @@ The MVP must not call provider APIs, connect accounts, store credentials, perfor
 
 Do not start any of these without a separate approved chunk and release-gate evidence:
 
-- public desktop downloads, GitHub Release artifacts, signing workflows, updater flows, or ordinary-user installers
+- GitHub Release artifacts, signing workflows, updater flows, or any installable build; the desktop track was abandoned on 2026-07-26 and restarting it is a new project, not a revert
 - social posts, custom-domain or DNS changes, exact public savings claims, live pricing tables, or live model fetches
 - provider account connections, telemetry, remote sync, authentication, external execution, or server-side planning
-- Partner Center secrets, identity documents, tax or banking details, private account screenshots, or public Store submission actions
+- identity documents, tax or banking details, or private account screenshots
 
 ## Work Pattern
 
@@ -92,7 +92,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 3 | Decision Card and prompt handoff polish | integration complete | Integration complete | Ensures exports carry the same staged agent-choice logic into the user's real workflow. |
 | 4 | Reviewed methodology page | draft complete; owner-review ready | Draft complete | Gives cautious, sourced backing for routing and impact claims without pretending to have live pricing. |
 | 5 | Opt-in local estimator UI | paused | Draft complete | Optional enhancement; only start if the owner explicitly wants a local impact-estimate surface. |
-| 6 | Windows Store/MSIX trust slice | held | Draft complete | Keeps the trusted desktop lane moving only after the web/product story is clear. |
+| 6 | ~~Windows Store/MSIX trust slice~~ | cancelled 2026-07-26T09:31:44-06:00 | n/a | The desktop track was abandoned; see [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | 7 | Audit remediation queue (R0-R12) | complete | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. R0 (deploy current `main`), R1 (artifacts follow the chosen route), R2 (honest impact numbers), R3 (first-run honesty), R4 (clean the copied prompt text), R10 (reframe the product promise), R11 (price each step by the model it names), and R12 (name the lean style by what it actually does), R5 (dead code and lint feedback loop), R6 (catalog staleness signal), R7 (help screen), R9 (resolve the frequency question), and R8 (real first-run E2E coverage) are complete. All thirteen chunks are done. R0 shipped all of the above to production, so the remediation work is now visible to users rather than sitting on `main`. The docs now say the app recommends a tier and a shape of work, not a vendor, and use one impact vocabulary shared with the app UI. Each step is now priced against the model that step tells the user to open, and the per-step figures are shown so a route total can be checked against its parts. Cost figures are now API-equivalent per-token estimates shown beside what is actually billed, and no surface claims the user saved money. R5 removed 388 lines of unreachable code and turned on `noUnusedLocals` and `noUnusedParameters`, so unused code now fails `npm run build`; it changed nothing a user sees. R7 replaced the developer placeholder on the Help tab with a real screen explaining what the app does, what it will never do, what the three routes and the numbers mean, and where saved choices live, and deleted `PlaceholderScreen` with it. R6 gave the app a way to admit its model knowledge is ageing: catalog age is computed from the review dates already recorded beside the catalogs, and Best Options shows a notice past 90 days telling the user to check their tool's current model list. The catalog is 20 days old, so the notice is correctly silent today. Two risks were added to the register, R-009 for recommendation-quality drift with a 90-day review cadence and R-010 for impact-claim accuracy. R9 resolved the setup question that collected how often each tool is used and then changed nothing: the app no longer computes a `preferredModelId` from it, and the setup screen now says plainly that account level shapes recommendations while frequency is the user's own note. A guard test asserts routing decisions are identical whether every tool is marked rarely used or used many times a day. R8 closed the last gap with a cold-path E2E test that injects nothing into IndexedDB: it routes once before any tool exists to prove the app admits the plan is manual, then adds ChatGPT Plus through the picker, describes a task in free text, and checks the saved decision card names the tool the user actually chose. Owner decisions on impact framing and product promise are recorded; no chunk is blocked on input. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
 
 ## Plan Chunks
@@ -110,7 +110,7 @@ Audit the current app copy, README, manual, product brief, and public-facing doc
 
 User outcome:
 
-A first-time individual user can understand why the router is useful before they care about governance, desktop packaging, or internal release history.
+A first-time individual user can understand why the router is useful before they care about governance or internal release history.
 
 Likely files:
 
@@ -126,7 +126,6 @@ Non-goals:
 - no public posting
 - no exact savings claims
 - no provider API calls, live model fetches, telemetry, or account connections
-- no desktop release work
 
 Acceptance criteria:
 
@@ -137,7 +136,7 @@ Acceptance criteria:
 
 Validation expectations:
 
-- Run `rg` checks for stale or misleading terms such as autonomous-agent language, exact savings claims, and public desktop release wording.
+- Run `rg` checks for stale or misleading terms such as autonomous-agent language, exact savings claims, and any surviving desktop or installer wording.
 - Run targeted unit or E2E tests only if user-facing app copy changes.
 - Run `git diff --check`.
 
@@ -347,50 +346,6 @@ Stop at a draft user-visible estimator. Do not expand to analytics, sync, or pro
 Pause decision:
 
 As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool functional enough for hands-on testing without this estimator. Do not start Chunk 5 unless the owner explicitly reopens it.
-
-### Chunk 6 - Windows Store/MSIX Trust Slice
-
-Status: held
-Status Updated: 2026-07-08T21:17:29-06:00
-Completion target: Draft complete
-Budget class: Medium
-
-Objective:
-
-Advance the trusted Windows desktop lane only after the web story and staged recommendation proof are clean.
-
-User outcome:
-
-The eventual desktop path is credible and trust-first, without exposing ordinary users to unsigned or unclear downloads.
-
-Likely files:
-
-- `docs/2026-07-06-windows-store-trust-prep.md`
-- `docs/release/windows-store-package-identity.template.json`
-- `scripts/prepare-windows-store-manifest.mjs`
-- desktop release evidence and gate scripts
-
-Non-goals:
-
-- no public desktop download
-- no Partner Center secrets, identity documents, tax, banking, or private screenshots in repo
-- no updater or signing workflow unless separately approved
-
-Acceptance criteria:
-
-- Any work stays within proof, template, or gate preparation.
-- Public desktop release gates continue to fail without real trust evidence and owner approval.
-- Web/PWA remains the public user path.
-
-Validation expectations:
-
-- Run relevant desktop prep/gate commands only for the selected slice.
-- Run `git diff --check`.
-- Run broader tests only if shared app code changes.
-
-Stop condition:
-
-Stop before public submission, publishing, or any secret/private account handling.
 
 ## Validation Log
 

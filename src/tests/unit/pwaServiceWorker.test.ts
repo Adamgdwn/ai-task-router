@@ -23,7 +23,7 @@ describe("PWA service worker registration", () => {
     ).toBe(true);
   });
 
-  it("blocks registration in development, insecure public HTTP, missing support, or Tauri", () => {
+  it("blocks registration in development, insecure public HTTP, or missing support", () => {
     expect(
       shouldRegisterPwaServiceWorker({
         hasServiceWorker: true,
@@ -45,15 +45,6 @@ describe("PWA service worker registration", () => {
         hasServiceWorker: false,
         hostname: "oldskoolai.com",
         isProduction: true,
-        protocol: "https:",
-      }),
-    ).toBe(false);
-    expect(
-      shouldRegisterPwaServiceWorker({
-        hasServiceWorker: true,
-        hostname: "oldskoolai.com",
-        isProduction: true,
-        isTauriRuntime: true,
         protocol: "https:",
       }),
     ).toBe(false);

@@ -6,21 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node scripts/check-bundle-budget.mjs",
-    "tauri": "tauri",
-    "desktop:dev": "tauri dev",
-    "desktop:build": "tauri build --no-bundle",
-    "desktop:package:windows:internal": "tauri build --bundles nsis --no-sign --ci --config src-tauri/tauri.internal-windows.conf.json",
-    "desktop:package:windows:technical-preview": "tauri build --bundles nsis --no-sign --ci --config src-tauri/tauri.technical-preview.conf.json",
-    "desktop:package:windows:msix-proof": "node scripts/package-windows-msix-proof.mjs",
-    "desktop:prepare:windows-store-manifest": "node scripts/prepare-windows-store-manifest.mjs",
-    "desktop:package:macos:technical-preview": "tauri build --bundles dmg --ci --config src-tauri/tauri.technical-preview.conf.json",
-    "desktop:package:linux:technical-preview": "tauri build --bundles appimage,deb --ci --config src-tauri/tauri.technical-preview.conf.json",
-    "desktop:artifacts": "node scripts/inspect-desktop-artifacts.mjs",
-    "desktop:checksums": "node scripts/inspect-desktop-artifacts.mjs --write-checksums --require-artifacts",
-    "desktop:gate:technical-preview": "node scripts/desktop-release-gate.mjs --mode technical-preview",
-    "desktop:gate:public": "node scripts/desktop-release-gate.mjs --mode public",
-    "desktop:info": "tauri info",
-    "detect:local-models": "node scripts/detect-local-models.mjs",
     "scan:web-rc": "node scripts/web-release-candidate-scan.mjs",
     "test": "vitest run",
     "test:scripts": "node --test scripts/*.node-test.mjs",
@@ -29,7 +14,6 @@
     "check:bundle": "node scripts/check-bundle-budget.mjs"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.11.1",
     "dexie": "^4.4.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -37,7 +21,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "@tauri-apps/cli": "^2.11.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

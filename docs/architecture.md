@@ -46,8 +46,7 @@ All MVP data stays in browser-local storage or user-triggered exports.
 
 The hosted/browser build can be installed from supported browsers through the web app manifest and service worker. The
 service worker caches same-origin app-shell assets only; it does not add provider calls, telemetry, local machine
-inspection, file indexing, account connections, or background data collection. The browser/PWA install path remains
-separate from desktop local discovery.
+inspection, file indexing, account connections, or background data collection. The app never inspects the user's machine.
 
 ## Dependencies
 
@@ -72,24 +71,11 @@ Excluded from v0.2:
 - cloud databases
 - vector databases
 - background workers
-- public desktop wrappers and installers
 - hosted multi-user infrastructure
 
-## Future Desktop Architecture
-
-Public desktop packaging is intentionally excluded from v0.2. Desktop Chunk D6 adds only an opt-in unsigned internal Windows package build for evidence, documented in [desktop packaging and signing spike](2026-07-04-desktop-packaging-signing-spike.md). The future desktop track is documented in [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md).
-
-The desktop architecture keeps the React frontend and adds a narrow Tauri native layer for desktop-only local discovery. The frontend does not receive broad filesystem access. Native commands are allowlisted, read-only, timeout-bound, schema-validated, and triggered only after explicit user approval.
-
-ADR-0001 selected Tauri for the shell spike. Desktop Chunk D3 defined the `get_desktop_discovery_options` and `run_desktop_discovery` command contracts with Zod schemas in `src/domain/schemas.ts`. Desktop Chunk D4 implements those commands in `src-tauri/src/discovery.rs` and registers them through the Tauri invoke handler while keeping the default capability permission list free of broad `fs`, `shell`, process, upload, updater, provider, credential, telemetry, or database plugin permissions.
-
-Desktop detection is limited to user-approved checks for allowlisted local AI tools and known model folders. It must not silently scan the machine, index files, expose paths, upload local data, store credentials, or execute provider actions.
-
-## Key Decisions
 
 - Use the uploaded coder build brief as the canonical product source until repo-local docs are expanded.
 - Build directly in this repository unless the owner later chooses a nested app folder.
 - Keep permission levels capped at local draft/export; there is no execute permission level.
 - Treat route recommendations and prompt packages as local decision artifacts, not actions.
-- Treat public installable desktop distribution as a separate future product surface requiring a signing plan, packaging review, and owner approval before release.
-
+- Abandon the desktop track. The product is a web app that teaches lower-impact AI decisions, and nothing about that intention requires an installer. See [ADR-0002](decisions/adr-0002-abandon-desktop-track.md).

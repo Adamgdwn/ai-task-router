@@ -2,11 +2,16 @@
 
 Document ID: ADR-ENG-001
 Version: 1.0.0
-Status: accepted for spike
+Status: superseded
 Owner: Technical Lead
 Approver: Project Owner
 Date: 2026-07-04
-Status Updated: 2026-07-04T14:51:54-06:00
+Status Updated: 2026-07-26T09:31:44-06:00
+Superseded By: [ADR-0002](adr-0002-abandon-desktop-track.md)
+
+> **Superseded 2026-07-26.** The desktop track was abandoned. This decision is kept as the record of
+> why Tauri was chosen and what the trust boundary was, not as guidance for current work. See
+> [ADR-0002](adr-0002-abandon-desktop-track.md).
 
 ## Context
 

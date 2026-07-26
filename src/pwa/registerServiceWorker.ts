@@ -1,13 +1,7 @@
-type TauriAwareWindow = Window & {
-  __TAURI__?: unknown;
-  __TAURI_INTERNALS__?: unknown;
-};
-
 export type PwaServiceWorkerDecisionInput = {
   hasServiceWorker?: boolean;
   hostname?: string;
   isProduction?: boolean;
-  isTauriRuntime?: boolean;
   protocol?: string;
 };
 
@@ -18,12 +12,6 @@ export type RegisterPwaServiceWorkerOptions = {
   windowRef?: Window;
 };
 
-export function isTauriRuntime(windowRef: Window = window): boolean {
-  const tauriAwareWindow = windowRef as TauriAwareWindow;
-
-  return Boolean(tauriAwareWindow.__TAURI_INTERNALS__ || tauriAwareWindow.__TAURI__);
-}
-
 export function shouldRegisterPwaServiceWorker(input: PwaServiceWorkerDecisionInput = {}): boolean {
   const isProduction = input.isProduction ?? import.meta.env.PROD;
   const hasServiceWorker = input.hasServiceWorker ?? ("serviceWorker" in navigator);
@@ -33,7 +21,7 @@ export function shouldRegisterPwaServiceWorker(input: PwaServiceWorkerDecisionIn
   const isLocalDevelopment =
     protocol === "http:" && (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]");
 
-  return Boolean(isProduction && hasServiceWorker && !input.isTauriRuntime && (isHostedSecurely || isLocalDevelopment));
+  return Boolean(isProduction && hasServiceWorker && (isHostedSecurely || isLocalDevelopment));
 }
 
 export function registerPwaServiceWorker(options: RegisterPwaServiceWorkerOptions = {}): boolean {
@@ -47,7 +35,6 @@ export function registerPwaServiceWorker(options: RegisterPwaServiceWorkerOption
       hasServiceWorker,
       hostname: windowRef.location.hostname,
       isProduction: options.isProduction,
-      isTauriRuntime: isTauriRuntime(windowRef),
       protocol: windowRef.location.protocol,
     }) ||
     !serviceWorker

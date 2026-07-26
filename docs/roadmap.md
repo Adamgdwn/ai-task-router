@@ -33,13 +33,11 @@ Status Updated: 2026-07-06T14:08:49-06:00
 - Use GitHub plus Cloudflare as the intended free distribution path.
 - Prefer one canonical Cloudflare Pages app URL, not three app copies; D13 selected the Cloudflare Pages production URL for the first public web release.
 - Keep the D5 PWA install path for the hosted app where supported.
-- Plan a separate signed desktop app for Windows, macOS, and Linux when local machine discovery is ready.
-- Use [public launch master plan](2026-07-04-public-launch-master-plan.md) as the controlling release map and [desktop trust and distribution plan](2026-07-04-desktop-trust-distribution-plan.md) as the baseline for desktop trust, signing, and release work.
-- Desktop Chunk D0 is confirmed for planning, and Desktop Chunk D1 selected Tauri for the first desktop shell spike.
+- Use [public launch master plan](2026-07-04-public-launch-master-plan.md) as the controlling release map.
+- The desktop track was abandoned on 2026-07-26. There is no installer and no plan for one; see [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). The historical desktop chunks D0 through D22 are recorded in `docs/archive/`.
 - Desktop Chunks D2 through D14 now cover the Tauri shell, trust boundary, permissioned local discovery, PWA install path, an opt-in unsigned internal Windows package artifact for evidence, release/security readiness, web release-candidate evidence, Cloudflare Pages hosted preview smoke, technical-preview desktop artifact lane, public launch master plan, Old Skool AI hub handoff package, Cloudflare Pages production web deployment, and the live Old Skool AI hub/cross-site link publication. Public desktop publishing, updater, provider connections, credentials, telemetry, broad folder access, and file indexing are not approved; D20 selected a Store/MSIX-first Windows public desktop lane and D21 added a self-signed MSIX proof path before any desktop download can ship publicly.
 - Chunk Fifteen added 22 fixture tasks and Playwright E2E coverage for setup, routing, export preparation, feedback, no-execution controls, and narrow-viewport overflow.
 - Desktop Chunk D8 completed local web/PWA release-candidate security evidence and added `npm run scan:web-rc`; Desktop Chunk D9 created a Cloudflare Pages hosted preview at `https://preview-20260704-0c7b253.ai-task-router.pages.dev` and passed hosted E2E; Desktop Chunk D10 added the manual desktop technical-preview artifact lane; Desktop Chunk D11 added the public launch master plan; Desktop Chunk D12 added the Old Skool AI hub handoff package; Desktop Chunk D13 deployed and smoked the production app at `https://ai-task-router.pages.dev/`; Desktop Chunk D14 published and smoked the Old Skool AI hub at `https://oldskoolai.com/ai-task-router/`, support/security route at `https://oldskoolai.com/security/`, and Guided AI Labs/Journey links to the hub; D16 deployed public impact insight; D18 deployed suggested stage guidance; D19 deployed PDF-ready Decision Card reports; D20 selected the first trusted desktop distribution lane and added public desktop release evidence gating; D21 added Windows MSIX proof packaging and workflow support. Social launch still waits for owner approval.
-- Run an owner governance review before desktop implementation because local machine inspection is a higher-trust surface than the v0.2 browser app.
 
 ## Explicitly Deferred
 
@@ -49,7 +47,7 @@ Status Updated: 2026-07-06T14:08:49-06:00
 - OAuth connectors
 - Auth and team mode
 - Hosted/cloud storage
-- Public desktop installer publishing, updater, and release-channel signing until the desktop trust plan reaches a controlled beta or release chunk with real public release evidence
+- Any desktop or installable build; the track was abandoned on 2026-07-26 and reversing it is a new project, not a revert
 - Server-rendered PDF export beyond the current browser print/save-PDF report
 - Agent mode or autonomous execution
 

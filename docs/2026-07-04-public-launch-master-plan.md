@@ -32,11 +32,11 @@ As of 2026-07-06T13:39:30-06:00:
 - The desktop prototype has narrow permissioned local AI tool discovery through Tauri commands.
 - Windows technical-preview packaging was locally verified, but the installer and executable are unsigned.
 - macOS and Linux technical-preview artifact workflows are ready, but remote artifacts have not been generated in this repo yet.
-- D17 adds [Desktop Download Readiness Gate](2026-07-05-desktop-download-readiness-gate.md), making artifact/checksum checks repeatable and making the public desktop gate fail until trust evidence exists.
+- D17 adds [Desktop Download Readiness Gate](archive/2026-07-05-desktop-download-readiness-gate.md), making artifact/checksum checks repeatable and making the public desktop gate fail until trust evidence exists.
 - D18 adds [Public Stage Guidance Cloudflare Update](2026-07-05-public-stage-guidance-cloudflare-update.md), adding compact suggested stages with recommended help beside each stage to the public app and redeploying Cloudflare Pages production.
 - D19 adds [Public PDF Report Cloudflare Update](2026-07-05-public-pdf-report-cloudflare-update.md), adding PDF-ready saved Decision Card reports to the public app and redeploying Cloudflare Pages production.
-- D20 adds [Desktop Public Distribution Decision](2026-07-06-desktop-public-distribution-decision.md), recommending Windows Store/MSIX first and tightening the public desktop gate around a real evidence manifest.
-- D21 adds [Windows MSIX Proof](2026-07-06-windows-msix-proof.md), creating a repeatable self-signed MSIX proof and workflow artifact path while keeping public desktop downloads held.
+- D20 adds [Desktop Public Distribution Decision](archive/2026-07-06-desktop-public-distribution-decision.md), recommending Windows Store/MSIX first and tightening the public desktop gate around a real evidence manifest.
+- D21 adds [Windows MSIX Proof](archive/2026-07-06-windows-msix-proof.md), creating a repeatable self-signed MSIX proof and workflow artifact path while keeping public desktop downloads held.
 - Public desktop downloads remain held until signing/notarization, checksums, install/launch/uninstall smoke, local discovery smoke, support/withdrawal copy, and owner approval pass.
 - The owner preference is one Old Skool AI public hub/tab, with `guidedailabs.com` and `guidedaijourney.com` linking to that hub.
 - D12 adds the [Old Skool AI Hub Handoff Package](2026-07-04-old-skool-ai-hub-handoff.md), including page structure, plain-language copy, cross-site link instructions, held desktop-download copy, and rollback notes.
