@@ -1,14 +1,14 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.1.0
+Version: 1.2.0
 Status: resolved
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-09
 Next Review: During the next production deploy attempt; the recovery path in this note is now proven
-Last Updated: 2026-07-25T16:28:35-06:00
+Last Updated: 2026-07-26T09:14:52-06:00
 Status Updated: 2026-07-25T16:28:35-06:00
 
 ## Purpose
@@ -31,11 +31,24 @@ Use this note with the active pathway, [2026-07-09-current-build-pathway.md](202
 
 If a future deploy hits `9109` again, the token's allowed-IP list is the thing to look at first, and recovery option 4 below (CI-based deploys with a stable egress) is the durable fix.
 
-## Current State As Of The Blocker
+## Which URL Is Live Right Now
+
+Verified 2026-07-26T09:14:52-06:00 by fetching each URL and comparing the hashed asset it references.
 
 | Item | Status | Notes |
 |---|---|---|
-| Canonical production URL | live but stale | `https://ai-task-router.pages.dev/` currently serves the prior production deployment. |
+| Canonical production URL | live and current with the 2026-07-25 deploy | `https://ai-task-router.pages.dev/` serves asset `index--Sdj9Css.js`, the same build as `https://7c570b1d.ai-task-router.pages.dev/`. The Pages production alias followed the deploy, so the canonical URL is the one to link publicly. Per R-008 it is the only URL that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; hash URLs like `7c570b1d.` are per-deploy and must not be published. |
+| Live build contents | one chunk behind `main` | The live asset still contains the string `Placeholder State` and does not contain `What this app does`, confirming the Help tab shows the pre-R7 developer placeholder. The current `main` build is the inverse. R6, R7, R8, and R9 are undeployed. |
+| `https://ef92b270.ai-task-router.pages.dev` | superseded | Serves the older `index-DOmdc2yL.js` from source `9639840`. It was the latest production deployment before 2026-07-25; it is no longer what the canonical URL points at. |
+
+## Current State As Of The Blocker
+
+Historical snapshot from 2026-07-09, kept as the record of what the failure looked like. The first two rows were
+superseded by the 2026-07-25 deploy; see the table above for what is live now.
+
+| Item | Status | Notes |
+|---|---|---|
+| Canonical production URL | live but stale | `https://ai-task-router.pages.dev/` served the prior production deployment. |
 | Latest known production deployment | live | `https://ef92b270.ai-task-router.pages.dev` from source `9639840`. |
 | Latest pushed main before this turnover note | ready for deploy | `2bedbf1` includes the Best Options UX fixes, deploy-blocker documentation, and Chunk 4 methodology review boundaries. |
 | Production deployment from current network | blocked | Cloudflare rejected the deploy token from public IP `184.67.69.66` with code `9109`, meaning the access token cannot be used from this location. |
