@@ -26,7 +26,9 @@ Keep these files compact. They should route to durable docs, not duplicate them.
 
 | Task | Load First |
 |---|---|
+| Resuming after a session break, compaction, or context clear | `docs/2026-07-26-session-turnover.md`, then `START_HERE.md`, then the active pathway's Next Handoff |
 | Current plan, chunking, validation, or handoff | Active plan named by `START_HERE.md`; default `docs/2026-07-09-current-build-pathway.md` |
+| Production deploy, or verifying which build is live | `docs/2026-07-09-cloudflare-deploy-turnover.md`, including its Verification Traps section before recording any result |
 | Engineering standards map | `docs/standards/README.md` |
 | Context windows, token budgets, compaction, scoped reads, or handoffs | `docs/standards/context-hygiene-standard.md` |
 | Durable implementation, design quality, testing discipline, or AI coding fundamentals | `docs/policy/durable-development-engineering-policy.md` |

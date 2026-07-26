@@ -1,14 +1,14 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.4.0
+Version: 1.5.0
 Status: resolved
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-26
-Next Review: During the next production deploy attempt; the recovery path in this note is now proven three times
-Last Updated: 2026-07-26T11:10:28-06:00
+Next Review: During the next production deploy attempt; the recovery path in this note is now proven four times
+Last Updated: 2026-07-26T11:41:28-06:00
 Status Updated: 2026-07-25T16:28:35-06:00
 
 ## Purpose
@@ -35,14 +35,39 @@ If a future deploy hits `9109` again, the token's allowed-IP list is the thing t
 
 **Re-run 2026-07-26T11:10:28-06:00 from the same location.** Source `a34d839` deployed to `https://9d00dce4.ai-task-router.pages.dev` on the first attempt, again unchanged. The runbook below is now proven three times, and the canonical alias has followed the deploy within the session on both of the last two attempts.
 
+**Re-run 2026-07-26T11:41:28-06:00 from the same location.** Source `b8069fa` deployed to `https://cc915a90.ai-task-router.pages.dev` on the first attempt, unchanged. Fourth consecutive success. This run is the one that exposed the verification traps below: the canonical alias appeared stale on the first plain fetch and was not, and the first bundle string check ran against an SPA fallback and reported a clean pass it had not earned.
+
+## Verification Traps
+
+Both of these produced a confident wrong answer on 2026-07-26T11:41:28-06:00. The deploy itself was fine; the checks were not.
+
+**A single plain fetch cannot tell a stale alias from a stale edge cache.** The canonical URL served the previous asset on the first fetch while the per-deploy hash URL already served the new one. A cache-busted fetch returned the new asset, and an ordinary fetch immediately after did too — an edge-cache hit lasting seconds. Always re-check with cache-busting before recording that the alias failed to follow:
+
+```powershell
+$rx = [regex]'index-[A-Za-z0-9_-]+\.js'
+$html = (Invoke-WebRequest "https://ai-task-router.pages.dev/?cb=verify" -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}).Content
+$rx.Match($html).Value
+```
+
+**Check the byte length before trusting a bundle string check.** A request for a not-yet-propagated asset path returns the SPA fallback HTML with HTTP 200. Roughly 962 characters of HTML contain none of the phrases being searched for, so every "must be present" reports missing *and every "must be absent" reports absent* — including the R-010 vocabulary, which reads as a clean pass. Assert the length matches the build output first:
+
+```powershell
+$asset = ($rx.Match($html).Value)
+$js = (Invoke-WebRequest "https://ai-task-router.pages.dev/assets/$asset" -UseBasicParsing -Headers @{"Cache-Control"="no-cache"}).Content
+if ($js.Length -lt 500000) { throw "Got $($js.Length) chars, not the bundle - do not trust any string check against this." }
+```
+
+Absence of a forbidden phrase is only evidence when the haystack is real.
+
 ## Which URL Is Live Right Now
 
-Verified 2026-07-26T10:21:53-06:00 by fetching each URL and comparing the hashed asset it references.
+Verified 2026-07-26T11:41:28-06:00 by fetching each URL and comparing the hashed asset it references.
 
 | Item | Status | Notes |
 |---|---|---|
-| Canonical production URL | live and current with `main` | Re-verified 2026-07-26T11:10:28-06:00. `https://ai-task-router.pages.dev/` serves asset `index-Dv6r8WOf.js`, the same build as `https://9d00dce4.ai-task-router.pages.dev/`. The Pages production alias followed the deploy within the same session again, with no stale edge-cache hit on the first fetch. Per R-008 it is the only URL that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; hash URLs like `9d00dce4.` are per-deploy and must not be published. |
-| Live build contents | current with `main` at `a34d839` | The live asset contains `10-watt LED bulb` and `Which routes you followed`, confirming the teaching-audit fixes reached users, and still contains `What this app does` from the R7 Help screen. It contains none of `Estimated savings`, `Energy saved`, or `Est. saved`, so the R-010 vocabulary control holds in the shipped artifact. Nothing on `main` is undeployed. |
+| Canonical production URL | live and current with `main` | Re-verified 2026-07-26T11:41:28-06:00. `https://ai-task-router.pages.dev/` serves asset `index-Dc_ddyS3.js`, the same build as `https://cc915a90.ai-task-router.pages.dev/`. The alias did follow the deploy, but this time only a cache-busted fetch showed it — see Verification Traps above. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; hash URLs like `cc915a90.` are per-deploy and must not be published. |
+| Live build contents | current with `main` at `b8069fa` | The live asset is 658,310 characters, matching the build output, so the string check below ran against the real bundle. It contains `Why which tool you pick matters`, `Smaller is not automatically better`, `Energy moves with it`, `How you have been choosing`, `If this run were metered`, `Against the heaviest offered`, `10-watt LED bulb`, and `Which routes you followed`, confirming all five teaching-audit fixes reached users, and still contains `What this app does` from the R7 Help screen. It contains none of `Estimated savings`, `Energy saved`, `Est. saved`, or `avoided cost`. Nothing on `main` is undeployed. |
+| `https://9d00dce4.ai-task-router.pages.dev` | superseded | Serves `index-Dv6r8WOf.js` from source `a34d839`. It was the production deployment for roughly thirty minutes on 2026-07-26; it is no longer what the canonical URL points at. |
 | `https://d81aef5b.ai-task-router.pages.dev` | superseded | Serves `index-CBWnLbEK.js` from source `69b31a2`. It was the production deployment for roughly fifty minutes on 2026-07-26; it is no longer what the canonical URL points at. |
 | `https://7c570b1d.ai-task-router.pages.dev` | superseded | Serves `index--Sdj9Css.js` from source `ab329e5`. It was the production deployment from 2026-07-25 to 2026-07-26; it is no longer what the canonical URL points at. |
 | `https://ef92b270.ai-task-router.pages.dev` | superseded | Serves the older `index-DOmdc2yL.js` from source `9639840`, the last production deployment before 2026-07-25. |
