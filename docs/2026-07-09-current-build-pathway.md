@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.6.12
+Version: 1.6.13
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
-Last Reviewed: 2026-07-25
+Last Reviewed: 2026-07-26
 Next Review: During the next substantial build session
-Last Updated: 2026-07-25T16:58:01-06:00
-Status Updated: 2026-07-25T16:58:01-06:00
+Last Updated: 2026-07-26T10:21:53-06:00
+Status Updated: 2026-07-26T10:21:53-06:00
 
 ## Purpose
 
@@ -31,14 +31,14 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live, one chunk behind `main` | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://7c570b1d.ai-task-router.pages.dev` from source `ab329e5`, which carried the audit remediation work from R1, R2, R3, R4, R5, R10, R11, and R12. R6, R7, R8, and R9 landed after that deploy. R7 is user-visible, so the live Help tab still shows the developer placeholder until the next deploy. |
+| Browser/PWA app | live and current with `main` | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://d81aef5b.ai-task-router.pages.dev` from source `69b31a2`, deployed 2026-07-26T10:21:53-06:00. It carries everything the 2026-07-25 deploy of `ab329e5` was missing: R6, R7, R8, R9, the bundle budget gate, the desktop-track removal, and the 2026-07-26 leanness pass. The two user-visible ones are now live — the Help tab shows the real screen instead of the developer placeholder, and route costs read in real dollars and cents rather than two-significant-figure rounding. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Desktop track | abandoned 2026-07-26T09:31:44-06:00 | Removed entirely: Tauri shell, local discovery, packaging and gate scripts, and the "Desktop app - Coming Soon!" card that promised computer checking on production. Planning and evidence docs are in `docs/archive/`. See [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Audit queue complete, undeployed | Chunk R0 is complete as of 2026-07-25T16:28:35-06:00. The blocker was network location, not the token or the build: Cloudflare rejected the token from public IP `184.67.69.66` with code `9109`, and the same token, command shape, and secure env file succeeded unchanged from the owner's home network at public IP `70.65.205.71`. Production now serves source `ab329e5`. Nothing in the app, the build, or the token was modified to make this work. R7 then replaced the Help placeholder with a real screen, R6 added the catalog staleness signal, R9 made the tool frequency question honest, and R8 added cold-path E2E coverage. All four are on `main` and not yet deployed. The whole audit remediation queue, R0 through R12, is now complete. |
+| Active chunk | Audit queue complete and deployed | Chunk R0 is complete as of 2026-07-25T16:28:35-06:00. The blocker was network location, not the token or the build: Cloudflare rejected the token from public IP `184.67.69.66` with code `9109`, and the same token, command shape, and secure env file succeeded unchanged from the owner's home network at public IP `70.65.205.71`. Production now serves source `ab329e5`. Nothing in the app, the build, or the token was modified to make this work. R7 then replaced the Help placeholder with a real screen, R6 added the catalog staleness signal, R9 made the tool frequency question honest, and R8 added cold-path E2E coverage. All four went live in the 2026-07-26 deploy of `69b31a2`, along with the bundle budget gate, the desktop-track removal, and the leanness pass that gave money a single formatter. The whole audit remediation queue, R0 through R12, is now complete and visible to users. |
 
 ## Product Boundary
 
@@ -444,6 +444,13 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 | 2026-07-25T16:58:01-06:00 | Negative control on the new cold-path test | pass | Swapping the expected tool name from ChatGPT to Claude fails the test on both the stage guidance locator and the decision card Markdown, confirming the tool-naming assertion is not incidentally true. |
 | 2026-07-25T16:58:01-06:00 | `npm run test`; `npm run build`; `npm run scan:web-rc`; `git diff --check`; `bash scripts/governance-preflight.sh` | pass | 15 files and 143 tests unchanged, since R8 adds no unit tests; build clean; no release-blocking findings; whitespace check exit 0; governance preflight 0 warnings after R8. |
 
+| 2026-07-26T10:21:53-06:00 | Public IP confirmed before deploy | pass | `70.65.205.71`, the home network the 2026-07-25 deploy succeeded from, not the blocked `184.67.69.66`. This is the precondition the turnover note sets before any deploy attempt. |
+| 2026-07-26T10:21:53-06:00 | `git pull --ff-only`; `bash scripts/governance-preflight.sh`; `npm audit --audit-level=moderate` | pass | Already up to date at `69b31a2`; governance preflight 0 warnings; 0 vulnerabilities. |
+| 2026-07-26T10:21:53-06:00 | `npm run test`; `npm run build`; `npm run scan:web-rc` | pass | Vitest 16 files and 147 tests; build clean with the existing Vite chunk-size warning only, and the budget gate reported javascript raw 649.58 kB / 700.00 kB and stylesheet raw 41.56 kB / 60.00 kB; no release-blocking findings. |
+| 2026-07-26T10:21:53-06:00 | `npx --yes wrangler pages deploy dist --project-name ai-task-router --branch main --commit-hash 69b31a2 --commit-message ... --env-file ...` | pass | Deployed source `69b31a2` to `https://d81aef5b.ai-task-router.pages.dev`; 3 new files uploaded, 6 already present. One attempt, no token or command changes, no token values printed. |
+| 2026-07-26T10:21:53-06:00 | Canonical hosted smoke on `https://ai-task-router.pages.dev` | pass | Root, `/manifest.webmanifest`, and `/service-worker.js` returned HTTP 200. The canonical URL served asset `index-CBWnLbEK.js` on the first fetch with no stale edge-cache hit, unlike 2026-07-25. The live asset contains `What this app does` and not `Placeholder State`, proving the R7 Help screen is the one visitors now see. |
+| 2026-07-26T10:21:53-06:00 | Hosted `PLAYWRIGHT_BASE_URL=https://ai-task-router.pages.dev npx playwright test src/tests/e2e/mvp-workflows.spec.ts --project=chromium` | pass on re-run | First hosted run was 6 passed, 1 failed: the route-selection case did not find `Choose this route` within its timeout on a cold edge. The same test passed alone in 1.9s immediately after, and a full re-run passed 7/7 in 9.3s. Read as cold-start latency on first hosted paint, not a product defect; if it recurs on a warm edge it is a real timing bug in that screen. |
+
 ## Completed Chunk - Compact Active Pathway Extraction
 
 Status: task complete
@@ -507,10 +514,10 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 A functional audit of `59dd849` on 2026-07-25 found gaps between what the app claims and what it does. The remediation queue is [2026-07-25-audit-remediation-plan.md](2026-07-25-audit-remediation-plan.md); all thirteen chunks, R0 through R12, are complete as of 2026-07-25T16:58:01-06:00. There is no next coder chunk in that queue. The audit chunks are self-contained and name their own context load, so do not read this pathway's history to work them.
 
-The Cloudflare deploy blocker is resolved. It was the network location the token was used from, not the token or the build, and the recovery path in [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) worked unchanged from the owner's home network. Use that note as the deploy runbook.
+The Cloudflare deploy blocker is resolved. It was the network location the token was used from, not the token or the build, and the recovery path in [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) has now worked unchanged from the owner's home network twice. Use that note as the deploy runbook.
 
-**There is undeployed user-visible work on `main`.** R7's Help screen is not live; production still shows the developer placeholder on that tab. R6's catalog staleness notice is also undeployed, though it is silent until the catalog passes 90 days on 2026-10-03. R8 and R9 are test and internal work with no user-visible surface. Deploying is an owner decision, so a coder chunk should leave it alone and say so in its handoff rather than deploying on its own.
+**Production is current with `main`.** The owner authorized the deploy on 2026-07-26 and source `69b31a2` is live. Nothing is sitting undeployed. R7's Help screen, R6's catalog staleness notice — silent until the catalog passes 90 days on 2026-10-03 — and the money formatter that shows real dollars and cents are all in front of users now.
 
-At the next deploy, alongside the hosted smoke in the runbook, verify by hand what the E2E suite cannot judge: that each stage shows a visible path with no disclosure/pull-down, that route cards let the user choose which route to accept, that the save panel names the selected route, that the followed-choice impact counter increments after saving, and that the new Help tab reads as plain language rather than product copy. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
+**The hosted smoke still needs human eyes.** The automated half is done: 7/7 hosted E2E and the asset checks above. What no test can judge is wording and feel. On `https://ai-task-router.pages.dev/`, verify by hand that each stage shows a visible path with no disclosure/pull-down, that route cards let the user choose which route to accept, that the save panel names the selected route, that the followed-choice impact counter increments after saving, that the Help tab reads as plain language rather than product copy, and that route costs now read as ordinary dollars and cents in both the route card and the stage guidance panel, which used to disagree. Also re-check both a difficult build-planning task and an ordinary planning task: true build tasks should use the strongest available reasoning pass for the master prompt, then move execution/build to the lighter or build-capable helper with concrete build items; ordinary wording such as "build an itinerary" should stay in planning/execution/table routing rather than app-build routing. Keep this active pathway compact; put any new detailed evidence into a purpose-specific dated evidence doc instead of growing the active pathway. Chunk 5 is paused until explicitly reopened; Chunk 6 remains held.
 
 After meaningful work, follow the chunk close-out protocol in `AGENTS.md`: check `CARRY_FORWARD.md`, commit and push the scoped change, then suggest `/compact`.

@@ -1,14 +1,14 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.2.0
+Version: 1.3.0
 Status: resolved
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
-Last Reviewed: 2026-07-09
-Next Review: During the next production deploy attempt; the recovery path in this note is now proven
-Last Updated: 2026-07-26T09:14:52-06:00
+Last Reviewed: 2026-07-26
+Next Review: During the next production deploy attempt; the recovery path in this note is now proven twice
+Last Updated: 2026-07-26T10:21:53-06:00
 Status Updated: 2026-07-25T16:28:35-06:00
 
 ## Purpose
@@ -31,15 +31,18 @@ Use this note with the active pathway, [2026-07-09-current-build-pathway.md](202
 
 If a future deploy hits `9109` again, the token's allowed-IP list is the thing to look at first, and recovery option 4 below (CI-based deploys with a stable egress) is the durable fix.
 
+**Re-run 2026-07-26T10:21:53-06:00 from the same home network, public IP `70.65.205.71`.** Source `69b31a2` deployed to `https://d81aef5b.ai-task-router.pages.dev` on the first attempt with no token, command, or code changes. The runbook below is now proven twice.
+
 ## Which URL Is Live Right Now
 
-Verified 2026-07-26T09:14:52-06:00 by fetching each URL and comparing the hashed asset it references.
+Verified 2026-07-26T10:21:53-06:00 by fetching each URL and comparing the hashed asset it references.
 
 | Item | Status | Notes |
 |---|---|---|
-| Canonical production URL | live and current with the 2026-07-25 deploy | `https://ai-task-router.pages.dev/` serves asset `index--Sdj9Css.js`, the same build as `https://7c570b1d.ai-task-router.pages.dev/`. The Pages production alias followed the deploy, so the canonical URL is the one to link publicly. Per R-008 it is the only URL that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; hash URLs like `7c570b1d.` are per-deploy and must not be published. |
-| Live build contents | one chunk behind `main` | The live asset still contains the string `Placeholder State` and does not contain `What this app does`, confirming the Help tab shows the pre-R7 developer placeholder. The current `main` build is the inverse. R6, R7, R8, and R9 are undeployed. |
-| `https://ef92b270.ai-task-router.pages.dev` | superseded | Serves the older `index-DOmdc2yL.js` from source `9639840`. It was the latest production deployment before 2026-07-25; it is no longer what the canonical URL points at. |
+| Canonical production URL | live and current with `main` | `https://ai-task-router.pages.dev/` serves asset `index-CBWnLbEK.js`, the same build as `https://d81aef5b.ai-task-router.pages.dev/`. The Pages production alias followed the deploy within the same session this time, with no stale edge-cache hit on the first fetch. Per R-008 it is the only URL that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; hash URLs like `d81aef5b.` are per-deploy and must not be published. |
+| Live build contents | current with `main` at `69b31a2` | The live asset contains `What this app does` and no longer contains `Placeholder State`, confirming the R7 Help screen replaced the developer placeholder. Nothing on `main` is undeployed. |
+| `https://7c570b1d.ai-task-router.pages.dev` | superseded | Serves `index--Sdj9Css.js` from source `ab329e5`. It was the production deployment from 2026-07-25 to 2026-07-26; it is no longer what the canonical URL points at. |
+| `https://ef92b270.ai-task-router.pages.dev` | superseded | Serves the older `index-DOmdc2yL.js` from source `9639840`, the last production deployment before 2026-07-25. |
 
 ## Current State As Of The Blocker
 

@@ -1,8 +1,8 @@
 # 2026-07-03T11:51:11-06:00 - Carry-Forward Flags
 
-Last Updated: 2026-07-26T09:49:39-06:00
+Last Updated: 2026-07-26T10:21:53-06:00
 Status: open
-Status Updated: 2026-07-26T09:49:39-06:00
+Status Updated: 2026-07-26T10:21:53-06:00
 
 Use this file to record anything that must survive a context reset:
 blockers, unresolved decisions, open risks, next-chunk prerequisites.
@@ -12,6 +12,5 @@ the coding agent will surface them before suggesting /compact.
 
 | Flag | Added | Owner | Status | Notes |
 |---|---|---|---|---|
-| Production is behind `main` by six chunks, two of them user-visible | 2026-07-25T16:58:01-06:00 | Project Owner | Open | R6, R7, R8, R9, the bundle budget gate, the 2026-07-26 desktop-track removal, and the 2026-07-26 leanness pass all landed after the R0 deploy of `ab329e5`. Two are user-visible. R7: the live Help tab still shows the old developer placeholder. The 2026-07-26 money formatting fix: the live site still prices routes with the two-significant-figure rounding, so a $12.35 estimate reads as "$12.00" there and the stage guidance panel still disagrees with the route card describing the same route. Deploying is an owner decision, not coder work. Runbook: `docs/2026-07-09-cloudflare-deploy-turnover.md`, proven from the home network on 2026-07-25. Verified 2026-07-26: the canonical URL `https://ai-task-router.pages.dev/` is current with the 2026-07-25 deploy, and its live asset still contains `Placeholder State` and not `What this app does`, so the old Help placeholder is what visitors see today. Public links belong on the canonical URL, never a per-deploy hash URL. Clear this flag when the deploy lands. |
-| Hosted smoke items need human eyes, not tests | 2026-07-25T16:58:01-06:00 | Project Owner | Open | The turnover note's Hosted Smoke Focus list asks whether routing detail is visible by default, whether route selection and the save panel name the chosen route, whether followed-choice impact increments, whether ordinary planning language stays out of app-build routing, and now whether the new Help screen reads as plain language. The E2E suite proves the flow works; it cannot judge wording. About ten minutes on the live site after the deploy. |
+| Hosted smoke items need human eyes, not tests | 2026-07-25T16:58:01-06:00 | Project Owner | Open, now unblocked | The deploy this was waiting on landed 2026-07-26T10:21:53-06:00, so the live site is finally the build worth reading. The turnover note's Hosted Smoke Focus list asks whether routing detail is visible by default, whether route selection and the save panel name the chosen route, whether followed-choice impact increments, whether ordinary planning language stays out of app-build routing, whether the new Help screen reads as plain language, and now whether route costs read as ordinary dollars and cents in both the route card and the stage guidance panel, which used to disagree with each other. The E2E suite passed 7/7 against the live site; it cannot judge wording. About ten minutes on `https://ai-task-router.pages.dev/`. |
 | Catalog review due 2026-10-03 | 2026-07-25T16:58:01-06:00 | Project Owner | Scheduled | R-009 in `docs/risks/risk-register.md`. The app starts telling users the model and pricing catalog is stale once it passes 90 days. Refreshing it is a deliberate review pass; move `everydayToolCatalogReviewedAt` and `impactCatalogReviewedAt` together or the freshness check keeps measuring from whichever one lagged. |
