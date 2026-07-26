@@ -1,14 +1,14 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.3.0
+Version: 1.4.0
 Status: resolved
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-26
-Next Review: During the next production deploy attempt; the recovery path in this note is now proven twice
-Last Updated: 2026-07-26T10:21:53-06:00
+Next Review: During the next production deploy attempt; the recovery path in this note is now proven three times
+Last Updated: 2026-07-26T11:10:28-06:00
 Status Updated: 2026-07-25T16:28:35-06:00
 
 ## Purpose
@@ -31,7 +31,9 @@ Use this note with the active pathway, [2026-07-09-current-build-pathway.md](202
 
 If a future deploy hits `9109` again, the token's allowed-IP list is the thing to look at first, and recovery option 4 below (CI-based deploys with a stable egress) is the durable fix.
 
-**Re-run 2026-07-26T10:21:53-06:00 from the same home network, public IP `70.65.205.71`.** Source `69b31a2` deployed to `https://d81aef5b.ai-task-router.pages.dev` on the first attempt with no token, command, or code changes. The runbook below is now proven twice.
+**Re-run 2026-07-26T10:21:53-06:00 from the same home network, public IP `70.65.205.71`.** Source `69b31a2` deployed to `https://d81aef5b.ai-task-router.pages.dev` on the first attempt with no token, command, or code changes.
+
+**Re-run 2026-07-26T11:10:28-06:00 from the same location.** Source `a34d839` deployed to `https://9d00dce4.ai-task-router.pages.dev` on the first attempt, again unchanged. The runbook below is now proven three times, and the canonical alias has followed the deploy within the session on both of the last two attempts.
 
 ## Which URL Is Live Right Now
 
@@ -39,8 +41,9 @@ Verified 2026-07-26T10:21:53-06:00 by fetching each URL and comparing the hashed
 
 | Item | Status | Notes |
 |---|---|---|
-| Canonical production URL | live and current with `main` | `https://ai-task-router.pages.dev/` serves asset `index-CBWnLbEK.js`, the same build as `https://d81aef5b.ai-task-router.pages.dev/`. The Pages production alias followed the deploy within the same session this time, with no stale edge-cache hit on the first fetch. Per R-008 it is the only URL that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; hash URLs like `d81aef5b.` are per-deploy and must not be published. |
-| Live build contents | current with `main` at `69b31a2` | The live asset contains `What this app does` and no longer contains `Placeholder State`, confirming the R7 Help screen replaced the developer placeholder. Nothing on `main` is undeployed. |
+| Canonical production URL | live and current with `main` | Re-verified 2026-07-26T11:10:28-06:00. `https://ai-task-router.pages.dev/` serves asset `index-Dv6r8WOf.js`, the same build as `https://9d00dce4.ai-task-router.pages.dev/`. The Pages production alias followed the deploy within the same session again, with no stale edge-cache hit on the first fetch. Per R-008 it is the only URL that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; hash URLs like `9d00dce4.` are per-deploy and must not be published. |
+| Live build contents | current with `main` at `a34d839` | The live asset contains `10-watt LED bulb` and `Which routes you followed`, confirming the teaching-audit fixes reached users, and still contains `What this app does` from the R7 Help screen. It contains none of `Estimated savings`, `Energy saved`, or `Est. saved`, so the R-010 vocabulary control holds in the shipped artifact. Nothing on `main` is undeployed. |
+| `https://d81aef5b.ai-task-router.pages.dev` | superseded | Serves `index-CBWnLbEK.js` from source `69b31a2`. It was the production deployment for roughly fifty minutes on 2026-07-26; it is no longer what the canonical URL points at. |
 | `https://7c570b1d.ai-task-router.pages.dev` | superseded | Serves `index--Sdj9Css.js` from source `ab329e5`. It was the production deployment from 2026-07-25 to 2026-07-26; it is no longer what the canonical URL points at. |
 | `https://ef92b270.ai-task-router.pages.dev` | superseded | Serves the older `index-DOmdc2yL.js` from source `9639840`, the last production deployment before 2026-07-25. |
 
