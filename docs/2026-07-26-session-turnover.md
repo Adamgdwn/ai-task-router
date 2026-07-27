@@ -1,15 +1,15 @@
 # 2026-07-26 - Session Turnover
 
 Document ID: PATH-ENG-004
-Version: 1.2.0
+Version: 1.3.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-26
 Last Reviewed: 2026-07-26
 Next Review: At the start of the next working session
-Last Updated: 2026-07-26T21:04:00-06:00
-Status Updated: 2026-07-26T21:04:00-06:00
+Last Updated: 2026-07-26T21:12:00-06:00
+Status Updated: 2026-07-26T21:12:00-06:00
 
 ## Purpose
 
@@ -19,21 +19,22 @@ This note is a resume point, not a history. Detailed evidence stays in the activ
 
 ## Where Things Stand
 
-**Production serves `b8069fa`. `main` has since moved ahead by the teaching-audit finding 3 fix, which is committed, gated, and undeployed.** The app is live at `https://ai-task-router.pages.dev/` and the public hub at `https://oldskoolai.com/ai-task-router/`.
+**Production is current with `main` at `e58f81b`.** Nothing is committed and undeployed. All six teaching-audit findings are live. The app is live at `https://ai-task-router.pages.dev/` and the public hub at `https://oldskoolai.com/ai-task-router/`.
 
-Three owner-authorized deploys landed today:
+Four owner-authorized deploys landed today:
 
 | Time | Source | Deployment | Carried |
 |---|---|---|---|
 | 10:21:53-06:00 | `69b31a2` | `https://d81aef5b.` | R6, R7, R8, R9, bundle budget gate, desktop-track removal, leanness pass |
 | 11:10:28-06:00 | `a34d839` | `https://9d00dce4.` | Teaching-audit fixes 4, 5, 6: readable energy figures, followed-route lean/balanced/premium split, comparison multiples |
 | 11:41:28-06:00 | `b8069fa` | `https://cc915a90.` | Teaching-audit findings 1 and 2: pre-task worked examples on Start Here, per-row and whole-log figures on Past Choices |
+| 21:12:00-06:00 | `e58f81b` | `https://3db20d3b.` | Teaching-audit finding 3: Best Options panel rebalance, plus comparison multiples reconciled with the figures as displayed |
 
 Per R-008, only the canonical URL may be published. The per-deploy hash URLs above are internal evidence and must not appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`.
 
 ## What Changed Today, And Why
 
-The 2026-07-25 functional audit asked "does the app work". A teaching audit on 2026-07-26 asked a narrower question: **does the app teach why right-sizing matters?** It found six gaps. All six are now fixed; five are live and the sixth is on `main`.
+The 2026-07-25 functional audit asked "does the app work". A teaching audit on 2026-07-26 asked a narrower question: **does the app teach why right-sizing matters?** It found six gaps. All six are fixed and live.
 
 The through-line in all six: the app was *honest* before it was *readable*. Every figure was sourced and every hedge was true, but the lesson was arriving in a form, at a time, or at a size the user could not act on.
 
@@ -42,7 +43,7 @@ The through-line in all six: the app was *honest* before it was *readable*. Ever
 - **The reader was doing the division.** Heaviest-sibling comparisons showed two figures side by side. They now state the multiple, because the division *is* the lesson.
 - **The lesson arrived after the decision.** Start Here now carries three worked examples before any task is described. The figures come from the reviewed snapshot already used on Best Options, so this changed placement, not claims.
 - **Past Choices taught nothing.** It was a receipt. Rows now carry metered cost, energy, and a comparison against the heaviest route offered, and the log carries choice-pattern totals across every saved choice.
-- **The disclaimers were the first thing read.** Three of the four Best Options impact cards opened with their own hedge, in a rail too narrow to hold an argument. The hedges now sit once at the group level, and each example leads with its lesson. Not yet deployed.
+- **The disclaimers were the first thing read.** Three of the four Best Options impact cards opened with their own hedge, in a rail too narrow to hold an argument. The hedges now sit once at the group level, and each example leads with its lesson.
 
 ## Judgement Calls Worth Preserving
 
@@ -74,13 +75,11 @@ Both produced a confident wrong answer today. Both are now written into the Veri
 
 ## Open Items
 
-Three, none blocking, plus one undeployed change awaiting owner authorization.
+Two, neither blocking.
 
-1. ~~**Teaching-audit finding 3.**~~ Fixed 2026-07-26T20:51:35-06:00, committed and gated on `main`, **not deployed**. The four impact cards sat at equal weight in the narrow right rail and three of them opened with their own disclaimer, so the strongest teaching content in the app began by telling the reader it was safe to skip. Every hedge survives; they are now stated once where they apply — the group heading "Worked examples, not your usage" and one shared caveat — which is the same consolidation Start Here already uses. The route figure gained weight above; the three examples moved to a full-width band below. This is now the only undeployed change, and a deploy needs fresh owner authorization.
+1. **Hosted smoke needs human eyes.** The automated half is done and has passed on every deploy. What no test can judge is wording and feel, and the list has grown to nine items across the five shipped fixes. It is enumerated in `CARRY_FORWARD.md`. Roughly ten to fifteen minutes on the live site. This is owner work, not coder work.
 
-2. **Hosted smoke needs human eyes.** The automated half is done and has passed on every deploy. What no test can judge is wording and feel, and the list has grown to nine items across the five shipped fixes. It is enumerated in `CARRY_FORWARD.md`. Roughly ten to fifteen minutes on the live site. This is owner work, not coder work.
-
-3. **Catalog review due 2026-10-03.** R-009. The app starts telling users the model and pricing catalog is stale once it passes 90 days. Move `everydayToolCatalogReviewedAt` and `impactCatalogReviewedAt` together or the freshness check keeps measuring from whichever one lagged.
+2. **Catalog review due 2026-10-03.** R-009. The app starts telling users the model and pricing catalog is stale once it passes 90 days. Move `everydayToolCatalogReviewedAt` and `impactCatalogReviewedAt` together or the freshness check keeps measuring from whichever one lagged.
 
 One low-priority loose end is recorded in the pathway's Next Handoff: three user-reachable strings contain "savings" while describing the *user's own requested deliverable* rather than an app claim about money. Not an R-010 violation, and not introduced by today's work — but `App.test.tsx` asserts rendered output never matches `/\bsavings\b/i`, a guard that reads broader than it actually is.
 
