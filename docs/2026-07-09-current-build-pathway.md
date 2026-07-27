@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.9.0
+Version: 1.10.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-26
 Next Review: During the next substantial build session
-Last Updated: 2026-07-26T21:30:00-06:00
-Status Updated: 2026-07-26T21:30:00-06:00
+Last Updated: 2026-07-26T21:40:00-06:00
+Status Updated: 2026-07-26T21:40:00-06:00
 
 ## Purpose
 
@@ -490,6 +490,8 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 | 2026-07-26T21:30:00-06:00 | Freshness mechanism extended for dated provider changes | pass | The 90-day clock could not see an announced change, so Claude Sonnet 5's 2026-09-01 price change would have made the catalog wrong while it still read as fresh five weeks after review. `announcedCatalogChanges` now makes the catalog stale on the day a dated change lands and the notice names the change rather than the age. Four tests added; the age rule is now tested against an injected empty list, because while a change is pending no date exercises age alone. |
 | 2026-07-26T21:30:00-06:00 | Full gates after the catalog review | pass | 17 files and 174 tests; build clean with javascript raw 660.24 kB / 700.00 kB and stylesheet 43.62 kB / 60.00 kB; local E2E 7/7; preflight 0 warnings; scan clean. |
 
+| 2026-07-26T21:40:00-06:00 | Deploy and verify the catalog review | pass | Source `0c81132` to `https://743db3ef.ai-task-router.pages.dev`, one attempt from `70.65.205.71`; sixth consecutive success. Canonical alias followed on the first cache-busted check. Live bundle 660,237 characters, matching the build. Present: `Gemini 3 Flash on Fast`, `Gemini 3 Pro`, `Claude Opus 5 with effort`, `Grok 4.5 for hard reasoning`, and both dated-change strings. Absent, as intended: `Gemini 2.5 Flash`, `Gemini 2.5 Pro`, `Claude Opus 4.8` - the retired names are gone from what users see. No R-010 vocabulary. Hosted E2E 7/7 first run. |
+
 ## Completed Chunk - Compact Active Pathway Extraction
 
 Status: task complete
@@ -555,7 +557,7 @@ A functional audit of `59dd849` on 2026-07-25 found gaps between what the app cl
 
 The Cloudflare deploy blocker is resolved. It was the network location the token was used from, not the token or the build, and the recovery path in [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) has now worked unchanged from the owner's home network four times. Use that note as the deploy runbook.
 
-**Production is current with `main` at `e58f81b`, deployed 2026-07-26T21:12:00-06:00.** Three owner-authorized deploys landed on 2026-07-26: `69b31a2` at 10:21:53, `a34d839` at 11:10:28, and `b8069fa` at 11:41:28. R7's Help screen, R6's catalog staleness notice — silent until the catalog passes 90 days on 2026-10-03 — the money formatter that shows real dollars and cents, and and all six teaching-audit fixes are in front of users now, including the Best Options panel rebalance and the reconciled comparison multiples. Nothing on `main` is undeployed.
+**Production is current with `main` at `0c81132`, deployed 2026-07-26T21:40:00-06:00.** Three owner-authorized deploys landed on 2026-07-26: `69b31a2` at 10:21:53, `a34d839` at 11:10:28, and `b8069fa` at 11:41:28. R7's Help screen, R6's catalog staleness notice — silent until the catalog passes 90 days on 2026-10-03 — the money formatter that shows real dollars and cents, and and all six teaching-audit fixes are in front of users now, including the Best Options panel rebalance and the reconciled comparison multiples. Nothing on `main` is undeployed.
 
 Two verification lessons from the last deploy are worth carrying, because both would have produced a confident wrong answer:
 

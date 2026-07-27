@@ -1,15 +1,15 @@
 # 2026-07-26 - Session Turnover
 
 Document ID: PATH-ENG-004
-Version: 1.4.0
+Version: 1.5.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-26
 Last Reviewed: 2026-07-26
 Next Review: At the start of the next working session
-Last Updated: 2026-07-26T21:30:00-06:00
-Status Updated: 2026-07-26T21:30:00-06:00
+Last Updated: 2026-07-26T21:40:00-06:00
+Status Updated: 2026-07-26T21:40:00-06:00
 
 ## Purpose
 
@@ -19,9 +19,9 @@ This note is a resume point, not a history. Detailed evidence stays in the activ
 
 ## Where Things Stand
 
-**Production is current with `main` at `e58f81b`.** Nothing is committed and undeployed. All six teaching-audit findings are live. The app is live at `https://ai-task-router.pages.dev/` and the public hub at `https://oldskoolai.com/ai-task-router/`.
+**Production is current with `main` at `0c81132`.** Nothing is committed and undeployed. All six teaching-audit findings are live. The app is live at `https://ai-task-router.pages.dev/` and the public hub at `https://oldskoolai.com/ai-task-router/`.
 
-Four owner-authorized deploys landed today:
+Five owner-authorized deploys landed today:
 
 | Time | Source | Deployment | Carried |
 |---|---|---|---|
@@ -29,6 +29,7 @@ Four owner-authorized deploys landed today:
 | 11:10:28-06:00 | `a34d839` | `https://9d00dce4.` | Teaching-audit fixes 4, 5, 6: readable energy figures, followed-route lean/balanced/premium split, comparison multiples |
 | 11:41:28-06:00 | `b8069fa` | `https://cc915a90.` | Teaching-audit findings 1 and 2: pre-task worked examples on Start Here, per-row and whole-log figures on Past Choices |
 | 21:12:00-06:00 | `e58f81b` | `https://3db20d3b.` | Teaching-audit finding 3: Best Options panel rebalance, plus comparison multiples reconciled with the figures as displayed |
+| 21:40:00-06:00 | `0c81132` | `https://743db3ef.` | R-009 catalog review: Gemini 3 model names, two corrected price anchors, and dated-change staleness |
 
 Per R-008, only the canonical URL may be published. The per-deploy hash URLs above are internal evidence and must not appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`.
 
