@@ -1593,6 +1593,7 @@ button:focus-visible {
 
 .impactLead p,
 .impactMetricGrid span,
+.impactExampleGrid span,
 .impactDetails p,
 .impactRouteNote {
   color: var(--muted-ink);
@@ -1612,7 +1613,34 @@ button:focus-visible {
 .impactMetricGrid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+}
+
+/* The worked examples sit full width below the route figure rather than beside it. In the right
+   rail they had roughly 280px split two ways, which is what forced them into label-sized text. */
+.impactExamples {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding-top: 14px;
+}
+
+.impactExamples h4 {
+  color: var(--muted-ink);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.impactExampleGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0;
 }
 
@@ -1666,7 +1694,8 @@ button:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.impactMetricGrid div {
+.impactMetricGrid div,
+.impactExampleGrid div {
   border-left: 3px solid var(--brand-teal);
   display: grid;
   gap: 4px;
@@ -1674,19 +1703,33 @@ button:focus-visible {
   padding-left: 12px;
 }
 
-.impactMetricGrid dt {
+/* Secondary to the route figure above: same shape, lighter rule, smaller number. */
+.impactExampleGrid div {
+  border-left-color: #cdeaf2;
+}
+
+.impactMetricGrid dt,
+.impactExampleGrid dt {
   color: var(--muted-ink);
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
-.impactMetricGrid dd {
+.impactMetricGrid dd,
+.impactExampleGrid dd {
   color: var(--brand-navy);
-  font-size: 1.08rem;
   font-weight: 900;
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.impactMetricGrid dd {
+  font-size: 1.32rem;
+}
+
+.impactExampleGrid dd {
+  font-size: 1.02rem;
 }
 
 .impactRouteNote,
@@ -2800,6 +2843,7 @@ button:focus-visible {
   .taskShortcutGrid,
   .impactSection,
   .impactMetricGrid,
+  .impactExampleGrid,
   .impactCounterPanel,
   .impactCounterPanel dl,
   .toolkitColumns,
@@ -2974,6 +3018,7 @@ button:focus-visible {
   .artifactSummaryBand,
   .stageGuidanceList li,
   .impactSection,
+  .impactExamples,
   .impactCounterPanel,
   .artifactRouteOption,
   .routingSection,
@@ -3007,6 +3052,7 @@ button:focus-visible {
 
   .stageGuidanceList,
   .impactMetricGrid,
+  .impactExampleGrid,
   .artifactMetricGrid {
     grid-template-columns: 1fr;
   }

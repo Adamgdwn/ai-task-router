@@ -14,6 +14,22 @@ type ImpactInsightPanelProps = {
   trackedImpactMessage?: string;
 };
 
+/**
+ * Two things share this panel: what the user's own route costs, and the worked examples that explain
+ * why that number is worth looking at. They used to sit in one flat four-card grid at equal weight,
+ * in the narrow right rail, and three of the four opened with their own disclaimer - "Textbook
+ * example", "Illustrative only", "Nobody is claiming you ran these" - so the first words of the
+ * strongest teaching content in the app told the reader it was safe to skip.
+ *
+ * The hedges are load-bearing and none of them are gone. They are stated once, where they apply: the
+ * group heading says "not your usage" and the shared caveat says nobody is claiming you ran these.
+ * That is the same move the Start Here panel already makes, and it buys each example enough room to
+ * lead with its lesson instead of its qualifier.
+ *
+ * Right-sizing keeps the most room on purpose. It nets out induced extra runs, so it is the only
+ * figure here that can honestly say going too small costs more, and its old label - "Right-sizing
+ * example" - named the category rather than the point.
+ */
 export function ImpactInsightPanel({
   recommended,
   snapshot,
@@ -21,6 +37,8 @@ export function ImpactInsightPanel({
   trackedImpact,
   trackedImpactMessage,
 }: ImpactInsightPanelProps) {
+  const { environmentalExample, rightSizingExample, tokenBenchmark } = snapshot;
+
   return (
     <section className="impactSection" aria-labelledby="impact-insight-heading">
       <div className="impactLead">
@@ -76,36 +94,48 @@ export function ImpactInsightPanel({
           <dd>{routeCostHeadline(recommended)}</dd>
           <span>{routeCostDetail(recommended)}</span>
         </div>
-        <div>
-          <dt>100k-token example</dt>
-          <dd>
-            {formatUsd(snapshot.tokenBenchmark.lowerCostUsd)} vs {formatUsd(snapshot.tokenBenchmark.comparisonCostUsd)}
-          </dd>
-          <span>
-            Textbook example, not your usage: {snapshot.tokenBenchmark.lowerCostModelLabel} compared with{" "}
-            {snapshot.tokenBenchmark.comparisonModelLabel} on the same 100k-token run.
-          </span>
-        </div>
-        <div>
-          <dt>Right-sizing example</dt>
-          <dd>{formatUsd(snapshot.rightSizingExample.netAvoidedCostUsd)}</dd>
-          <span>
-            Illustrative only: the difference a smaller model makes across {snapshot.rightSizingExample.taskCount}{" "}
-            similar tasks, after {snapshot.rightSizingExample.inducedExtraRuns} extra smaller-model runs. Nobody is
-            claiming you ran these.
-          </span>
-        </div>
-        <div>
-          <dt>Energy example</dt>
-          <dd>{formatWattHoursWithEveryday(snapshot.environmentalExample.netAvoidedWattHours)}</dd>
-          <span>
-            Illustrative only: the compute difference across {snapshot.environmentalExample.taskCount} reasoning tasks
-            when half route to a lighter text workload.
-          </span>
-        </div>
       </dl>
 
       <p className="impactRouteNote">{routeImpactMessage(recommended)}</p>
+
+      <section className="impactExamples" aria-labelledby="impact-examples-heading">
+        <h4 id="impact-examples-heading">Worked examples, not your usage</h4>
+        <dl className="impactExampleGrid">
+          <div>
+            <dt>100k-token example</dt>
+            <dd>
+              {formatUsd(tokenBenchmark.lowerCostUsd)} vs {formatUsd(tokenBenchmark.comparisonCostUsd)}
+            </dd>
+            <span>
+              {tokenBenchmark.lowerCostModelLabel} against {tokenBenchmark.comparisonModelLabel} on the same run. Same
+              work, same tokens. The only difference is which tool it was sent to.
+            </span>
+          </div>
+          <div>
+            <dt>Right-sizing, after rework</dt>
+            <dd>{formatUsd(rightSizingExample.netAvoidedCostUsd)}</dd>
+            <span>
+              Across {rightSizingExample.taskCount} similar tasks, sending the right ones to a lighter tool comes to
+              about this much less than sending all of them to the heavier one - and that is after paying for{" "}
+              {rightSizingExample.inducedExtraRuns} extra runs where the lighter tool was not enough. Smaller is not
+              automatically cheaper.
+            </span>
+          </div>
+          <div>
+            <dt>Energy example</dt>
+            <dd>{formatWattHoursWithEveryday(environmentalExample.netAvoidedWattHours)}</dd>
+            <span>
+              Across {environmentalExample.taskCount} reasoning tasks, routing half to a lighter text workload is about
+              this much difference in compute. Small per task, which is exactly why it is easy to stop noticing.
+            </span>
+          </div>
+        </dl>
+        <p className="impactCaveat">
+          Published list prices and inference figures, not your usage - nobody is claiming you ran these. Your own
+          numbers are the ones above and on every route card. These three are here so the pattern stays readable before
+          you have a history to read.
+        </p>
+      </section>
 
       <details className="impactDetails">
         <summary>Method and sources</summary>

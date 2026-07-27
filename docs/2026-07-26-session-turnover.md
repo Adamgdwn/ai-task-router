@@ -1,15 +1,15 @@
 # 2026-07-26 - Session Turnover
 
 Document ID: PATH-ENG-004
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-26
 Last Reviewed: 2026-07-26
 Next Review: At the start of the next working session
-Last Updated: 2026-07-26T11:41:28-06:00
-Status Updated: 2026-07-26T11:41:28-06:00
+Last Updated: 2026-07-26T20:51:35-06:00
+Status Updated: 2026-07-26T20:51:35-06:00
 
 ## Purpose
 
@@ -19,7 +19,7 @@ This note is a resume point, not a history. Detailed evidence stays in the activ
 
 ## Where Things Stand
 
-**Production is current with `main` at `b8069fa`.** Nothing is committed and undeployed. The app is live at `https://ai-task-router.pages.dev/` and the public hub at `https://oldskoolai.com/ai-task-router/`.
+**Production serves `b8069fa`. `main` has since moved ahead by the teaching-audit finding 3 fix, which is committed, gated, and undeployed.** The app is live at `https://ai-task-router.pages.dev/` and the public hub at `https://oldskoolai.com/ai-task-router/`.
 
 Three owner-authorized deploys landed today:
 
@@ -33,15 +33,16 @@ Per R-008, only the canonical URL may be published. The per-deploy hash URLs abo
 
 ## What Changed Today, And Why
 
-The 2026-07-25 functional audit asked "does the app work". A teaching audit on 2026-07-26 asked a narrower question: **does the app teach why right-sizing matters?** It found six gaps. Five are now fixed and live.
+The 2026-07-25 functional audit asked "does the app work". A teaching audit on 2026-07-26 asked a narrower question: **does the app teach why right-sizing matters?** It found six gaps. All six are now fixed; five are live and the sixth is on `main`.
 
-The through-line in all five: the app was *honest* before it was *readable*. Every figure was sourced and every hedge was true, but the lesson was arriving in a form and at a time the user could not act on.
+The through-line in all six: the app was *honest* before it was *readable*. Every figure was sourced and every hedge was true, but the lesson was arriving in a form, at a time, or at a size the user could not act on.
 
 - **Energy figures were unreadable.** Watt-hours are correct and mean nothing to most readers. Every energy figure a user decides on now carries an everyday restatement.
 - **A computed insight was being discarded.** The lean/balanced/premium split of followed routes had been calculated and thrown away since it was written. It is now rendered.
 - **The reader was doing the division.** Heaviest-sibling comparisons showed two figures side by side. They now state the multiple, because the division *is* the lesson.
 - **The lesson arrived after the decision.** Start Here now carries three worked examples before any task is described. The figures come from the reviewed snapshot already used on Best Options, so this changed placement, not claims.
 - **Past Choices taught nothing.** It was a receipt. Rows now carry metered cost, energy, and a comparison against the heaviest route offered, and the log carries choice-pattern totals across every saved choice.
+- **The disclaimers were the first thing read.** Three of the four Best Options impact cards opened with their own hedge, in a rail too narrow to hold an argument. The hedges now sit once at the group level, and each example leads with its lesson. Not yet deployed.
 
 ## Judgement Calls Worth Preserving
 
@@ -57,6 +58,10 @@ These are the decisions a future session could plausibly reverse without realizi
 
 **The comparison primitives were extracted, not copied.** `heaviestSiblingRoute` and `comparisonMultipleClause` moved to `src/domain/impact/routeComparison.ts`. `src/domain/format.ts` exists precisely because four copies of a formatter had drifted; a fifth copy of a comparison rule would have been the same defect.
 
+**The Best Options hedges were moved, not softened.** "Not your usage" and "nobody is claiming you ran these" now appear once each, in the group heading and the shared caveat, instead of three times inside the teaching text. Anyone tempted to trim further should read that as the floor, not a direction of travel: the panel earns its numbers by being obviously careful with them.
+
+**A comparison multiple was drafted for the 100k-token card and deliberately removed.** `formatMultiple` gives 24x from the true snapshot values, while the two figures beside it are rounded to `$0.05` and `$1.13`, which divide to 22.6. A reader who checks the arithmetic and disagrees with the app costs more than the multiple teaches. Start Here ships this same mismatch today and is flagged in `CARRY_FORWARD.md`; do not add a third instance while it is open.
+
 **R-010 stands.** No user-facing "saved", "savings", or "avoided" for money. The reconciliation with the owner's "cost savings" framing is comparison and ratio language: a multiple is a ratio between two estimates on the same basis, not a claim that money changed hands. Do not loosen the vocabulary without an owner decision in the risk register.
 
 ## Two Verification Lessons
@@ -69,9 +74,9 @@ Both produced a confident wrong answer today. Both are now written into the Veri
 
 ## Open Items
 
-Three, none blocking.
+Three, none blocking, plus one undeployed change awaiting owner authorization.
 
-1. **Teaching-audit finding 3 — the last one.** Two of the four impact metrics on Best Options are hedged into invisibility. "Textbook example, not your usage" and "Illustrative only... Nobody is claiming you ran these" are honest but occupy half the panel's visual weight while teaching less than the two task-specific figures beside them. Partly addressed already: finding 1's fix promotes the same right-sizing example to Start Here and states the too-small-costs-more point in the body rather than in a hedge. What remains is the panel itself. **Treat the hedges as load-bearing — rebalance the weight, do not delete them.** Coder work, needs no owner decision to start.
+1. ~~**Teaching-audit finding 3.**~~ Fixed 2026-07-26T20:51:35-06:00, committed and gated on `main`, **not deployed**. The four impact cards sat at equal weight in the narrow right rail and three of them opened with their own disclaimer, so the strongest teaching content in the app began by telling the reader it was safe to skip. Every hedge survives; they are now stated once where they apply — the group heading "Worked examples, not your usage" and one shared caveat — which is the same consolidation Start Here already uses. The route figure gained weight above; the three examples moved to a full-width band below. This is now the only undeployed change, and a deploy needs fresh owner authorization.
 
 2. **Hosted smoke needs human eyes.** The automated half is done and has passed on every deploy. What no test can judge is wording and feel, and the list has grown to nine items across the five shipped fixes. It is enumerated in `CARRY_FORWARD.md`. Roughly ten to fifteen minutes on the live site. This is owner work, not coder work.
 
@@ -89,7 +94,9 @@ One low-priority loose end is recorded in the pathway's Next Handoff: three user
 | `bash scripts/governance-preflight.sh` | 0 warnings |
 | `npm audit --audit-level=moderate` | 0 vulnerabilities |
 | Hosted E2E against the live site | 7/7 in 10.1s, first run |
-| Live bundle string check | All five fixes present; no R-010 vocabulary |
+| Live bundle string check | All five deployed fixes present; no R-010 vocabulary |
+| Finding 3 re-run at 20:51:35-06:00 | 166 tests, clean build, local E2E 7/7, preflight 0 warnings, scan clean, no R-010 vocabulary added |
+| Finding 3 visual check | `.impactSection` screenshotted at 1440px and 820px through a temporary Playwright capture, since no test can judge visual weight. Capture removed afterwards. |
 
 One build failure occurred during the session and was fixed: `TS2783` from a duplicate `id` in a test fixture helper. Worth remembering that **Vitest and Playwright both passed while `npm run build` did not** — `tsc --noEmit` covers test files and the runners do not typecheck.
 
