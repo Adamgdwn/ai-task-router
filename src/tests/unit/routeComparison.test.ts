@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { formatUsd } from "../../domain/format";
 import {
   comparisonMultipleClause,
+  displayedCostMultiple,
   formatMultiple,
   heaviestSiblingRoute,
   summarizeFollowedChoicePattern,
@@ -148,5 +150,45 @@ describe("summarizeFollowedChoicePattern", () => {
     // rather than appearing as a 1x comparison against itself.
     expect(pattern.comparedCount).toBe(0);
     expect(pattern.lighterThanHeaviestCount).toBe(0);
+  });
+});
+
+/**
+ * A ratio shown beside two dollar figures is an invitation to check it. These hold the app to the
+ * arithmetic the reader can actually do, rather than the more accurate arithmetic behind the screen.
+ */
+describe("displayedCostMultiple", () => {
+  it("divides the figures as displayed, not the raw estimates", () => {
+    // $0.047 renders as "$0.05". Raw division gives 24; the visible numbers give 22.6.
+    expect(formatUsd(0.047)).toBe("$0.05");
+    expect(displayedCostMultiple(0.047, 1.13)).toBe("23");
+  });
+
+  it("stays reproducible from the rendered figures across the sub-cent bands", () => {
+    const pairs: ReadonlyArray<readonly [number, number]> = [
+      [0.047, 1.13],
+      [0.0004, 0.0071],
+      [0.0123, 4.567],
+      [1.239, 19.87],
+    ];
+
+    for (const [lighter, heavier] of pairs) {
+      const shown = displayedCostMultiple(lighter, heavier);
+      const fromScreen = formatMultiple(
+        Number(formatUsd(heavier).replace(/[$,]/g, "")) / Number(formatUsd(lighter).replace(/[$,]/g, "")),
+      );
+
+      expect(shown).toBe(fromScreen);
+    }
+  });
+
+  it("says nothing when a figure rounds away or the routes barely differ", () => {
+    expect(displayedCostMultiple(0, 1.13)).toBeNull();
+    expect(displayedCostMultiple(1.13, 0)).toBeNull();
+    expect(displayedCostMultiple(1, 1.05)).toBeNull();
+  });
+
+  it("keeps comparisonMultipleClause reproducible from the same displayed figures", () => {
+    expect(comparisonMultipleClause(0.047, 1.13)).toBe("roughly 23x this route");
   });
 });

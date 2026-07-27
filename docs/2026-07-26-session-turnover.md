@@ -1,15 +1,15 @@
 # 2026-07-26 - Session Turnover
 
 Document ID: PATH-ENG-004
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-26
 Last Reviewed: 2026-07-26
 Next Review: At the start of the next working session
-Last Updated: 2026-07-26T20:51:35-06:00
-Status Updated: 2026-07-26T20:51:35-06:00
+Last Updated: 2026-07-26T21:04:00-06:00
+Status Updated: 2026-07-26T21:04:00-06:00
 
 ## Purpose
 
@@ -60,7 +60,7 @@ These are the decisions a future session could plausibly reverse without realizi
 
 **The Best Options hedges were moved, not softened.** "Not your usage" and "nobody is claiming you ran these" now appear once each, in the group heading and the shared caveat, instead of three times inside the teaching text. Anyone tempted to trim further should read that as the floor, not a direction of travel: the panel earns its numbers by being obviously careful with them.
 
-**A comparison multiple was drafted for the 100k-token card and deliberately removed.** `formatMultiple` gives 24x from the true snapshot values, while the two figures beside it are rounded to `$0.05` and `$1.13`, which divide to 22.6. A reader who checks the arithmetic and disagrees with the app costs more than the multiple teaches. Start Here ships this same mismatch today and is flagged in `CARRY_FORWARD.md`; do not add a third instance while it is open.
+**A multiple divides the figures as displayed, never the raw estimates.** `formatUsd` rounds to cents above a cent, so drafting a multiple for the 100k-token card exposed a defect already live on Start Here and latent in the Past Choices pattern: "roughly 24x" printed beside two figures that visibly divide to 22.6. `displayedUsdValue` and `displayedCostMultiple` now make reproducibility structural rather than a property of the current catalog, so a catalog refresh cannot quietly reintroduce it. Roughly six percent of ratio accuracy went; what came back is that the app never invites a reader to check arithmetic it will fail. Do not "simplify" these back to dividing raw values.
 
 **R-010 stands.** No user-facing "saved", "savings", or "avoided" for money. The reconciliation with the owner's "cost savings" framing is comparison and ratio language: a multiple is a ratio between two estimates on the same basis, not a claim that money changed hands. Do not loosen the vocabulary without an owner decision in the risk register.
 
@@ -95,7 +95,7 @@ One low-priority loose end is recorded in the pathway's Next Handoff: three user
 | `npm audit --audit-level=moderate` | 0 vulnerabilities |
 | Hosted E2E against the live site | 7/7 in 10.1s, first run |
 | Live bundle string check | All five deployed fixes present; no R-010 vocabulary |
-| Finding 3 re-run at 20:51:35-06:00 | 166 tests, clean build, local E2E 7/7, preflight 0 warnings, scan clean, no R-010 vocabulary added |
+| Finding 3 and the multiple fix | 170 tests, clean build, local E2E 7/7, preflight 0 warnings, scan clean, no R-010 vocabulary added |
 | Finding 3 visual check | `.impactSection` screenshotted at 1440px and 820px through a temporary Playwright capture, since no test can judge visual weight. Capture removed afterwards. |
 
 One build failure occurred during the session and was fixed: `TS2783` from a duplicate `id` in a test fixture helper. Worth remembering that **Vitest and Playwright both passed while `npm run build` did not** — `tsc --noEmit` covers test files and the runners do not typecheck.

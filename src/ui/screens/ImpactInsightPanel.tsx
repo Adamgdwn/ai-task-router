@@ -1,4 +1,5 @@
 import { formatUsd, formatWattHoursWithEveryday } from "../../domain/format";
+import { displayedCostMultiple } from "../../domain/impact/routeComparison";
 import type { PublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
 import type { TrackedImpactSummary } from "../../domain/impact/impactCounter";
 import type { RouteOption, TaskIntake } from "../../domain/types";
@@ -38,6 +39,7 @@ export function ImpactInsightPanel({
   trackedImpactMessage,
 }: ImpactInsightPanelProps) {
   const { environmentalExample, rightSizingExample, tokenBenchmark } = snapshot;
+  const benchmarkMultiple = displayedCostMultiple(tokenBenchmark.lowerCostUsd, tokenBenchmark.comparisonCostUsd);
 
   return (
     <section className="impactSection" aria-labelledby="impact-insight-heading">
@@ -107,8 +109,9 @@ export function ImpactInsightPanel({
               {formatUsd(tokenBenchmark.lowerCostUsd)} vs {formatUsd(tokenBenchmark.comparisonCostUsd)}
             </dd>
             <span>
-              {tokenBenchmark.lowerCostModelLabel} against {tokenBenchmark.comparisonModelLabel} on the same run. Same
-              work, same tokens. The only difference is which tool it was sent to.
+              {benchmarkMultiple ? `Roughly ${benchmarkMultiple}x for the same run: ` : "The same run on "}
+              {tokenBenchmark.lowerCostModelLabel} against {tokenBenchmark.comparisonModelLabel}. Same work, same
+              tokens. The only difference is which tool it was sent to.
             </span>
           </div>
           <div>

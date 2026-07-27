@@ -29,15 +29,35 @@ export function formatUsd(value: number): string {
     return "$0.00";
   }
 
-  const magnitude = Math.abs(value);
-  const maximumFractionDigits = magnitude === 0 || magnitude >= 0.01 ? 2 : magnitude >= 0.001 ? 4 : 6;
-
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
-    maximumFractionDigits,
+    maximumFractionDigits: usdFractionDigits(Math.abs(value)),
   }).format(value);
+}
+
+function usdFractionDigits(magnitude: number): number {
+  return magnitude === 0 || magnitude >= 0.01 ? 2 : magnitude >= 0.001 ? 4 : 6;
+}
+
+/**
+ * The number `formatUsd` actually puts on screen.
+ *
+ * Anything that divides two dollar figures has to divide the figures the reader can see. Above a
+ * cent `formatUsd` rounds to cents, so $0.047 renders as "$0.05" - and a ratio taken from the raw
+ * values then reads "roughly 24x" beside two numbers that visibly divide to 22.6. That is the app
+ * inviting a reader to check its arithmetic and then failing the check, which costs more trust than
+ * the discarded accuracy was ever worth.
+ *
+ * Callers that compare money should divide these values, not the estimates behind them.
+ */
+export function displayedUsdValue(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Number(value.toFixed(usdFractionDigits(Math.abs(value))));
 }
 
 /**

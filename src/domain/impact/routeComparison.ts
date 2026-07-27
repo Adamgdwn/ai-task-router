@@ -1,3 +1,4 @@
+import { displayedUsdValue } from "../format";
 import type { RouteCard, RouteLogEntry, RouteOption } from "../types";
 
 /**
@@ -22,19 +23,47 @@ export function heaviestSiblingRoute(candidate: RouteOption, options: readonly R
  * Returns null when the multiple would overstate what the estimates support: a zero or missing
  * candidate figure has no meaningful ratio, and near-equal routes should read as near-equal rather
  * than as "1.1x".
+ *
+ * The division runs on the figures as displayed, so a reader who checks it against the dollar
+ * amounts beside it gets the same answer. See `displayedUsdValue`.
  */
 export function comparisonMultipleClause(candidateValue: number | undefined, heaviestValue: number) {
   if (candidateValue === undefined || candidateValue <= 0 || !Number.isFinite(candidateValue)) {
     return null;
   }
 
-  const multiple = heaviestValue / candidateValue;
+  const multiple = displayedCostMultipleValue(candidateValue, heaviestValue);
 
-  if (!Number.isFinite(multiple) || multiple < 1.1) {
+  if (multiple === null || multiple < 1.1) {
     return "about the same as this route";
   }
 
   return `roughly ${formatMultiple(multiple)}x this route`;
+}
+
+/**
+ * How many times the lighter figure the heavier one is, as both are shown on screen.
+ *
+ * Returns null when there is nothing worth stating: a missing or zero figure once rounded for
+ * display, or two figures close enough that a multiple would dress up noise as a lesson.
+ */
+export function displayedCostMultiple(lighterUsd: number, heavierUsd: number): string | null {
+  const multiple = displayedCostMultipleValue(lighterUsd, heavierUsd);
+
+  return multiple === null || multiple < 1.1 ? null : formatMultiple(multiple);
+}
+
+function displayedCostMultipleValue(lighterUsd: number, heavierUsd: number): number | null {
+  const lighter = displayedUsdValue(lighterUsd);
+  const heavier = displayedUsdValue(heavierUsd);
+
+  if (lighter <= 0 || heavier <= 0) {
+    return null;
+  }
+
+  const multiple = heavier / lighter;
+
+  return Number.isFinite(multiple) ? multiple : null;
 }
 
 export function formatMultiple(multiple: number): string {

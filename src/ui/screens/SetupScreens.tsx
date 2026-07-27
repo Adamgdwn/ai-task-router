@@ -2,7 +2,7 @@ import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import { domIdFor } from "../domId";
 import { formatUsd, formatWattHoursWithEveryday } from "../../domain/format";
 import { buildDefaultPublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
-import { formatMultiple } from "../../domain/impact/routeComparison";
+import { displayedCostMultiple } from "../../domain/impact/routeComparison";
 import {
   applyEverydayToolSelection,
   everydayToolCatalogReviewedAt,
@@ -124,10 +124,7 @@ export function StartHereScreen({ definition, onNavigate }: StartHereScreenProps
  */
 function WhyRoutingMattersPanel() {
   const { tokenBenchmark, rightSizingExample, environmentalExample } = publicImpactSnapshot;
-  const benchmarkMultiple =
-    tokenBenchmark.lowerCostUsd > 0
-      ? formatMultiple(tokenBenchmark.comparisonCostUsd / tokenBenchmark.lowerCostUsd)
-      : null;
+  const benchmarkMultiple = displayedCostMultiple(tokenBenchmark.lowerCostUsd, tokenBenchmark.comparisonCostUsd);
 
   return (
     <section className="whyRoutingMatters" aria-labelledby="why-routing-matters-heading">

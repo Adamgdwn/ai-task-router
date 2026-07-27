@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import { formatTimestamp, formatUsd, formatWattHours, formatWattHoursWithEveryday } from "../../domain/format";
 import {
   comparisonMultipleClause,
-  formatMultiple,
+  displayedCostMultiple,
   heaviestSiblingRoute,
   summarizeFollowedChoicePattern,
   type FollowedChoicePattern,
@@ -346,8 +346,7 @@ function ChoicePatternPanel({ pattern }: { pattern: FollowedChoicePattern }) {
     return null;
   }
 
-  const multiple =
-    pattern.chosenCostUsd > 0 ? formatMultiple(pattern.heaviestOfferedCostUsd / pattern.chosenCostUsd) : null;
+  const multiple = displayedCostMultiple(pattern.chosenCostUsd, pattern.heaviestOfferedCostUsd);
 
   return (
     <section className="choicePatternPanel" aria-labelledby="choice-pattern-heading">
