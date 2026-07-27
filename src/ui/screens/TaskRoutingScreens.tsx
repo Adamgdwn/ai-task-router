@@ -454,11 +454,24 @@ function TaskStructurePreview({
  * The wording has to admit the age without implying the app could fix it by checking. It cannot
  * check; not checking is the product boundary, not a missing feature.
  */
-export function CatalogStalenessNotice() {
-  const freshness = assessCatalogFreshness();
+export function CatalogStalenessNotice({ freshness = assessCatalogFreshness() }: CatalogStalenessNoticeProps = {}) {
 
   if (!freshness.stale) {
     return null;
+  }
+
+  // A landed announced change makes the catalog wrong on a known date, which can happen days after a
+  // review. Saying "last reviewed 5 days ago" and nothing else would read as a contradiction, so the
+  // notice names the change instead of the age.
+  if (freshness.landedChange) {
+    return (
+      <p className="setupBoundaryNote" role="status">
+        A provider change landed on {formatAnnouncedDate(freshness.landedChange.effectiveAt)} that this catalog has not
+        caught up with yet: {freshness.landedChange.summary} Details here were last reviewed{" "}
+        {formatReviewDate(freshness.reviewedAt)}. This app never reads live provider menus or prices, so check your
+        tool's current model list and pricing page before relying on a specific figure here.
+      </p>
+    );
   }
 
   return (
@@ -468,6 +481,17 @@ export function CatalogStalenessNotice() {
       on a specific model name here.
     </p>
   );
+}
+
+type CatalogStalenessNoticeProps = {
+  /** Injectable so each staleness reason can be rendered on its own; see `assessCatalogFreshness`. */
+  freshness?: ReturnType<typeof assessCatalogFreshness>;
+};
+
+// Announced dates are calendar dates a provider published, so they are read in UTC. Formatting one
+// locally turned "September 1" into "Aug 31" for anyone west of Greenwich.
+function formatAnnouncedDate(timestamp: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeZone: "UTC" }).format(new Date(timestamp));
 }
 
 function formatReviewDate(timestamp: string) {

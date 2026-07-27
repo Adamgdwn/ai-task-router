@@ -48,9 +48,9 @@ export function claudeGuidanceLabels(accountId: EverydayToolAccountId): Provider
   if (accountId === "max-5x" || accountId === "max-20x" || accountId === "team" || accountId === "enterprise") {
     return {
       minimumModelLabel: "Claude Sonnet 5 for most work",
-      promptBuilderModelLabel: "Claude Opus 4.8 with effort high/xhigh for the master prompt",
+      promptBuilderModelLabel: "Claude Opus 5 with effort high/xhigh for the master prompt",
       executionModelLabel: "Claude Sonnet 5 after the prompt is clear; Haiku 4.5 for tiny mechanical passes",
-      upgradeModelLabel: "Claude Opus 4.8 effort xhigh for stuck, wide, or high-autonomy work",
+      upgradeModelLabel: "Claude Opus 5 effort xhigh for stuck, wide, or high-autonomy work",
     };
   }
 
@@ -59,7 +59,7 @@ export function claudeGuidanceLabels(accountId: EverydayToolAccountId): Provider
       minimumModelLabel: "Claude Sonnet 5 when available in Pro",
       promptBuilderModelLabel: "Claude Sonnet 5 for the master prompt; Opus only if your plan exposes it and review fails",
       executionModelLabel: "Claude Sonnet 5 after the prompt is clear; Haiku 4.5 for quick mechanical work when available",
-      upgradeModelLabel: "Claude Opus 4.8 or a Max tier when the work is genuinely stuck or cross-cutting",
+      upgradeModelLabel: "Claude Opus 5 or a Max tier when the work is genuinely stuck or cross-cutting",
     };
   }
 
@@ -67,25 +67,25 @@ export function claudeGuidanceLabels(accountId: EverydayToolAccountId): Provider
     minimumModelLabel: "Claude Haiku 4.5 or the fastest Claude model offered",
     promptBuilderModelLabel: "Claude Sonnet if offered; otherwise Haiku 4.5 with a clear upgrade trigger",
     executionModelLabel: "Claude Haiku 4.5 or the fastest Claude model after the prompt is clear",
-    upgradeModelLabel: "Claude Sonnet 5, then Opus 4.8 only for hard review failures",
+    upgradeModelLabel: "Claude Sonnet 5, then Opus 5 only for hard review failures",
   };
 }
 
 export function geminiGuidanceLabels(accountId: EverydayToolAccountId): ProviderGuidanceLabels {
   if (accountId === "google-ai-pro" || accountId === "google-ai-ultra" || accountId === "team" || accountId === "enterprise") {
     return {
-      minimumModelLabel: "Gemini 2.5 Flash for ordinary execution",
-      promptBuilderModelLabel: "Gemini 2.5 Pro for the master prompt",
-      executionModelLabel: "Gemini 2.5 Flash after the prompt is clear; Flash-Lite for tiny repeatable passes",
-      upgradeModelLabel: "Gemini 2.5 Pro again, or the current Pro/Ultra reasoning model exposed in your picker",
+      minimumModelLabel: "Gemini 3 Flash on Fast for ordinary execution",
+      promptBuilderModelLabel: "Gemini 3 Pro for the master prompt",
+      executionModelLabel: "Gemini 3 Flash on Fast after the prompt is clear; Thinking only when a step needs reasoning",
+      upgradeModelLabel: "Gemini 3 Pro at the Extended thinking level, or the top reasoning model your picker exposes",
     };
   }
 
   return {
-    minimumModelLabel: "Gemini 2.5 Flash or the fastest free Gemini model offered",
-    promptBuilderModelLabel: "Gemini 2.5 Flash for the master prompt with a clear upgrade trigger",
-    executionModelLabel: "Gemini 2.5 Flash-Lite or Flash after the prompt is clear",
-    upgradeModelLabel: "Gemini 2.5 Pro when the review fails or the task becomes complex",
+    minimumModelLabel: "Gemini 3 Flash on Fast, or the fastest free Gemini model offered",
+    promptBuilderModelLabel: "Gemini 3 Flash on Thinking for the master prompt, with a clear upgrade trigger",
+    executionModelLabel: "Gemini 3 Flash on Fast after the prompt is clear",
+    upgradeModelLabel: "Gemini 3 Pro when the review fails or the task becomes complex, if your account offers it",
   };
 }
 
@@ -114,7 +114,7 @@ export function grokGuidanceLabels(accountId: EverydayToolAccountId): ProviderGu
       minimumModelLabel: "Grok 4.3 with reasoning low or auto for ordinary execution",
       promptBuilderModelLabel: "Grok 4.3 with reasoning high for the master prompt",
       executionModelLabel: "Grok 4.3 with reasoning none/low after the prompt is clear",
-      upgradeModelLabel: "Grok 4.3 reasoning high, or Grok Build 0.1 for code/build execution",
+      upgradeModelLabel: "Grok 4.5 for hard reasoning, or Grok Build 0.1 for code/build execution",
     };
   }
 
@@ -122,6 +122,6 @@ export function grokGuidanceLabels(accountId: EverydayToolAccountId): ProviderGu
     minimumModelLabel: "Grok 4.3 when available in the Free account",
     promptBuilderModelLabel: "Grok 4.3 with the highest reasoning setting offered for the master prompt",
     executionModelLabel: "Grok 4.3 with reasoning none/low after the prompt is clear",
-    upgradeModelLabel: "SuperGrok with Grok 4.3 reasoning high or Grok Build 0.1 for code/build execution",
+    upgradeModelLabel: "SuperGrok with Grok 4.5, or Grok Build 0.1 for code/build execution",
   };
 }

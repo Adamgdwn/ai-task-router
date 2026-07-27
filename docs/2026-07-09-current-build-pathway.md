@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.8.0
+Version: 1.9.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-26
 Next Review: During the next substantial build session
-Last Updated: 2026-07-26T21:12:00-06:00
-Status Updated: 2026-07-26T21:12:00-06:00
+Last Updated: 2026-07-26T21:30:00-06:00
+Status Updated: 2026-07-26T21:30:00-06:00
 
 ## Purpose
 
@@ -485,6 +485,10 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 | 2026-07-26T21:12:00-06:00 | Canonical smoke on `https://ai-task-router.pages.dev` | pass, after the documented traps fired | Both Verification Traps triggered and both were caught by the runbook. The canonical alias served the previous asset on the first cache-busted fetch and had followed by the retry. Separately, appending a cache-busting query string to the *asset* path (`/assets/<hash>.js?cb=...`) returned the 962-character SPA fallback with HTTP 200 - a new variant worth knowing: the query string is what caused the miss, so cache-bust the HTML but request the asset path clean. The length assertion caught it, exactly as intended. Root, `/manifest.webmanifest`, and `/service-worker.js` all HTTP 200. |
 | 2026-07-26T21:12:00-06:00 | Live bundle string check against the real artifact | pass | Fetched asset is 659,257 characters, matching the 659.26 kB build output, so the check ran against real content. Present: `Worked examples, not your usage`, `Right-sizing, after rework`, `nobody is claiming you ran these`, `Why which tool you pick matters`, `Smaller is not automatically better`, `How you have been choosing`, `Against the heaviest offered`, `10-watt LED bulb`, `What this app does`. Absent: `Estimated savings`, `Energy saved`, `Est. saved`, `avoided cost`. The deliberate negation `not money you saved` is present as intended, and doubles as a positive control proving the haystack was real. |
 | 2026-07-26T21:12:00-06:00 | Hosted E2E against the live site | pass | 7/7 in 9.5s on the first hosted run. Third consecutive first-run hosted pass. |
+
+| 2026-07-26T21:30:00-06:00 | R-009 catalog review, brought forward from 2026-10-03 | pass, with two anchors and one model family corrected | All seven pricing sources fetched and compared. 15 of 16 anchors unchanged. Google low-cost moved to $0.30/$2.50/$0.03 (Gemini 3.5 Flash-Lite); xAI premium re-tiered to grok-4.5 $2/$6. Gemini guidance named 2.5-generation models no longer in the app picker and was rewritten to Gemini 3 Flash / Gemini 3 Pro; Opus 4.8 references moved to Opus 5; Grok upgrade paths moved to Grok 4.5. Neither changed anchor feeds the public snapshot, so no user-facing worked example moved. Both review dates moved together. Evidence in `docs/2026-07-05-impact-estimator-methodology.md`. |
+| 2026-07-26T21:30:00-06:00 | Freshness mechanism extended for dated provider changes | pass | The 90-day clock could not see an announced change, so Claude Sonnet 5's 2026-09-01 price change would have made the catalog wrong while it still read as fresh five weeks after review. `announcedCatalogChanges` now makes the catalog stale on the day a dated change lands and the notice names the change rather than the age. Four tests added; the age rule is now tested against an injected empty list, because while a change is pending no date exercises age alone. |
+| 2026-07-26T21:30:00-06:00 | Full gates after the catalog review | pass | 17 files and 174 tests; build clean with javascript raw 660.24 kB / 700.00 kB and stylesheet 43.62 kB / 60.00 kB; local E2E 7/7; preflight 0 warnings; scan clean. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 

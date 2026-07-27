@@ -1,7 +1,7 @@
 # 2026-07-08T22:07:13-06:00 - AI Task Router Impact Estimator Methodology
 
 Document ID: GUI-ENG-002
-Version: 0.9.0
+Version: 0.10.0
 Status: draft
 Owner: Technical Lead
 Approver: Project Owner
@@ -9,7 +9,7 @@ Effective Date: 2026-07-05
 Last Reviewed: 2026-07-26
 Next Review: Before source refresh, exact public savings claims, social launch copy, live pricing tables, or opt-in estimator release
 Timestamp: 2026-07-08T22:07:13-06:00
-Last Updated: 2026-07-26T11:20:59-06:00
+Last Updated: 2026-07-26T21:30:00-06:00
 
 ## Purpose
 
@@ -273,7 +273,7 @@ The panel repeats the existing hedges verbatim in substance: worked examples, no
 
 ## Source Snapshot Policy
 
-The current public app uses a source snapshot reviewed on `2026-07-05T08:52:38-06:00`.
+The current public app uses a source snapshot reviewed on `2026-07-26T21:30:00-06:00`. See the 2026-07-26 Catalog Review section for what was checked and what moved.
 
 | Source area | Evidence or source |
 |---|---|
@@ -374,3 +374,32 @@ Next bounded chunks can be:
 - a fresh source snapshot before any exact public pricing, savings, energy, water, or carbon claims
 
 Do not publish public environmental savings claims, live pricing tables, exact per-user savings, or provider-comparison tables without a fresh source review, owner review, and release evidence.
+
+## 2026-07-26 Catalog Review
+
+R-009's scheduled 90-day review, brought forward from 2026-10-03 and completed 2026-07-26T21:30:00-06:00. Every pricing source in `pricingSources` was fetched and compared against its anchor. Both review dates moved together, as R-009 requires.
+
+**Fifteen of sixteen price anchors were verified unchanged**, which is the generic-tier design working: anchors name a tier ("low-cost text API anchor"), not a model, so a provider renaming or superseding a model does not invalidate them.
+
+| Anchor | Verified against | Result |
+|---|---|---|
+| OpenAI low-cost / premium / frontier | gpt-5.4-nano $0.20/$1.25, gpt-5.5 $5/$30, gpt-5.5-pro $30/$180 | unchanged |
+| Anthropic low-cost / premium / frontier / highest | Haiku 4.5 $1/$5, Sonnet 5 $2/$10, Opus 5 $5/$25, Fable 5 $10/$50 | unchanged, but see the announced change below |
+| Google premium | Gemini 3.1 Pro $2/$12 | unchanged |
+| **Google low-cost** | **Gemini 3.5 Flash-Lite $0.30/$2.50, cached $0.03** | **changed from $0.25/$1.50/$0.025** |
+| Perplexity Sonar / Sonar Pro | $1/$1 and $3/$15 | unchanged |
+| Mistral Large | $2/$6 | unchanged |
+| DeepSeek low-cost / premium | v4-flash $0.14/$0.28, v4-pro $0.435/$0.87 | unchanged |
+| xAI low-cost | grok-build-0.1 $1/$2 | unchanged |
+| **xAI premium** | **grok-4.5 $2/$6 is now the flagship tier** | **re-tiered from grok-4.3 $1.25/$2.50** |
+
+Neither changed anchor feeds the public snapshot, which draws on the two OpenAI anchors, so no user-facing worked example moved.
+
+**The model names were the real finding.** R-009 anticipated exactly this: "a renamed, retired, or superseded model would be recommended by name with full confidence." The Gemini guidance named Gemini 2.5 Flash, 2.5 Flash-Lite, and 2.5 Pro throughout. The Gemini app picker now offers **Gemini 3 Flash** (as Fast and Thinking) and **Gemini 3 Pro**, with a Standard/Extended thinking level. A user following the old guidance would have been hunting for models that are not in their picker. Rewritten to the current picker names and modes. Claude Opus 4.8 references moved to Opus 5, and the Grok upgrade paths moved to Grok 4.5, which did not exist at the last review. ChatGPT's Instant/Thinking/Pro tiers and the GPT-5.5 family were verified still present; GPT-5.6 now sits above them, which the existing upgrade-trigger phrasing already accommodates.
+
+**One announced change is dated and pending.** Claude Sonnet 5's introductory API pricing ends 2026-09-01, when $2/$10 becomes $3/$15. The anchor is correct today and was not pre-changed - the app states current list prices, not future ones.
+
+That exposed a real gap in the freshness mechanism. The 90-day clock measures how long since a human looked; it cannot know about a change a provider has already dated, so on 2026-09-01 the catalog would have become wrong while still reading as fresh, five weeks after a review. `announcedCatalogChanges` in `catalogFreshness.ts` now records dated changes and makes the catalog stale on the day one lands, whatever the review age, with the notice naming the change instead of the age. Record a change there only when the provider has published both the change and its date; an undated rumour belongs in the risk register.
+
+Note that the `pricingSources` entry IDs still carry the `-2026-07-05` suffix. They are stable internal keys referenced by every anchor, not dates the user sees; the displayed `reviewedAt` comes from `impactCatalogReviewedAt` and is current. Renaming them is churn, not correction.
+

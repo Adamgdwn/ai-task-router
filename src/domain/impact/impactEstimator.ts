@@ -90,7 +90,7 @@ export type RangeEstimate = {
   high: number;
 };
 
-export const impactCatalogReviewedAt = "2026-07-05T08:52:38-06:00";
+export const impactCatalogReviewedAt = "2026-07-26T21:30:00-06:00";
 
 export const defaultHundredThousandTokenRun = {
   inputTokens: 75_000,
@@ -150,12 +150,12 @@ export const modelPricingAnchors = [
   anchor("anthropic-premium-text-anchor", "Anthropic", "premium text API anchor", "anthropic-pricing-2026-07-05", 2, 10, 0.2),
   anchor("anthropic-frontier-text-anchor", "Anthropic", "frontier text API anchor", "anthropic-pricing-2026-07-05", 5, 25, 0.5),
   anchor("anthropic-highest-cost-anchor", "Anthropic", "highest-cost text API anchor", "anthropic-pricing-2026-07-05", 10, 50, 1),
-  anchor("google-low-cost-text-anchor", "Google", "low-cost text API anchor", "google-gemini-pricing-2026-07-05", 0.25, 1.5, 0.025),
+  anchor("google-low-cost-text-anchor", "Google", "low-cost text API anchor", "google-gemini-pricing-2026-07-05", 0.3, 2.5, 0.03),
   anchor("google-premium-text-anchor", "Google", "premium text API anchor", "google-gemini-pricing-2026-07-05", 2, 12, 0.2),
   anchor("perplexity-sonar", "Perplexity", "Sonar", "perplexity-pricing-2026-07-05", 1, 1),
   anchor("perplexity-sonar-pro", "Perplexity", "Sonar Pro", "perplexity-pricing-2026-07-05", 3, 15),
   anchor("xai-low-cost-text-anchor", "xAI", "low-cost text API anchor", "xai-pricing-2026-07-05", 1, 2),
-  anchor("xai-premium-text-anchor", "xAI", "premium text API anchor", "xai-pricing-2026-07-05", 1.25, 2.5),
+  anchor("xai-premium-text-anchor", "xAI", "premium text API anchor", "xai-pricing-2026-07-05", 2, 6),
   anchor("mistral-large", "Mistral AI", "Mistral Large", "mistral-pricing-2026-07-05", 2, 6),
   anchor("deepseek-low-cost-text-anchor", "DeepSeek", "low-cost text API anchor", "deepseek-pricing-2026-07-05", 0.14, 0.28, 0.0028),
   anchor("deepseek-premium-text-anchor", "DeepSeek", "premium text API anchor", "deepseek-pricing-2026-07-05", 0.435, 0.87, 0.003625),

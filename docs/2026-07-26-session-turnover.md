@@ -1,15 +1,15 @@
 # 2026-07-26 - Session Turnover
 
 Document ID: PATH-ENG-004
-Version: 1.3.0
+Version: 1.4.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-26
 Last Reviewed: 2026-07-26
 Next Review: At the start of the next working session
-Last Updated: 2026-07-26T21:12:00-06:00
-Status Updated: 2026-07-26T21:12:00-06:00
+Last Updated: 2026-07-26T21:30:00-06:00
+Status Updated: 2026-07-26T21:30:00-06:00
 
 ## Purpose
 
@@ -61,6 +61,8 @@ These are the decisions a future session could plausibly reverse without realizi
 
 **The Best Options hedges were moved, not softened.** "Not your usage" and "nobody is claiming you ran these" now appear once each, in the group heading and the shared caveat, instead of three times inside the teaching text. Anyone tempted to trim further should read that as the floor, not a direction of travel: the panel earns its numbers by being obviously careful with them.
 
+**Price anchors name a tier, not a model, and that is why the review was cheap.** The 2026-07-26 catalog review verified 15 of 16 anchors unchanged despite three months of provider churn, because an anchor called "low-cost text API anchor" survives a model being renamed or superseded. What did break was the guidance that names models directly - Gemini 2.5 models are no longer in the picker. Keep anchors generic and accept that model names are the part needing a human every quarter.
+
 **A multiple divides the figures as displayed, never the raw estimates.** `formatUsd` rounds to cents above a cent, so drafting a multiple for the 100k-token card exposed a defect already live on Start Here and latent in the Past Choices pattern: "roughly 24x" printed beside two figures that visibly divide to 22.6. `displayedUsdValue` and `displayedCostMultiple` now make reproducibility structural rather than a property of the current catalog, so a catalog refresh cannot quietly reintroduce it. Roughly six percent of ratio accuracy went; what came back is that the app never invites a reader to check arithmetic it will fail. Do not "simplify" these back to dividing raw values.
 
 **R-010 stands.** No user-facing "saved", "savings", or "avoided" for money. The reconciliation with the owner's "cost savings" framing is comparison and ratio language: a multiple is a ratio between two estimates on the same basis, not a claim that money changed hands. Do not loosen the vocabulary without an owner decision in the risk register.
@@ -79,7 +81,7 @@ Two, neither blocking.
 
 1. **Hosted smoke needs human eyes.** The automated half is done and has passed on every deploy. What no test can judge is wording and feel, and the list has grown to nine items across the five shipped fixes. It is enumerated in `CARRY_FORWARD.md`. Roughly ten to fifteen minutes on the live site. This is owner work, not coder work.
 
-2. **Catalog review due 2026-10-03.** R-009. The app starts telling users the model and pricing catalog is stale once it passes 90 days. Move `everydayToolCatalogReviewedAt` and `impactCatalogReviewedAt` together or the freshness check keeps measuring from whichever one lagged.
+2. **Catalog review due before 2026-09-01.** R-009. The scheduled review was done early on 2026-07-26 and both dates moved together, so the 90-day clock now runs to 2026-10-24 - but Claude Sonnet 5's introductory API pricing ends 2026-09-01, and that is the real deadline. It is recorded in `announcedCatalogChanges`, so the app will call itself stale on that date even though it was reviewed recently. When the review happens: set `anthropic-premium-text-anchor` to 3/15/0.30, remove the entry, move both dates together.
 
 One low-priority loose end is recorded in the pathway's Next Handoff: three user-reachable strings contain "savings" while describing the *user's own requested deliverable* rather than an app claim about money. Not an R-010 violation, and not introduced by today's work — but `App.test.tsx` asserts rendered output never matches `/\bsavings\b/i`, a guard that reads broader than it actually is.
 
