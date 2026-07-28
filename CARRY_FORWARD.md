@@ -1,8 +1,8 @@
 # 2026-07-03T11:51:11-06:00 - Carry-Forward Flags
 
-Last Updated: 2026-07-27T20:03:54-06:00
+Last Updated: 2026-07-27T20:26:56-06:00
 Status: open
-Status Updated: 2026-07-27T20:03:54-06:00
+Status Updated: 2026-07-27T20:26:56-06:00
 
 Use this file to record anything that must survive a context reset:
 blockers, unresolved decisions, open risks, next-chunk prerequisites.
@@ -12,6 +12,7 @@ the coding agent will surface them before suggesting /compact.
 
 | Flag | Added | Owner | Status | Notes |
 |---|---|---|---|---|
+| ~~Straightforward tasks repeat a hardcoded prompt relay instead of choosing a useful work path~~ | 2026-07-27T20:26:56-06:00 | Technical Lead | Resolved 2026-07-27T20:26:56-06:00 | Source `68a7e1d` removes the unconditional prompt-design pass for ordinary plans, drafts, briefs, answers, and tables. A separate prompt-building run remains only for build-shaped work or an explicitly requested prompt artifact. The exact ChatGPT Go + Perplexity Free + Microsoft Copilot Free planning scenario now recommends one direct ChatGPT Go execution step, keeps responsibilities, dependencies, risks, measures, review points, and first action visible, and produces a copy-ready instruction for the requested plan rather than another prompt. Production deployment `https://86dbe307.ai-task-router.pages.dev` serves the exact 669,064-byte asset and hosted E2E passes 7/7. No provider calls, execution, telemetry, or account connection were added. |
 | ~~Followed choices remains at zero beside saved plans~~ | 2026-07-27T20:03:54-06:00 | Technical Lead | Resolved 2026-07-27T20:03:54-06:00 | Git history showed older route saves were initialized as Deferred, while the impact summary intentionally counts only Accepted or Edited outcomes. The app had no explanation or direct path to update them. Production source `e3671b2` now labels the metric `Accepted or edited choices`, explains when saved Deferred or Rejected records are excluded, and links to Past Choices through `Review saved choices`. Existing outcomes were not silently migrated because the app cannot know whether the route was actually used. |
 | ~~Stage reasoning and project-plan repair deployment is blocked~~ | 2026-07-27T18:53:34-06:00 | Project Owner | Resolved 2026-07-27T19:38:42-06:00 | The new account-owned control-plane token returned HTTP 200 for the actual Pages project before deployment. Source `50478e0`, carrying the repair from `b75ed3e`, deployed to `https://79dab484.ai-task-router.pages.dev` in one attempt. Canonical and immutable URLs serve the exact 660,744-byte local asset with both repair markers present and the old Medium-default wording absent; hosted E2E passed 7/7. |
 | Master environment has duplicate `CLOUDFLARE_API_TOKEN` assignments | 2026-07-27T19:38:42-06:00 | Project Owner | Open, cleanup recommended | The environment loader processes the file from top to bottom, so the later control-plane assignment currently wins and is the credential that successfully deployed. The earlier assignment remains in the file and could cause future operator confusion or behave differently in a loader that uses first-value-wins semantics. Consolidate privately to one canonical assignment; never paste either value into chat or commit the environment file. |
