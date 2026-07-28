@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.12.0
+Version: 1.13.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: During the next substantial build session
-Last Updated: 2026-07-27T19:03:04-06:00
-Status Updated: 2026-07-27T19:03:04-06:00
+Last Updated: 2026-07-27T19:09:32-06:00
+Status Updated: 2026-07-27T19:09:32-06:00
 
 ## Purpose
 
@@ -493,7 +493,7 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 
 | 2026-07-26T21:40:00-06:00 | Deploy and verify the catalog review | pass | Source `0c81132` to `https://743db3ef.ai-task-router.pages.dev`, one attempt from `70.65.205.71`; sixth consecutive success. Canonical alias followed on the first cache-busted check. Live bundle 660,237 characters, matching the build. Present: `Gemini 3 Flash on Fast`, `Gemini 3 Pro`, `Claude Opus 5 with effort`, `Grok 4.5 for hard reasoning`, and both dated-change strings. Absent, as intended: `Gemini 2.5 Flash`, `Gemini 2.5 Pro`, `Claude Opus 4.8` - the retired names are gone from what users see. No R-010 vocabulary. Hosted E2E 7/7 first run. |
 | 2026-07-27T18:53:34-06:00 | Stage reasoning and project-plan repair | pass; integration complete, undeployed | Governance preflight passed with 0 warnings. Vitest passed 17 files and 174 tests; script tests passed 5/5; TypeScript/Vite production build and bundle budget passed (javascript raw 660.74 kB / 700.00 kB, stylesheet raw 43.70 kB / 60.00 kB); local Playwright passed 7/7; `npm audit --audit-level=moderate` found 0 vulnerabilities; the web release-candidate scan found no release-blocking findings. Browser reproduction confirmed the original Stage 3 row was 3,350 px high with a 389 px method pill; the repaired row is 1,591 px with a 25 px pill, aligned overview/actions, a full-width path, and all five build items visible. No deployment was attempted. |
-| 2026-07-27T19:01:40-06:00 | Authorized Cloudflare production deployment of `b75ed3e` | blocked before upload | Clean install and full release gates passed again: 174/174 Vitest, 5/5 script tests, 7/7 local Playwright, production build and bundle budget, 0 audit vulnerabilities, clean release-candidate scan, and all PWA artifacts present. Public IP was the previously allowed `70.65.205.71`; `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing values. Wrangler rejected the one permitted attempt with authentication error `10000`. No files uploaded and production stayed on asset `index-BHonc_lf.js` at 660,237 characters; it contains the old Medium copy and not the repair marker. |
+| 2026-07-27T19:01:40-06:00 | Authorized Cloudflare production deployment of `b75ed3e` | blocked before upload | Clean install and full release gates passed again: 174/174 Vitest, 5/5 script tests, 7/7 local Playwright, production build and bundle budget, 0 audit vulnerabilities, clean release-candidate scan, and all PWA artifacts present. Public IP was the previously allowed `70.65.205.71`; `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing values. Wrangler rejected the one permitted attempt with authentication error `10000`. Follow-up read-only checks proved the token is active, but it sees zero Cloudflare accounts and receives `403 / 10000` for the configured Pages project. No files uploaded and production stayed on asset `index-BHonc_lf.js` at 660,237 characters; it contains the old Medium copy and not the repair marker. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -560,7 +560,7 @@ A functional audit of `59dd849` on 2026-07-25 found gaps between what the app cl
 
 The Cloudflare deploy blocker is resolved. It was the network location the token was used from, not the token or the build, and the recovery path in [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) has now worked unchanged from the owner's home network four times. Use that note as the deploy runbook.
 
-**Production remains at `0c81132`, deployed 2026-07-26T21:40:00-06:00.** The owner authorized deployment of the integration-complete Stage 2 reasoning and Stage 3 project-plan repair on 2026-07-27, but Cloudflare rejected the single attempt with authentication error `10000` before upload. Refresh or replace the scoped Cloudflare token before another authorized attempt. The repair is deliberately narrow: no new provider connection or execution behavior was added.
+**Production remains at `0c81132`, deployed 2026-07-26T21:40:00-06:00.** The owner authorized deployment of the integration-complete Stage 2 reasoning and Stage 3 project-plan repair on 2026-07-27, but Cloudflare rejected the single attempt with authentication error `10000` before upload. The stored token is active but sees zero accounts and cannot access the configured Pages project, so the token resource scope or stored account ID must be corrected before another authorized attempt. The repair is deliberately narrow: no new provider connection or execution behavior was added.
 
 Two verification lessons from the last deploy are worth carrying, because both would have produced a confident wrong answer:
 

@@ -1,15 +1,15 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.7.0
+Version: 1.8.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: After the scoped Cloudflare token is refreshed or replaced
-Last Updated: 2026-07-27T19:03:04-06:00
-Status Updated: 2026-07-27T19:03:04-06:00
+Last Updated: 2026-07-27T19:09:32-06:00
+Status Updated: 2026-07-27T19:09:32-06:00
 
 ## Purpose
 
@@ -39,7 +39,7 @@ If a future deploy hits `9109` again, the token's allowed-IP list is the thing t
 
 **Re-run 2026-07-26T11:41:28-06:00 from the same location.** Source `b8069fa` deployed to `https://cc915a90.ai-task-router.pages.dev` on the first attempt, unchanged. Fourth consecutive success. This run is the one that exposed the verification traps below: the canonical alias appeared stale on the first plain fetch and was not, and the first bundle string check ran against an SPA fallback and reported a clean pass it had not earned.
 
-**Attempt 2026-07-27T19:01:40-06:00 from the same home network, public IP `70.65.205.71`.** The owner authorized deployment of source `b75ed3e`. Clean install and all release gates passed, and both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing their values. Wrangler rejected the request before upload with authentication error `10000`. The one-attempt stop rule was observed. Production did not change; refresh or replace the scoped token before another attempt.
+**Attempt 2026-07-27T19:01:40-06:00 from the same home network, public IP `70.65.205.71`.** The owner authorized deployment of source `b75ed3e`. Clean install and all release gates passed, and both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing their values. Wrangler rejected the request before upload with authentication error `10000`. Read-only diagnosis then verified the token itself is active, but the accounts endpoint returns zero visible accounts and the configured Pages project returns `403 / 10000`. The token is therefore valid but not authorized for the stored account/project combination. The one-attempt stop rule was observed. Production did not change; correct the token resource scope or stored account ID before another attempt.
 
 ## Verification Traps
 
