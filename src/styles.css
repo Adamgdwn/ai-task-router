@@ -1687,6 +1687,11 @@ button:focus-visible {
   color: var(--muted-ink);
 }
 
+.impactCounterReviewButton {
+  justify-self: start;
+  margin-top: 4px;
+}
+
 .impactCounterPanel dl {
   display: grid;
   gap: 10px;

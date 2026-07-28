@@ -225,7 +225,7 @@ test("task intake routes, saves, prepares exports, and records feedback without 
 
   await page.getByRole("button", { name: "Accept selected route and save prompts" }).click();
   await expect(page.getByText("Selected route, decision card, prompts, and followed-choice impact saved on this device.")).toBeVisible();
-  await expect(page.getByText("1 followed recommendation(s) counted on this device.")).toBeVisible();
+  await expect(page.getByText("1 accepted or edited choice counted on this device.")).toBeVisible();
   // The lean/balanced/premium split was computed and discarded before this; it is the only surface
   // that answers "am I always reaching for the heaviest option?"
   await expect(page.locator("dt").filter({ hasText: "Which routes you followed" })).toBeVisible();

@@ -112,11 +112,10 @@ export function HelpScreen({ definition }: { definition: ScreenDefinition }) {
             readable, because watt-hours are a unit almost nobody has a feel for.
           </li>
           <li>
-            <strong>Followed choices</strong> - how many recommendations you accepted or edited on this device, with
-            their totals and how they split across lean, balanced, and premium. It counts what you told the app you
-            followed; it cannot see what you actually did. The split is there so you can notice your own pattern - if
-            every task is going premium, that is worth knowing, and if premium is genuinely what your work needs, that
-            is a fine answer too.
+            <strong>Accepted or edited choices</strong> - how many recommendations you marked Accepted or Edited on
+            this device, with their totals and how they split across lean, balanced, and premium. Deferred and Rejected
+            choices stay out of the total. If saved plans exist while this number is zero, use Review saved choices and
+            update What happened? in Past Choices after you use a route. The app cannot see what you actually did.
           </li>
           <li>
             <strong>Your pattern on Past Choices</strong> - the same idea across your whole log. It totals what the

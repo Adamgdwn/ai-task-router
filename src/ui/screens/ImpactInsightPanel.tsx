@@ -13,6 +13,7 @@ type ImpactInsightPanelProps = {
   >;
   trackedImpact?: TrackedImpactSummary;
   trackedImpactMessage?: string;
+  onReviewPastChoices?: () => void;
 };
 
 /**
@@ -37,9 +38,13 @@ export function ImpactInsightPanel({
   task,
   trackedImpact,
   trackedImpactMessage,
+  onReviewPastChoices,
 }: ImpactInsightPanelProps) {
   const { environmentalExample, rightSizingExample, tokenBenchmark } = snapshot;
   const benchmarkMultiple = displayedCostMultiple(tokenBenchmark.lowerCostUsd, tokenBenchmark.comparisonCostUsd);
+  const notCountedPlanCount = trackedImpact
+    ? Math.max(0, trackedImpact.savedPlanCount - trackedImpact.followedPlanCount)
+    : 0;
 
   return (
     <section className="impactSection" aria-labelledby="impact-insight-heading">
@@ -55,11 +60,16 @@ export function ImpactInsightPanel({
       </div>
 
       {trackedImpact ? (
-        <div className="impactCounterPanel" aria-label="Cumulative followed-route impact">
+        <div className="impactCounterPanel" aria-label="Accepted and edited choice impact">
           <div>
-            <span>Followed choices</span>
+            <span>Accepted or edited choices</span>
             <strong>{formatInteger(trackedImpact.followedPlanCount)}</strong>
-            <small>{trackedImpactMessage ?? "Accepted or edited recommendations counted on this device."}</small>
+            <small>{trackedImpactMessage ?? "Accepted or edited choices counted on this device."}</small>
+            {notCountedPlanCount > 0 && onReviewPastChoices ? (
+              <button className="impactCounterReviewButton" onClick={onReviewPastChoices} type="button">
+                Review saved choices
+              </button>
+            ) : null}
           </div>
           <dl>
             <div>

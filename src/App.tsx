@@ -105,6 +105,7 @@ export function App({ store = browserLocalStore }: AppProps) {
           <RouteResultsScreen
             definition={activeScreen}
             impactCounter={impactCounter}
+            onOpenPastChoices={() => setActiveScreenId("route-log")}
             onOpenTaskIntake={() => setActiveScreenId("task-intake")}
             onOpenToolInventory={() => setActiveScreenId("tool-inventory")}
             routing={taskRouting}
@@ -116,6 +117,7 @@ export function App({ store = browserLocalStore }: AppProps) {
             artifacts={routeArtifacts}
             definition={activeScreen}
             impactCounter={impactCounter}
+            onOpenPastChoices={() => setActiveScreenId("route-log")}
             onOpenTaskIntake={() => setActiveScreenId("task-intake")}
           />
         ) : null}

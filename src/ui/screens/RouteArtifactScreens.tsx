@@ -20,6 +20,7 @@ type RouteArtifactScreenProps = {
   definition: ScreenDefinition;
   artifacts: RouteArtifactsController;
   impactCounter?: ImpactCounterController;
+  onOpenPastChoices?: () => void;
   onOpenTaskIntake: () => void;
 };
 
@@ -27,6 +28,7 @@ export function SavedRouteCardScreen({
   definition,
   artifacts,
   impactCounter,
+  onOpenPastChoices,
   onOpenTaskIntake,
 }: RouteArtifactScreenProps) {
   const routeCard = artifacts.selectedRouteCard;
@@ -60,6 +62,7 @@ export function SavedRouteCardScreen({
             snapshot={publicImpactSnapshot}
             trackedImpact={impactCounter?.summary}
             trackedImpactMessage={impactCounter?.message}
+            onReviewPastChoices={onOpenPastChoices}
           />
           <MarkdownExportPanel
             copyLabel="Route card Markdown"
@@ -578,4 +581,3 @@ function inlineList(values: readonly string[]) {
 
   return values.join(", ");
 }
-

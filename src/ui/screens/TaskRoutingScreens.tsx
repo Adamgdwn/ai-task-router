@@ -49,6 +49,7 @@ type TaskIntakeScreenProps = TaskRoutingScreenProps & {
 };
 
 type RouteResultsScreenProps = TaskRoutingScreenProps & {
+  onOpenPastChoices: () => void;
   onOpenTaskIntake: () => void;
   onOpenToolInventory: () => void;
 };
@@ -272,6 +273,7 @@ export function RouteResultsScreen({
   impactCounter,
   routing,
   setup,
+  onOpenPastChoices,
   onOpenTaskIntake,
   onOpenToolInventory,
 }: RouteResultsScreenProps) {
@@ -292,6 +294,7 @@ export function RouteResultsScreen({
       ) : (
         <GeneratedResults
           impactCounter={impactCounter}
+          onOpenPastChoices={onOpenPastChoices}
           onOpenToolInventory={onOpenToolInventory}
           result={result}
           routing={routing}
@@ -501,12 +504,14 @@ function formatReviewDate(timestamp: string) {
 function GeneratedResults({
   result,
   impactCounter,
+  onOpenPastChoices,
   onOpenToolInventory,
   routing,
   setup,
 }: {
   result: GeneratedRouteResult;
   impactCounter?: ImpactCounterController;
+  onOpenPastChoices: () => void;
   onOpenToolInventory: () => void;
   routing: TaskRoutingController;
   setup: SetupConfigurationController;
@@ -590,6 +595,7 @@ function GeneratedResults({
         task={result.task}
         trackedImpact={impactCounter?.summary}
         trackedImpactMessage={impactCounter?.message}
+        onReviewPastChoices={onOpenPastChoices}
       />
 
       <ToolkitSuggestionPanel toolkit={suggestedToolkit} />

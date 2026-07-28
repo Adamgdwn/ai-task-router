@@ -28,11 +28,7 @@ export function useImpactCounter(store: LocalStore): ImpactCounterController {
 
       setSummary(nextSummary);
       setStatus("ready");
-      setMessage(
-        nextSummary.followedPlanCount > 0
-          ? `${nextSummary.followedPlanCount} followed recommendation(s) counted on this device.`
-          : "No followed recommendations have been counted yet.",
-      );
+      setMessage(impactCounterMessage(nextSummary));
     } catch (error) {
       setSummary(emptyTrackedImpactSummary);
       setStatus("error");
@@ -50,6 +46,36 @@ export function useImpactCounter(store: LocalStore): ImpactCounterController {
     message,
     refresh,
   };
+}
+
+function impactCounterMessage(summary: TrackedImpactSummary) {
+  const notCounted = Math.max(0, summary.savedPlanCount - summary.followedPlanCount);
+
+  if (summary.followedPlanCount > 0) {
+    const countedLabel =
+      summary.followedPlanCount === 1
+        ? "1 accepted or edited choice counted on this device."
+        : `${summary.followedPlanCount} accepted or edited choices counted on this device.`;
+
+    if (notCounted === 0) {
+      return countedLabel;
+    }
+
+    const otherLabel =
+      notCounted === 1
+        ? "1 other saved choice is marked Deferred or Rejected and is not included."
+        : `${notCounted} other saved choices are marked Deferred or Rejected and are not included.`;
+
+    return `${countedLabel} ${otherLabel}`;
+  }
+
+  if (summary.savedPlanCount > 0) {
+    return summary.savedPlanCount === 1
+      ? '1 saved choice is marked Deferred or Rejected, so this stays at zero. Review Past Choices and update "What happened?" after you use a route.'
+      : `${summary.savedPlanCount} saved choices are marked Deferred or Rejected, so this stays at zero. Review Past Choices and update "What happened?" after you use a route.`;
+  }
+
+  return "No choices counted yet. Accept and save a selected route to start this history.";
 }
 
 function impactCounterErrorMessage(error: unknown) {
