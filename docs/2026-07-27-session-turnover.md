@@ -1,15 +1,15 @@
 # 2026-07-27 - Session Turnover
 
 Document ID: PATH-ENG-005
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-27
 Last Reviewed: 2026-07-27
 Next Review: At the start of the next working session
-Last Updated: 2026-07-27T22:20:04-06:00
-Status Updated: 2026-07-27T22:20:04-06:00
+Last Updated: 2026-07-27T22:22:45-06:00
+Status Updated: 2026-07-27T22:22:45-06:00
 
 ## Purpose
 
@@ -19,7 +19,7 @@ This note is a resume point, not a full history. Detailed implementation and val
 
 ## Where Work Stopped
 
-Chunk 12 is **Integration complete and not deployed**. Production remains on source `1b5ea8f` at `https://ai-task-router.pages.dev/`. The stage-first planning grammar is committed on `main`, but a production deployment requires fresh owner authorization.
+Chunk 12 is **Integration complete and not deployed**. Source `b565331` is committed and pushed to `main`. Production remains on source `1b5ea8f` at `https://ai-task-router.pages.dev/`; a production deployment requires fresh owner authorization.
 
 The completed chunk replaces the remaining shallow planning route with a task-first work grammar:
 

@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.20.0
+Version: 1.21.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: During the next substantial build session
-Last Updated: 2026-07-27T22:18:56-06:00
-Status Updated: 2026-07-27T22:18:56-06:00
+Last Updated: 2026-07-27T22:22:45-06:00
+Status Updated: 2026-07-27T22:22:45-06:00
 
 ## Purpose
 
@@ -31,7 +31,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live; stage-first planning grammar not deployed | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://0e76221f.ai-task-router.pages.dev` from source `1b5ea8f`, deployed 2026-07-27. It carries the previous task-reasoning repair. The completed stage-first planning grammar in Chunk 12 remains local until it is committed, pushed, and separately authorized for deployment. |
+| Browser/PWA app | live; stage-first planning grammar not deployed | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://0e76221f.ai-task-router.pages.dev` from source `1b5ea8f`, deployed 2026-07-27. It carries the previous task-reasoning repair. The completed stage-first planning grammar is committed and pushed as `b565331` but remains undeployed pending fresh owner authorization. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Desktop track | abandoned 2026-07-26T09:31:44-06:00 | Removed entirely: Tauri shell, local discovery, packaging and gate scripts, and the "Desktop app - Coming Soon!" card that promised computer checking on production. Planning and evidence docs are in `docs/archive/`. See [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
@@ -548,6 +548,7 @@ The router now classifies the task, infers the work and deliverables it requires
 | 2026-07-27T21:04:49-06:00 | Replace fixed role sequencing with task reasoning | pass; integration complete, deploy pending | Root cause confirmed: route candidates selected role slots before assessing whether each stage added value; scoring compared three prebuilt bundles; fast and thinking modes shared capability vectors; zero marginal account price erased their resource difference. Added deterministic task-reasoning analysis, stage-utility decisions, mode-specific capability and adequacy scoring, and task-specific route explanations. With the same ChatGPT Go, Perplexity Free, and Microsoft Copilot Free inventory, the structured plan regression selects GPT-5.5 Thinking for direct reasoning with no prompt relay, while a simple rewrite selects GPT-5.5 Instant. Governance preflight passed with 0 warnings; Vitest passed 184/184; script tests 5/5; production build and bundle budgets passed at 678.10 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; release-candidate scan and `git diff --check` passed; local Playwright passed 8/8, including the same-tools contrast and narrow-layout checks. No provider calls, accounts, telemetry, execution, or new UI feature were added. |
 | 2026-07-27T21:07:32-06:00 | Deploy and verify the task-reasoning engine repair | pass | Source `1b5ea8f` pushed to `main`. The account-owned control-plane credential returned HTTP 200 for the actual `ai-task-router` Pages project, then Wrangler deployed it to `https://0e76221f.ai-task-router.pages.dev` in one attempt. Canonical and immutable URLs both serve `index-BJ8G6-nl.js` at exactly 678,109 bytes, matching `dist`; task-reasoning, stage-utility, and selected-mode markers are present, while the stale direct-work script and old GPT-5.5 Medium-default markers are absent. Manifest and service worker return HTTP 200. Hosted Playwright passed 8/8, including the same-tools contrast: the structured plan uses GPT-5.5 Thinking for direct reasoning with no Perplexity or Copilot relay, and the simple rewrite uses GPT-5.5 Instant. |
 | 2026-07-27T22:18:56-06:00 | Complete and verify the stage-first planning grammar | pass; integration complete, deployment not authorized | Root cause confirmed: task reasoning still chose a primary model before it had represented scope framing, plan synthesis, and downstream action as required work. Added task archetypes, inferred planning deliverables, a model-independent work-plan grammar, stage-first mode assignment, stage-specific output contracts, and route coverage scoring. The exact ChatGPT Go, Perplexity Free, and Copilot Free regression now yields Perplexity scope framing from approved inputs, highest available GPT-5.5 Thinking for the actual plan, and Copilot for the lightweight action handoff; a simple rewrite remains one GPT-5.5 Instant pass. Browser verification also caught and fixed a null/kind fallback that had duplicated the action helper into a bogus package Stage 3. Vitest passed 190/190; script tests 5/5; TypeScript/Vite production build passed at 702.36 kB JavaScript and 43.76 kB CSS; the deliberately tight raw JavaScript budget moved from 700 kB to 705 kB while the 200 kB compressed-download ceiling stayed unchanged; dependency audit found 0 vulnerabilities; release-candidate scan and governance preflight passed; local Playwright passed 8/8; an annotated browser load check found content, no Vite overlay, and no captured console errors. No provider call, live search, account connection, telemetry, external execution, schema migration, or visual redesign was added. |
+| 2026-07-27T22:21:13-06:00 | Commit and push Chunk 12 with the night handoff | pass | Source `b565331` (`Build stage-first task planning`) is on `main` and matches `origin/main`. It includes the Integration-complete implementation, validation record, carry-forward flag, updated startup route, and `docs/2026-07-27-session-turnover.md`. No deployment was attempted. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -614,7 +615,7 @@ A functional audit of `59dd849` on 2026-07-25 found gaps between what the app cl
 
 The Cloudflare deploy blocker is resolved. The original user-scoped token path was rejected, but the account-owned control-plane token added on 2026-07-27 returned HTTP 200 for the actual Pages project and completed the deployment on the first attempt. Use [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) as the deploy runbook.
 
-**Production remains at source `1b5ea8f`, deployed 2026-07-27; Chunk 12 is integration complete but not deployed.** The local stage-first planning grammar supersedes the single-model structured-plan behavior currently live. After commit and push, deploy only with fresh owner authorization. Production deployment verification must use the existing Cloudflare turnover runbook, cache-bust the HTML, fetch the asset path without a query string, and confirm its byte length matches `dist` before trusting marker checks. The new local regression expects Perplexity framing, highest available ChatGPT reasoning for the actual plan, and a lightweight Copilot action handoff with no duplicate package stage; the same inventory still selects GPT-5.5 Instant for a simple rewrite.
+**Production remains at source `1b5ea8f`, deployed 2026-07-27; Chunk 12 source `b565331` is integration complete, pushed, and not deployed.** Deploy only with fresh owner authorization. Production verification must use the existing Cloudflare turnover runbook, cache-bust the HTML, fetch the asset path without a query string, and confirm its byte length matches `dist` before trusting marker checks. The new regression expects Perplexity framing, highest available ChatGPT reasoning for the actual plan, and a lightweight Copilot action handoff with no duplicate package stage; the same inventory still selects GPT-5.5 Instant for a simple rewrite.
 
 Two verification lessons from the last deploy are worth carrying, because both would have produced a confident wrong answer:
 
