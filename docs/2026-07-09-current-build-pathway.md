@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.16.0
+Version: 1.17.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: During the next substantial build session
-Last Updated: 2026-07-27T20:26:56-06:00
-Status Updated: 2026-07-27T20:26:56-06:00
+Last Updated: 2026-07-27T21:04:49-06:00
+Status Updated: 2026-07-27T21:04:49-06:00
 
 ## Purpose
 
@@ -38,7 +38,7 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts Accepted or Edited saved routes in local impact. Legacy Deferred or Rejected saves are explicitly excluded and link directly to Past Choices for review. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Direct-work routing repair: task complete and live | Straightforward plans, drafts, briefs, answers, and tables now go directly to the right-sized execution helper instead of receiving an unconditional prompt-builder handoff. Build-shaped work and explicit prompt artifacts retain separate prompt design. Exact user-requested planning elements stay visible through the stage path and copy-ready instruction. Full local and hosted release gates pass, and production serves the exact verified build. |
+| Active chunk | Task-reasoning engine repair: integration complete; deploy pending | The earlier direct-work repair changed the fixed route script but did not make stage or mode choices depend deeply enough on the task. The router now evaluates reasoning demand and the marginal value of evidence, prompt design, specialist packaging, and independent review before selecting stages. Mode adequacy distinguishes fast and thinking modes even when account cost is identical. Local release gates pass; production still serves the prior structural repair until this source is committed and deployed. |
 
 ## Product Boundary
 
@@ -97,6 +97,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 8 | Stage reasoning and project-plan repair | task complete; live | Task complete | Removes the contradictory GPT-5.5 Medium default, makes the Stage 3 handoff actionable, and repairs the stretched project-plan layout without adding a feature or changing the product boundary. |
 | 9 | Followed-choice clarification | task complete; live | Task complete | Explains that only Accepted or Edited outcomes count, gives legacy Deferred saves a direct review path, and avoids inventing usage history the app cannot observe. |
 | 10 | Direct-work routing repair | task complete; live | Task complete | Stops straightforward tasks from parroting the same prompt relay, preserves explicit task requirements, and produces a usable direct-work contract without adding provider execution. |
+| 11 | Task-reasoning engine repair | integration complete; deploy pending | Integration complete | Replaces the remaining fixed role sequence with task-dependent stage utility and model-mode adequacy, proven by different routes for different tasks using the same saved tools. |
 
 ## Plan Chunks
 
@@ -499,6 +500,7 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 | 2026-07-27T19:37:14-06:00 | Deploy and verify the Stage 2 reasoning and Stage 3 project-plan repair | pass | The new account-owned Cloudflare control-plane token returned HTTP 200 for the actual Pages project before deployment. Governance preflight passed with 0 warnings; `npm audit` found 0 vulnerabilities; Vitest passed 174/174; the production build and bundle budgets passed; the release-candidate scan was clean; local Playwright passed 7/7. Wrangler deployed source `50478e0`, carrying the repair from `b75ed3e`, to `https://79dab484.ai-task-router.pages.dev` in one attempt. Canonical and immutable URLs both serve `index-X2Tnl_UX.js` at exactly 660,744 bytes, matching `dist`; `not Medium by default` and `Run the build-plan prompt` are present, while `usually GPT-5.5 Thinking Medium` is absent. Manifest and service worker return 200, and hosted Playwright passed 7/7. |
 | 2026-07-27T20:03:54-06:00 | Diagnose, repair, deploy, and verify followed-choice tracking | pass | Git history showed legacy saves were created with `outcome: "deferred"` while the counter intentionally counts only Accepted or Edited outcomes. The fix names that contract, explains saved-but-uncounted records, links to Past Choices, and does not silently rewrite user history. Vitest passed 175/175; script tests 5/5; build budgets passed at 661.86 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; scan clean; local Playwright 7/7; desktop and 390 px browser checks showed no errors or overflow. Wrangler deployed source `e3671b2` to `https://eb485f5c.ai-task-router.pages.dev`. Canonical and immutable assets match `index-CtA-qQF5.js` at 661,862 bytes with all new markers present and the old exact header absent. Hosted verification initially exposed the documented seconds-long edge cache, then a test-fixture race with asynchronous local-store seeding; the E2E helper now waits for configuration readiness and the full canonical suite passes 7/7. |
 | 2026-07-27T20:26:56-06:00 | Repair and deploy direct-work routing | pass | The router had structurally selected prompt design plus execution for nearly every task, and stage guidance then wrapped that fixed route in the same project-plan story. Source `68a7e1d` makes separate prompt design conditional on build-shaped or explicit prompt work, gives ordinary tasks one direct execution step, preserves explicit planning requirements, and generates a direct copy-ready output contract. Vitest passed 179/179; script tests 5/5; build budgets passed at 669.06 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; scan and governance preflight passed; local Playwright passed 7/7; desktop and 390 px checks showed no errors or overflow. Wrangler deployed to `https://86dbe307.ai-task-router.pages.dev`. Canonical and immutable URLs serve the exact `index-B-i3htL0.js` asset at 669,064 bytes. Direct-work markers are present, the old `Quick project plan` and generic lead are absent, root/PWA files return 200, and hosted Playwright passes 7/7. The documented 962-byte SPA fallback appeared once during canonical asset propagation and was rejected by the length assertion before string checks. |
+| 2026-07-27T21:04:49-06:00 | Replace fixed role sequencing with task reasoning | pass; integration complete, deploy pending | Root cause confirmed: route candidates selected role slots before assessing whether each stage added value; scoring compared three prebuilt bundles; fast and thinking modes shared capability vectors; zero marginal account price erased their resource difference. Added deterministic task-reasoning analysis, stage-utility decisions, mode-specific capability and adequacy scoring, and task-specific route explanations. With the same ChatGPT Go, Perplexity Free, and Microsoft Copilot Free inventory, the structured plan regression selects GPT-5.5 Thinking for direct reasoning with no prompt relay, while a simple rewrite selects GPT-5.5 Instant. Governance preflight passed with 0 warnings; Vitest passed 184/184; script tests 5/5; production build and bundle budgets passed at 678.10 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; release-candidate scan and `git diff --check` passed; local Playwright passed 8/8, including the same-tools contrast and narrow-layout checks. No provider calls, accounts, telemetry, execution, or new UI feature were added. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 

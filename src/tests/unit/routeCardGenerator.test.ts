@@ -280,8 +280,8 @@ describe("route card generator", () => {
     expect(packageStage?.actions.join(" ")).toContain("Copy-Ready Prompts");
     expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");
-    expect(reviewStage?.recommendedModelLabel).toContain("highest GPT-5.5 Thinking level");
-    expect(reviewStage?.recommendedModelLabel).not.toContain("usually GPT-5.5 Thinking Medium");
+    expect(reviewStage?.recommendedModelLabel).toBe("My own final review");
+    expect(reviewStage?.recommendedModelLabel).not.toContain("GPT-5.5");
     expect(reviewStage?.recommendedModelLabel).not.toBe(packageStage?.recommendedModelLabel);
     expect(reviewStage?.actions.join(" ")).toContain("improvement and strength insights");
     expect(reviewStage?.reviewChecks.join(" ")).toContain("full requested build path");

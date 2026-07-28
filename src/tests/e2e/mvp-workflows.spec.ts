@@ -1,4 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { createEverydayToolModel } from "../../domain/defaults/everydayToolCatalog";
+import type { ModelInventoryItem } from "../../domain/types";
 import { legacyPrefilledToolModels } from "../fixtures/legacyPrefilledToolModels";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
 import { e2eTaskFixtures, type E2ETaskFixtureTag } from "../fixtures/e2eTaskFixtures";
@@ -328,6 +330,78 @@ test("cold start: add one tool through the picker, describe a task in free text,
   await page.getByRole("button", { name: "Decision Card", exact: true }).click();
   await expect(page.getByLabel("Prepared route card Markdown")).toContainText("ChatGPT");
   await expectNoExecutionControls(page);
+});
+
+test("the same tools choose reasoning for a structured plan and fast mode for a simple rewrite", async ({ page }) => {
+  const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+  if (!manualReviewModel) {
+    throw new Error("Manual review model is required for the browser routing fixture.");
+  }
+  const models = [
+    manualReviewModel,
+    createEverydayToolModel({
+      id: "chatgpt-go",
+      providerId: "chatgpt",
+      accountId: "go",
+      frequencyId: "daily",
+    }),
+    createEverydayToolModel({
+      id: "perplexity-free",
+      providerId: "perplexity",
+      accountId: "basic",
+      frequencyId: "weekly",
+    }),
+    createEverydayToolModel({
+      id: "copilot-free",
+      providerId: "copilot",
+      accountId: "basic",
+      frequencyId: "weekly",
+    }),
+  ] satisfies ModelInventoryItem[];
+  const browserErrors: string[] = [];
+
+  page.on("pageerror", (error) => browserErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      browserErrors.push(message.text());
+    }
+  });
+
+  await openApp(page);
+  await replaceIndexedDbRecords(page, "modelInventory", models);
+  await page.reload();
+  await page.getByRole("button", { name: "My Task", exact: true }).click();
+
+  const taskDescription = page.getByRole("textbox", { name: "What do you need help with?" });
+  await taskDescription.fill(
+    "Create a practical plan for a community open house with responsibilities, dependencies, risks, review points, and the first action.",
+  );
+  await page.getByRole("combobox", { name: "What kind of help do you need?" }).selectOption("planning");
+  await page.getByRole("combobox", { name: "What are you making?" }).selectOption("plan");
+  await page.getByRole("combobox", { name: "How polished should it be?" }).selectOption("standard");
+  await page.getByRole("button", { name: "Show me my best options" }).click();
+
+  const workPath = page.locator(".stageGuidanceSection");
+  await expect(page.getByRole("heading", { name: "Best Options", level: 2 })).toBeVisible();
+  await expect(page.getByText(/The request has moderate reasoning demand/).first()).toBeVisible();
+  await expect(workPath.getByText(/highest GPT-5\.5 Thinking level your Go picker offers for direct reasoning/).first()).toBeVisible();
+  await expect(workPath.getByText(/Perplexity/)).toHaveCount(0);
+  await expect(workPath.getByText(/Microsoft Copilot/)).toHaveCount(0);
+  await expect(workPath.getByRole("heading", { name: "Build the master prompt" })).toHaveCount(0);
+  await expect(workPath.getByText(/responsibilities and owners/).first()).toBeVisible();
+  await expect(workPath.getByText(/dependencies and ordering/).first()).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  await page.getByRole("button", { name: "My Task", exact: true }).click();
+  await taskDescription.fill("Rewrite this paragraph in plain language.");
+  await page.getByRole("combobox", { name: "What kind of help do you need?" }).selectOption("writing");
+  await page.getByRole("combobox", { name: "What are you making?" }).selectOption("draft");
+  await page.getByRole("combobox", { name: "How polished should it be?" }).selectOption("quick");
+  await page.getByRole("button", { name: "Show me my best options" }).click();
+
+  await expect(page.getByText(/The request has light reasoning demand/).first()).toBeVisible();
+  await expect(page.locator(".stageGuidanceSection").getByText(/GPT-5\.5 Instant for direct execution/).first()).toBeVisible();
+  expect(browserErrors).toEqual([]);
 });
 
 test("corrected screens do not overflow on a narrow viewport", async ({ page }) => {

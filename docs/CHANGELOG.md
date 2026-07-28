@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Replaced fixed route scripting with task-aware reasoning. The router now assesses reasoning demand, evidence need, prompt-handoff value, specialist packaging value, and independent-review value before choosing stages; mode scoring distinguishes fast and thinking modes even when both are included in an account. With the same ChatGPT Go, Perplexity Free, and Microsoft Copilot Free setup, a structured multi-part plan now selects GPT-5.5 Thinking for direct reasoning while a simple rewrite selects GPT-5.5 Instant.
 - Fixed straightforward tasks being forced through the same prompt-builder relay: ordinary plans, drafts, briefs, answers, and tables now go directly to the right-sized execution helper, while separate prompt-design remains reserved for build-shaped or explicitly prompt-producing work. Planning paths and copy-ready instructions now carry the requested responsibilities, dependencies, risks, measures, review points, and first action into the actual output contract.
 - Fixed Stage 2 reasoning guidance so ChatGPT Go no longer treats GPT-5.5 Thinking Medium as the usual highest choice when High, Extra High, or Max is available; repaired the Stage 3 handoff and project-plan layout while keeping all five concrete build items visible.
 - Initial project setup.

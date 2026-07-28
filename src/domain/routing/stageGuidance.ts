@@ -20,7 +20,6 @@ import {
   taskHasModelSelectionIntent,
   taskNeedsEvidenceCheck,
   taskNeedsFullBuildPlan,
-  taskNeedsSeparatePromptDesign,
   type TaskDecomposition,
   type TaskDeliverable,
 } from "./taskDecomposition";
@@ -60,12 +59,11 @@ export function buildProjectStageGuidance({
     firstStepOfWorkRole(selectedOption, "execution") ??
     primaryWorkStep(selectedOption);
   const primaryStep = promptStep ?? executionStep ?? primaryWorkStep(selectedOption);
-  const usesSeparatePromptDesign = taskNeedsSeparatePromptDesign(task) && promptStep !== null;
+  const usesSeparatePromptDesign = promptStep !== null;
+  const directWorkRole: WorkRole = executionStep?.workRole === "build-slice" ? "build-slice" : "execution";
   const artifactStep = firstStepOfKind(selectedOption, "artifact");
   const humanApprovalStep = firstStepOfKind(selectedOption, "human review");
-  const reviewSupportStep =
-    firstStepOfWorkRole(selectedOption, "quality-review") ??
-    aiReviewSupportStep(task, promptStep ?? executionStep);
+  const reviewSupportStep = firstStepOfWorkRole(selectedOption, "quality-review");
   const promptBuilderModelLabel = modelLabelForStageStep(
     task,
     promptStep,
@@ -102,7 +100,7 @@ export function buildProjectStageGuidance({
       methodLabel: "Plan",
       label: gatherStageLabel(task),
       purpose: gatherStagePurpose(task),
-      actions: gatherStageActions(task),
+      actions: gatherStageActions(task, usesSeparatePromptDesign),
       reviewChecks: gatherStageChecks(task),
       routeStep: researchStep ?? primaryStep,
       fallbackModelLabel: "You first",
@@ -112,6 +110,7 @@ export function buildProjectStageGuidance({
         stage: "gather",
         workRole: "evidence-check",
         routeStep: researchStep ?? undefined,
+        usesSeparatePromptDesign,
         modelById,
         manualReviewModel,
         fallbackModelLabel: "You first",
@@ -134,8 +133,9 @@ export function buildProjectStageGuidance({
       task,
       decomposition,
       stage: "create",
-      workRole: usesSeparatePromptDesign ? "prompt-design" : "execution",
+      workRole: usesSeparatePromptDesign ? "prompt-design" : directWorkRole,
       routeStep: usesSeparatePromptDesign ? promptStep : executionStep,
+      usesSeparatePromptDesign,
       modelById,
       manualReviewModel,
       fallbackModelLabel: "You first",
@@ -160,6 +160,7 @@ export function buildProjectStageGuidance({
         stage: "package",
         workRole: artifactStep ? "artifact-package" : executionStep?.workRole === "build-slice" ? "build-slice" : "execution",
         routeStep: artifactStep ?? executionStep,
+        usesSeparatePromptDesign,
         modelById,
         manualReviewModel,
         fallbackModelLabel: modelLabelForStep(primaryStep, modelById, manualReviewModel, "You first"),
@@ -171,8 +172,8 @@ export function buildProjectStageGuidance({
     stage: "review",
     methodLabel: "Check",
     label: reviewStageLabel(task),
-    purpose: reviewStagePurpose(task),
-    actions: reviewStageActions(task),
+    purpose: reviewStagePurpose(task, usesSeparatePromptDesign),
+    actions: reviewStageActions(task, usesSeparatePromptDesign),
     reviewChecks: reviewStageChecks(task),
     routeStep: reviewSupportStep ?? humanApprovalStep ?? undefined,
     fallbackModelLabel: manualReviewModel?.label ?? "Your review",
@@ -185,6 +186,7 @@ export function buildProjectStageGuidance({
       stage: "review",
       workRole: "quality-review",
       routeStep: reviewSupportStep ?? undefined,
+      usesSeparatePromptDesign,
       modelById,
       manualReviewModel,
       fallbackModelLabel: manualReviewModel?.label ?? "Your review",
@@ -195,8 +197,8 @@ export function buildProjectStageGuidance({
     stage: "act",
     methodLabel: "Act",
     label: actStageLabel(task),
-    purpose: actStagePurpose(task),
-    actions: actStageActions(task),
+    purpose: actStagePurpose(task, usesSeparatePromptDesign),
+    actions: actStageActions(task, usesSeparatePromptDesign),
     reviewChecks: actStageChecks(task),
     fallbackModelLabel: "You first",
     workItems: buildStageWorkItems({
@@ -205,6 +207,7 @@ export function buildProjectStageGuidance({
       stage: "act",
       workRole: "next-action",
       routeStep: undefined,
+      usesSeparatePromptDesign,
       modelById,
       manualReviewModel,
       fallbackModelLabel: "You first",
@@ -275,11 +278,22 @@ function buildStageWorkItems(input: {
   stage: ProjectStageGuidance["stage"];
   workRole: WorkRole;
   routeStep: RouteStep | undefined | null;
+  usesSeparatePromptDesign: boolean;
   modelById: Map<string, ModelInventoryItem>;
   manualReviewModel: ModelInventoryItem | undefined;
   fallbackModelLabel: string;
 }): ProjectStageWorkItem[] {
-  const { task, decomposition, stage, workRole, routeStep, modelById, manualReviewModel, fallbackModelLabel } = input;
+  const {
+    task,
+    decomposition,
+    stage,
+    workRole,
+    routeStep,
+    usesSeparatePromptDesign,
+    modelById,
+    manualReviewModel,
+    fallbackModelLabel,
+  } = input;
   const deliverables = deliverablesForStageRole(decomposition, workRole);
   const targets = targetDeliverableGroups(task, workRole, deliverables);
   // Per-token, not per-bill, so a work item reads the same way as the route it belongs to.
@@ -290,7 +304,7 @@ function buildStageWorkItems(input: {
 
   return targets.map((targetDeliverables, index) => {
     const deliverableIds = targetDeliverables.map((deliverable) => deliverable.id);
-    const label = workItemLabel(task, workRole, targetDeliverables, stage);
+    const label = workItemLabel(task, workRole, targetDeliverables, stage, usesSeparatePromptDesign);
     const setupGapLabel = manualSetupGapLabel(task, workRole, routeStep);
 
     return {
@@ -298,7 +312,7 @@ function buildStageWorkItems(input: {
       workRole,
       deliverableIds,
       label,
-      expectedOutput: expectedOutputForWorkItem(task, workRole, targetDeliverables),
+      expectedOutput: expectedOutputForWorkItem(task, workRole, targetDeliverables, usesSeparatePromptDesign),
       recommendedModelLabel:
         setupGapLabel ??
         recommendedLabelForWorkItem(routeStep, modelById, manualReviewModel, fallbackModelLabel),
@@ -311,7 +325,7 @@ function buildStageWorkItems(input: {
           ? ["A research-only or manual setup cannot execute this build stage; add or select a build-capable AI helper before relying on the route."]
           : ["This stage follows the selected route and the user's allowed tools."],
       reviewChecks: reviewChecksForWorkItem(task, workRole, targetDeliverables),
-      upgradeTrigger: upgradeTriggerForWorkItem(task, workRole),
+      upgradeTrigger: upgradeTriggerForWorkItem(task, workRole, usesSeparatePromptDesign),
       ...(perItemCost !== undefined ? { estimatedCostUsd: roundEstimate(perItemCost) } : {}),
       ...(perItemEnergy !== undefined ? { estimatedEnergyWh: roundEstimate(perItemEnergy) } : {}),
     };
@@ -345,6 +359,7 @@ function workItemLabel(
   workRole: WorkRole,
   deliverables: readonly TaskDeliverable[],
   stage: ProjectStageGuidance["stage"],
+  usesSeparatePromptDesign: boolean,
 ) {
   const deliverableLabel = deliverables.length === 1 ? deliverables[0]?.label : "full request";
 
@@ -354,7 +369,7 @@ function workItemLabel(
     case "prompt-design":
       return deliverables.length > 1 || needsFullBuildPlan(task) ? "Build one master prompt" : `Build the prompt for ${deliverableLabel}`;
     case "execution":
-      if (!taskNeedsSeparatePromptDesign(task)) {
+      if (!usesSeparatePromptDesign) {
         return task.outputType === "plan"
           ? "Produce the requested working plan"
           : `Produce ${friendlyOutputName(task.outputType)}`;
@@ -391,6 +406,7 @@ function expectedOutputForWorkItem(
   task: TaskIntake,
   workRole: WorkRole,
   deliverables: readonly TaskDeliverable[],
+  usesSeparatePromptDesign: boolean,
 ) {
   const deliverableText = compactDeliverableText(deliverables);
 
@@ -407,7 +423,7 @@ function expectedOutputForWorkItem(
       return `A saved or copy-ready ${task.outputType} package with warnings, checks, and next action visible.`;
     case "quality-review":
       return `A pass/fail review of ${deliverableText || "the result"} against ${
-        taskNeedsSeparatePromptDesign(task) ? "the approved prompt" : "the original task"
+        usesSeparatePromptDesign ? "the approved prompt" : "the original task"
       }, privacy limits, and acceptance checks.`;
     case "next-action":
       return "The smallest next action, the measure to check next, and whether the route should be reused or upgraded.";
@@ -447,13 +463,17 @@ function reviewChecksForWorkItem(
   }
 }
 
-function upgradeTriggerForWorkItem(task: TaskIntake, workRole: WorkRole) {
+function upgradeTriggerForWorkItem(
+  task: TaskIntake,
+  workRole: WorkRole,
+  usesSeparatePromptDesign: boolean,
+) {
   if (workRole === "prompt-design") {
     return "Upgrade the prompt-design helper only if the master prompt misses deliverables, checks, privacy, or the execution model choice.";
   }
 
   if (workRole === "execution" || workRole === "build-slice") {
-    return taskNeedsSeparatePromptDesign(task)
+    return usesSeparatePromptDesign
       ? "Upgrade execution only if the lighter mode ignores the master prompt or fails review after a focused retry."
       : "Upgrade execution only if the direct result misses requested deliverables or fails review after a focused retry.";
   }
@@ -545,13 +565,13 @@ function gatherStagePurpose(task: TaskIntake) {
   return "Gather only the information you intend to use, then move it into the chosen helper yourself.";
 }
 
-function gatherStageActions(task: TaskIntake) {
+function gatherStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (taskHasModelSelectionIntent(task)) {
     return [
       "Check which models or modes are actually available in the tools you selected.",
       "Write down the minimum execution mode, the stronger prompt-design mode, and the upgrade trigger.",
       "Note privacy limits before moving any project details into a helper.",
-      taskNeedsSeparatePromptDesign(task)
+      usesSeparatePromptDesign
         ? "Bring only the relevant availability notes into the master prompt."
         : "Bring only the relevant availability notes into the direct working brief.",
     ];
@@ -967,7 +987,7 @@ function reviewStageLabel(task: TaskIntake) {
   return "Check and learn";
 }
 
-function reviewStagePurpose(task: TaskIntake) {
+function reviewStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
     return "Check the result against the original request, the master prompt, and the expected deliverables before spending more tool time.";
   }
@@ -984,12 +1004,12 @@ function reviewStagePurpose(task: TaskIntake) {
     return "Compare the result against the goal and tighten anything weak or unsupported.";
   }
 
-  return taskNeedsSeparatePromptDesign(task)
+  return usesSeparatePromptDesign
     ? "Compare the executed result against the master prompt, acceptance checks, and original task before deciding what to do next."
     : "Compare the result against the original task, requested deliverables, and direct-work checks before deciding what to do next.";
 }
 
-function reviewStageActions(task: TaskIntake) {
+function reviewStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
     return [
       "Read the master prompt and execution result together.",
@@ -1001,7 +1021,7 @@ function reviewStageActions(task: TaskIntake) {
   }
 
   const actions = [
-    taskNeedsSeparatePromptDesign(task)
+    usesSeparatePromptDesign
       ? "Read the prompt and the result together, from the perspective of the person who has to use it."
       : "Read the result against the original task from the perspective of the person who has to use it.",
     "Fix unclear steps, unsupported claims, missing context, or places where the helper ignored the prompt.",
@@ -1049,13 +1069,13 @@ function actStageLabel(task: TaskIntake) {
   return "Act on the lesson";
 }
 
-function actStagePurpose(task: TaskIntake) {
+function actStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
     return "Choose the smallest build action, save the prompt, and decide the measure that will prove the route saved time, cost, or energy.";
   }
 
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
-    return taskNeedsSeparatePromptDesign(task)
+    return usesSeparatePromptDesign
       ? "Pick the smallest next step, decide what to measure, and note whether the prompt should be reused, tightened, or rerun with stronger help."
       : "Pick the smallest next step, decide what to measure, and note whether the direct plan should be edited or rerun with stronger help.";
   }
@@ -1067,11 +1087,13 @@ function actStagePurpose(task: TaskIntake) {
   return "Use what you learned to proceed, save the route if it worked, or adjust the prompt and setup for next time.";
 }
 
-function actStageActions(task: TaskIntake) {
+function actStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
     return [
       "Choose one first build action, such as the spreadsheet import, category rules, or first tracking view.",
-      "Save the master prompt and the execution model choice beside the plan.",
+      usesSeparatePromptDesign
+        ? "Save the master prompt and the execution model choice beside the plan."
+        : "Save the direct working brief and the execution model choice beside the plan.",
       "Record what this route was expected to cost in tool use, energy, and your own time, so the route can be learned from later.",
     ];
   }
@@ -1080,7 +1102,9 @@ function actStageActions(task: TaskIntake) {
     return [
       "Choose one first action that can be started today.",
       "Name the measure that will show whether the plan helped.",
-      "Decide the trigger for looping back to the prompt or upgrading the helper.",
+      usesSeparatePromptDesign
+        ? "Decide the trigger for looping back to the prompt or upgrading the helper."
+        : "Decide the trigger for revising the direct brief or upgrading the helper.",
     ];
   }
 
@@ -1196,23 +1220,6 @@ function firstStepOfWorkRole(option: RouteOption, workRole: WorkRole): RouteStep
   return option.steps.find((step) => step.workRole === workRole) ?? null;
 }
 
-function aiReviewSupportStep(task: TaskIntake, promptStep: RouteStep | undefined | null): RouteStep | null {
-  if (!promptStep || promptStep.kind === "manual") {
-    return null;
-  }
-
-  if (
-    needsFullBuildPlan(task) ||
-    task.qualityBar === "high" ||
-    task.qualityBar === "critical" ||
-    task.publicFacing
-  ) {
-    return promptStep;
-  }
-
-  return null;
-}
-
 function modelLabelForStep(
   step: RouteStep | undefined | null,
   modelById: Map<string, ModelInventoryItem>,
@@ -1256,7 +1263,7 @@ function modelLabelForStageStep(
     if (
       stageMode === "execution" &&
       step.modeLabel &&
-      (step.workRole === "build-slice" || !taskNeedsSeparatePromptDesign(task))
+      (step.workRole === "build-slice" || step.workRole === "execution")
     ) {
       return `${model.label} (execution ${step.modeLabel})`;
     }

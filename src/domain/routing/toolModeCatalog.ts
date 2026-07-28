@@ -50,6 +50,9 @@ type SelectToolModeInput = {
   modes: readonly ToolModeCandidate[];
   role: WorkRole;
   strategy: "lean" | "balanced" | "premium";
+  minimumCapability?: number;
+  requireMinimumCapability?: boolean;
+  excludedModelIds?: readonly string[];
 };
 
 const toolModeCatalogReviewedAt = "2026-07-07T00:27:03-06:00";
@@ -83,18 +86,45 @@ export function buildToolModeCatalog(models: readonly ModelInventoryItem[], task
   return models.filter((model) => model.enabled).flatMap((model) => modesForModel(model, task));
 }
 
-export function selectToolModeForRole({ task, modes, role, strategy }: SelectToolModeInput): ToolModeCandidate | null {
-  const eligibleModes = modes.filter((mode) => mode.roles.includes(role));
+export function selectToolModeForRole({
+  task,
+  modes,
+  role,
+  strategy,
+  minimumCapability,
+  requireMinimumCapability = false,
+  excludedModelIds = [],
+}: SelectToolModeInput): ToolModeCandidate | null {
+  const excludedModelIdSet = new Set(excludedModelIds);
+  const roleEligibleModes = modes.filter((mode) => mode.roles.includes(role) && !excludedModelIdSet.has(mode.modelId));
+  const modesMeetingMinimum =
+    minimumCapability === undefined
+      ? roleEligibleModes
+      : roleEligibleModes.filter(
+          (mode) => roleCapability(mode.capabilityScores, role, task) >= minimumCapability,
+        );
+  const eligibleModes =
+    strategy === "lean"
+      ? roleEligibleModes
+      : modesMeetingMinimum.length > 0
+        ? modesMeetingMinimum
+        : requireMinimumCapability
+          ? []
+          : roleEligibleModes;
 
   if (eligibleModes.length === 0) {
     return null;
   }
 
   if (strategy === "lean" && (role === "prompt-design" || role === "execution" || role === "build-slice")) {
-    return selectLeastResourceAdequateMode(eligibleModes, role, task);
+    return selectLeastResourceAdequateMode(eligibleModes, role, task, minimumCapability);
   }
 
-  if (strategy === "balanced" && role === "prompt-design" && shouldUseStrongestPromptDesignPass(task)) {
+  if (
+    (strategy === "balanced" || strategy === "premium") &&
+    role === "prompt-design" &&
+    shouldUseStrongestPromptDesignPass(task)
+  ) {
     return selectStrongestPromptDesignMode(eligibleModes, role, strategy, task);
   }
 
@@ -117,6 +147,17 @@ export function selectToolModeForRole({ task, modes, role, strategy }: SelectToo
 
     if (everydayPromptModes.length > 0) {
       return [...everydayPromptModes].sort((left, right) => modeScore(right, role, strategy, task) - modeScore(left, role, strategy, task))[0] ?? everydayPromptModes[0] ?? null;
+    }
+  }
+
+  if (
+    strategy === "balanced" &&
+    role === "execution" &&
+    minimumCapability !== undefined
+  ) {
+    const adequateMode = selectBalancedAdequateMode(eligibleModes, role, task, minimumCapability);
+    if (adequateMode) {
+      return adequateMode;
     }
   }
 
@@ -278,7 +319,7 @@ function chatGptModes(model: ModelInventoryItem, accountId: EverydayToolAccountI
       kind: "prompt",
       suffix: "prompt-reasoning",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["prompt-design", "quality-review"],
+      roles: ["prompt-design", "execution", "quality-review"],
       resourceProfile: promptIsReasoning ? "reasoning" : "standard",
       selectionReasons: [
         "Use the stronger thinking pass once to make the downstream prompt precise enough for cheaper execution.",
@@ -331,7 +372,7 @@ function claudeModes(
       kind: "prompt",
       suffix: "prompt-reasoning",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["prompt-design", "quality-review"],
+      roles: ["prompt-design", "execution", "quality-review"],
       resourceProfile: maxOrTeam ? "reasoning" : "standard",
       selectionReasons: ["Use Claude's stronger reasoning pass when prompt quality or architecture judgment prevents rework."],
     }),
@@ -422,7 +463,7 @@ function geminiModes(model: ModelInventoryItem, accountId: EverydayToolAccountId
       kind: "prompt",
       suffix: "prompt-pro",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["prompt-design", "quality-review"],
+      roles: ["prompt-design", "execution", "quality-review"],
       resourceProfile: strong ? "reasoning" : "standard",
       selectionReasons: ["Use Gemini's stronger reasoning mode when the prompt is the hard part."],
     }),
@@ -485,7 +526,7 @@ function grokModes(
       kind: "prompt",
       suffix: "prompt-reasoning",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["prompt-design", "quality-review"],
+      roles: ["prompt-design", "execution", "quality-review"],
       resourceProfile: paid ? "reasoning" : "standard",
       selectionReasons: [
         "Use Grok 4.3's named reasoning setting for the thinking-heavy prompt pass instead of a generic best-model label.",
@@ -832,7 +873,9 @@ function mode(input: {
     modeLabel: input.modeLabel,
     displayLabel: input.providerId === "none" ? "You first" : `${providerLabel} ${input.accountLabel} - ${input.modeLabel}`,
     roles: [...new Set(input.roles)],
-    capabilityScores: input.capabilityScores ?? input.model.capabilityScores,
+    capabilityScores:
+      input.capabilityScores ??
+      capabilityScoresForMode(input.model.capabilityScores, input.suffix),
     maxPermissionLevel: input.model.maxPermissionLevel,
     localOnly: input.model.localOnly,
     requiresExternalCall: input.model.requiresExternalCall ?? !input.model.localOnly,
@@ -841,7 +884,10 @@ function mode(input: {
     // and showing what it would meter at is the entire point of the per-token figure; whether the
     // user is billed is decided separately when a route is priced.
     ...estimateProfile,
-    resourceProfile: zeroMarginalCost && input.resourceProfile !== "manual" ? "free" : input.resourceProfile,
+    // Whether the user's account adds a bill and how much compute a mode uses are different facts.
+    // A free account's Thinking mode is still heavier than its Fast mode, so zero marginal price
+    // must not flatten every mode into the same resource class.
+    resourceProfile: input.resourceProfile,
     catalogReviewedAt: toolModeCatalogReviewedAt,
     sourceIds: officialSourceIdsByProvider[input.providerId] ?? [],
     selectionReasons: input.selectionReasons,
@@ -872,16 +918,22 @@ function selectLeastResourceAdequateMode(
   eligibleModes: readonly ToolModeCandidate[],
   role: WorkRole,
   task: TaskIntake,
+  minimumCapability?: number,
 ) {
   const nonManualModes = eligibleModes.filter((mode) => mode.modeKind !== "manual");
-  const zeroMarginalModes = nonManualModes.filter((mode) => mode.zeroMarginalCost);
+  const adequateNonManualModes =
+    minimumCapability === undefined
+      ? nonManualModes
+      : nonManualModes.filter((mode) => roleCapability(mode.capabilityScores, role, task) >= minimumCapability);
+  const candidateModes = adequateNonManualModes.length > 0 ? adequateNonManualModes : nonManualModes;
+  const zeroMarginalModes = candidateModes.filter((mode) => mode.zeroMarginalCost);
 
   if (zeroMarginalModes.length > 0) {
     return sortLeastResourceModes(zeroMarginalModes, role, task)[0] ?? zeroMarginalModes[0] ?? null;
   }
 
-  if (shouldPreferAiOverManualLeanMode(task, role) && nonManualModes.length > 0) {
-    return sortLeastResourceModes(nonManualModes, role, task)[0] ?? nonManualModes[0] ?? null;
+  if (shouldPreferAiOverManualLeanMode(task, role) && candidateModes.length > 0) {
+    return sortLeastResourceModes(candidateModes, role, task)[0] ?? candidateModes[0] ?? null;
   }
 
   const manualMode = eligibleModes.find((mode) => mode.modeKind === "manual");
@@ -889,7 +941,35 @@ function selectLeastResourceAdequateMode(
     return manualMode;
   }
 
-  return sortLeastResourceModes(nonManualModes.length ? nonManualModes : eligibleModes, role, task)[0] ?? null;
+  return sortLeastResourceModes(candidateModes.length ? candidateModes : eligibleModes, role, task)[0] ?? null;
+}
+
+function selectBalancedAdequateMode(
+  eligibleModes: readonly ToolModeCandidate[],
+  role: WorkRole,
+  task: TaskIntake,
+  minimumCapability: number,
+) {
+  const normalModes = eligibleModes.filter(
+    (mode) => mode.modeKind !== "manual" && mode.modeKind !== "benchmark" && mode.resourceProfile !== "premium",
+  );
+  const adequateModes = normalModes.filter(
+    (mode) => roleCapability(mode.capabilityScores, role, task) >= minimumCapability,
+  );
+
+  if (adequateModes.length === 0) {
+    return null;
+  }
+
+  return [...adequateModes].sort((left, right) => {
+    const resourceComparison = resourceRanks[left.resourceProfile] - resourceRanks[right.resourceProfile];
+    const targetDistanceComparison =
+      Math.abs(roleCapability(left.capabilityScores, role, task) - minimumCapability) -
+      Math.abs(roleCapability(right.capabilityScores, role, task) - minimumCapability);
+    const scoreComparison = modeScore(right, role, "balanced", task) - modeScore(left, role, "balanced", task);
+
+    return resourceComparison || targetDistanceComparison || scoreComparison || left.displayLabel.localeCompare(right.displayLabel);
+  })[0] ?? null;
 }
 
 function shouldPreferAiOverManualLeanMode(task: TaskIntake, role: WorkRole) {
@@ -922,7 +1002,7 @@ function sortLeastResourceModes(
   });
 }
 
-function roleCapability(scores: CapabilityScores, role: WorkRole, task: TaskIntake) {
+export function toolModeCapabilityForRole(scores: CapabilityScores, role: WorkRole, task: TaskIntake) {
   switch (role) {
     case "evidence-check":
       return (scores.research * 0.75 + scores.reasoning * 0.25);
@@ -941,6 +1021,34 @@ function roleCapability(scores: CapabilityScores, role: WorkRole, task: TaskInta
     case "next-action":
       return (scores.reasoning + scores.writing) / 2;
   }
+}
+
+const roleCapability = toolModeCapabilityForRole;
+
+function capabilityScoresForMode(scores: CapabilityScores, suffix: string): CapabilityScores {
+  if (suffix === "claude-code-build" || suffix === "grok-build") {
+    return {
+      ...scores,
+      reasoning: Math.max(4, scores.reasoning),
+      coding: Math.max(4.5, scores.coding),
+    };
+  }
+
+  if (suffix !== "execution-fast" && suffix !== "execution-flash") {
+    return scores;
+  }
+
+  return {
+    reasoning: clampCapabilityScore(scores.reasoning - 1),
+    writing: scores.writing,
+    coding: clampCapabilityScore(scores.coding - 0.5),
+    research: scores.research,
+    packaging: clampCapabilityScore(scores.packaging - 0.5),
+  };
+}
+
+function clampCapabilityScore(score: number) {
+  return Math.min(5, Math.max(0, score));
 }
 
 function roleSpecificBonus(mode: ToolModeCandidate, role: WorkRole, task: TaskIntake) {

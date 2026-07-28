@@ -6,7 +6,6 @@ import {
   requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
-  taskNeedsSeparatePromptDesign,
 } from "../routing/taskDecomposition";
 
 type GeneratePromptPackageInput = {
@@ -96,7 +95,8 @@ function buildPromptStep(input: {
     routeStep.kind === "human review"
       ? context.safeRouteSourceIds
       : safeSourceIdsForStep(routeStep, context.sourceById, context.allowedSourceIds);
-  const expectedOutput = expectedOutputForStep(task, routeStep);
+  const hasSeparatePromptDesign = selectedRoute.steps.some((step) => step.workRole === "prompt-design");
+  const expectedOutput = expectedOutputForStep(task, routeStep, hasSeparatePromptDesign);
   const inputRefs = buildInputRefs({ task, selectedRoute, routeStep, safeSourceIds });
 
   return {
@@ -104,7 +104,7 @@ function buildPromptStep(input: {
     title: promptStepTitle(
       routeStep,
       routeStepIndex,
-      selectedRoute.steps.some((step) => step.workRole === "prompt-design"),
+      hasSeparatePromptDesign,
     ),
     instruction: buildPromptInstruction({
       task,
@@ -364,7 +364,7 @@ function promptTextForWorkRole(input: {
         `Expected output: ${expectedOutput}`,
       ].join("\n");
     case "execution":
-      if (!hasSeparatePromptDesign && !taskNeedsSeparatePromptDesign(task)) {
+      if (!hasSeparatePromptDesign) {
         return [
           "Direct-work instruction:",
           `Produce the requested ${task.outputType} itself. Do not return a master prompt, prompt-writing advice, or a restatement of which tools to use.`,
@@ -401,7 +401,9 @@ function promptTextForWorkRole(input: {
     case "build-slice":
       return [
         "Build-slice execution instruction:",
-        "Paste the approved master prompt into this build helper or mode.",
+        hasSeparatePromptDesign
+          ? "Paste the approved master prompt into this build helper or mode."
+          : "Use the original task and direct working brief in this build helper or mode; no separate master-prompt pass is required.",
         "Produce the first usable build slice before adding polish or extra features.",
         "Include data flow, screens or files, tests, acceptance checks, deferred features, and the smallest next implementation action.",
         `The result must cover: ${deliverableText}.`,
@@ -489,7 +491,11 @@ function sourceUseReminder(routeStep: RouteStep, safeSourceIds: string[], source
     : `Source-use reminder: Use only these allowed source IDs for this step: ${sourceRefs}.`;
 }
 
-function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
+function expectedOutputForStep(
+  task: TaskIntake,
+  routeStep: RouteStep,
+  hasSeparatePromptDesign: boolean,
+) {
   if (routeStep.workRole) {
     switch (routeStep.workRole) {
       case "evidence-check":
@@ -497,7 +503,7 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
       case "prompt-design":
         return `A master prompt for "${task.title}" that covers ${requestedDeliverableSummary(task)}, names the execution mode, and includes checks and upgrade triggers.`;
       case "execution":
-        return taskNeedsSeparatePromptDesign(task)
+        return hasSeparatePromptDesign
           ? `The first usable ${task.outputType} for "${task.title}" produced from the approved master prompt.`
           : `The requested ${task.outputType} for "${task.title}" itself, with dependencies, decisions, missing inputs, risks, measures, review points, and first action made explicit where relevant.`;
       case "build-slice":

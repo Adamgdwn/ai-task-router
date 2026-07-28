@@ -4,7 +4,11 @@ import { defaultSources } from "../../domain/defaults/defaultSources";
 import { generateRouteCandidates, type RouteCandidate, type RouteCandidateGenerationResult } from "../../domain/routing/candidateGeneration";
 import { evaluateHardGates, type HardGateResult } from "../../domain/routing/hardGates";
 import { decomposeTask } from "../../domain/routing/taskDecomposition";
-import { buildToolModeCatalog, modeEstimateAnchorsForRouteStep } from "../../domain/routing/toolModeCatalog";
+import {
+  buildToolModeCatalog,
+  modeEstimateAnchorsForRouteStep,
+  toolModeCapabilityForRole,
+} from "../../domain/routing/toolModeCatalog";
 import { routeStepSchema } from "../../domain/schemas";
 import type { ModelInventoryItem, SourcePermission, TaskIntake } from "../../domain/types";
 import { routeReadyModels } from "../fixtures/routeReadyModels";
@@ -162,11 +166,34 @@ describe("route candidate generation", () => {
     expect(balanced.steps.map((step) => step.workRole)).toEqual(["execution"]);
     expect(balanced.steps[0]).toMatchObject({
       modelId: "chatgpt-go",
-      modeLabel: expect.stringContaining("direct execution"),
+      modeId: "chatgpt-go:prompt-reasoning",
+      modeLabel: expect.stringContaining("direct reasoning"),
       instruction: expect.stringContaining("produce the requested plan directly"),
     });
-    expect(balanced.steps[0]?.instruction).toContain("dependencies, decisions, risks, measures, review points");
+    expect(balanced.steps[0]?.instruction).toContain("responsibilities and owners");
+    expect(balanced.steps[0]?.instruction).toContain("dependencies and ordering");
+    expect(balanced.steps[0]?.instruction).toContain("risks and responses");
     expect(balanced.steps[0]?.instruction).not.toContain("Run the approved master prompt");
+
+    const simpleTask = buildTask({
+      id: "task-simple-rewrite-same-tools",
+      title: "Rewrite one paragraph",
+      description: "Rewrite this paragraph in plain language.",
+      knowledgeWorkType: "writing",
+      outputType: "draft",
+      qualityBar: "quick",
+      requestedSourceIds: [],
+    });
+    const simpleBalanced = requireCandidate(generateForTask(simpleTask, models).candidateResult, "balanced");
+
+    expect(simpleBalanced.steps).toEqual([
+      expect.objectContaining({
+        modelId: "chatgpt-go",
+        modeId: "chatgpt-go:execution-fast",
+        workRole: "execution",
+      }),
+    ]);
+    expect(simpleBalanced.steps[0]?.modeId).not.toBe(balanced.steps[0]?.modeId);
   });
 
   it("uses only allowed confidential sources and skips blocked model options", () => {
@@ -192,14 +219,14 @@ describe("route candidate generation", () => {
       modelId: "manual-human-review",
       sourceIds: ["local-files", "uploaded-documents"],
     });
-    expect(requireCandidate(candidateResult, "balanced").steps[0]).toMatchObject({
-      modelId: "user-mid-synthesis-model",
-      sourceIds: ["local-files", "uploaded-documents"],
-    });
-    expect(requireCandidate(candidateResult, "premium").steps[0]).toMatchObject({
-      modelId: "user-frontier-quality-model",
-      sourceIds: ["local-files", "uploaded-documents"],
-    });
+    expect(requireCandidate(candidateResult, "balanced").steps[0]?.sourceIds).toEqual([
+      "local-files",
+      "uploaded-documents",
+    ]);
+    expect(requireCandidate(candidateResult, "premium").steps[0]?.sourceIds).toEqual([
+      "local-files",
+      "uploaded-documents",
+    ]);
 
     for (const candidate of candidateResult.candidates) {
       expectValidRouteSteps(candidate);
@@ -594,14 +621,14 @@ describe("route candidate generation", () => {
     const { candidateResult } = generateForTask(task);
     const premium = requireCandidate(candidateResult, "premium");
 
-    expect(premium.steps.map((step) => step.kind)).toEqual(["model", "model", "artifact"]);
-    expect(premium.steps.map((step) => step.workRole)).toEqual(["prompt-design", "execution", "artifact-package"]);
-    expect(premium.steps[2]).toMatchObject({
+    expect(premium.steps.map((step) => step.kind)).toEqual(["model", "artifact"]);
+    expect(premium.steps.map((step) => step.workRole)).toEqual(["prompt-design", "artifact-package"]);
+    expect(premium.steps[1]).toMatchObject({
       id: "route-task-artifact-packaging-premium-artifact-package",
       modelId: "user-artifact-tool",
       sourceIds: ["web"],
     });
-    expect(premium.summary).toContain("It includes a packaging step for the requested artifact shape.");
+    expect(premium.summary).toContain("A specialist packaging pass is included");
     expectValidRouteSteps(premium);
   });
 
@@ -730,6 +757,37 @@ describe("route candidate generation", () => {
       // is the whole point of the per-token figure.
       expect(mode.pricingAnchorId).not.toBeNull();
     }
+  });
+
+  it("keeps free-account price separate from fast-versus-thinking resource weight", () => {
+    const task = buildTask({
+      id: "task-free-mode-weight",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+    });
+    const modes = buildToolModeCatalog(
+      [
+        createEverydayToolModel({
+          id: "chatgpt-free",
+          providerId: "chatgpt",
+          accountId: "basic",
+          frequencyId: "weekly",
+        }),
+      ],
+      task,
+    );
+    const thinking = modes.find((mode) => mode.id === "chatgpt-free:prompt-reasoning");
+    const fast = modes.find((mode) => mode.id === "chatgpt-free:execution-fast");
+
+    if (!thinking || !fast) {
+      throw new Error("Expected both ChatGPT Thinking and Fast modes.");
+    }
+
+    expect(thinking).toMatchObject({ zeroMarginalCost: true, resourceProfile: "standard" });
+    expect(fast).toMatchObject({ zeroMarginalCost: true, resourceProfile: "free" });
+    expect(toolModeCapabilityForRole(thinking.capabilityScores, "execution", task)).toBeGreaterThan(
+      toolModeCapabilityForRole(fast.capabilityScores, "execution", task),
+    );
   });
 
   /**

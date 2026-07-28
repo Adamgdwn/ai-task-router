@@ -112,8 +112,8 @@ describe("prompt package generator", () => {
     });
     expect(promptPackage.steps).toHaveLength(selectedRoute.steps.length);
     expect(promptPackage.steps[0]).toMatchObject({
-      id: "prompt-step-route-task-prompt-public-writing-lean-route-task-prompt-public-writing-lean-prompt-design",
-      title: "Step 1: Build Master Prompt",
+      id: "prompt-step-route-task-prompt-public-writing-lean-route-task-prompt-public-writing-lean-execution",
+      title: "Step 1: Produce Requested Output",
       requiresHumanApproval: false,
     });
     expect(promptPackage.steps[0]?.inputRefs).toEqual(
@@ -121,17 +121,17 @@ describe("prompt package generator", () => {
     );
     expect(promptPackage.steps[0]?.inputRefs).not.toContain("user-free-small-model");
     expect(promptPackage.steps[0]?.instruction).toContain("Use this prompt package as manual guidance only.");
-    expect(promptPackage.steps[0]?.instruction).toContain("Handoff stage: Create.");
+    expect(promptPackage.steps[0]?.instruction).toContain("Handoff stage: Do.");
     expect(promptPackage.steps[0]?.instruction).toContain("Recommended help:");
     expect(promptPackage.steps[0]?.instruction).toContain("Review checks:");
     expect(promptPackage.steps[0]?.instruction).toContain("Upgrade trigger:");
     expect(promptPackage.steps[0]?.instruction).toContain("Work type: writing. Output type: draft.");
-    expect(promptPackage.steps[0]?.instruction).toContain("Create a master prompt for this writing task");
-    expect(promptPackage.steps[0]?.instruction).toContain("Carry forward every requested piece");
+    expect(promptPackage.steps[0]?.instruction).toContain("Direct-work instruction:");
+    expect(promptPackage.steps[0]?.instruction).toContain("Produce the requested draft itself");
     expect(promptPackage.steps[0]?.instruction).toContain(
       "Use only these allowed source IDs for this step: web (Websites or web search), github (GitHub or repo pages).",
     );
-    expect(promptPackage.steps[0]?.expectedOutput).toContain("master prompt");
+    expect(promptPackage.steps[0]?.expectedOutput).toContain("requested draft");
   });
 
   it("carries prompt, model, and build deliverables into planning prompts", () => {
@@ -371,11 +371,10 @@ describe("prompt package generator", () => {
     const inputRefs = promptPackage.steps.flatMap((step) => step.inputRefs);
 
     expectValidPromptPackage(promptPackage);
-    expect(selectedRoute.steps.map((step) => step.kind)).toEqual(["manual", "manual", "human review"]);
+    expect(selectedRoute.steps.map((step) => step.kind)).toEqual(["manual", "human review"]);
     expect(promptPackage.steps.map((step) => step.title)).toEqual([
-      "Step 1: Build Master Prompt",
-      "Step 2: Run Finished Prompt",
-      "Step 3: Approve Before Use",
+      "Step 1: Produce Requested Output",
+      "Step 2: Approve Before Use",
     ]);
     expect(promptPackage.steps[promptPackage.steps.length - 1]?.requiresHumanApproval).toBe(true);
     expect(inputRefs).toContain("secure-local-source");

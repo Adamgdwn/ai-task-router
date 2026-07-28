@@ -1,4 +1,4 @@
-import type { CapabilityScores, ModelInventoryItem, PolicyDefault, ScoringWeights, TaskIntake } from "../types";
+import type { ModelInventoryItem, PolicyDefault, ScoringWeights, TaskIntake, WorkRole } from "../types";
 import type {
   RouteCandidate,
   RouteCandidateCostLevel,
@@ -7,6 +7,12 @@ import type {
   RouteCandidateStrategy,
   UnavailableRouteCandidate,
 } from "./candidateGeneration";
+import { analyzeTaskReasoning, capabilityTargetForRole } from "./taskReasoning";
+import {
+  buildToolModeCatalog,
+  toolModeCapabilityForRole,
+  type ToolModeCandidate,
+} from "./toolModeCatalog";
 
 const weightedComponentKeys = ["cost", "energy", "quality", "speed", "sourceFit", "sensitivityFit"] as const;
 
@@ -55,8 +61,6 @@ type ComponentScore = {
   explanation: string;
 };
 
-type CapabilityKey = keyof CapabilityScores;
-
 const ambiguousScoreThreshold = 2;
 const policyStrategyPreferenceThreshold = 12;
 
@@ -78,13 +82,6 @@ const effortSpeedScores: Record<RouteCandidateEffortLevel, number> = {
   high: 60,
 };
 
-const qualityBarTargets: Record<TaskIntake["qualityBar"], number> = {
-  quick: 45,
-  standard: 65,
-  high: 80,
-  critical: 90,
-};
-
 const strategyResourceRank: Record<RouteCandidateStrategy, number> = {
   lean: 0,
   balanced: 1,
@@ -104,12 +101,14 @@ export function scoreRouteCandidates({
   policy,
 }: ScoreRouteCandidatesInput): RouteScoringResult {
   const modelById = new Map(models.map((model) => [model.id, model]));
+  const modeById = new Map(buildToolModeCatalog(models, task).map((mode) => [mode.id, mode]));
   const normalizedWeights = normalizeScoringWeights(policy.scoringWeights);
   const scoredCandidates = candidateResult.candidates.map((candidate) =>
     scoreCandidate({
       task,
       candidate,
       modelById,
+      modeById,
       policy,
       normalizedWeights,
     }),
@@ -131,11 +130,12 @@ function scoreCandidate(input: {
   task: TaskIntake;
   candidate: RouteCandidate;
   modelById: Map<string, ModelInventoryItem>;
+  modeById: Map<string, ToolModeCandidate>;
   policy: PolicyDefault;
   normalizedWeights: ScoringWeights;
 }): ScoredRouteCandidate {
-  const { task, candidate, modelById, policy, normalizedWeights } = input;
-  const weightedComponents = buildWeightedComponents({ task, candidate, modelById, policy, normalizedWeights });
+  const { task, candidate, modelById, modeById, policy, normalizedWeights } = input;
+  const weightedComponents = buildWeightedComponents({ task, candidate, modelById, modeById, policy, normalizedWeights });
   const weightedScoreBeforePenalty = clampScore(
     weightedComponents.reduce((total, component) => total + component.contribution, 0),
   );
@@ -169,14 +169,15 @@ function buildWeightedComponents(input: {
   task: TaskIntake;
   candidate: RouteCandidate;
   modelById: Map<string, ModelInventoryItem>;
+  modeById: Map<string, ToolModeCandidate>;
   policy: PolicyDefault;
   normalizedWeights: ScoringWeights;
 }): RouteScoreComponent[] {
-  const { task, candidate, modelById, policy, normalizedWeights } = input;
+  const { task, candidate, modelById, modeById, policy, normalizedWeights } = input;
   const componentScores: Record<WeightedScoreComponentKey, ComponentScore> = {
     cost: scoreCostFit(candidate, task),
     energy: scoreEnergyFit(candidate, task),
-    quality: scoreQualityFit(candidate, task, modelById),
+    quality: scoreQualityFit(candidate, task, modelById, modeById),
     speed: scoreSpeedFit(candidate),
     sourceFit: scoreSourceFit(candidate, task),
     sensitivityFit: scoreSensitivityFit(candidate, task, modelById),
@@ -229,22 +230,54 @@ function scoreQualityFit(
   candidate: RouteCandidate,
   task: TaskIntake,
   modelById: Map<string, ModelInventoryItem>,
+  modeById: Map<string, ToolModeCandidate>,
 ): ComponentScore {
-  const capabilityKeys = capabilityKeysFor(task.knowledgeWorkType);
-  const models = modelsUsedForQuality(candidate, modelById);
-  const modelCapabilityScores = models.map((model) => averageCapabilityScore(model.capabilityScores, capabilityKeys));
-  const bestCapabilityScore = modelCapabilityScores.length > 0 ? Math.max(...modelCapabilityScores) : 1.75;
-  const supportingStepBonus = Math.min(10, Math.max(0, modelCapabilityScores.length - 1) * 5);
-  const capabilityPercent = clampScore(bestCapabilityScore * 20 + supportingStepBonus);
-  const target = qualityBarTargets[task.qualityBar];
-  const shortfall = Math.max(0, target - capabilityPercent);
-  const meetsTargetBonus = shortfall === 0 ? 25 : 10;
-  const rawScore = clampScore(capabilityPercent * 0.75 + meetsTargetBonus - shortfall * 0.5);
+  const profile = analyzeTaskReasoning(task);
+  const primaryRole: WorkRole = profile.promptArtifactRequested ? "prompt-design" : profile.primaryWorkRole;
+  const primaryStep = candidate.steps.find((step) => step.workRole === primaryRole);
+  const primaryCapability = capabilityForStep(primaryStep, primaryRole, task, modelById, modeById);
+  const target = capabilityTargetForRole(task, profile, primaryRole, "balanced");
+  const capabilityFit = clampScore((primaryCapability / target) * 100);
+  const stageChecks = [
+    primaryStep !== undefined,
+    !profile.requiresEvidence || candidate.steps.some((step) => step.workRole === "evidence-check"),
+    !profile.benefitsFromPromptHandoff ||
+      candidate.steps.some((step) => step.workRole === "prompt-design") ||
+      primaryCapability >= target + 0.45,
+    !profile.benefitsFromIndependentReview ||
+      candidate.steps.some((step) => step.workRole === "quality-review" || step.kind === "human review"),
+    !profile.benefitsFromSpecialistPackaging ||
+      candidate.steps.some((step) => step.workRole === "artifact-package") ||
+      (primaryStep?.modeId !== undefined &&
+        (modeById.get(primaryStep.modeId)?.capabilityScores.packaging ?? 0) >= 4),
+  ];
+  const stageCoverage = (stageChecks.filter(Boolean).length / stageChecks.length) * 100;
+  const rawScore = clampScore(capabilityFit * 0.78 + stageCoverage * 0.22);
 
   return {
     rawScore,
-    explanation: `The best route capability for ${task.knowledgeWorkType} work is compared with the ${task.qualityBar} quality bar.`,
+    explanation: `The primary mode is checked against this task's ${profile.demand} reasoning target, then the route is checked for the evidence, handoff, review, and packaging stages that this request actually needs.`,
   };
+}
+
+function capabilityForStep(
+  step: RouteCandidate["steps"][number] | undefined,
+  role: WorkRole,
+  task: TaskIntake,
+  modelById: Map<string, ModelInventoryItem>,
+  modeById: Map<string, ToolModeCandidate>,
+) {
+  if (!step) {
+    return 0;
+  }
+
+  const mode = step.modeId ? modeById.get(step.modeId) : undefined;
+  if (mode) {
+    return toolModeCapabilityForRole(mode.capabilityScores, role, task);
+  }
+
+  const model = step.modelId ? modelById.get(step.modelId) : undefined;
+  return model ? toolModeCapabilityForRole(model.capabilityScores, role, task) : 1.5;
 }
 
 function scoreSpeedFit(candidate: RouteCandidate): ComponentScore {
@@ -432,44 +465,6 @@ function normalizeScoringWeights(weights: ScoringWeights): ScoringWeights {
     sourceFit: weights.sourceFit / totalWeight,
     sensitivityFit: weights.sensitivityFit / totalWeight,
   };
-}
-
-function capabilityKeysFor(knowledgeWorkType: TaskIntake["knowledgeWorkType"]): CapabilityKey[] {
-  switch (knowledgeWorkType) {
-    case "research":
-      return ["research", "reasoning"];
-    case "synthesis":
-      return ["reasoning", "writing"];
-    case "analysis":
-      return ["reasoning"];
-    case "writing":
-      return ["writing"];
-    case "coding":
-      return ["coding", "reasoning"];
-    case "planning":
-      return ["reasoning", "writing"];
-    case "review":
-      return ["reasoning"];
-    case "packaging":
-      return ["packaging", "writing"];
-  }
-}
-
-function averageCapabilityScore(scores: CapabilityScores, keys: CapabilityKey[]) {
-  return keys.reduce((total, key) => total + scores[key], 0) / keys.length;
-}
-
-function modelsUsedForQuality(candidate: RouteCandidate, modelById: Map<string, ModelInventoryItem>) {
-  const modelIds = candidate.steps
-    .filter((step) => step.kind !== "human review")
-    .map((step) => step.modelId)
-    .filter((modelId): modelId is string => modelId !== undefined);
-  const uniqueModelIds = unique(modelIds);
-
-  return uniqueModelIds.flatMap((modelId) => {
-    const model = modelById.get(modelId);
-    return model ? [model] : [];
-  });
 }
 
 function modelsUsedByCandidate(candidate: RouteCandidate, modelById: Map<string, ModelInventoryItem>) {
