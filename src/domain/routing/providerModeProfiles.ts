@@ -30,9 +30,11 @@ export function chatGptGuidanceLabels(accountId: EverydayToolAccountId): Provide
   if (accountId === "go") {
     return {
       minimumModelLabel: "GPT-5.5 Instant for ordinary execution",
-      promptBuilderModelLabel: "the highest Go Thinking level for the master prompt, usually GPT-5.5 Thinking Medium",
+      promptBuilderModelLabel:
+        "the highest GPT-5.5 Thinking level your Go picker offers for the master prompt; use High, Extra High, or Max when shown, not Medium by default",
       executionModelLabel: "GPT-5.5 Instant after the master prompt is clear; GPT-5.5 Instant Mini only after limits",
-      upgradeModelLabel: "GPT-5.5 Thinking Medium again, or Plus/Pro if the prompt still misses the job",
+      upgradeModelLabel:
+        "the next higher GPT-5.5 Thinking level your Go picker offers, or Plus/Pro only if Go has no stronger setting and the prompt still misses the job",
     };
   }
 

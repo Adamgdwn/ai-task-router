@@ -265,7 +265,7 @@ describe("route candidate generation", () => {
           kind: "model",
           modelId: "chatgpt-go",
           workRole: "prompt-design",
-          modeLabel: expect.stringContaining("highest Go Thinking level"),
+          modeLabel: expect.stringContaining("highest GPT-5.5 Thinking level"),
         }),
         expect.objectContaining({
           kind: "model",

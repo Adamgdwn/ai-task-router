@@ -323,7 +323,6 @@ describe("App", () => {
     expect(screen.getAllByText(/Use .* to /).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Path for this stage").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Action").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Why").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Check").length).toBeGreaterThan(0);
     expect(document.querySelectorAll(".stageGuidanceSection details")).toHaveLength(0);
     expect(document.querySelectorAll(".stageGuidanceSection summary")).toHaveLength(0);
@@ -518,6 +517,14 @@ describe("App", () => {
     expect(screen.getByText("Build the insight and recommendation view")).toBeInTheDocument();
     expect(screen.getAllByText(/GPT-5.5 Pro Extended/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Claude/).length).toBeGreaterThan(0);
+    const buildPath = screen.getByRole("region", { name: "Run the build-plan prompt path" });
+    expect(within(buildPath).getAllByText("Action")).toHaveLength(5);
+    expect(within(buildPath).getAllByText("If metered")).toHaveLength(5);
+    expect(within(buildPath).getAllByText("Check")).toHaveLength(5);
+    expect(within(buildPath).queryByText("Help")).not.toBeInTheDocument();
+    expect(within(buildPath).queryByText("Mode")).not.toBeInTheDocument();
+    expect(within(buildPath).queryByText("Why")).not.toBeInTheDocument();
+    expect(within(buildPath).queryByText("Upgrade trigger")).not.toBeInTheDocument();
   });
 
   it("shows blocked routes when requested sources fail local gates", async () => {

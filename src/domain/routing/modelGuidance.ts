@@ -61,7 +61,7 @@ function modelLabelForPromptDesign(model: ModelInventoryItem): string {
   }
 
   const guidance = modelUseGuidance(model);
-  return `${model.label} (prompt builder ${guidance.promptBuilderModelLabel}; run later with ${guidance.executionModelLabel})`;
+  return `${model.label} (prompt builder ${guidance.promptBuilderModelLabel})`;
 }
 
 export function modelLabelForPromptDesignForTask(model: ModelInventoryItem, task: TaskIntake): string {

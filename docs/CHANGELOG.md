@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed Stage 2 reasoning guidance so ChatGPT Go no longer treats GPT-5.5 Thinking Medium as the usual highest choice when High, Extra High, or Max is available; repaired the Stage 3 handoff and project-plan layout while keeping all five concrete build items visible.
 - Initial project setup.
 - Added the desktop trust and distribution planning baseline for future hosted/PWA and signed desktop release paths.
 - Adopted the New Build Agent document-control standard locally and routed controlled docs, validation logs, ADRs, registers, and handoffs through it.

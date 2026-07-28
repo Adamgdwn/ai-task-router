@@ -176,6 +176,26 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByText("Action").first()).toBeVisible();
   await expect(page.locator(".stageGuidanceSection details")).toHaveCount(0);
   await expect(page.locator(".stageGuidanceSection summary")).toHaveCount(0);
+  const stageLayout = await page.locator(".stageGuidanceItem.stage-create").evaluate((stage) => {
+    const row = stage.getBoundingClientRect();
+    const overview = stage.querySelector(".stageOverview")?.getBoundingClientRect();
+    const actions = stage.querySelector(".stageActionGrid")?.getBoundingClientRect();
+    const path = stage.querySelector(".stageWorkItems")?.getBoundingClientRect();
+    const methodPill = stage.querySelector(".methodPill")?.getBoundingClientRect();
+
+    return {
+      rowWidth: row.width,
+      overviewTop: overview?.top ?? 0,
+      actionsTop: actions?.top ?? 0,
+      pathTop: path?.top ?? 0,
+      pathWidth: path?.width ?? 0,
+      methodPillHeight: methodPill?.height ?? 0,
+    };
+  });
+  expect(Math.abs(stageLayout.overviewTop - stageLayout.actionsTop)).toBeLessThan(2);
+  expect(stageLayout.pathTop).toBeGreaterThan(stageLayout.actionsTop);
+  expect(stageLayout.pathWidth).toBeGreaterThan(stageLayout.rowWidth * 0.9);
+  expect(stageLayout.methodPillHeight).toBeLessThan(40);
   await expect(page.getByRole("heading", { name: "Your options" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Selected route", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Choose this route" }).first()).toBeVisible();

@@ -103,51 +103,67 @@ function StageGuidanceItem({
         <section className="stageWorkItems" aria-label={`${stage.label} path`}>
           <h5>Path for this stage</h5>
           <ol>
-            {stage.workItems.map((item) => (
-              <li key={item.id}>
-                <div>
-                  <span>{workRoleLabel(item.workRole)}</span>
-                  <strong>{item.label}</strong>
-                </div>
-                <p>{item.expectedOutput}</p>
-                <dl>
+            {stage.workItems.map((item) => {
+              const usesPrimaryRoute =
+                primaryWorkItem?.recommendedModelLabel === item.recommendedModelLabel &&
+                primaryWorkItem?.modeLabel === item.modeLabel &&
+                primaryWorkItem?.selectionReasons[0] === item.selectionReasons[0] &&
+                primaryWorkItem?.upgradeTrigger === item.upgradeTrigger;
+
+              return (
+                <li key={item.id}>
                   <div>
-                    <dt>Action</dt>
-                    <dd>{stageDecisionLabel(item)}</dd>
+                    <span>{workRoleLabel(item.workRole)}</span>
+                    <strong>{item.label}</strong>
                   </div>
-                  <div>
-                    <dt>Help</dt>
-                    <dd>{item.recommendedModelLabel}</dd>
-                  </div>
-                  {item.modeLabel ? (
+                  <p>{item.expectedOutput}</p>
+                  <dl>
                     <div>
-                      <dt>Mode</dt>
-                      <dd>{item.modeLabel}</dd>
+                      <dt>Action</dt>
+                      <dd>
+                        {usesPrimaryRoute
+                          ? `${item.label} using the recommended help above.`
+                          : stageDecisionLabel(item)}
+                      </dd>
                     </div>
-                  ) : null}
-                  <div>
-                    <dt>If metered</dt>
-                    <dd>{workItemEstimateLabel(item)}</dd>
-                  </div>
-                  {item.selectionReasons[0] ? (
+                    {!usesPrimaryRoute ? (
+                      <div>
+                        <dt>Help</dt>
+                        <dd>{item.recommendedModelLabel}</dd>
+                      </div>
+                    ) : null}
+                    {!usesPrimaryRoute && item.modeLabel ? (
+                      <div>
+                        <dt>Mode</dt>
+                        <dd>{item.modeLabel}</dd>
+                      </div>
+                    ) : null}
                     <div>
-                      <dt>Why</dt>
-                      <dd>{item.selectionReasons[0]}</dd>
+                      <dt>If metered</dt>
+                      <dd>{workItemEstimateLabel(item)}</dd>
                     </div>
-                  ) : null}
-                  {item.reviewChecks[0] ? (
-                    <div>
-                      <dt>Check</dt>
-                      <dd>{item.reviewChecks[0]}</dd>
-                    </div>
-                  ) : null}
-                  <div>
-                    <dt>Upgrade trigger</dt>
-                    <dd>{item.upgradeTrigger}</dd>
-                  </div>
-                </dl>
-              </li>
-            ))}
+                    {!usesPrimaryRoute && item.selectionReasons[0] ? (
+                      <div>
+                        <dt>Why</dt>
+                        <dd>{item.selectionReasons[0]}</dd>
+                      </div>
+                    ) : null}
+                    {item.reviewChecks[0] ? (
+                      <div>
+                        <dt>Check</dt>
+                        <dd>{item.reviewChecks[0]}</dd>
+                      </div>
+                    ) : null}
+                    {!usesPrimaryRoute ? (
+                      <div>
+                        <dt>Upgrade trigger</dt>
+                        <dd>{item.upgradeTrigger}</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </li>
+              );
+            })}
           </ol>
         </section>
       ) : null}
@@ -195,4 +211,3 @@ function workItemEstimateLabel(item: ProjectStageGuidance["workItems"][number]) 
 
   return cost ?? energy ?? "No estimate";
 }
-

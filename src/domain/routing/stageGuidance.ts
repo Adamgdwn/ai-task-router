@@ -623,7 +623,7 @@ function createStageLabel(task: TaskIntake) {
 
 function createStagePurpose(task: TaskIntake) {
   if (needsFullBuildPlan(task)) {
-    return "Use the highest-level helper or reasoning mode you already own for the thinking-heavy part: create the master prompt before any lower-cost execution run.";
+    return "Use the strongest prompt-building model and reasoning level actually available in the account you selected, then create the master prompt before any lower-cost execution run.";
   }
 
   if (task.knowledgeWorkType === "coding") {
@@ -652,7 +652,7 @@ function createStagePurpose(task: TaskIntake) {
 function createStageActions(task: TaskIntake) {
   if (needsFullBuildPlan(task)) {
     return [
-      "Ask the highest-level model or reasoning mode you own to create the master prompt before any lower-mode execution run.",
+      "Choose the strongest prompt-building model and reasoning level actually shown in your selected account; do not stop at a default Medium setting when a higher level is available.",
       `Make one prompt cover the main deliverables: ${compactTaskDeliverableSummary(task)}.`,
       `Require the prompt to produce the actual build path: ${buildPlanCoverageSummary(task)}.`,
       "Include four sections only: Plan, Do, Check, and Act, plus privacy limits, acceptance checks, exact execution mode, and upgrade trigger.",
@@ -723,7 +723,7 @@ function packageStageLabel(task: TaskIntake) {
   }
 
   if (needsFullBuildPlan(task)) {
-    return "Execute the build plan prompt";
+    return "Run the build-plan prompt";
   }
 
   if (taskHasBuildIntent(task)) {
@@ -747,7 +747,7 @@ function packageStageLabel(task: TaskIntake) {
 
 function packageStagePurpose(task: TaskIntake) {
   if (needsFullBuildPlan(task)) {
-    return "Paste the approved master prompt into the lightest adequate execution mode and make it produce the actual build plan, model choice, and first usable slice.";
+    return "This is a manual handoff: after Stage 2, run the finished master prompt in the recommended execution mode to produce the actual build plan and first usable slice.";
   }
 
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
@@ -780,7 +780,8 @@ function packageStagePurpose(task: TaskIntake) {
 function packageStageActions(task: TaskIntake) {
   if (needsFullBuildPlan(task)) {
     return [
-      "Paste the approved master prompt into the chosen lighter execution model or mode.",
+      "Finish Stage 2, then save this route and open Copy-Ready Prompts.",
+      "Copy the finished master prompt and paste it into the recommended execution model or mode shown here.",
       `Generate the actual plan or build brief, not more prompt advice: ${buildPlanCoverageSummary(task)}.`,
       "Require data flow, screens or files, acceptance tests, and what can wait for a later pass.",
       "Stop after the first usable slice is clear enough for a human review.",

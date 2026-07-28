@@ -240,16 +240,19 @@ describe("route card generator", () => {
     });
     expect(createStage).toMatchObject({
       label: "Build the master prompt",
-      recommendedModelLabel: expect.stringContaining("GPT-5.5 Thinking Medium"),
+      recommendedModelLabel: expect.stringContaining("highest GPT-5.5 Thinking level"),
     });
     expect(createStage?.recommendedModelLabel).not.toContain("Instant first");
+    expect(createStage?.recommendedModelLabel).not.toContain("usually GPT-5.5 Thinking Medium");
+    expect(createStage?.recommendedModelLabel).not.toContain("run later with");
     expect(createStage?.workItems).toHaveLength(1);
     expect(createStage?.workItems[0]).toMatchObject({
       label: "Build one master prompt",
-      recommendedModelLabel: expect.stringContaining("GPT-5.5 Thinking Medium"),
-      modeLabel: expect.stringContaining("Thinking Medium"),
+      recommendedModelLabel: expect.stringContaining("highest GPT-5.5 Thinking level"),
+      modeLabel: expect.stringContaining("highest GPT-5.5 Thinking level"),
       upgradeTrigger: expect.stringContaining("Upgrade the prompt-design helper only if"),
     });
+    expect(createStage?.workItems[0]?.modeLabel).not.toContain("usually GPT-5.5 Thinking Medium");
     expect(createStage?.workItems.map((item) => item.label).join(" ")).not.toContain("Prompt section");
     expect(createStage?.workItems[0]?.expectedOutput).toContain("One master prompt");
     expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
@@ -257,7 +260,7 @@ describe("route card generator", () => {
     expect(createStage?.actions.join(" ")).toContain("month-over-month tracking");
     expect(createStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage).toMatchObject({
-      label: "Execute the build plan prompt",
+      label: "Run the build-plan prompt",
       recommendedModelLabel: expect.stringContaining("execution GPT-5.5 Instant"),
     });
     expect(packageStage?.workItems.map((item) => item.label)).toEqual(
@@ -278,9 +281,11 @@ describe("route card generator", () => {
       });
     }
     expect(packageStage?.actions.join(" ")).toContain("actual plan or build brief");
+    expect(packageStage?.actions.join(" ")).toContain("Copy-Ready Prompts");
     expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");
-    expect(reviewStage?.recommendedModelLabel).toContain("GPT-5.5 Thinking Medium");
+    expect(reviewStage?.recommendedModelLabel).toContain("highest GPT-5.5 Thinking level");
+    expect(reviewStage?.recommendedModelLabel).not.toContain("usually GPT-5.5 Thinking Medium");
     expect(reviewStage?.recommendedModelLabel).not.toBe(packageStage?.recommendedModelLabel);
     expect(reviewStage?.actions.join(" ")).toContain("improvement and strength insights");
     expect(reviewStage?.reviewChecks.join(" ")).toContain("full requested build path");
@@ -334,7 +339,8 @@ describe("route card generator", () => {
 
     expectValidRouteCard(card);
     expect(card.recommendedOptionId).toBe("route-task-card-lean-chatgpt-build-lean");
-    expect(createStage?.recommendedModelLabel).toContain("GPT-5.5 Thinking Medium");
+    expect(createStage?.recommendedModelLabel).toContain("highest GPT-5.5 Thinking level");
+    expect(createStage?.recommendedModelLabel).toContain("not Medium by default");
     expect(createStage?.recommendedModelLabel).not.toContain("You first");
     expect(createStage?.actions.join(" ")).not.toContain("best model to execute the mini application");
     expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
