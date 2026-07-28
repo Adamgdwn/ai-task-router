@@ -1,15 +1,15 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.8.0
+Version: 1.9.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
-Next Review: After the scoped Cloudflare token is refreshed or replaced
-Last Updated: 2026-07-27T19:09:32-06:00
-Status Updated: 2026-07-27T19:09:32-06:00
+Next Review: At the next production deployment
+Last Updated: 2026-07-27T19:38:42-06:00
+Status Updated: 2026-07-27T19:38:42-06:00
 
 ## Purpose
 
@@ -39,7 +39,9 @@ If a future deploy hits `9109` again, the token's allowed-IP list is the thing t
 
 **Re-run 2026-07-26T11:41:28-06:00 from the same location.** Source `b8069fa` deployed to `https://cc915a90.ai-task-router.pages.dev` on the first attempt, unchanged. Fourth consecutive success. This run is the one that exposed the verification traps below: the canonical alias appeared stale on the first plain fetch and was not, and the first bundle string check ran against an SPA fallback and reported a clean pass it had not earned.
 
-**Attempt 2026-07-27T19:01:40-06:00 from the same home network, public IP `70.65.205.71`.** The owner authorized deployment of source `b75ed3e`. Clean install and all release gates passed, and both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing their values. Wrangler rejected the request before upload with authentication error `10000`. Read-only diagnosis then verified the token itself is active, but the accounts endpoint returns zero visible accounts and the configured Pages project returns `403 / 10000`. The token is therefore valid but not authorized for the stored account/project combination. The one-attempt stop rule was observed. Production did not change; correct the token resource scope or stored account ID before another attempt.
+**Attempt 2026-07-27T19:01:40-06:00 from the same home network, public IP `70.65.205.71`.** The owner authorized deployment of source `b75ed3e`. Clean install and all release gates passed, and both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing their values. Wrangler rejected the request before upload with authentication error `10000`. The configured Pages project returned `403 / 10000`; the user-token verification endpoint reported the token active, but Cloudflare documents that verification does not apply client-IP restrictions, so that result was not proof that the token was operationally authorized. The one-attempt stop rule was observed and production did not change.
+
+**Resolved 2026-07-27T19:37:14-06:00 with the new account-owned control-plane token.** A read-only request to the actual `ai-task-router` Pages project returned HTTP 200 before deployment. The generic user-token verification endpoint returned 401 because it is not the correct verifier for this account-owned credential; the resource request was the authoritative check. After all release gates passed, Wrangler deployed source `50478e0`, carrying the Stage 2 reasoning and Stage 3 project-plan repair from `b75ed3e`, to `https://79dab484.ai-task-router.pages.dev` in one attempt. The canonical alias served the exact local asset immediately, and hosted E2E passed 7/7.
 
 ## Verification Traps
 
@@ -79,12 +81,13 @@ Absence of a forbidden phrase is only evidence when the haystack is real.
 
 ## Which URL Is Live Right Now
 
-Verified 2026-07-26T11:41:28-06:00 by fetching each URL and comparing the hashed asset it references.
+Verified 2026-07-27T19:38:42-06:00 by fetching each URL and comparing the hashed asset it references.
 
 | Item | Status | Notes |
 |---|---|---|
-| Canonical production URL | live at source `0c81132`; current repair undeployed | Re-verified 2026-07-27T19:02:03-06:00. `https://ai-task-router.pages.dev/` serves asset `index-BHonc_lf.js` from deployment `https://743db3ef.ai-task-router.pages.dev/`. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; per-deploy hash URLs must not be published. |
-| Live build contents | prior build confirmed after failed deploy | The live asset is 660,237 characters, proving the check used the real bundle rather than the SPA fallback. It contains `usually GPT-5.5 Thinking Medium` and does not contain `not Medium by default`, confirming source `b75ed3e` was not uploaded. |
+| Canonical production URL | live at source `50478e0`; application build current | `https://ai-task-router.pages.dev/` serves `index-X2Tnl_UX.js` from deployment `https://79dab484.ai-task-router.pages.dev/`. The only post-deploy `main` changes are release-record documentation. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; per-deploy hash URLs must not be published. |
+| Live build contents | current repair confirmed | The canonical and immutable URLs both serve the exact 660,744-byte local asset rather than the SPA fallback. `not Medium by default` and `Run the build-plan prompt` are present; `usually GPT-5.5 Thinking Medium` is absent. Manifest and service worker return 200, and hosted E2E passed 7/7. |
+| `https://743db3ef.ai-task-router.pages.dev` | superseded | Serves the prior catalog-review build from source `0c81132`. |
 | `https://cc915a90.ai-task-router.pages.dev` | superseded | Serves `index-Dc_ddyS3.js` from source `b8069fa`. Production for roughly ten hours on 2026-07-26. |
 | `https://9d00dce4.ai-task-router.pages.dev` | superseded | Serves `index-Dv6r8WOf.js` from source `a34d839`. It was the production deployment for roughly thirty minutes on 2026-07-26; it is no longer what the canonical URL points at. |
 | `https://d81aef5b.ai-task-router.pages.dev` | superseded | Serves `index-CBWnLbEK.js` from source `69b31a2`. It was the production deployment for roughly fifty minutes on 2026-07-26; it is no longer what the canonical URL points at. |

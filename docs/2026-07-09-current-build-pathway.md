@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.13.0
+Version: 1.14.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: During the next substantial build session
-Last Updated: 2026-07-27T19:09:32-06:00
-Status Updated: 2026-07-27T19:09:32-06:00
+Last Updated: 2026-07-27T19:38:42-06:00
+Status Updated: 2026-07-27T19:38:42-06:00
 
 ## Purpose
 
@@ -31,14 +31,14 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live; current stage repair is undeployed and deployment is blocked | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://743db3ef.ai-task-router.pages.dev` from source `0c81132`, deployed 2026-07-26T21:40:00-06:00. The owner authorized deployment of the Stage 2 reasoning and Stage 3 project-plan repair on 2026-07-27, but Cloudflare rejected the single attempt with authentication error `10000` before upload. |
+| Browser/PWA app | live; application build current | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://79dab484.ai-task-router.pages.dev` from source `50478e0`, deployed 2026-07-27T19:37:14-06:00. The deployment carries the Stage 2 reasoning and Stage 3 project-plan repair implemented in `b75ed3e`; the only post-deploy `main` changes are release-record documentation. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Desktop track | abandoned 2026-07-26T09:31:44-06:00 | Removed entirely: Tauri shell, local discovery, packaging and gate scripts, and the "Desktop app - Coming Soon!" card that promised computer checking on production. Planning and evidence docs are in `docs/archive/`. See [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Stage reasoning and project-plan repair: integration complete, deployment blocked | ChatGPT Go prompt design no longer calls Medium the usual highest choice: it tells the user to select the highest GPT-5.5 Thinking level actually shown, including High, Extra High, or Max when available. Stage 3 is an explicit manual handoff into Copy-Ready Prompts and the recommended execution mode. Its path now sits below aligned overview/actions, shared routing details render once, and all five concrete build items remain visible. Full release gates pass. The authorized Cloudflare attempt failed with authentication error `10000`; production remains on `0c81132`. |
+| Active chunk | Stage reasoning and project-plan repair: task complete and live | ChatGPT Go prompt design no longer calls Medium the usual highest choice: it tells the user to select the highest GPT-5.5 Thinking level actually shown, including High, Extra High, or Max when available. Stage 3 is an explicit manual handoff into Copy-Ready Prompts and the recommended execution mode. Its path now sits below aligned overview/actions, shared routing details render once, and all five concrete build items remain visible. Full local and hosted release gates pass, and production serves the exact verified build. |
 
 ## Product Boundary
 
@@ -493,7 +493,8 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 
 | 2026-07-26T21:40:00-06:00 | Deploy and verify the catalog review | pass | Source `0c81132` to `https://743db3ef.ai-task-router.pages.dev`, one attempt from `70.65.205.71`; sixth consecutive success. Canonical alias followed on the first cache-busted check. Live bundle 660,237 characters, matching the build. Present: `Gemini 3 Flash on Fast`, `Gemini 3 Pro`, `Claude Opus 5 with effort`, `Grok 4.5 for hard reasoning`, and both dated-change strings. Absent, as intended: `Gemini 2.5 Flash`, `Gemini 2.5 Pro`, `Claude Opus 4.8` - the retired names are gone from what users see. No R-010 vocabulary. Hosted E2E 7/7 first run. |
 | 2026-07-27T18:53:34-06:00 | Stage reasoning and project-plan repair | pass; integration complete, undeployed | Governance preflight passed with 0 warnings. Vitest passed 17 files and 174 tests; script tests passed 5/5; TypeScript/Vite production build and bundle budget passed (javascript raw 660.74 kB / 700.00 kB, stylesheet raw 43.70 kB / 60.00 kB); local Playwright passed 7/7; `npm audit --audit-level=moderate` found 0 vulnerabilities; the web release-candidate scan found no release-blocking findings. Browser reproduction confirmed the original Stage 3 row was 3,350 px high with a 389 px method pill; the repaired row is 1,591 px with a 25 px pill, aligned overview/actions, a full-width path, and all five build items visible. No deployment was attempted. |
-| 2026-07-27T19:01:40-06:00 | Authorized Cloudflare production deployment of `b75ed3e` | blocked before upload | Clean install and full release gates passed again: 174/174 Vitest, 5/5 script tests, 7/7 local Playwright, production build and bundle budget, 0 audit vulnerabilities, clean release-candidate scan, and all PWA artifacts present. Public IP was the previously allowed `70.65.205.71`; `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing values. Wrangler rejected the one permitted attempt with authentication error `10000`. Follow-up read-only checks proved the token is active, but it sees zero Cloudflare accounts and receives `403 / 10000` for the configured Pages project. No files uploaded and production stayed on asset `index-BHonc_lf.js` at 660,237 characters; it contains the old Medium copy and not the repair marker. |
+| 2026-07-27T19:01:40-06:00 | Authorized Cloudflare production deployment of `b75ed3e` | blocked before upload | Clean install and full release gates passed again: 174/174 Vitest, 5/5 script tests, 7/7 local Playwright, production build and bundle budget, 0 audit vulnerabilities, clean release-candidate scan, and all PWA artifacts present. Public IP was the previously allowed `70.65.205.71`; `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing values. Wrangler rejected the one permitted attempt with authentication error `10000`. The user-token verifier reported active, but that endpoint ignores client-IP restrictions; the actual configured Pages project returned `403 / 10000`, which was the authoritative failure. No files uploaded and production stayed on asset `index-BHonc_lf.js` at 660,237 characters; it contains the old Medium copy and not the repair marker. |
+| 2026-07-27T19:37:14-06:00 | Deploy and verify the Stage 2 reasoning and Stage 3 project-plan repair | pass | The new account-owned Cloudflare control-plane token returned HTTP 200 for the actual Pages project before deployment. Governance preflight passed with 0 warnings; `npm audit` found 0 vulnerabilities; Vitest passed 174/174; the production build and bundle budgets passed; the release-candidate scan was clean; local Playwright passed 7/7. Wrangler deployed source `50478e0`, carrying the repair from `b75ed3e`, to `https://79dab484.ai-task-router.pages.dev` in one attempt. Canonical and immutable URLs both serve `index-X2Tnl_UX.js` at exactly 660,744 bytes, matching `dist`; `not Medium by default` and `Run the build-plan prompt` are present, while `usually GPT-5.5 Thinking Medium` is absent. Manifest and service worker return 200, and hosted Playwright passed 7/7. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -558,9 +559,9 @@ The active pathway now includes a chunk queue and six plan chunks with objective
 
 A functional audit of `59dd849` on 2026-07-25 found gaps between what the app claims and what it does. The remediation queue is [2026-07-25-audit-remediation-plan.md](2026-07-25-audit-remediation-plan.md); all thirteen chunks, R0 through R12, are complete as of 2026-07-25T16:58:01-06:00. There is no next coder chunk in that queue. The audit chunks are self-contained and name their own context load, so do not read this pathway's history to work them.
 
-The Cloudflare deploy blocker is resolved. It was the network location the token was used from, not the token or the build, and the recovery path in [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) has now worked unchanged from the owner's home network four times. Use that note as the deploy runbook.
+The Cloudflare deploy blocker is resolved. The original user-scoped token path was rejected, but the account-owned control-plane token added on 2026-07-27 returned HTTP 200 for the actual Pages project and completed the deployment on the first attempt. Use [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) as the deploy runbook.
 
-**Production remains at `0c81132`, deployed 2026-07-26T21:40:00-06:00.** The owner authorized deployment of the integration-complete Stage 2 reasoning and Stage 3 project-plan repair on 2026-07-27, but Cloudflare rejected the single attempt with authentication error `10000` before upload. The stored token is active but sees zero accounts and cannot access the configured Pages project, so the token resource scope or stored account ID must be corrected before another authorized attempt. The repair is deliberately narrow: no new provider connection or execution behavior was added.
+**The production application build is current at source `50478e0`, deployed 2026-07-27T19:37:14-06:00; the only post-deploy `main` changes are release-record documentation.** The deployment carries the Stage 2 reasoning and Stage 3 project-plan repair from `b75ed3e`. Canonical production serves the exact 660,744-byte local asset, both repair markers are present, the contradictory Medium-default wording is absent, and hosted E2E passed 7/7. The repair is deliberately narrow: no new provider connection or execution behavior was added.
 
 Two verification lessons from the last deploy are worth carrying, because both would have produced a confident wrong answer:
 
