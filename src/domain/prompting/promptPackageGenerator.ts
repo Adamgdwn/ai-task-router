@@ -180,7 +180,9 @@ function stageHandoffLines(routeStep: RouteStep, hasSeparatePromptDesign: boolea
 function stageLabelForRouteStep(routeStep: RouteStep, hasSeparatePromptDesign: boolean): string {
   if (routeStep.workRole) {
     const stageByWorkRole: Record<WorkRole, string> = {
+      "scope-framing": "Frame",
       "evidence-check": "Gather",
+      "plan-synthesis": "Create",
       "prompt-design": "Create",
       execution: hasSeparatePromptDesign ? "Package" : "Do",
       "build-slice": "Package",
@@ -218,9 +220,17 @@ function toolLabelForRouteStep(routeStep: RouteStep): string {
 function reviewChecksForPromptHandoff(routeStep: RouteStep, hasSeparatePromptDesign: boolean): string[] {
   if (routeStep.workRole) {
     const checksByWorkRole: Record<WorkRole, string[]> = {
+      "scope-framing": [
+        "The draft scope includes outcome, boundaries, assumptions, missing decisions, and a usable working brief.",
+        "Only genuinely blocking questions are handed back to the user.",
+      ],
       "evidence-check": [
         "Current facts, source notes, model availability, and privacy assumptions are dated or marked uncertain.",
         "No unapproved source is required for the next stage.",
+      ],
+      "plan-synthesis": [
+        "The result is the actual ordered plan, not prompt advice.",
+        "Dependencies, owners, decisions, risks, measures, review points, acceptance checks, and first action are explicit.",
       ],
       "prompt-design": [
         "The master prompt covers the requested deliverables, execution mode, privacy limits, acceptance checks, and upgrade trigger.",
@@ -248,8 +258,12 @@ function reviewChecksForPromptHandoff(routeStep: RouteStep, hasSeparatePromptDes
 
 function upgradeTriggerForPromptHandoff(routeStep: RouteStep, hasSeparatePromptDesign: boolean): string {
   switch (routeStep.workRole) {
+    case "scope-framing":
+      return "Upgrade scope framing only if important boundaries, assumptions, or blocking decisions remain unresolved";
     case "evidence-check":
       return "Upgrade research only if current facts, citations, or model/privacy details are too thin";
+    case "plan-synthesis":
+      return "Upgrade plan synthesis only if one focused retry still misses dependencies, decisions, risks, measures, or acceptance checks";
     case "prompt-design":
       return "Upgrade prompt design only if the master prompt misses deliverables, checks, privacy, or the execution model choice";
     case "execution":
@@ -341,12 +355,38 @@ function promptTextForWorkRole(input: {
   ];
 
   switch (routeStep.workRole) {
+    case "scope-framing":
+      return [
+        "Scope-framing instruction:",
+        `Task title: ${task.title}`,
+        `Rough request: ${task.description}`,
+        `The finished output must cover: ${deliverableText}.`,
+        `Use only these source IDs: ${sourceRefs}.`,
+        "Draft the outcome, audience, scope boundaries, exclusions, assumptions, missing decisions, dependencies, risks, measures, acceptance checks, and first action.",
+        "Make reasonable assumptions explicit. Ask only about unknowns that genuinely block useful work.",
+        "Finish with a copy-ready working brief that the reasoning model can execute without making the user rebuild the scope.",
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
     case "evidence-check":
       return [
         "Evidence-check instruction:",
         `Use only these source IDs: ${sourceRefs}.`,
         "Collect current facts, citation notes, model availability, privacy notes, and any uncertainties before prompt design.",
         "Do not draft the final result yet.",
+        `Expected output: ${expectedOutput}`,
+      ].join("\n");
+    case "plan-synthesis":
+      return [
+        "Plan-synthesis instruction:",
+        `Task title: ${task.title}`,
+        `Task description: ${task.description}`,
+        `Use the approved scope and evidence to produce the actual ${task.outputType}.`,
+        `The plan must cover: ${deliverableText}.`,
+        "Order the work by real dependencies, not generic headings.",
+        "For each phase or step, name the output, owner, inputs, decision point, risks, completion check, and what must be true before the next step.",
+        "Keep assumptions and unresolved blockers visible; do not ask the user to rebuild the scope.",
+        "End with measures, review points, acceptance checks, and the first action.",
+        ...reviewLines,
         `Expected output: ${expectedOutput}`,
       ].join("\n");
     case "prompt-design":
@@ -427,7 +467,8 @@ function promptTextForWorkRole(input: {
     case "next-action":
       return [
         "Next-action instruction:",
-        "Choose the smallest useful action, the measure to check next, and whether this route should be reused or upgraded.",
+        "Turn the approved plan into a short execution handoff without changing its scope or redoing its reasoning.",
+        "Name the first action, owner, required inputs, completion check, and next review point.",
         `Expected output: ${expectedOutput}`,
       ].join("\n");
   }
@@ -498,8 +539,12 @@ function expectedOutputForStep(
 ) {
   if (routeStep.workRole) {
     switch (routeStep.workRole) {
+      case "scope-framing":
+        return `An execution-ready scope for "${task.title}" with outcome, boundaries, assumptions, blocking questions, dependencies, risks, measures, acceptance checks, and a copy-ready working brief.`;
       case "evidence-check":
         return `Evidence notes for "${task.title}" with current facts, source notes, model/privacy assumptions, and uncertainty.`;
+      case "plan-synthesis":
+        return `The actual ordered ${task.outputType} for "${task.title}" with dependencies, owners, decisions, risks, measures, review points, acceptance checks, and first action.`;
       case "prompt-design":
         return `A master prompt for "${task.title}" that covers ${requestedDeliverableSummary(task)}, names the execution mode, and includes checks and upgrade triggers.`;
       case "execution":
@@ -513,7 +558,7 @@ function expectedOutputForStep(
       case "quality-review":
         return `A review decision for "${task.title}" with required fixes, missing deliverables, privacy issues, and reroute or upgrade notes.`;
       case "next-action":
-        return `The smallest next action for "${task.title}" plus the measure and route lesson to save.`;
+        return `A short execution handoff for "${task.title}" with the first action, owner, inputs, completion check, and next review point.`;
     }
   }
 
@@ -536,7 +581,9 @@ function expectedOutputForStep(
 function promptStepTitle(routeStep: RouteStep, routeStepIndex: number, hasSeparatePromptDesign: boolean) {
   if (routeStep.workRole) {
     const actionByRole: Record<NonNullable<RouteStep["workRole"]>, string> = {
+      "scope-framing": "Frame Scope",
       "evidence-check": "Check Evidence",
+      "plan-synthesis": "Synthesize Plan",
       "prompt-design": "Build Master Prompt",
       execution: hasSeparatePromptDesign ? "Run Finished Prompt" : "Produce Requested Output",
       "build-slice": "Execute Build Slice",

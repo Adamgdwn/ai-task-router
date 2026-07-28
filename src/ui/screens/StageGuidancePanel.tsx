@@ -185,7 +185,9 @@ function lowercaseFirst(value: string) {
 
 function workRoleLabel(workRole: ProjectStageGuidance["workItems"][number]["workRole"]) {
   const labels: Record<ProjectStageGuidance["workItems"][number]["workRole"], string> = {
+    "scope-framing": "Scope",
     "evidence-check": "Evidence",
+    "plan-synthesis": "Plan",
     "prompt-design": "Prompt",
     execution: "Use helper",
     "build-slice": "Build",

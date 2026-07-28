@@ -1,6 +1,10 @@
 import type { TaskIntake, WorkRole } from "../types";
 
 type TaskDeliverableKind =
+  | "outcome"
+  | "scope"
+  | "assumptions"
+  | "decision"
   | "prompt"
   | "build"
   | "data-flow"
@@ -49,6 +53,30 @@ const buildIntentPatterns = [
 
 const detectorDefinitions: DeliverableDetector[] = [
   {
+    kind: "outcome",
+    label: "outcome and success definition",
+    patterns: [/\b(outcomes?|goals?|objectives?|desired result|what success looks like|finish line)\b/],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+  },
+  {
+    kind: "scope",
+    label: "scope boundaries and exclusions",
+    patterns: [/\b(scope|boundaries|in scope|out of scope|exclusions?|non-goals?)\b/],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+  },
+  {
+    kind: "assumptions",
+    label: "assumptions and blocking unknowns",
+    patterns: [/\b(assumptions?|unknowns?|open questions?|missing information|clarif(y|ication|ications))\b/],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+  },
+  {
+    kind: "decision",
+    label: "options, criteria, and tradeoffs",
+    patterns: [/\b(options?|alternatives?|criteria|tradeoffs?|trade-offs?|pros and cons|compare|decision)\b/],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+  },
+  {
     kind: "prompt",
     label: "copy-ready master prompt",
     patterns: [/\bprompt(s|ing)?\b/, /\bprompt package\b/],
@@ -58,97 +86,97 @@ const detectorDefinitions: DeliverableDetector[] = [
     kind: "build",
     label: "first usable tool or app build",
     patterns: buildIntentPatterns,
-    roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
     kind: "data-flow",
     label: "spreadsheet import or paste-in data flow",
     patterns: [/\b(spreadsheets?|sheets?|excel|csv|downloads?|uploads?|imports?|exports?|paste)\b/],
-    roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
     kind: "categorization",
     label: "categorization rules",
     patterns: [/\bcategor(y|ies|ize|izes|ise|ises|ized|ised|ization|isation|izing|ising)\b/, /\bclassif(y|ication|y into)\b/],
-    roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+    roles: ["plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
     kind: "tracking",
     label: "month-over-month tracking",
     patterns: [/\b(monthly|months?|month over month|month-over-month|tracks?|tracking|track them month|track.*month|over month|trends?|timeline)\b/],
-    roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+    roles: ["plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
     kind: "insight",
     label: "improvement and strength insights",
     patterns: [/\b(improves?|improvement|where .*doing well|doing really well|strength|insights?|recommends?|recommendations?|next actions?|opportunit(y|ies))\b/],
-    roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+    roles: ["plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
     kind: "model-selection",
     label: "model/tool choice for execution",
     patterns: [/\b(best model|model pick|which model|model to execute|execute.*model|tool choice|ai toolkit|stack)\b/],
-    roles: ["evidence-check", "prompt-design", "execution", "quality-review"],
+    roles: ["evidence-check", "scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
   },
   {
     kind: "privacy",
     label: "privacy check for sensitive data",
     patterns: [/\b(finance|financial|budget|expense|transaction|bank|income|spend|spending|private|confidential|regulated|privacy)\b/],
-    roles: ["prompt-design", "quality-review"],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "quality-review"],
   },
   {
     kind: "cost-energy",
     label: "cost, savings, or energy comparison",
     patterns: [/\b(cost|saving|savings|energy|impact|carbon|compute)\b/],
-    roles: ["prompt-design", "execution", "quality-review"],
+    roles: ["plan-synthesis", "prompt-design", "execution", "quality-review"],
   },
   {
     kind: "research",
     label: "current facts and source notes",
     patterns: [/\b(current facts|citations?|sources?|research|changed recently|latest|newest)\b/],
-    roles: ["evidence-check", "prompt-design", "quality-review"],
+    roles: ["evidence-check", "scope-framing", "plan-synthesis", "prompt-design", "quality-review"],
   },
   {
     kind: "ownership",
     label: "responsibilities and owners",
     patterns: [/\b(responsibilit(y|ies)|owners?|ownership|who does what|accountab(le|ility))\b/],
-    roles: ["prompt-design", "execution", "quality-review"],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
   },
   {
     kind: "dependencies",
     label: "dependencies and ordering",
     patterns: [/\b(dependenc(y|ies)|depends? on|prerequisites?|sequence|sequencing|order of work)\b/],
-    roles: ["prompt-design", "execution", "quality-review"],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
   },
   {
     kind: "risk",
     label: "risks and responses",
     patterns: [/\b(risks?|mitigat(e|ion|ions)|failure modes?|blockers?)\b/],
-    roles: ["prompt-design", "execution", "quality-review"],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
   },
   {
     kind: "measurement",
     label: "measures and review points",
     patterns: [/\b(measures?|metrics?|success criteria|review points?|milestones?|checkpoints?)\b/],
-    roles: ["prompt-design", "execution", "quality-review"],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
   },
   {
     kind: "next-action",
     label: "first concrete action",
     patterns: [/\b(first|next|immediate) (action|step)|where to start|start now\b/],
-    roles: ["prompt-design", "execution", "quality-review", "next-action"],
+    roles: ["plan-synthesis", "prompt-design", "execution", "quality-review", "next-action"],
   },
   {
     kind: "review",
     label: "review and acceptance checks",
     patterns: [/\b(review|check|acceptance|test|quality|validate|verify)\b/],
-    roles: ["prompt-design", "quality-review"],
+    roles: ["plan-synthesis", "prompt-design", "quality-review"],
   },
   {
     kind: "writing",
     label: "finished written output",
     patterns: [/\b(draft|write|copy|brief|answer|outline|summary|slides?)\b/],
-    roles: ["prompt-design", "execution", "quality-review"],
+    roles: ["plan-synthesis", "prompt-design", "execution", "quality-review"],
   },
 ];
 
@@ -203,9 +231,13 @@ export function decomposeTask(task: TaskIntake): TaskDecomposition {
     matched.push(buildDeliverable(task, "generic", clauseLabel(clause), clause, rolesForGenericClause(clause)));
   }
 
+  addArchetypeDeliverables(task, matched, seenKinds);
+
   if (matched.length === 0) {
     matched.push(
       buildDeliverable(task, "generic", friendlyOutputName(task.outputType), task.description || task.title, [
+        "scope-framing",
+        "plan-synthesis",
         "prompt-design",
         "execution",
         "quality-review",
@@ -221,7 +253,7 @@ export function decomposeTask(task: TaskIntake): TaskDecomposition {
       "research",
       "current facts and source notes",
       task.description,
-      ["evidence-check", "prompt-design", "quality-review"],
+      ["evidence-check", "scope-framing", "plan-synthesis", "prompt-design", "quality-review"],
     );
   }
 
@@ -253,22 +285,134 @@ export function taskNeedsFullBuildPlan(task: TaskIntake): boolean {
 }
 
 /**
- * A separate AI pass whose only output is another prompt is useful for build-shaped work and when
- * the requested artifact is itself a prompt package. For ordinary plans, drafts, briefs, answers,
- * and tables it adds a handoff without adding task knowledge, so the chosen helper should produce
- * the requested output directly.
+ * Prompt design is a real output or an explicit handoff, not a synonym for planning.
+ * Scope framing and plan synthesis are separate work roles, so build-shaped work no longer needs
+ * a fabricated prompt-only pass just to receive a deliberate plan.
  */
 export function taskNeedsSeparatePromptDesign(task: TaskIntake): boolean {
   const decomposition = decomposeTask(task);
 
   return (
-    decomposition.complexBuildPlan ||
-    taskHasBuildIntent(task) ||
-    task.knowledgeWorkType === "coding" ||
-    task.outputType === "code" ||
     task.outputType === "prompt package" ||
-    decomposition.deliverables.some((deliverable) => deliverable.kind === "prompt")
+    decomposition.deliverables.some((deliverable) => deliverable.kind === "prompt") &&
+      /\b(then|after|next|paste|run|use it|hand(?:\s|-)?off)\b/.test(normalizedTaskText(task))
   );
+}
+
+/**
+ * Task archetypes supply the work that a competent plan normally needs even when the user did not
+ * already know the planning vocabulary. These are composable deliverables rather than full route
+ * recipes: route generation still decides which stages earn a place and which saved tool fits each.
+ */
+function addArchetypeDeliverables(
+  task: TaskIntake,
+  deliverables: TaskDeliverable[],
+  seenKinds: Set<TaskDeliverableKind>,
+) {
+  const buildLike = taskHasBuildIntent(task) || task.knowledgeWorkType === "coding" || task.outputType === "code";
+  const planningLike = task.knowledgeWorkType === "planning" || task.outputType === "plan";
+  const analysisLike = task.knowledgeWorkType === "analysis";
+  const needsStructuredFrame = planningLike || buildLike || analysisLike;
+
+  if (needsStructuredFrame) {
+    ensureDeliverable(
+      deliverables,
+      seenKinds,
+      task,
+      "outcome",
+      "outcome and success definition",
+      task.description,
+      ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+    );
+    ensureDeliverable(
+      deliverables,
+      seenKinds,
+      task,
+      "scope",
+      "scope boundaries and exclusions",
+      task.description,
+      ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+    );
+    ensureDeliverable(
+      deliverables,
+      seenKinds,
+      task,
+      "assumptions",
+      "assumptions and blocking unknowns",
+      task.description,
+      ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+    );
+  }
+
+  if (analysisLike) {
+    ensureDeliverable(
+      deliverables,
+      seenKinds,
+      task,
+      "decision",
+      "options, criteria, and tradeoffs",
+      task.description,
+      ["scope-framing", "plan-synthesis", "execution", "quality-review"],
+    );
+  }
+
+  if (planningLike || buildLike) {
+    const planningDefaults: Array<{
+      kind: TaskDeliverableKind;
+      label: string;
+      roles: WorkRole[];
+    }> = [
+      {
+        kind: "ownership",
+        label: "responsibilities and owners",
+        roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+      },
+      {
+        kind: "dependencies",
+        label: "dependencies and ordering",
+        roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+      },
+      {
+        kind: "risk",
+        label: "risks and responses",
+        roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
+      },
+      {
+        kind: "measurement",
+        label: "measures and review points",
+        roles: ["plan-synthesis", "prompt-design", "execution", "quality-review"],
+      },
+      {
+        kind: "next-action",
+        label: "first concrete action",
+        roles: ["plan-synthesis", "prompt-design", "execution", "quality-review", "next-action"],
+      },
+    ];
+
+    for (const inferred of planningDefaults) {
+      ensureDeliverable(
+        deliverables,
+        seenKinds,
+        task,
+        inferred.kind,
+        inferred.label,
+        task.description,
+        inferred.roles,
+      );
+    }
+  }
+
+  if (task.knowledgeWorkType === "research") {
+    ensureDeliverable(
+      deliverables,
+      seenKinds,
+      task,
+      "research",
+      "current facts and source notes",
+      task.description,
+      ["evidence-check", "scope-framing", "execution", "quality-review"],
+    );
+  }
 }
 
 function normalizedTaskText(task: TaskIntake) {
@@ -370,14 +514,14 @@ function rolesForGenericClause(clause: string): WorkRole[] {
   const normalized = clause.toLowerCase();
 
   if (textHasBuildIntent(normalized)) {
-    return ["prompt-design", "execution", "build-slice", "quality-review"];
+    return ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"];
   }
 
   if (/\b(research|source|current|citation|latest|newest)\b/.test(normalized)) {
-    return ["evidence-check", "prompt-design", "quality-review"];
+    return ["evidence-check", "scope-framing", "plan-synthesis", "prompt-design", "quality-review"];
   }
 
-  return ["prompt-design", "execution", "quality-review"];
+  return ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"];
 }
 
 function textHasBuildIntent(text: string) {

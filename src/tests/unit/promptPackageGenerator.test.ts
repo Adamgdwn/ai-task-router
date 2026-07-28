@@ -165,7 +165,7 @@ describe("prompt package generator", () => {
     expect(instruction).not.toMatch(/\b(DMAIC|Define|Measure|Analyze|Improve|Control)\b/);
   });
 
-  it("turns a straightforward planning request into a direct working-plan instruction", () => {
+  it("turns a rough planning request into scope, plan synthesis, and an action handoff", () => {
     const task = buildTask({
       id: "task-prompt-direct-plan",
       title: "Plan a community open house",
@@ -182,18 +182,28 @@ describe("prompt package generator", () => {
     const selectedRoute = requireRecommendedRoute(scoringResult);
 
     const promptPackage = generatePromptPackage({ task, selectedRoute, hardGateResult });
-    const directStep = promptPackage.steps.find((step) => step.title.includes("Produce Requested Output"));
-    const instruction = directStep?.instruction ?? "";
+    const scopeInstruction =
+      promptPackage.steps.find((step) => step.title.includes("Frame Scope"))?.instruction ?? "";
+    const planInstruction =
+      promptPackage.steps.find((step) => step.title.includes("Synthesize Plan"))?.instruction ?? "";
+    const actionInstruction =
+      promptPackage.steps.find((step) => step.title.includes("Choose Next Action"))?.instruction ?? "";
 
     expectValidPromptPackage(promptPackage);
-    expect(selectedRoute.steps.map((step) => step.workRole)).toEqual(["execution"]);
-    expect(instruction).toContain("Produce the requested plan itself.");
-    expect(instruction).toContain("Order phases or numbered steps by real dependencies.");
-    expect(instruction).toContain("concrete output, required inputs, owner or first action, decision point, and exit condition");
-    expect(instruction).toContain("assumptions, missing information, blockers, and risks");
-    expect(instruction).toContain("success measures, review points, and the first action");
-    expect(instruction).not.toContain("Paste the approved master prompt");
-    expect(instruction).not.toContain("four sections only: Plan, Do, Check, Act");
+    expect(selectedRoute.steps.map((step) => step.workRole)).toEqual([
+      "scope-framing",
+      "plan-synthesis",
+      "next-action",
+    ]);
+    expect(scopeInstruction).toContain("Draft the outcome, audience, scope boundaries");
+    expect(scopeInstruction).toContain("Ask only about unknowns that genuinely block useful work");
+    expect(planInstruction).toContain("produce the actual plan");
+    expect(planInstruction).toContain("Order the work by real dependencies");
+    expect(planInstruction).toContain("owner, inputs, decision point, risks, completion check");
+    expect(planInstruction).toContain("assumptions and unresolved blockers visible");
+    expect(actionInstruction).toContain("without changing its scope or redoing its reasoning");
+    expect(planInstruction).not.toContain("Paste the approved master prompt");
+    expect(planInstruction).not.toContain("four sections only: Plan, Do, Check, Act");
   });
 
   it("includes current-facts and citation reminders without implying the app searches", () => {

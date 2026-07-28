@@ -13,6 +13,7 @@ import {
   toolModeCapabilityForRole,
   type ToolModeCandidate,
 } from "./toolModeCatalog";
+import { buildTaskWorkPlan } from "./taskWorkPlan";
 
 const weightedComponentKeys = ["cost", "energy", "quality", "speed", "sourceFit", "sensitivityFit"] as const;
 
@@ -233,30 +234,33 @@ function scoreQualityFit(
   modeById: Map<string, ToolModeCandidate>,
 ): ComponentScore {
   const profile = analyzeTaskReasoning(task);
-  const primaryRole: WorkRole = profile.promptArtifactRequested ? "prompt-design" : profile.primaryWorkRole;
+  const workPlan = buildTaskWorkPlan(task, undefined, profile);
+  const primaryRole: WorkRole = workPlan.primaryWorkRole;
   const primaryStep = candidate.steps.find((step) => step.workRole === primaryRole);
   const primaryCapability = capabilityForStep(primaryStep, primaryRole, task, modelById, modeById);
   const target = capabilityTargetForRole(task, profile, primaryRole, "balanced");
   const capabilityFit = clampScore((primaryCapability / target) * 100);
-  const stageChecks = [
-    primaryStep !== undefined,
-    !profile.requiresEvidence || candidate.steps.some((step) => step.workRole === "evidence-check"),
-    !profile.benefitsFromPromptHandoff ||
-      candidate.steps.some((step) => step.workRole === "prompt-design") ||
-      primaryCapability >= target + 0.45,
-    !profile.benefitsFromIndependentReview ||
-      candidate.steps.some((step) => step.workRole === "quality-review" || step.kind === "human review"),
-    !profile.benefitsFromSpecialistPackaging ||
-      candidate.steps.some((step) => step.workRole === "artifact-package") ||
-      (primaryStep?.modeId !== undefined &&
-        (modeById.get(primaryStep.modeId)?.capabilityScores.packaging ?? 0) >= 4),
-  ];
+  const stageChecks = workPlan.stages.map((stage) => {
+    if (candidate.steps.some((step) => step.workRole === stage.workRole)) {
+      return true;
+    }
+
+    if (stage.workRole === "quality-review") {
+      return candidate.steps.some((step) => step.kind === "human review");
+    }
+
+    if (stage.workRole === "artifact-package" && primaryStep?.modeId) {
+      return (modeById.get(primaryStep.modeId)?.capabilityScores.packaging ?? 0) >= 4;
+    }
+
+    return false;
+  });
   const stageCoverage = (stageChecks.filter(Boolean).length / stageChecks.length) * 100;
   const rawScore = clampScore(capabilityFit * 0.78 + stageCoverage * 0.22);
 
   return {
     rawScore,
-    explanation: `The primary mode is checked against this task's ${profile.demand} reasoning target, then the route is checked for the evidence, handoff, review, and packaging stages that this request actually needs.`,
+    explanation: `The primary mode is checked against this task's ${profile.demand} reasoning target, then the route is checked for the scope, evidence, planning, handoff, review, packaging, and action stages that this request actually needs.`,
   };
 }
 

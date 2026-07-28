@@ -121,7 +121,7 @@ describe("route candidate generation", () => {
     }
   });
 
-  it("produces a straightforward plan directly instead of parroting a fixed three-tool handoff", () => {
+  it("routes a rough plan through researched scope, strong synthesis, and a light action handoff", () => {
     const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
     if (!manualReviewModel) {
       throw new Error("Manual review model is required for this test.");
@@ -163,17 +163,36 @@ describe("route candidate generation", () => {
     const { candidateResult } = generateForTask(task, models);
     const balanced = requireCandidate(candidateResult, "balanced");
 
-    expect(balanced.steps.map((step) => step.workRole)).toEqual(["execution"]);
+    expect(balanced.steps.map((step) => step.workRole)).toEqual([
+      "scope-framing",
+      "plan-synthesis",
+      "next-action",
+    ]);
     expect(balanced.steps[0]).toMatchObject({
+      modelId: "perplexity-free",
+      modeId: "perplexity-free:sonar-research",
+      kind: "research",
+      sourceIds: [],
+      instruction: expect.stringContaining("turn the rough request into an execution-ready scope"),
+    });
+    expect(balanced.steps[0]?.instruction).toContain(
+      "No outside source is approved, so frame the scope from the request only",
+    );
+    expect(balanced.steps[1]).toMatchObject({
       modelId: "chatgpt-go",
       modeId: "chatgpt-go:prompt-reasoning",
-      modeLabel: expect.stringContaining("direct reasoning"),
-      instruction: expect.stringContaining("produce the requested plan directly"),
+      workRole: "plan-synthesis",
+      instruction: expect.stringContaining("produce the actual plan"),
     });
-    expect(balanced.steps[0]?.instruction).toContain("responsibilities and owners");
-    expect(balanced.steps[0]?.instruction).toContain("dependencies and ordering");
-    expect(balanced.steps[0]?.instruction).toContain("risks and responses");
-    expect(balanced.steps[0]?.instruction).not.toContain("Run the approved master prompt");
+    expect(balanced.steps[1]?.instruction).toContain("responsibilities and owners");
+    expect(balanced.steps[1]?.instruction).toContain("dependencies and ordering");
+    expect(balanced.steps[1]?.instruction).toContain("risks and responses");
+    expect(balanced.steps[1]?.instruction).not.toContain("Run the approved master prompt");
+    expect(balanced.steps[2]).toMatchObject({
+      modelId: "copilot-free",
+      workRole: "next-action",
+      instruction: expect.stringContaining("do not reopen the scope or redo the heavy reasoning"),
+    });
 
     const simpleTask = buildTask({
       id: "task-simple-rewrite-same-tools",
@@ -193,7 +212,7 @@ describe("route candidate generation", () => {
         workRole: "execution",
       }),
     ]);
-    expect(simpleBalanced.steps[0]?.modeId).not.toBe(balanced.steps[0]?.modeId);
+    expect(simpleBalanced.steps[0]?.modeId).not.toBe(balanced.steps[1]?.modeId);
   });
 
   it("uses only allowed confidential sources and skips blocked model options", () => {
@@ -338,11 +357,11 @@ describe("route candidate generation", () => {
 
     expect(balanced.steps).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ kind: "research", modelId: "perplexity-free", workRole: "evidence-check" }),
+        expect.objectContaining({ kind: "research", modelId: "perplexity-free", workRole: "scope-framing" }),
         expect.objectContaining({
           kind: "model",
           modelId: "chatgpt-go",
-          workRole: "prompt-design",
+          workRole: "plan-synthesis",
           modeLabel: expect.stringContaining("highest GPT-5.5 Thinking level"),
         }),
         expect.objectContaining({
@@ -359,8 +378,8 @@ describe("route candidate generation", () => {
     const premium = requireCandidate(candidateResult, "premium");
     expect(premium.steps).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ kind: "research", modelId: "perplexity-free", workRole: "evidence-check" }),
-        expect.objectContaining({ kind: "model", modelId: "chatgpt-go", workRole: "prompt-design" }),
+        expect.objectContaining({ kind: "research", modelId: "perplexity-free", workRole: "scope-framing" }),
+        expect.objectContaining({ kind: "model", modelId: "chatgpt-go", workRole: "plan-synthesis" }),
       ]),
     );
     expect(premium.summary).toContain("premium benchmark");
@@ -474,11 +493,11 @@ describe("route candidate generation", () => {
       expect.arrayContaining([
         expect.objectContaining({
           modelId: "perplexity-pro",
-          workRole: "evidence-check",
+          workRole: "scope-framing",
           modeLabel: expect.stringContaining("Perplexity Sonar Pro"),
         }),
         expect.objectContaining({
-          workRole: "prompt-design",
+          workRole: "plan-synthesis",
           modeLabel: expect.stringContaining("GPT-5.5 Pro Extended"),
         }),
         expect.objectContaining({
@@ -493,7 +512,7 @@ describe("route candidate generation", () => {
     );
   });
 
-  it("uses decomposed research intent to pull Perplexity into evidence even without the current-facts checkbox", () => {
+  it("uses decomposed research intent to pull Perplexity into scope framing even without the current-facts checkbox", () => {
     const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
     if (!manualReviewModel) {
       throw new Error("Manual review model is required for this test.");
@@ -531,7 +550,7 @@ describe("route candidate generation", () => {
     expect(balanced.steps[0]).toMatchObject({
       kind: "research",
       modelId: "perplexity-free",
-      workRole: "evidence-check",
+      workRole: "scope-framing",
       modeLabel: expect.stringContaining("Perplexity Sonar"),
     });
   });

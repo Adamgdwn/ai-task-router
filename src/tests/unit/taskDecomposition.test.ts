@@ -64,7 +64,19 @@ describe("task decomposition", () => {
       ]),
     );
     expect(decomposeTask(task).complexBuildPlan).toBe(true);
-    expect(promptItems.length).toBeGreaterThanOrEqual(labels.length - 1);
+    expect(promptItems.map((item) => item.label)).toEqual(
+      expect.arrayContaining([
+        "copy-ready master prompt",
+        "outcome and success definition",
+        "scope boundaries and exclusions",
+        "assumptions and blocking unknowns",
+        "responsibilities and owners",
+        "dependencies and ordering",
+        "risks and responses",
+        "measures and review points",
+        "first concrete action",
+      ]),
+    );
     expect(buildItems.map((item) => item.label)).toEqual(
       expect.arrayContaining([
         "first usable tool or app build",
@@ -182,6 +194,9 @@ describe("task decomposition", () => {
       "measures and review points",
       "first concrete action",
       "review and acceptance checks",
+      "outcome and success definition",
+      "scope boundaries and exclusions",
+      "assumptions and blocking unknowns",
     ]);
   });
 

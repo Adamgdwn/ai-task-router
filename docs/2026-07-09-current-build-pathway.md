@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.18.0
+Version: 1.20.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: During the next substantial build session
-Last Updated: 2026-07-27T21:07:32-06:00
-Status Updated: 2026-07-27T21:07:32-06:00
+Last Updated: 2026-07-27T22:18:56-06:00
+Status Updated: 2026-07-27T22:18:56-06:00
 
 ## Purpose
 
@@ -31,14 +31,14 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live; application build current | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://0e76221f.ai-task-router.pages.dev` from source `1b5ea8f`, deployed 2026-07-27. It carries the task-reasoning engine repair; the only post-deploy `main` changes are release records. |
+| Browser/PWA app | live; stage-first planning grammar not deployed | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://0e76221f.ai-task-router.pages.dev` from source `1b5ea8f`, deployed 2026-07-27. It carries the previous task-reasoning repair. The completed stage-first planning grammar in Chunk 12 remains local until it is committed, pushed, and separately authorized for deployment. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Desktop track | abandoned 2026-07-26T09:31:44-06:00 | Removed entirely: Tauri shell, local discovery, packaging and gate scripts, and the "Desktop app - Coming Soon!" card that promised computer checking on production. Planning and evidence docs are in `docs/archive/`. See [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts Accepted or Edited saved routes in local impact. Legacy Deferred or Rejected saves are explicitly excluded and link directly to Past Choices for review. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Task-reasoning engine repair: task complete and live | The earlier direct-work repair changed the fixed route script but did not make stage or mode choices depend deeply enough on the task. The router now evaluates reasoning demand and the marginal value of evidence, prompt design, specialist packaging, and independent review before selecting stages. Mode adequacy distinguishes fast and thinking modes even when account cost is identical. Full local and hosted release gates pass, and production serves the exact verified build. |
+| Active chunk | Stage-first planning grammar: integration complete | The router now builds a task work plan before choosing tools. Rough planning requests infer scope, assumptions, dependencies, ownership, risks, measures, and first action; the saved inventory then assigns each required stage. The exact Perplexity Free, ChatGPT Go, and Copilot Free regression produces scope framing, strongest available ChatGPT planning, and a lightweight Copilot action handoff, while a simple rewrite remains one fast pass. |
 
 ## Product Boundary
 
@@ -98,6 +98,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 9 | Followed-choice clarification | task complete; live | Task complete | Explains that only Accepted or Edited outcomes count, gives legacy Deferred saves a direct review path, and avoids inventing usage history the app cannot observe. |
 | 10 | Direct-work routing repair | task complete; live | Task complete | Stops straightforward tasks from parroting the same prompt relay, preserves explicit task requirements, and produces a usable direct-work contract without adding provider execution. |
 | 11 | Task-reasoning engine repair | task complete; live | Task complete | Replaces the remaining fixed role sequence with task-dependent stage utility and model-mode adequacy, proven by different routes for different tasks using the same saved tools. |
+| 12 | Stage-first planning grammar | integration complete | Integration complete | Infers the work required by a task before assigning tools, so planning can use research-backed scope framing, strongest adequate synthesis, and a lighter downstream action pass without turning that example into another fixed script. |
 
 ## Plan Chunks
 
@@ -351,6 +352,50 @@ Pause decision:
 
 As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool functional enough for hands-on testing without this estimator. Do not start Chunk 5 unless the owner explicitly reopens it.
 
+### Chunk 12 - Stage-First Planning Grammar
+
+Status: integration complete
+Status Updated: 2026-07-27T22:18:56-06:00
+Completion target: Integration complete
+Budget class: Large
+
+Objective:
+
+Make the deterministic router infer a useful work plan before it assigns tools. Replace the shallow evidence/prompt/execution slot sequence with reusable task archetypes, inferred deliverables, scope framing, plan synthesis, execution, review, packaging, and action handoff stages.
+
+User outcome:
+
+A person can enter a rough but ordinary planning request and receive an AI-assisted scope, a properly reasoned plan, and a right-sized downstream handoff. They are not told to finish the scope themselves, and the router does not use every saved tool merely because it is available.
+
+Acceptance criteria:
+
+- Planning and build archetypes infer the planning elements that competent work requires even when the user did not list them.
+- Stage selection happens before model assignment; tool availability changes assignments but does not erase required work.
+- With Perplexity Free, ChatGPT Go, and Copilot Free, a normal multi-part plan uses research-backed scope framing, ChatGPT's strongest available reasoning for the plan, and a lighter independent action handoff when adequate.
+- The same inventory still routes a simple rewrite directly to a light execution mode.
+- Research, public/high-quality review, build execution, privacy hard gates, and local-only/manual fallbacks retain their existing protections.
+- Route cards, stage guidance, and copy-ready prompts carry the inferred stages and explain what each helper must produce.
+
+Non-goals:
+
+- no provider API calls, account connections, live search, telemetry, or outside execution
+- no giant flat table of complete routes
+- no visual redesign, new screen, impact-claim change, or provider catalog refresh
+
+Validation expectations:
+
+- Add behavior-focused unit tests for archetypes, inferred deliverables, stage topology, assignments, scoring, route cards, and prompt packages.
+- Add an end-to-end contrast using one saved inventory across materially different tasks.
+- Run the full unit, script, build/bundle, dependency-audit, release-candidate, governance, and local Playwright gates.
+
+Rollback:
+
+Revert the bounded source commit. No schema migration, remote data, credential, provider, or production change is part of this chunk.
+
+Acceptance result:
+
+The router now classifies the task, infers the work and deliverables it requires, and only then assigns saved tool modes. Planning routes no longer collapse into one generic ChatGPT pass or manufacture a prompt relay. The browser regression proves Perplexity Free frames a rough planning request from the user-approved inputs, ChatGPT Go uses its highest available reasoning level to synthesize the actual plan, and Copilot Free packages the approved plan into an immediate action. The same inventory sends a simple rewrite directly to GPT-5.5 Instant. Explicit prompt handoffs, research-only work, builds, reviews, artifact packaging, privacy gates, and manual fallbacks remain conditional stages rather than a universal script. Stage guidance no longer mistakes a lightweight action tool for a package/execution stage, eliminating the duplicate and nonsensical Stage 3 that browser verification exposed.
+
 ## Validation Log
 
 | Timestamp | Command | Result | Notes |
@@ -502,6 +547,7 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 | 2026-07-27T20:26:56-06:00 | Repair and deploy direct-work routing | pass | The router had structurally selected prompt design plus execution for nearly every task, and stage guidance then wrapped that fixed route in the same project-plan story. Source `68a7e1d` makes separate prompt design conditional on build-shaped or explicit prompt work, gives ordinary tasks one direct execution step, preserves explicit planning requirements, and generates a direct copy-ready output contract. Vitest passed 179/179; script tests 5/5; build budgets passed at 669.06 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; scan and governance preflight passed; local Playwright passed 7/7; desktop and 390 px checks showed no errors or overflow. Wrangler deployed to `https://86dbe307.ai-task-router.pages.dev`. Canonical and immutable URLs serve the exact `index-B-i3htL0.js` asset at 669,064 bytes. Direct-work markers are present, the old `Quick project plan` and generic lead are absent, root/PWA files return 200, and hosted Playwright passes 7/7. The documented 962-byte SPA fallback appeared once during canonical asset propagation and was rejected by the length assertion before string checks. |
 | 2026-07-27T21:04:49-06:00 | Replace fixed role sequencing with task reasoning | pass; integration complete, deploy pending | Root cause confirmed: route candidates selected role slots before assessing whether each stage added value; scoring compared three prebuilt bundles; fast and thinking modes shared capability vectors; zero marginal account price erased their resource difference. Added deterministic task-reasoning analysis, stage-utility decisions, mode-specific capability and adequacy scoring, and task-specific route explanations. With the same ChatGPT Go, Perplexity Free, and Microsoft Copilot Free inventory, the structured plan regression selects GPT-5.5 Thinking for direct reasoning with no prompt relay, while a simple rewrite selects GPT-5.5 Instant. Governance preflight passed with 0 warnings; Vitest passed 184/184; script tests 5/5; production build and bundle budgets passed at 678.10 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; release-candidate scan and `git diff --check` passed; local Playwright passed 8/8, including the same-tools contrast and narrow-layout checks. No provider calls, accounts, telemetry, execution, or new UI feature were added. |
 | 2026-07-27T21:07:32-06:00 | Deploy and verify the task-reasoning engine repair | pass | Source `1b5ea8f` pushed to `main`. The account-owned control-plane credential returned HTTP 200 for the actual `ai-task-router` Pages project, then Wrangler deployed it to `https://0e76221f.ai-task-router.pages.dev` in one attempt. Canonical and immutable URLs both serve `index-BJ8G6-nl.js` at exactly 678,109 bytes, matching `dist`; task-reasoning, stage-utility, and selected-mode markers are present, while the stale direct-work script and old GPT-5.5 Medium-default markers are absent. Manifest and service worker return HTTP 200. Hosted Playwright passed 8/8, including the same-tools contrast: the structured plan uses GPT-5.5 Thinking for direct reasoning with no Perplexity or Copilot relay, and the simple rewrite uses GPT-5.5 Instant. |
+| 2026-07-27T22:18:56-06:00 | Complete and verify the stage-first planning grammar | pass; integration complete, deployment not authorized | Root cause confirmed: task reasoning still chose a primary model before it had represented scope framing, plan synthesis, and downstream action as required work. Added task archetypes, inferred planning deliverables, a model-independent work-plan grammar, stage-first mode assignment, stage-specific output contracts, and route coverage scoring. The exact ChatGPT Go, Perplexity Free, and Copilot Free regression now yields Perplexity scope framing from approved inputs, highest available GPT-5.5 Thinking for the actual plan, and Copilot for the lightweight action handoff; a simple rewrite remains one GPT-5.5 Instant pass. Browser verification also caught and fixed a null/kind fallback that had duplicated the action helper into a bogus package Stage 3. Vitest passed 190/190; script tests 5/5; TypeScript/Vite production build passed at 702.36 kB JavaScript and 43.76 kB CSS; the deliberately tight raw JavaScript budget moved from 700 kB to 705 kB while the 200 kB compressed-download ceiling stayed unchanged; dependency audit found 0 vulnerabilities; release-candidate scan and governance preflight passed; local Playwright passed 8/8; an annotated browser load check found content, no Vite overlay, and no captured console errors. No provider call, live search, account connection, telemetry, external execution, schema migration, or visual redesign was added. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -568,7 +614,7 @@ A functional audit of `59dd849` on 2026-07-25 found gaps between what the app cl
 
 The Cloudflare deploy blocker is resolved. The original user-scoped token path was rejected, but the account-owned control-plane token added on 2026-07-27 returned HTTP 200 for the actual Pages project and completed the deployment on the first attempt. Use [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) as the deploy runbook.
 
-**The production application build is current at source `1b5ea8f`, deployed 2026-07-27; the only post-deploy `main` changes are release records.** The deployment replaces fixed role sequencing with task-reasoning, stage-utility, and actual mode-adequacy decisions. Canonical production serves the exact 678,109-byte local asset; the structured-plan regression selects GPT-5.5 Thinking for direct reasoning without a Perplexity or Copilot relay, while the same saved tools select GPT-5.5 Instant for a simple rewrite; and hosted E2E passes 8/8. The repair is deliberately narrow: no provider connection, execution behavior, analytics, silent outcome migration, or new UI feature was added.
+**Production remains at source `1b5ea8f`, deployed 2026-07-27; Chunk 12 is integration complete but not deployed.** The local stage-first planning grammar supersedes the single-model structured-plan behavior currently live. After commit and push, deploy only with fresh owner authorization. Production deployment verification must use the existing Cloudflare turnover runbook, cache-bust the HTML, fetch the asset path without a query string, and confirm its byte length matches `dist` before trusting marker checks. The new local regression expects Perplexity framing, highest available ChatGPT reasoning for the actual plan, and a lightweight Copilot action handoff with no duplicate package stage; the same inventory still selects GPT-5.5 Instant for a simple rewrite.
 
 Two verification lessons from the last deploy are worth carrying, because both would have produced a confident wrong answer:
 

@@ -210,29 +210,30 @@ describe("route card generator", () => {
       promptPackage: buildPromptPackage(task),
       createdAt: cardCreatedAt,
     });
-    const gatherStage = card.stageGuidance.find((stage) => stage.stage === "gather");
+    const frameStage = card.stageGuidance.find((stage) => stage.stage === "frame");
     const createStage = card.stageGuidance.find((stage) => stage.stage === "create");
     const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
     const reviewStage = card.stageGuidance.find((stage) => stage.stage === "review");
     const actStage = card.stageGuidance.find((stage) => stage.stage === "act");
     const visibleStageHelpers = new Set(
       card.stageGuidance
-        .filter((stage) => ["gather", "create", "package", "review"].includes(stage.stage))
+        .filter((stage) => ["frame", "create", "package", "review"].includes(stage.stage))
         .map((stage) => stage.recommendedModelLabel),
     );
 
     expectValidRouteCard(card);
     expect(card.recommendedOptionId).toBe("route-task-card-finance-prompt-build-balanced");
     expect(visibleStageHelpers.size).toBeGreaterThanOrEqual(3);
-    expect(gatherStage).toMatchObject({
+    expect(frameStage).toMatchObject({
+      label: "Build the scope and working brief",
       recommendedModelLabel: expect.stringContaining("Perplexity Sonar"),
     });
-    expect(gatherStage?.workItems[0]).toMatchObject({
+    expect(frameStage?.workItems[0]).toMatchObject({
       modeLabel: expect.stringContaining("Perplexity Sonar"),
       selectionReasons: expect.arrayContaining([
         expect.stringContaining("current facts"),
       ]),
-      upgradeTrigger: expect.stringContaining("Upgrade research only if"),
+      upgradeTrigger: expect.stringContaining("Upgrade scope framing only if"),
     });
     expect(createStage).toMatchObject({
       label: "Build the master prompt",
@@ -276,7 +277,7 @@ describe("route card generator", () => {
         upgradeTrigger: expect.stringContaining("Upgrade execution only if"),
       });
     }
-    expect(packageStage?.actions.join(" ")).toContain("actual plan or build brief");
+    expect(packageStage?.actions.join(" ")).toContain("Implement the first usable slice");
     expect(packageStage?.actions.join(" ")).toContain("Copy-Ready Prompts");
     expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");
@@ -344,6 +345,64 @@ describe("route card generator", () => {
     expect(packageStage?.recommendedModelLabel).not.toContain("You first");
   });
 
+  it("does not turn a planning action handoff into a duplicate package stage", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-go",
+        providerId: "chatgpt",
+        accountId: "go",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+      createEverydayToolModel({
+        id: "copilot-free",
+        providerId: "copilot",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-card-stage-first-plan",
+      title: "Plan a community open house",
+      description:
+        "Create a practical plan for a community open house with responsibilities, dependencies, risks, review points, and the first action.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task, "balanced", models);
+
+    const card = generateRouteCard({
+      task,
+      models,
+      hardGateResult,
+      scoringResult,
+      promptPackage: buildPromptPackage(task),
+      createdAt: cardCreatedAt,
+    });
+
+    expect(card.stageGuidance.map((stage) => stage.stage)).toEqual([
+      "frame",
+      "create",
+      "review",
+      "act",
+    ]);
+    expect(card.stageGuidance.find((stage) => stage.stage === "package")).toBeUndefined();
+    expect(card.stageGuidance.find((stage) => stage.stage === "act")?.recommendedModelLabel).toContain(
+      "Microsoft Copilot",
+    );
+  });
+
   it("uses SuperGrok submodes for prompt design and build execution instead of generic best-model wording", () => {
     const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
     if (!manualReviewModel) {
@@ -386,12 +445,12 @@ describe("route card generator", () => {
       promptPackage: buildPromptPackage(task),
       createdAt: cardCreatedAt,
     });
-    const gatherStage = card.stageGuidance.find((stage) => stage.stage === "gather");
+    const frameStage = card.stageGuidance.find((stage) => stage.stage === "frame");
     const createStage = card.stageGuidance.find((stage) => stage.stage === "create");
     const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
 
     expectValidRouteCard(card);
-    expect(gatherStage?.recommendedModelLabel).toContain("Perplexity Sonar");
+    expect(frameStage?.recommendedModelLabel).toContain("Perplexity Sonar");
     expect(createStage?.recommendedModelLabel).toContain("Grok 4.3 with reasoning high");
     expect(packageStage?.recommendedModelLabel).toContain("execution Grok Build 0.1");
     expect(`${createStage?.recommendedModelLabel} ${packageStage?.recommendedModelLabel}`).not.toContain("best available model");
@@ -437,7 +496,7 @@ describe("route card generator", () => {
     const packageStage = card.stageGuidance.find((stage) => stage.stage === "package");
 
     expectValidRouteCard(card);
-    expect(createStage?.recommendedModelLabel).toContain("Select a prompt-capable AI helper first");
+    expect(createStage?.recommendedModelLabel).toContain("Select a planning-capable AI helper first");
     expect(packageStage?.recommendedModelLabel).toContain("Select a build or execution helper first");
     expect(createStage?.recommendedModelLabel).not.toBe("You first");
     expect(packageStage?.recommendedModelLabel).not.toBe("You first");

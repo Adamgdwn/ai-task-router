@@ -384,10 +384,18 @@ test("the same tools choose reasoning for a structured plan and fast mode for a 
   const workPath = page.locator(".stageGuidanceSection");
   await expect(page.getByRole("heading", { name: "Best Options", level: 2 })).toBeVisible();
   await expect(page.getByText(/The request has moderate reasoning demand/).first()).toBeVisible();
-  await expect(workPath.getByText(/highest GPT-5\.5 Thinking level your Go picker offers for direct reasoning/).first()).toBeVisible();
-  await expect(workPath.getByText(/Perplexity/)).toHaveCount(0);
-  await expect(workPath.getByText(/Microsoft Copilot/)).toHaveCount(0);
+  await expect(workPath.getByRole("heading", { name: "Build the scope and working brief" })).toBeVisible();
+  await expect(workPath.getByText(/Perplexity Sonar for scope framing/).first()).toBeVisible();
+  await expect(workPath.getByRole("heading", { name: "Synthesize the working plan" })).toBeVisible();
+  await expect(
+    workPath.getByText(
+      /highest GPT-5\.5 Thinking level your Go picker offers for the reasoning-heavy planning pass/,
+    ).first(),
+  ).toBeVisible();
+  await expect(workPath.getByRole("heading", { name: "Choose the first action" })).toBeVisible();
+  await expect(workPath.getByText(/Microsoft Copilot Chat for planning/).first()).toBeVisible();
   await expect(workPath.getByRole("heading", { name: "Build the master prompt" })).toHaveCount(0);
+  await expect(workPath.getByRole("heading", { name: "Run the prompt on the execution model" })).toHaveCount(0);
   await expect(workPath.getByText(/responsibilities and owners/).first()).toBeVisible();
   await expect(workPath.getByText(/dependencies and ordering/).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);

@@ -24,13 +24,15 @@ const stepCostMultipliers: Record<RouteStep["kind"], number> = {
 };
 
 const roleCostMultipliers: Record<WorkRole, number> = {
+  "scope-framing": 0.35,
   "evidence-check": 0.25,
+  "plan-synthesis": 0.65,
   "prompt-design": 0.45,
   execution: 0.65,
   "build-slice": 0.85,
   "artifact-package": 0.35,
   "quality-review": 0.15,
-  "next-action": 0,
+  "next-action": 0.15,
 };
 
 const energyProfileMultipliers = {

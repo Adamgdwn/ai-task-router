@@ -66,19 +66,24 @@ describe("task reasoning assessment", () => {
 
     expect(profile).toMatchObject({
       demand: "moderate",
-      primaryWorkRole: "execution",
+      archetype: "working-plan",
+      primaryWorkRole: "plan-synthesis",
       requiresEvidence: false,
+      needsScopeFraming: true,
+      needsPlanSynthesis: true,
+      needsDownstreamActionPass: true,
       promptArtifactRequested: false,
       benefitsFromPromptHandoff: false,
       benefitsFromIndependentReview: false,
     });
     expect(profile.assessmentReasons).toEqual(
       expect.arrayContaining([
-        "It combines 5 distinct requested parts.",
+        "It combines 8 distinct requested parts.",
+        "The route must turn the rough request into a usable scope instead of asking the user to finish the brief.",
         "Dependencies or ordering have to be reasoned through.",
       ]),
     );
-    expect(capabilityTargetForRole(task, profile, "execution", "balanced")).toBe(3.7);
+    expect(capabilityTargetForRole(task, profile, "plan-synthesis", "balanced")).toBe(4);
   });
 
   it("requires an evidence stage only when the task needs current or cited information", () => {
@@ -114,8 +119,11 @@ describe("task reasoning assessment", () => {
 
     expect(profile).toMatchObject({
       demand: "heavy",
+      archetype: "software-build",
       primaryWorkRole: "build-slice",
-      benefitsFromPromptHandoff: true,
+      needsScopeFraming: true,
+      needsPlanSynthesis: true,
+      benefitsFromPromptHandoff: false,
       benefitsFromIndependentReview: true,
     });
     expect(capabilityTargetForRole(task, profile, "build-slice", "balanced")).toBeGreaterThan(4.4);

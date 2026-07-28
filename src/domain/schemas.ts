@@ -45,7 +45,9 @@ const routeStepKinds = ["model", "research", "artifact", "human review", "manual
 const projectStageKinds = ["frame", "gather", "create", "package", "review", "act"] as const;
 
 export const workRoles = [
+  "scope-framing",
   "evidence-check",
+  "plan-synthesis",
   "prompt-design",
   "execution",
   "build-slice",

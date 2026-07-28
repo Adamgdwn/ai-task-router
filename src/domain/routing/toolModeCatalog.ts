@@ -116,14 +116,21 @@ export function selectToolModeForRole({
     return null;
   }
 
-  if (strategy === "lean" && (role === "prompt-design" || role === "execution" || role === "build-slice")) {
+  if (
+    strategy === "lean" &&
+    (role === "scope-framing" ||
+      role === "plan-synthesis" ||
+      role === "prompt-design" ||
+      role === "execution" ||
+      role === "build-slice" ||
+      role === "next-action")
+  ) {
     return selectLeastResourceAdequateMode(eligibleModes, role, task, minimumCapability);
   }
 
   if (
     (strategy === "balanced" || strategy === "premium") &&
-    role === "prompt-design" &&
-    shouldUseStrongestPromptDesignPass(task)
+    (role === "plan-synthesis" || (role === "prompt-design" && shouldUseStrongestPromptDesignPass(task)))
   ) {
     return selectStrongestPromptDesignMode(eligibleModes, role, strategy, task);
   }
@@ -297,7 +304,7 @@ function manualMode(model: ModelInventoryItem): ToolModeCandidate {
     kind: "manual",
     suffix: "manual",
     modeLabel: "human judgment",
-    roles: ["prompt-design", "execution", "build-slice", "quality-review", "next-action"],
+    roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review", "next-action"],
     capabilityScores: manualCapabilities,
     resourceProfile: "manual",
     selectionReasons: ["No provider call is required; this is the safest route when privacy or setup blocks AI use."],
@@ -319,7 +326,7 @@ function chatGptModes(model: ModelInventoryItem, accountId: EverydayToolAccountI
       kind: "prompt",
       suffix: "prompt-reasoning",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["prompt-design", "execution", "quality-review"],
+      roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
       resourceProfile: promptIsReasoning ? "reasoning" : "standard",
       selectionReasons: [
         "Use the stronger thinking pass once to make the downstream prompt precise enough for cheaper execution.",
@@ -334,7 +341,7 @@ function chatGptModes(model: ModelInventoryItem, accountId: EverydayToolAccountI
       kind: "execution",
       suffix: "execution-fast",
       modeLabel: profile.executionModelLabel,
-      roles: ["execution", "build-slice"],
+      roles: ["execution", "build-slice", "next-action"],
       resourceProfile: accountId === "basic" ? "free" : "light",
       selectionReasons: [
         "After the master prompt is clear, execution should start on the fastest adequate lower-resource mode.",
@@ -348,7 +355,7 @@ function chatGptModes(model: ModelInventoryItem, accountId: EverydayToolAccountI
       kind: "benchmark",
       suffix: "premium-benchmark",
       modeLabel: `premium comparison using ${profile.upgradeModelLabel}`,
-      roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+      roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
       resourceProfile: "premium",
       selectionReasons: ["This shows the cost and energy benchmark for using high reasoning through the whole task."],
     }),
@@ -372,7 +379,7 @@ function claudeModes(
       kind: "prompt",
       suffix: "prompt-reasoning",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["prompt-design", "execution", "quality-review"],
+      roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
       resourceProfile: maxOrTeam ? "reasoning" : "standard",
       selectionReasons: ["Use Claude's stronger reasoning pass when prompt quality or architecture judgment prevents rework."],
     }),
@@ -384,7 +391,7 @@ function claudeModes(
       kind: "execution",
       suffix: "execution-fast",
       modeLabel: profile.executionModelLabel,
-      roles: ["execution"],
+      roles: ["execution", "next-action"],
       resourceProfile: "light",
       selectionReasons: ["Use the lower-resource Claude pass only after the master prompt has removed ambiguity."],
     }),
@@ -396,7 +403,7 @@ function claudeModes(
       kind: "benchmark",
       suffix: "premium-benchmark",
       modeLabel: `premium comparison using ${profile.upgradeModelLabel}`,
-      roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+      roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
       resourceProfile: "premium",
       selectionReasons: ["This benchmarks the heavier route where Claude is used at high intensity throughout."],
     }),
@@ -440,7 +447,7 @@ function perplexityModes(model: ModelInventoryItem, accountId: EverydayToolAccou
       kind: "research",
       suffix: "sonar-research",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["evidence-check", "quality-review"],
+      roles: ["scope-framing", "evidence-check", "quality-review"],
       resourceProfile: paid ? "standard" : "free",
       selectionReasons: [
         "Use Perplexity for current facts, citations, and source-backed framing.",
@@ -463,7 +470,7 @@ function geminiModes(model: ModelInventoryItem, accountId: EverydayToolAccountId
       kind: "prompt",
       suffix: "prompt-pro",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["prompt-design", "execution", "quality-review"],
+      roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
       resourceProfile: strong ? "reasoning" : "standard",
       selectionReasons: ["Use Gemini's stronger reasoning mode when the prompt is the hard part."],
     }),
@@ -475,7 +482,7 @@ function geminiModes(model: ModelInventoryItem, accountId: EverydayToolAccountId
       kind: "execution",
       suffix: "execution-flash",
       modeLabel: profile.executionModelLabel,
-      roles: ["execution", "build-slice"],
+      roles: ["execution", "build-slice", "next-action"],
       resourceProfile: accountId === "basic" ? "free" : "light",
       selectionReasons: ["Gemini Flash-style modes are the lower-resource execution pass after prompt design."],
     }),
@@ -487,7 +494,7 @@ function geminiModes(model: ModelInventoryItem, accountId: EverydayToolAccountId
       kind: "benchmark",
       suffix: "premium-benchmark",
       modeLabel: `premium comparison using ${profile.upgradeModelLabel}`,
-      roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+      roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
       resourceProfile: "premium",
       selectionReasons: ["This benchmarks keeping the task on a heavier Gemini reasoning mode."],
     }),
@@ -511,7 +518,7 @@ function grokModes(
       kind: "research",
       suffix: "grok-search-evidence",
       modeLabel: "Grok 4.3 with Web Search or X Search enabled for evidence checks",
-      roles: ["evidence-check", "quality-review"],
+      roles: ["scope-framing", "evidence-check", "quality-review"],
       resourceProfile: paid ? "standard" : "free",
       selectionReasons: [
         "Grok needs Web Search or X Search enabled for current facts; without search, do not treat it as current.",
@@ -526,7 +533,7 @@ function grokModes(
       kind: "prompt",
       suffix: "prompt-reasoning",
       modeLabel: profile.promptBuilderModelLabel,
-      roles: ["prompt-design", "execution", "quality-review"],
+      roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review"],
       resourceProfile: paid ? "reasoning" : "standard",
       selectionReasons: [
         "Use Grok 4.3's named reasoning setting for the thinking-heavy prompt pass instead of a generic best-model label.",
@@ -541,7 +548,7 @@ function grokModes(
       kind: "execution",
       suffix: "execution-fast",
       modeLabel: profile.executionModelLabel,
-      roles: ["execution"],
+      roles: ["execution", "next-action"],
       resourceProfile: paid ? "light" : "free",
       selectionReasons: [
         "After prompt design, use Grok 4.3 with reasoning none or low so execution does not burn the heavy setting unnecessarily.",
@@ -555,7 +562,7 @@ function grokModes(
       kind: "benchmark",
       suffix: "premium-benchmark",
       modeLabel: `premium comparison using ${profile.upgradeModelLabel}`,
-      roles: ["prompt-design", "execution", "build-slice", "quality-review"],
+      roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
       resourceProfile: "premium",
       selectionReasons: ["This benchmarks leaving the whole task on Grok's heavier reasoning or code mode."],
     }),
@@ -595,10 +602,10 @@ function genericModes(
   const profile = genericProviderModeProfile(providerId, accountId, accountLabel, model, task);
   const baseRoles: WorkRole[] =
     model.tier === "research"
-      ? ["evidence-check", "quality-review"]
+      ? ["scope-framing", "evidence-check", "quality-review"]
       : model.tier === "artifact"
-        ? ["artifact-package", "execution", "quality-review"]
-        : ["prompt-design", "execution", "quality-review"];
+        ? ["scope-framing", "artifact-package", "execution", "quality-review", "next-action"]
+        : ["scope-framing", "plan-synthesis", "prompt-design", "execution", "quality-review", "next-action"];
   const codingRoles: WorkRole[] = isBuildTask(task) && model.capabilityScores.coding >= 4 ? ["build-slice"] : [];
   const resourceProfile = model.tier === "frontier" ? "reasoning" : model.tier === "small" ? "light" : "standard";
 
@@ -639,7 +646,7 @@ function genericProviderModeProfile(
         kind: "artifact",
         modeLabel:
           "Microsoft Copilot Chat for planning; Copilot in Word, Excel, or PowerPoint when the output is a document, table, or slide",
-        roles: ["prompt-design", "execution", "artifact-package", "quality-review"],
+        roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "artifact-package", "quality-review", "next-action"],
         selectionReasons: [
           "Copilot is strongest when the result belongs in Microsoft 365 or a work-approved Copilot chat.",
           "Use a specialist research helper first when current facts or citations matter.",
@@ -649,7 +656,7 @@ function genericProviderModeProfile(
       return {
         kind: "research",
         modeLabel: "Genspark research or agent mode for source-backed planning and synthesis",
-        roles: ["evidence-check", "prompt-design", "execution", "quality-review"],
+        roles: ["scope-framing", "evidence-check", "plan-synthesis", "prompt-design", "execution", "quality-review"],
         selectionReasons: [
           "Use Genspark when the task benefits from source-backed research, agents, or assembled content.",
           "Keep final build execution on a coding/build tool when the task is software-heavy.",
@@ -665,7 +672,7 @@ function genericProviderModeProfile(
     case "poe":
       return {
         modeLabel: `Poe${accountContext}: choose the named underlying bot for this stage, such as Claude/GPT/Gemini for reasoning or a search bot for research`,
-        roles: ["evidence-check", "prompt-design", "execution", "build-slice", "quality-review"],
+        roles: ["scope-framing", "evidence-check", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
         selectionReasons: [
           "Poe is a multi-model hub, so the useful instruction is to pick the underlying bot/model inside Poe for each stage.",
           "Do not treat Poe itself as the model; route by the model or bot selected inside Poe.",
@@ -675,7 +682,7 @@ function genericProviderModeProfile(
       return {
         kind: "research",
         modeLabel: "You.com Research or agent mode for current web-backed evidence and synthesis",
-        roles: ["evidence-check", "prompt-design", "execution", "quality-review"],
+        roles: ["scope-framing", "evidence-check", "plan-synthesis", "prompt-design", "execution", "quality-review"],
         selectionReasons: [
           "Use You.com when search-grounded research is part of the job.",
           "Prefer a coding/build helper for implementation after the research frame is clear.",
@@ -685,7 +692,7 @@ function genericProviderModeProfile(
       return {
         kind: "research",
         modeLabel: "NotebookLM source-grounded answer from the approved notebook sources",
-        roles: ["evidence-check", "quality-review"],
+        roles: ["scope-framing", "evidence-check", "quality-review"],
         selectionReasons: [
           "NotebookLM is strongest when the user already has source documents loaded and wants grounded synthesis.",
           "Use it to check evidence, not to invent app architecture outside the supplied sources.",
@@ -695,7 +702,7 @@ function genericProviderModeProfile(
       return {
         kind: "artifact",
         modeLabel: "Canva Magic Write, Magic Design, or presentation tools for the final visual/document artifact",
-        roles: ["artifact-package", "execution", "quality-review"],
+        roles: ["scope-framing", "artifact-package", "execution", "quality-review", "next-action"],
         selectionReasons: [
           "Canva is an artifact and design surface; use it after the plan, copy, or structure is clear.",
           "Keep reasoning-heavy prompt design on a stronger general model when the task is complex.",
@@ -901,7 +908,14 @@ function modeScore(mode: ToolModeCandidate, role: WorkRole, strategy: "lean" | "
   const privacyBonus = mode.localOnly || mode.modeKind === "manual" ? 6 : 0;
   const roleBonus = roleSpecificBonus(mode, role, task);
   const manualEffortPenalty =
-    mode.modeKind === "manual" && (role === "prompt-design" || role === "execution" || role === "build-slice") ? 18 : 0;
+    mode.modeKind === "manual" &&
+    (role === "scope-framing" ||
+      role === "plan-synthesis" ||
+      role === "prompt-design" ||
+      role === "execution" ||
+      role === "build-slice")
+      ? 18
+      : 0;
 
   if (strategy === "lean") {
     return capability * 0.55 + (5 - resourceRank) * 12 + zeroCostBonus * 1.6 + privacyBonus + roleBonus - manualEffortPenalty;
@@ -977,7 +991,11 @@ function shouldPreferAiOverManualLeanMode(task: TaskIntake, role: WorkRole) {
     return false;
   }
 
-  if (role === "prompt-design" && (taskNeedsFullBuildPlan(task) || taskHasBuildIntent(task))) {
+  if (
+    role === "scope-framing" ||
+    role === "plan-synthesis" ||
+    (role === "prompt-design" && (taskNeedsFullBuildPlan(task) || taskHasBuildIntent(task)))
+  ) {
     return true;
   }
 
@@ -1004,8 +1022,12 @@ function sortLeastResourceModes(
 
 export function toolModeCapabilityForRole(scores: CapabilityScores, role: WorkRole, task: TaskIntake) {
   switch (role) {
+    case "scope-framing":
+      return (scores.research * 0.55 + scores.reasoning * 0.35 + scores.writing * 0.1);
     case "evidence-check":
       return (scores.research * 0.75 + scores.reasoning * 0.25);
+    case "plan-synthesis":
+      return (scores.reasoning * 0.82 + scores.writing * 0.13 + scores.research * 0.05);
     case "prompt-design":
       return task.knowledgeWorkType === "coding" || taskHasBuildIntent(task)
         ? (scores.reasoning * 0.65 + scores.coding * 0.25 + scores.writing * 0.1)
@@ -1056,6 +1078,18 @@ function roleSpecificBonus(mode: ToolModeCandidate, role: WorkRole, task: TaskIn
 
   if (role === "evidence-check" && mode.providerId === "perplexity") {
     bonus += 24;
+  }
+
+  if (role === "scope-framing" && mode.providerId === "perplexity") {
+    bonus += 22;
+  }
+
+  if (role === "plan-synthesis" && mode.resourceProfile === "reasoning") {
+    bonus += 16;
+  }
+
+  if (role === "next-action" && mode.providerId === "copilot") {
+    bonus += 10;
   }
 
   if (role === "build-slice" && mode.modeKind === "build") {

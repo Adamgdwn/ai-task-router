@@ -52,18 +52,26 @@ export function buildProjectStageGuidance({
   const modelById = new Map(models.map((model) => [model.id, model]));
   const manualReviewModel = models.find((model) => model.tier === "human");
   const decomposition = decomposeTask(task);
-  const researchStep = firstStepOfWorkRole(selectedOption, "evidence-check") ?? firstStepOfKind(selectedOption, "research");
+  const scopeStep = firstStepOfWorkRole(selectedOption, "scope-framing");
+  const researchStep = firstStepOfWorkRole(selectedOption, "evidence-check");
+  const planStep = firstStepOfWorkRole(selectedOption, "plan-synthesis");
   const promptStep = firstStepOfWorkRole(selectedOption, "prompt-design");
   const executionStep =
     firstStepOfWorkRole(selectedOption, "build-slice") ??
-    firstStepOfWorkRole(selectedOption, "execution") ??
-    primaryWorkStep(selectedOption);
-  const primaryStep = promptStep ?? executionStep ?? primaryWorkStep(selectedOption);
+    firstStepOfWorkRole(selectedOption, "execution");
+  const primaryStep = planStep ?? promptStep ?? executionStep ?? scopeStep ?? primaryWorkStep(selectedOption);
   const usesSeparatePromptDesign = promptStep !== null;
-  const directWorkRole: WorkRole = executionStep?.workRole === "build-slice" ? "build-slice" : "execution";
-  const artifactStep = firstStepOfKind(selectedOption, "artifact");
+  const createWorkRole: WorkRole = planStep
+    ? "plan-synthesis"
+    : promptStep
+      ? "prompt-design"
+      : executionStep?.workRole === "build-slice"
+        ? "build-slice"
+        : "execution";
+  const artifactStep = firstStepOfWorkRole(selectedOption, "artifact-package");
   const humanApprovalStep = firstStepOfKind(selectedOption, "human review");
   const reviewSupportStep = firstStepOfWorkRole(selectedOption, "quality-review");
+  const nextActionStep = firstStepOfWorkRole(selectedOption, "next-action");
   const promptBuilderModelLabel = modelLabelForStageStep(
     task,
     promptStep,
@@ -85,16 +93,43 @@ export function buildProjectStageGuidance({
     {
       stage: "frame",
       methodLabel: "Plan",
-      label: "Frame the outcome",
-      purpose: "Write down the goal, who will use the result, what inputs are allowed, and what done looks like.",
-      actions: frameStageActions(task),
-      reviewChecks: frameStageChecks(task),
+      label: scopeStep ? "Build the scope and working brief" : "Frame the outcome",
+      purpose: scopeStep
+        ? "Use the recommended helper to draft the outcome, boundaries, assumptions, missing decisions, and finish line. Confirm the draft instead of building the scope from scratch."
+        : "Write down the goal, who will use the result, what inputs are allowed, and what done looks like.",
+      actions: frameStageActions(task, scopeStep !== null),
+      reviewChecks: frameStageChecks(task, scopeStep !== null),
+      routeStep: scopeStep ?? undefined,
       fallbackModelLabel: "You first",
-      workItems: frameStageWorkItems(task, decomposition),
+      recommendedModelLabel: scopeStep
+        ? recommendedLabelForStageRole(
+            task,
+            "scope-framing",
+            scopeStep,
+            modelById,
+            manualReviewModel,
+            "You first",
+          )
+        : undefined,
+      workItems: scopeStep
+        ? buildStageWorkItems({
+            task,
+            decomposition,
+            stage: "frame",
+            workRole: "scope-framing",
+            routeStep: scopeStep,
+            usesSeparatePromptDesign,
+            modelById,
+            manualReviewModel,
+            fallbackModelLabel: "You first",
+          })
+        : frameStageWorkItems(task, decomposition),
     },
   ];
 
-  if (shouldAddGatherStage(task)) {
+  const scopeAlreadyHandlesResearch = researchStep === null && scopeStep?.kind === "research";
+
+  if (shouldAddGatherStage(task) && !scopeAlreadyHandlesResearch) {
     stages.push({
       stage: "gather",
       methodLabel: "Plan",
@@ -120,21 +155,48 @@ export function buildProjectStageGuidance({
 
   stages.push({
     stage: "create",
-    methodLabel: usesSeparatePromptDesign ? "Plan" : "Do",
-    label: usesSeparatePromptDesign ? createStageLabel(task) : directWorkStageLabel(task),
-    purpose: usesSeparatePromptDesign ? createStagePurpose(task) : directWorkStagePurpose(task),
-    actions: usesSeparatePromptDesign ? createStageActions(task) : directWorkStageActions(task),
-    reviewChecks: usesSeparatePromptDesign ? createStageChecks(task) : directWorkStageChecks(task),
-    routeStep: usesSeparatePromptDesign ? promptStep : executionStep,
+    methodLabel: planStep || usesSeparatePromptDesign ? "Plan" : "Do",
+    label: planStep
+      ? "Synthesize the working plan"
+      : usesSeparatePromptDesign
+        ? createStageLabel(task)
+        : directWorkStageLabel(task),
+    purpose: planStep
+      ? "Use the strongest adequate reasoning pass to turn the framed scope and evidence into the actual ordered plan."
+      : usesSeparatePromptDesign
+        ? createStagePurpose(task)
+        : directWorkStagePurpose(task),
+    actions: planStep
+      ? directWorkStageActions(task)
+      : usesSeparatePromptDesign
+        ? createStageActions(task)
+        : directWorkStageActions(task),
+    reviewChecks: planStep
+      ? directWorkStageChecks(task)
+      : usesSeparatePromptDesign
+        ? createStageChecks(task)
+        : directWorkStageChecks(task),
+    routeStep: planStep ?? (usesSeparatePromptDesign ? promptStep : executionStep) ?? undefined,
     fallbackModelLabel: "You first",
-    recommendedModelLabel: usesSeparatePromptDesign ? promptBuilderModelLabel : executionModelLabel,
-    recommendedModelId: (usesSeparatePromptDesign ? promptStep : executionStep)?.modelId,
+    recommendedModelLabel: planStep
+      ? recommendedLabelForStageRole(
+          task,
+          "plan-synthesis",
+          planStep,
+          modelById,
+          manualReviewModel,
+          "You first",
+        )
+      : usesSeparatePromptDesign
+        ? promptBuilderModelLabel
+        : executionModelLabel,
+    recommendedModelId: (planStep ?? (usesSeparatePromptDesign ? promptStep : executionStep))?.modelId,
     workItems: buildStageWorkItems({
       task,
       decomposition,
       stage: "create",
-      workRole: usesSeparatePromptDesign ? "prompt-design" : directWorkRole,
-      routeStep: usesSeparatePromptDesign ? promptStep : executionStep,
+      workRole: createWorkRole,
+      routeStep: planStep ?? (usesSeparatePromptDesign ? promptStep : executionStep),
       usesSeparatePromptDesign,
       modelById,
       manualReviewModel,
@@ -142,15 +204,15 @@ export function buildProjectStageGuidance({
     }),
   });
 
-  if (shouldAddPackageStage(artifactStep, promptStep)) {
+  if (shouldAddPackageStage(artifactStep, promptStep, planStep, executionStep)) {
     stages.push({
       stage: "package",
       methodLabel: "Do",
-      label: packageStageLabel(task),
-      purpose: packageStagePurpose(task),
-      actions: packageStageActions(task),
-      reviewChecks: packageStageChecks(task),
-      routeStep: artifactStep ?? executionStep,
+      label: packageStageLabel(task, usesSeparatePromptDesign),
+      purpose: packageStagePurpose(task, usesSeparatePromptDesign),
+      actions: packageStageActions(task, usesSeparatePromptDesign),
+      reviewChecks: packageStageChecks(task, usesSeparatePromptDesign),
+      routeStep: artifactStep ?? executionStep ?? undefined,
       fallbackModelLabel: modelLabelForStep(primaryStep, modelById, manualReviewModel, "You first"),
       recommendedModelLabel: executionModelLabel,
       recommendedModelId: (artifactStep ?? executionStep)?.modelId,
@@ -197,16 +259,21 @@ export function buildProjectStageGuidance({
     stage: "act",
     methodLabel: "Act",
     label: actStageLabel(task),
-    purpose: actStagePurpose(task, usesSeparatePromptDesign),
-    actions: actStageActions(task, usesSeparatePromptDesign),
+    purpose: actStagePurpose(task, usesSeparatePromptDesign, nextActionStep !== null),
+    actions: actStageActions(task, usesSeparatePromptDesign, nextActionStep !== null),
     reviewChecks: actStageChecks(task),
+    routeStep: nextActionStep ?? undefined,
     fallbackModelLabel: "You first",
+    recommendedModelLabel: nextActionStep
+      ? recommendedLabelForWorkItem(nextActionStep, modelById, manualReviewModel, "You first")
+      : undefined,
+    recommendedModelId: nextActionStep?.modelId,
     workItems: buildStageWorkItems({
       task,
       decomposition,
       stage: "act",
       workRole: "next-action",
-      routeStep: undefined,
+      routeStep: nextActionStep ?? undefined,
       usesSeparatePromptDesign,
       modelById,
       manualReviewModel,
@@ -322,7 +389,11 @@ function buildStageWorkItems(input: {
       selectionReasons: routeStep?.selectionReasons?.length
         ? routeStep.selectionReasons
         : setupGapLabel
-          ? ["A research-only or manual setup cannot execute this build stage; add or select a build-capable AI helper before relying on the route."]
+          ? [
+              workRole === "scope-framing" || workRole === "plan-synthesis" || workRole === "prompt-design"
+                ? "The saved setup does not include a suitable planning helper for this stage; add or select one before relying on the route."
+                : "A research-only or manual setup cannot execute this build stage; add or select a build-capable AI helper before relying on the route.",
+            ]
           : ["This stage follows the selected route and the user's allowed tools."],
       reviewChecks: reviewChecksForWorkItem(task, workRole, targetDeliverables),
       upgradeTrigger: upgradeTriggerForWorkItem(task, workRole, usesSeparatePromptDesign),
@@ -364,8 +435,12 @@ function workItemLabel(
   const deliverableLabel = deliverables.length === 1 ? deliverables[0]?.label : "full request";
 
   switch (workRole) {
+    case "scope-framing":
+      return "Draft the scope and working brief";
     case "evidence-check":
       return taskHasModelSelectionIntent(task) ? "Check evidence and model availability" : `Check evidence for ${deliverableLabel}`;
+    case "plan-synthesis":
+      return "Synthesize the actual working plan";
     case "prompt-design":
       return deliverables.length > 1 || needsFullBuildPlan(task) ? "Build one master prompt" : `Build the prompt for ${deliverableLabel}`;
     case "execution":
@@ -411,8 +486,12 @@ function expectedOutputForWorkItem(
   const deliverableText = compactDeliverableText(deliverables);
 
   switch (workRole) {
+    case "scope-framing":
+      return `An execution-ready scope covering ${deliverableText}, with reasonable assumptions stated, blocking unknowns separated, and a copy-ready brief for the reasoning stage.`;
     case "evidence-check":
       return `Current facts, source notes, model availability, and privacy notes that affect ${deliverableText}.`;
+    case "plan-synthesis":
+      return `The actual ordered ${task.outputType} for ${deliverableText}, including dependencies, owners, assumptions, decisions, risks, measures, review points, acceptance checks, and the first action.`;
     case "prompt-design":
       return `One master prompt that covers ${deliverableText}, names the execution helper or mode, and includes privacy limits, checks, and upgrade triggers.`;
     case "execution":
@@ -438,10 +517,20 @@ function reviewChecksForWorkItem(
   const deliverableText = compactDeliverableText(deliverables);
 
   switch (workRole) {
+    case "scope-framing":
+      return [
+        `The draft scope covers ${deliverableText} without handing the user a blank worksheet.`,
+        "Assumptions are explicit, boundaries are visible, and only genuinely blocking questions remain.",
+      ];
     case "evidence-check":
       return [
         "Current facts and model/privacy assumptions are dated or marked uncertain.",
         "No unapproved source is required for the next stage.",
+      ];
+    case "plan-synthesis":
+      return [
+        `The result is the actual ${task.outputType} for ${deliverableText}, not prompt advice or a restatement of the route.`,
+        "The sequence follows dependencies and names owners, decisions, risks, measures, acceptance checks, and the first action.",
       ];
     case "prompt-design":
       return [
@@ -468,6 +557,14 @@ function upgradeTriggerForWorkItem(
   workRole: WorkRole,
   usesSeparatePromptDesign: boolean,
 ) {
+  if (workRole === "scope-framing") {
+    return "Upgrade scope framing only if important boundaries, assumptions, or blocking decisions remain unresolved.";
+  }
+
+  if (workRole === "plan-synthesis") {
+    return "Upgrade plan synthesis only if one focused retry still misses dependencies, decisions, risks, measures, or acceptance checks.";
+  }
+
   if (workRole === "prompt-design") {
     return "Upgrade the prompt-design helper only if the master prompt misses deliverables, checks, privacy, or the execution model choice.";
   }
@@ -506,11 +603,35 @@ function recommendedLabelForWorkItem(
   return modelLabelForStep(routeStep, modelById, manualReviewModel, fallbackModelLabel);
 }
 
+function recommendedLabelForStageRole(
+  task: TaskIntake,
+  workRole: WorkRole,
+  routeStep: RouteStep | undefined | null,
+  modelById: Map<string, ModelInventoryItem>,
+  manualReviewModel: ModelInventoryItem | undefined,
+  fallbackModelLabel: string,
+) {
+  return (
+    manualSetupGapLabel(task, workRole, routeStep) ??
+    recommendedLabelForWorkItem(routeStep, modelById, manualReviewModel, fallbackModelLabel)
+  );
+}
+
 function roundEstimate(value: number) {
   return Math.round(value * 1000) / 1000;
 }
 
-function frameStageActions(task: TaskIntake) {
+function frameStageActions(task: TaskIntake, usesScopeHelper: boolean) {
+  if (usesScopeHelper) {
+    return [
+      "Paste the rough request into the recommended helper.",
+      `Ask it to draft the full working scope for ${friendlyOutputName(task.outputType)}: ${compactTaskDeliverableSummary(task)}.`,
+      "Require explicit assumptions, boundaries, missing decisions, dependencies, risks, measures, and acceptance checks.",
+      "Tell it to make reasonable assumptions and ask only about unknowns that genuinely block the work.",
+      "Carry the finished working brief into the planning stage.",
+    ];
+  }
+
   return [
     "Restate the task in one plain sentence.",
     `Name the finished output: ${friendlyOutputName(task.outputType)}.`,
@@ -520,8 +641,12 @@ function frameStageActions(task: TaskIntake) {
   ];
 }
 
-function frameStageChecks(task: TaskIntake) {
-  const checks = ["The goal, audience, inputs, and finish line are clear."];
+function frameStageChecks(task: TaskIntake, usesScopeHelper: boolean) {
+  const checks = [
+    usesScopeHelper
+      ? "The helper drafted a usable scope; the user only needs to confirm or correct it."
+      : "The goal, audience, inputs, and finish line are clear.",
+  ];
 
   if (task.sensitivityClass !== "public") {
     checks.push("Private or sensitive details stay out of tools that are not allowed for them.");
@@ -808,21 +933,26 @@ function directWorkStageChecks(task: TaskIntake) {
   ];
 }
 
-function shouldAddPackageStage(artifactStep: RouteStep | null, promptStep: RouteStep | null) {
-  return artifactStep !== null || promptStep !== null;
+function shouldAddPackageStage(
+  artifactStep: RouteStep | null,
+  promptStep: RouteStep | null,
+  planStep: RouteStep | null,
+  executionStep: RouteStep | null,
+) {
+  return artifactStep !== null || promptStep !== null || (planStep !== null && executionStep !== null);
 }
 
-function packageStageLabel(task: TaskIntake) {
+function packageStageLabel(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return "Build the first slice";
   }
 
   if (needsFullBuildPlan(task)) {
-    return "Run the build-plan prompt";
+    return usesSeparatePromptDesign ? "Run the build-plan prompt" : "Implement the first build slice";
   }
 
   if (taskHasBuildIntent(task)) {
-    return "Run the build prompt";
+    return usesSeparatePromptDesign ? "Run the build prompt" : "Implement the approved build plan";
   }
 
   if (task.outputType === "plan") {
@@ -840,17 +970,23 @@ function packageStageLabel(task: TaskIntake) {
   return "Run the prompt";
 }
 
-function packageStagePurpose(task: TaskIntake) {
+function packageStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
-    return "This is a manual handoff: after Stage 2, run the finished master prompt in the recommended execution mode to produce the actual build plan and first usable slice.";
+    return usesSeparatePromptDesign
+      ? "This is a manual handoff: run the finished master prompt in the recommended execution mode to produce the first usable slice."
+      : "Use the approved scope and build plan to implement the first usable slice without reopening the planning decisions.";
   }
 
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
-    return "Use the master prompt to build the smallest useful version first, then leave bigger features for later passes.";
+    return usesSeparatePromptDesign
+      ? "Use the master prompt to build the smallest useful version first, then leave bigger features for later passes."
+      : "Implement the smallest useful version from the approved build plan, then leave bigger features for later passes.";
   }
 
   if (taskHasBuildIntent(task) && (task.outputType === "plan" || task.knowledgeWorkType === "planning")) {
-    return "Use the master prompt with the lightest adequate execution model or mode to produce the actual build plan and first usable slice.";
+    return usesSeparatePromptDesign
+      ? "Use the master prompt with the lightest adequate execution model or mode to produce the first usable slice."
+      : "Use the lightest adequate execution model or mode to implement the first usable slice from the approved plan.";
   }
 
   if (task.outputType === "plan") {
@@ -872,12 +1008,21 @@ function packageStagePurpose(task: TaskIntake) {
   return "Use the prompt to create the requested output with the smallest helper that can pass the checks.";
 }
 
-function packageStageActions(task: TaskIntake) {
+function packageStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
+    const actions = usesSeparatePromptDesign
+      ? [
+          "Save this route and open Copy-Ready Prompts.",
+          "Copy the finished master prompt and paste it into the recommended execution model or mode shown here.",
+        ]
+      : [
+          "Carry the approved scope and build plan into the recommended execution model or mode.",
+          "Tell the helper to preserve the decisions, boundaries, and deferred work already agreed.",
+        ];
+
     return [
-      "Finish Stage 2, then save this route and open Copy-Ready Prompts.",
-      "Copy the finished master prompt and paste it into the recommended execution model or mode shown here.",
-      `Generate the actual plan or build brief, not more prompt advice: ${buildPlanCoverageSummary(task)}.`,
+      ...actions,
+      `Implement the first usable slice, not more planning advice: ${buildPlanCoverageSummary(task)}.`,
       "Require data flow, screens or files, acceptance tests, and what can wait for a later pass.",
       "Stop after the first usable slice is clear enough for a human review.",
     ];
@@ -885,7 +1030,9 @@ function packageStageActions(task: TaskIntake) {
 
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return [
-      "Paste the master prompt into the selected execution helper.",
+      usesSeparatePromptDesign
+        ? "Paste the master prompt into the selected execution helper."
+        : "Give the selected execution helper the approved scope and build plan.",
       "Build only the first useful slice before adding polish or extra features.",
       "Ask for the files, components, tests, and manual checks needed for that slice.",
       "Stop and upgrade only if the build plan is confused, unsafe, or repeatedly failing review.",
@@ -944,14 +1091,16 @@ function packageStageActions(task: TaskIntake) {
   ];
 }
 
-function packageStageChecks(task: TaskIntake) {
+function packageStageChecks(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return ["The first slice works well enough to review before more features are added."];
   }
 
   if (needsFullBuildPlan(task)) {
     return [
-      "The output includes the master prompt, execution model choice, build sequence, checks, privacy limits, and impact comparison.",
+      usesSeparatePromptDesign
+        ? "The handoff preserves the master prompt, execution model choice, build sequence, checks, privacy limits, and impact comparison."
+        : "The implementation preserves the approved scope, build sequence, checks, privacy limits, and deferred work.",
       "The first build slice is small enough to start without trying to build the whole product at once.",
     ];
   }
@@ -989,7 +1138,9 @@ function reviewStageLabel(task: TaskIntake) {
 
 function reviewStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
-    return "Check the result against the original request, the master prompt, and the expected deliverables before spending more tool time.";
+    return usesSeparatePromptDesign
+      ? "Check the result against the original request, the master prompt, and the expected deliverables before spending more tool time."
+      : "Check the result against the original request, approved scope, build plan, and expected deliverables before spending more tool time.";
   }
 
   if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
@@ -1069,7 +1220,15 @@ function actStageLabel(task: TaskIntake) {
   return "Act on the lesson";
 }
 
-function actStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean) {
+function actStagePurpose(
+  task: TaskIntake,
+  usesSeparatePromptDesign: boolean,
+  usesNextActionHelper: boolean,
+) {
+  if (usesNextActionHelper) {
+    return "Use the recommended lighter helper to turn the approved plan into an immediate action without repeating the expensive reasoning.";
+  }
+
   if (needsFullBuildPlan(task)) {
     return "Choose the smallest build action, save the prompt, and decide the measure that will prove the route saved time, cost, or energy.";
   }
@@ -1087,7 +1246,19 @@ function actStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   return "Use what you learned to proceed, save the route if it worked, or adjust the prompt and setup for next time.";
 }
 
-function actStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
+function actStageActions(
+  task: TaskIntake,
+  usesSeparatePromptDesign: boolean,
+  usesNextActionHelper: boolean,
+) {
+  if (usesNextActionHelper) {
+    return [
+      "Paste the approved plan into the recommended lighter helper.",
+      "Ask for the first action, its owner, required inputs, completion signal, and next review point.",
+      "Tell it to preserve the approved scope and decisions instead of reopening the plan.",
+    ];
+  }
+
   if (needsFullBuildPlan(task)) {
     return [
       "Choose one first build action, such as the spreadsheet import, category rules, or first tracking view.",
@@ -1287,12 +1458,19 @@ function manualSetupGapLabel(task: TaskIntake, workRole: WorkRole, step: RouteSt
     return null;
   }
 
-  if (!(needsFullBuildPlan(task) || taskHasBuildIntent(task))) {
+  if (
+    !(
+      needsFullBuildPlan(task) ||
+      taskHasBuildIntent(task) ||
+      task.outputType === "plan" ||
+      task.knowledgeWorkType === "planning"
+    )
+  ) {
     return null;
   }
 
-  if (workRole === "prompt-design") {
-    return "Select a prompt-capable AI helper first (ChatGPT, Claude, Gemini, Grok, Poe, or similar)";
+  if (workRole === "scope-framing" || workRole === "plan-synthesis" || workRole === "prompt-design") {
+    return "Select a planning-capable AI helper first (Perplexity for research-backed scope; ChatGPT, Claude, Gemini, Grok, Poe, or similar for synthesis)";
   }
 
   if (workRole === "execution" || workRole === "build-slice" || workRole === "artifact-package") {

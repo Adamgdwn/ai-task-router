@@ -7,13 +7,27 @@ import {
 } from "./taskDecomposition";
 
 export type ReasoningDemand = "light" | "moderate" | "heavy";
+export type TaskArchetype =
+  | "simple-output"
+  | "research-synthesis"
+  | "decision-analysis"
+  | "working-plan"
+  | "software-build"
+  | "quality-review"
+  | "artifact-production"
+  | "prompt-package";
 
 export type TaskReasoningProfile = {
   taskId: string;
+  archetype: TaskArchetype;
   demand: ReasoningDemand;
   demandScore: number;
-  primaryWorkRole: "execution" | "build-slice";
+  primaryWorkRole: WorkRole;
   requiresEvidence: boolean;
+  needsScopeFraming: boolean;
+  needsPlanSynthesis: boolean;
+  needsExecution: boolean;
+  needsDownstreamActionPass: boolean;
   promptArtifactRequested: boolean;
   explicitPromptHandoff: boolean;
   benefitsFromPromptHandoff: boolean;
@@ -39,22 +53,22 @@ export function analyzeTaskReasoning(
   decomposition: TaskDecomposition = decomposeTask(task),
 ): TaskReasoningProfile {
   const text = normalizedTaskText(task);
-  const primaryWorkRole =
-    taskHasBuildIntent(task) || task.knowledgeWorkType === "coding" || task.outputType === "code"
-      ? "build-slice"
-      : "execution";
+  const baseArchetype = archetypeForTask(task);
   const promptRequested =
     task.outputType === "prompt package" ||
     (decomposition.deliverables.some((deliverable) => deliverable.kind === "prompt") &&
       /\b(build|create|draft|write|make|produce|design)\b.{0,36}\bprompt\b/.test(text));
   const explicitPromptHandoff =
-    task.outputType !== "prompt package" &&
     promptRequested &&
-    (primaryWorkRole === "build-slice" ||
+    (baseArchetype === "software-build" ||
       /\bprompt\b.{0,140}\b(then|after|next|paste|run|use it|hand(?:\s|-)?off)\b/.test(text));
+  const archetype =
+    explicitPromptHandoff && baseArchetype !== "software-build"
+      ? "prompt-package"
+      : baseArchetype;
   const promptArtifactRequested =
     task.outputType === "prompt package" ||
-    (promptRequested && !explicitPromptHandoff && primaryWorkRole === "execution");
+    (promptRequested && !explicitPromptHandoff && archetype !== "software-build");
   const substantiveDeliverableCount = decomposition.deliverables.filter(
     (deliverable) => deliverable.kind !== "privacy" && deliverable.kind !== "review",
   ).length;
@@ -72,9 +86,36 @@ export function analyzeTaskReasoning(
   );
   const demand = demandForScore(score);
   const requiresEvidence = taskNeedsEvidenceCheck(task);
-  const benefitsFromPromptHandoff =
-    primaryWorkRole === "build-slice" &&
-    (explicitPromptHandoff || demand === "heavy" || decomposition.complexBuildPlan);
+  const needsScopeFraming =
+    archetype === "working-plan" ||
+    archetype === "software-build" ||
+    archetype === "decision-analysis" ||
+    (archetype === "prompt-package" && (demand === "heavy" || explicitPromptHandoff));
+  const needsPlanSynthesis =
+    archetype === "working-plan" ||
+    (archetype === "software-build" && !explicitPromptHandoff);
+  const primaryWorkRole =
+    explicitPromptHandoff && archetype !== "software-build"
+      ? "execution"
+      : promptArtifactRequested && !explicitPromptHandoff
+      ? "prompt-design"
+      : archetype === "software-build"
+        ? "build-slice"
+        : archetype === "working-plan"
+          ? "plan-synthesis"
+          : archetype === "quality-review"
+            ? "quality-review"
+            : "execution";
+  const needsExecution =
+    explicitPromptHandoff ||
+    (!promptArtifactRequested &&
+      archetype !== "working-plan" &&
+      archetype !== "quality-review");
+  const benefitsFromPromptHandoff = explicitPromptHandoff;
+  const needsDownstreamActionPass =
+    archetype === "working-plan" &&
+    task.qualityBar !== "quick" &&
+    demand !== "light";
   const benefitsFromIndependentReview =
     explicitlyRequestsOutputReview(task) ||
     task.publicFacing ||
@@ -82,7 +123,7 @@ export function analyzeTaskReasoning(
     task.qualityBar === "critical" ||
     task.sensitivityClass === "regulated" ||
     task.sensitivityClass === "highly restricted" ||
-    (primaryWorkRole === "build-slice" && demand === "heavy");
+    (archetype === "software-build" && demand === "heavy");
   const benefitsFromSpecialistPackaging =
     task.knowledgeWorkType === "packaging" ||
     task.outputType === "table" ||
@@ -90,10 +131,15 @@ export function analyzeTaskReasoning(
 
   return {
     taskId: task.id,
+    archetype,
     demand,
     demandScore: score,
     primaryWorkRole,
     requiresEvidence,
+    needsScopeFraming,
+    needsPlanSynthesis,
+    needsExecution,
+    needsDownstreamActionPass,
     promptArtifactRequested,
     explicitPromptHandoff,
     benefitsFromPromptHandoff,
@@ -107,6 +153,9 @@ export function analyzeTaskReasoning(
       hasConstraintWork,
       requiresEvidence,
       benefitsFromIndependentReview,
+      archetype,
+      needsScopeFraming,
+      needsDownstreamActionPass,
     }),
   };
 }
@@ -128,7 +177,11 @@ export function capabilityTargetForRole(
     premium: 0.45,
   }[strategy];
   const roleAdjustment =
-    role === "build-slice"
+    role === "scope-framing"
+      ? -0.3
+      : role === "plan-synthesis"
+        ? 0.3
+        : role === "build-slice"
       ? 0.2
       : role === "quality-review"
         ? 0.15
@@ -138,7 +191,9 @@ export function capabilityTargetForRole(
             ? task.requiresCitations
               ? 0.15
               : 0
-            : 0;
+            : role === "next-action"
+              ? -0.8
+              : 0;
 
   return clampCapabilityTarget(demandTarget[profile.demand] + strategyAdjustment + roleAdjustment);
 }
@@ -157,6 +212,9 @@ function assessmentReasons(input: {
   hasConstraintWork: boolean;
   requiresEvidence: boolean;
   benefitsFromIndependentReview: boolean;
+  archetype: TaskArchetype;
+  needsScopeFraming: boolean;
+  needsDownstreamActionPass: boolean;
 }) {
   const reasons: string[] = [];
 
@@ -166,6 +224,10 @@ function assessmentReasons(input: {
     reasons.push(`It combines ${input.substantiveDeliverableCount} requested parts.`);
   } else {
     reasons.push("It asks for one main finished output.");
+  }
+
+  if (input.needsScopeFraming) {
+    reasons.push("The route must turn the rough request into a usable scope instead of asking the user to finish the brief.");
   }
 
   if (input.hasOrderingWork) {
@@ -184,11 +246,52 @@ function assessmentReasons(input: {
     reasons.push("The requested quality, risk, or review need makes a separate check useful.");
   }
 
+  if (input.needsDownstreamActionPass) {
+    reasons.push("A lighter downstream pass can turn the approved plan into an immediate action without redoing the reasoning.");
+  }
+
   if (input.task.qualityBar === "quick" && input.demand === "light") {
     reasons.push("A fast first pass is enough unless its review check fails.");
   }
 
   return reasons;
+}
+
+function archetypeForTask(task: TaskIntake): TaskArchetype {
+  if (task.outputType === "prompt package") {
+    return "prompt-package";
+  }
+
+  if (taskHasBuildIntent(task) || task.knowledgeWorkType === "coding" || task.outputType === "code") {
+    return "software-build";
+  }
+
+  if (task.knowledgeWorkType === "planning" || task.outputType === "plan") {
+    return "working-plan";
+  }
+
+  if (task.knowledgeWorkType === "research" || task.requiresCurrentFacts || task.requiresCitations) {
+    return "research-synthesis";
+  }
+
+  if (task.knowledgeWorkType === "analysis") {
+    return "decision-analysis";
+  }
+
+  if (task.knowledgeWorkType === "review") {
+    return "quality-review";
+  }
+
+  if (
+    task.knowledgeWorkType === "packaging" ||
+    task.outputType === "table" ||
+    task.outputType === "slide outline" ||
+    task.outputType === "route card"
+  ) {
+    return "artifact-production";
+  }
+
+  return "simple-output";
 }
 
 function workTypeDemand(workType: TaskIntake["knowledgeWorkType"]) {

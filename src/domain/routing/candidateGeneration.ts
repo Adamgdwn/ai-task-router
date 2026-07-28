@@ -5,13 +5,11 @@ import {
   decomposeTask,
   requestedDeliverableSummary,
   taskHasBuildIntent,
-  taskHasModelSelectionIntent,
   type TaskDecomposition,
 } from "./taskDecomposition";
 import {
   buildToolModeCatalog,
   selectToolModeForRole,
-  toolModeCapabilityForRole,
   type ToolModeCandidate,
 } from "./toolModeCatalog";
 import {
@@ -20,6 +18,11 @@ import {
   taskReasoningSummary,
   type TaskReasoningProfile,
 } from "./taskReasoning";
+import {
+  buildTaskWorkPlan,
+  workStageForRole,
+  type TaskWorkPlan,
+} from "./taskWorkPlan";
 
 const routeCandidateStrategies = ["lean", "balanced", "premium"] as const;
 
@@ -74,6 +77,7 @@ type CandidateContext = {
   allowedSources: SourcePermission[];
   decomposition: TaskDecomposition;
   reasoning: TaskReasoningProfile;
+  workPlan: TaskWorkPlan;
   modes: ToolModeCandidate[];
   warnings: string[];
 };
@@ -163,13 +167,15 @@ function buildCandidateContext(
   const allowedSourceIdSet = new Set(allowedSourceIds);
 
   const decomposition = decomposeTask(task);
+  const reasoning = analyzeTaskReasoning(task, decomposition);
 
   return {
     allowedModels: models.filter((model) => allowedModelIds.has(model.id)),
     allowedSourceIds,
     allowedSources: task.sourcePermissions.filter((source) => allowedSourceIdSet.has(source.id)),
     decomposition,
-    reasoning: analyzeTaskReasoning(task, decomposition),
+    reasoning,
+    workPlan: buildTaskWorkPlan(task, decomposition, reasoning),
     modes: buildToolModeCatalog(models.filter((model) => allowedModelIds.has(model.id)), task),
     warnings: uniqueMessages(hardGateResult.warnings.map((warning) => warning.message)),
   };
@@ -211,14 +217,22 @@ function buildStrategyCandidate(input: {
 
   const roleSelections = selectRouteRoleModes({ strategy, task, context });
   const primarySelections = [
-    roleSelections.promptDesign,
-    roleSelections.execution,
-    roleSelections.artifact,
+    context.workPlan.primaryWorkRole === "scope-framing" ? roleSelections.scopeFraming : null,
+    context.workPlan.primaryWorkRole === "evidence-check" ? roleSelections.evidence : null,
+    context.workPlan.primaryWorkRole === "plan-synthesis" ? roleSelections.planSynthesis : null,
+    context.workPlan.primaryWorkRole === "prompt-design" ? roleSelections.promptDesign : null,
+    context.workPlan.primaryWorkRole === "execution" || context.workPlan.primaryWorkRole === "build-slice"
+      ? roleSelections.execution
+      : null,
+    context.workPlan.primaryWorkRole === "artifact-package" ? roleSelections.artifact : null,
+    context.workPlan.primaryWorkRole === "quality-review" ? roleSelections.review : null,
   ].filter((mode): mode is ToolModeCandidate => mode !== null);
   const usableSelections = [
+    roleSelections.scopeFraming,
     roleSelections.evidence,
     ...primarySelections,
     roleSelections.review,
+    roleSelections.nextAction,
   ].filter((mode): mode is ToolModeCandidate => mode !== null);
   const usesManualPrimaryStep =
     primarySelections.length > 0 && primarySelections.every((mode) => mode.modeKind === "manual");
@@ -227,7 +241,7 @@ function buildStrategyCandidate(input: {
     usableSelections.some((mode) => mode.modeKind === "benchmark") &&
     !context.allowedModels.some((model) => model.tier === "frontier");
 
-  if (!roleSelections.promptDesign && !roleSelections.execution) {
+  if (primarySelections.length === 0) {
     return unavailableCandidate({
       taskId: task.id,
       strategy,
@@ -239,9 +253,37 @@ function buildStrategyCandidate(input: {
   }
 
   const steps: RouteStep[] = [];
+  const scopeStep = roleSelections.scopeFraming
+    ? buildRoleModeStep({
+        routeId,
+        task,
+        context,
+        mode: roleSelections.scopeFraming,
+        workRole: "scope-framing",
+        sourceIds: context.allowedSourceIds,
+      })
+    : null;
+  if (scopeStep) {
+    steps.push(scopeStep);
+  }
+
   const researchStep = buildEvidenceStep({ routeId, task, context, mode: roleSelections.evidence });
   if (researchStep) {
     steps.push(researchStep);
+  }
+
+  const planStep = roleSelections.planSynthesis
+    ? buildRoleModeStep({
+        routeId,
+        task,
+        context,
+        mode: roleSelections.planSynthesis,
+        workRole: "plan-synthesis",
+        sourceIds: context.allowedSourceIds,
+      })
+    : null;
+  if (planStep) {
+    steps.push(planStep);
   }
 
   const promptStep = roleSelections.promptDesign
@@ -303,6 +345,20 @@ function buildStrategyCandidate(input: {
     steps.push(reviewStep);
   }
 
+  const nextActionStep = roleSelections.nextAction
+    ? buildRoleModeStep({
+        routeId,
+        task,
+        context,
+        mode: roleSelections.nextAction,
+        workRole: "next-action",
+        sourceIds: context.allowedSourceIds,
+      })
+    : null;
+  if (nextActionStep) {
+    steps.push(nextActionStep);
+  }
+
   if (hardGateResult.requiresHumanApproval) {
     steps.push(buildHumanApprovalStep(routeId, finalApprovalRouteStep));
   }
@@ -316,10 +372,13 @@ function buildStrategyCandidate(input: {
       definition,
       usesManualPrimaryStep,
       usesPremiumBenchmark,
+      hasScopeStep: scopeStep !== null,
       hasResearchStep: researchStep !== null,
+      hasPlanStep: planStep !== null,
       hasPromptStep: promptStep !== null,
       hasArtifactStep: artifactStep !== null,
       hasReviewStep: reviewStep !== null,
+      hasNextActionStep: nextActionStep !== null,
       requiresHumanApproval: hardGateResult.requiresHumanApproval,
       workItemCount: context.decomposition.deliverables.length,
       reasoning: context.reasoning,
@@ -340,92 +399,140 @@ function selectRouteRoleModes(input: {
   task: TaskIntake;
   context: CandidateContext;
 }): {
+  scopeFraming: ToolModeCandidate | null;
   evidence: ToolModeCandidate | null;
+  planSynthesis: ToolModeCandidate | null;
   promptDesign: ToolModeCandidate | null;
   execution: ToolModeCandidate | null;
   artifact: ToolModeCandidate | null;
   review: ToolModeCandidate | null;
+  nextAction: ToolModeCandidate | null;
 } {
   const { strategy, task, context } = input;
-  const executionWorkRole = context.reasoning.primaryWorkRole;
-  const execution =
-    context.reasoning.promptArtifactRequested && !context.reasoning.explicitPromptHandoff
-      ? null
-      : selectExecutionModeForRoute({
-          strategy,
+  const scopeStage = workStageForRole(context.workPlan, "scope-framing");
+  const scopeFraming = scopeStage
+    ? withDecisionReasons(
+        selectToolModeForRole({
           task,
-          context,
-          executionWorkRole,
-          promptDesign: null,
-        });
-  const promptCandidate = selectToolModeForRole({
-    task,
-    modes: context.modes,
-    role: "prompt-design",
-    strategy,
-    minimumCapability: capabilityTargetForRole(task, context.reasoning, "prompt-design", strategy),
-  });
-  const promptDesign = shouldUseSeparatePromptPass({
-    strategy,
-    task,
-    profile: context.reasoning,
-    promptCandidate,
-    execution,
-  })
-    ? withDecisionReasons(promptCandidate, [
-        taskReasoningSummary(context.reasoning),
-        "A separate planning handoff earns its place here because the build executor benefits from a checked specification before implementation starts.",
-      ])
+          modes: context.modes,
+          role: "scope-framing",
+          strategy,
+          minimumCapability: capabilityTargetForRole(task, context.reasoning, "scope-framing", strategy),
+        }),
+        [
+          taskReasoningSummary(context.reasoning),
+          ...scopeStage.selectionReasons,
+          context.allowedSources.some((source) => source.sourceType === "web")
+            ? "Approved public sources may be used where they materially improve the scope."
+            : "No outside source is approved, so frame the scope from the request only and mark any fact that would need checking.",
+        ],
+        "scope-framing",
+      )
     : null;
-  const selectedExecution =
-    promptDesign && execution
-      ? selectExecutionModeForRoute({
-          strategy,
+  const evidenceStage = workStageForRole(context.workPlan, "evidence-check");
+  const evidence = evidenceStage
+    ? withDecisionReasons(
+        selectToolModeForRole({
           task,
-          context,
-          executionWorkRole,
-          promptDesign,
-        })
-      : execution;
-  const directExecution =
-    !promptDesign && selectedExecution
-      ? directWorkMode(selectedExecution, task, context.reasoning)
-      : selectedExecution
-        ? withDecisionReasons(selectedExecution, [
-            `This mode is assigned to the ${executionWorkRole === "build-slice" ? "implementation" : "finished-output"} stage after the planning handoff.`,
-          ])
-        : null;
-  const artifact = selectArtifactMode({ strategy, task, context, execution: directExecution });
-  const review = selectReviewMode({
-    strategy,
-    task,
-    context,
-    usedModelIds: [promptDesign?.modelId, directExecution?.modelId, artifact?.modelId].filter(
-      (modelId): modelId is string => modelId !== undefined,
-    ),
-  });
-
-  return {
-    evidence: shouldAddEvidenceStep(task, context)
+          modes: context.modes,
+          role: "evidence-check",
+          strategy,
+          minimumCapability: capabilityTargetForRole(task, context.reasoning, "evidence-check", strategy),
+        }),
+        [
+          ...evidenceStage.selectionReasons,
+        ],
+      )
+    : null;
+  const planStage = workStageForRole(context.workPlan, "plan-synthesis");
+  const planSynthesis = planStage
+    ? withDecisionReasons(
+        selectToolModeForRole({
+          task,
+          modes: context.modes,
+          role: "plan-synthesis",
+          strategy,
+          minimumCapability: capabilityTargetForRole(task, context.reasoning, "plan-synthesis", strategy),
+        }),
+        [
+          taskReasoningSummary(context.reasoning),
+          ...planStage.selectionReasons,
+        ],
+        "plan-synthesis",
+      )
+    : null;
+  const promptStage = workStageForRole(context.workPlan, "prompt-design");
+  const promptDesign =
+    promptStage
       ? withDecisionReasons(
           selectToolModeForRole({
             task,
             modes: context.modes,
-            role: "evidence-check",
+            role: "prompt-design",
             strategy,
-            minimumCapability: capabilityTargetForRole(task, context.reasoning, "evidence-check", strategy),
+            minimumCapability: capabilityTargetForRole(task, context.reasoning, "prompt-design", strategy),
           }),
           [
-            task.requiresCitations
-              ? "This stage is required because the result needs citations that can be checked."
-              : "This stage is required because current facts or source-backed assumptions affect the result.",
+            taskReasoningSummary(context.reasoning),
+            ...promptStage.selectionReasons,
           ],
         )
-      : null,
+      : null;
+  const executionStage =
+    workStageForRole(context.workPlan, "build-slice") ??
+    workStageForRole(context.workPlan, "execution");
+  const executionWorkRole: WorkRole =
+    executionStage?.workRole === "build-slice" ? "build-slice" : "execution";
+  const selectedExecution = executionStage
+    ? selectExecutionModeForRoute({
+          strategy,
+          task,
+          context,
+          executionWorkRole,
+          promptDesign: promptDesign ?? planSynthesis,
+        })
+    : null;
+  const directExecution =
+    !promptDesign && !planSynthesis && selectedExecution
+      ? directWorkMode(selectedExecution, task, context.reasoning)
+      : selectedExecution
+        ? withDecisionReasons(selectedExecution, [
+            `This mode is assigned to the ${executionWorkRole === "build-slice" ? "implementation" : "finished-output"} stage after the scope and planning work.`,
+          ])
+        : null;
+  const artifact = workStageForRole(context.workPlan, "artifact-package")
+    ? selectArtifactMode({ strategy, task, context, execution: directExecution })
+    : null;
+  const usedBeforeReview = [scopeFraming, evidence, planSynthesis, promptDesign, directExecution, artifact];
+  const review = selectReviewMode({
+    strategy,
+    task,
+    context,
+    usedModelIds: usedBeforeReview.map((mode) => mode?.modelId).filter(
+      (modelId): modelId is string => modelId !== undefined,
+    ),
+  });
+  const nextAction =
+    workStageForRole(context.workPlan, "next-action") && strategy !== "lean"
+      ? selectNextActionMode({
+          task,
+          strategy,
+          context,
+          usedModelIds: [planSynthesis?.modelId, review?.modelId].filter(
+            (modelId): modelId is string => modelId !== undefined,
+          ),
+        })
+      : null;
+
+  return {
+    scopeFraming,
+    evidence,
+    planSynthesis,
     promptDesign,
     execution: directExecution,
     artifact,
     review,
+    nextAction,
   };
 }
 
@@ -451,45 +558,6 @@ function directWorkMode(mode: ToolModeCandidate, task: TaskIntake, profile: Task
       ...mode.selectionReasons.filter((reason) => !/\b(prompt|downstream)\b/i.test(reason)),
     ],
   };
-}
-
-function shouldUseSeparatePromptPass(input: {
-  strategy: RouteCandidateStrategy;
-  task: TaskIntake;
-  profile: TaskReasoningProfile;
-  promptCandidate: ToolModeCandidate | null;
-  execution: ToolModeCandidate | null;
-}) {
-  const { strategy, task, profile, promptCandidate, execution } = input;
-
-  if (!promptCandidate) {
-    return false;
-  }
-
-  if (profile.promptArtifactRequested && !profile.explicitPromptHandoff) {
-    return true;
-  }
-
-  if (profile.explicitPromptHandoff) {
-    return true;
-  }
-
-  if (!profile.benefitsFromPromptHandoff || !execution || strategy === "lean") {
-    return false;
-  }
-
-  if (promptCandidate.id === execution.id) {
-    return false;
-  }
-
-  const promptCapability = toolModeCapabilityForRole(promptCandidate.capabilityScores, "prompt-design", task);
-  const executionReasoning = execution.capabilityScores.reasoning;
-
-  return (
-    execution.modeKind === "build" ||
-    strategy === "premium" ||
-    promptCapability >= executionReasoning + 0.35
-  );
 }
 
 function selectArtifactMode(input: {
@@ -534,7 +602,10 @@ function selectReviewMode(input: {
 }) {
   const { strategy, task, context, usedModelIds } = input;
 
-  if (!context.reasoning.benefitsFromIndependentReview || strategy === "lean") {
+  if (
+    !workStageForRole(context.workPlan, "quality-review") ||
+    (strategy === "lean" && context.workPlan.primaryWorkRole !== "quality-review")
+  ) {
     return null;
   }
 
@@ -576,17 +647,107 @@ function selectReviewMode(input: {
   ]);
 }
 
+function selectNextActionMode(input: {
+  task: TaskIntake;
+  strategy: RouteCandidateStrategy;
+  context: CandidateContext;
+  usedModelIds: string[];
+}) {
+  const { task, strategy, context, usedModelIds } = input;
+  const target = capabilityTargetForRole(task, context.reasoning, "next-action", strategy);
+  const usableModes = context.modes.filter((mode) => mode.modeKind !== "benchmark");
+  const independent = selectToolModeForRole({
+    task,
+    modes: usableModes,
+    role: "next-action",
+    strategy: "lean",
+    minimumCapability: target,
+    requireMinimumCapability: true,
+    excludedModelIds: usedModelIds,
+  });
+  const selected =
+    independent ??
+    selectToolModeForRole({
+      task,
+      modes: usableModes,
+      role: "next-action",
+      strategy: "lean",
+      minimumCapability: target,
+    });
+
+  if (!selected) {
+    return null;
+  }
+
+  return withDecisionReasons(selected, [
+    independent
+      ? "A different lightweight saved helper turns the approved plan into a short action handoff without spending another heavy reasoning pass."
+      : "No adequate independent helper is available, so the lightest adequate saved mode handles the action handoff.",
+    "This stage must operationalize the approved plan, not reopen its scope or rewrite its reasoning.",
+  ], "next-action");
+}
+
 function withDecisionReasons(
   mode: ToolModeCandidate | null,
   decisionReasons: string[],
+  assignedRole?: WorkRole,
 ): ToolModeCandidate | null {
   if (!mode) {
     return null;
   }
 
+  const adaptedMode = assignedRole ? adaptModeForAssignedRole(mode, assignedRole) : mode;
+
+  return {
+    ...adaptedMode,
+    selectionReasons: uniqueMessages([...decisionReasons, ...adaptedMode.selectionReasons]),
+  };
+}
+
+function adaptModeForAssignedRole(mode: ToolModeCandidate, workRole: WorkRole): ToolModeCandidate {
+  if (workRole !== "scope-framing" && workRole !== "plan-synthesis" && workRole !== "next-action") {
+    return mode;
+  }
+
+  const roleLabel =
+    workRole === "scope-framing"
+      ? "for research-backed scope framing"
+      : workRole === "plan-synthesis"
+        ? "for the reasoning-heavy planning pass"
+        : "for the lightweight action handoff";
+  const modeLabel = mode.modeLabel
+    .replace(
+      /for current-facts framing, not final app execution/gi,
+      "for scope framing and approved source checks, not final execution",
+    )
+    .replace(
+      /for source-backed framing, not final app execution/gi,
+      "for scope framing and approved source checks, not final execution",
+    )
+    .replace(/for the master prompt/gi, roleLabel)
+    .replace(/after the master prompt is clear/gi, roleLabel)
+    .replace(/after the prompt is clear/gi, roleLabel)
+    .replace(/for prompt design/gi, roleLabel);
+  const displayLabel =
+    mode.providerId === "none"
+      ? mode.displayLabel
+      : `${mode.providerLabel} ${mode.accountLabel} - ${modeLabel}`;
+  const selectionReasons =
+    workRole === "next-action"
+      ? mode.selectionReasons.filter((reason) => !/\b(master prompt|prompt design|downstream prompt)\b/i.test(reason))
+      : mode.selectionReasons
+          .filter((reason) => !/\bdownstream prompt\b/i.test(reason))
+          .map((reason) =>
+            workRole === "scope-framing" && /\buse perplexity for current facts\b/i.test(reason)
+              ? "Use Perplexity to structure the scope; use current facts and citations only when outside sources are approved."
+              : reason,
+          );
+
   return {
     ...mode,
-    selectionReasons: uniqueMessages([...decisionReasons, ...mode.selectionReasons]),
+    modeLabel,
+    displayLabel,
+    selectionReasons,
   };
 }
 
@@ -654,7 +815,7 @@ function buildEvidenceStep(input: {
 }): RouteStep | null {
   const { routeId, task, context, mode } = input;
 
-  if (!shouldAddEvidenceStep(task, context) || !mode) {
+  if (!workStageForRole(context.workPlan, "evidence-check") || !mode) {
     return null;
   }
 
@@ -735,8 +896,12 @@ function routeStepKindForMode(mode: ToolModeCandidate, workRole: WorkRole): Rout
 
 function roleActionLabel(workRole: WorkRole, task: TaskIntake, usesSeparatePromptDesign: boolean) {
   switch (workRole) {
+    case "scope-framing":
+      return "research-backed scope and execution brief";
     case "evidence-check":
       return "evidence and model availability check";
+    case "plan-synthesis":
+      return "synthesize the working plan";
     case "prompt-design":
       return taskHasBuildIntent(task) ? "master build prompt" : "master prompt";
     case "execution":
@@ -765,26 +930,37 @@ function roleInstruction(input: {
   const sourceText = formatSourceIds(sourceIds);
   const reasonText = mode.selectionReasons.join(" ");
   const upgradeTrigger = upgradeTriggerForRole(workRole, mode, task, usesSeparatePromptDesign);
+  const plannedStage = workStageForRole(context.workPlan, workRole);
+  const outputContract = plannedStage ? `Required output: ${plannedStage.outputContract}` : "";
+  const usesPriorPlan = workStageForRole(context.workPlan, "plan-synthesis") !== null;
 
   switch (workRole) {
+    case "scope-framing":
+      return `Use ${mode.displayLabel} to turn the rough request into an execution-ready scope. Draft the outcome, audience, boundaries, assumptions, missing decisions, required deliverables, dependencies, risks, measures, and acceptance checks for ${deliverableSummary}. Make reasonable assumptions explicit and ask the user only about genuinely blocking unknowns. Finish with a copy-ready working brief for the reasoning stage. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger} The app does not send task data to the model.`;
     case "evidence-check":
-      return `Manually use ${mode.displayLabel} for current facts, citations, model availability, and privacy notes before relying on the result. Use only allowed source IDs (${sourceText}). Cover ${deliverableSummary}. ${reasonText} The app does not search, fetch, or call the tool.`;
+      return `Manually use ${mode.displayLabel} for current facts, citations, model availability, and privacy notes before relying on the result. Use only allowed source IDs (${sourceText}). Cover ${deliverableSummary}. ${outputContract} ${reasonText} The app does not search, fetch, or call the tool.`;
+    case "plan-synthesis":
+      return `Use ${mode.displayLabel} for the reasoning-heavy pass. Starting from the framed scope and any evidence notes, produce the actual ${task.outputType} for ${deliverableSummary}. Build a real sequence from dependencies; name outputs, owners, assumptions, decisions, risks, measures, review points, acceptance checks, and the first action. Do not return prompt advice or ask the user to rebuild the scope. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`;
     case "prompt-design":
-      return `Use ${mode.displayLabel} for the thinking-heavy prompt-design pass. Build a master prompt that covers ${deliverableSummary}, names allowed inputs, privacy limits, acceptance checks, four sections only (Plan, Do, Check, Act), the execution helper, and the upgrade trigger. ${context.decomposition.complexBuildPlan ? "Do not create only prompt advice; make the prompt require the actual build plan and first usable slice. " : ""}${reasonText} Upgrade trigger: ${upgradeTrigger}. The app does not send task data to the model.`;
+      return `Use ${mode.displayLabel} for the thinking-heavy prompt-design pass. Build a master prompt that covers ${deliverableSummary}, names allowed inputs, privacy limits, acceptance checks, four sections only (Plan, Do, Check, Act), the execution helper, and the upgrade trigger. ${context.decomposition.complexBuildPlan ? "Do not create only prompt advice; make the prompt require the actual build plan and first usable slice. " : ""}${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger} The app does not send task data to the model.`;
     case "execution":
       return usesSeparatePromptDesign
-        ? `Run the approved master prompt in ${mode.displayLabel}. Produce the requested ${task.outputType} for ${deliverableSummary}, not another prompt-writing plan. Keep the first pass small enough to review. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`
-        : `Use ${mode.displayLabel} to produce the requested ${task.outputType} directly for ${deliverableSummary}. Preserve the user's stated requirements and mark missing information instead of inventing it. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
+        ? `Run the approved master prompt in ${mode.displayLabel}. Produce the requested ${task.outputType} for ${deliverableSummary}, not another prompt-writing plan. Keep the first pass small enough to review. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`
+        : usesPriorPlan
+          ? `Use ${mode.displayLabel} to execute the approved scope and plan for ${deliverableSummary}. Preserve its decisions and boundaries; do not reopen the scope or replace the plan with generic advice. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`
+          : `Use ${mode.displayLabel} to produce the requested ${task.outputType} directly for ${deliverableSummary}. Preserve the user's stated requirements and mark missing information instead of inventing it. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`;
     case "build-slice":
       return usesSeparatePromptDesign
-        ? `Run the approved master prompt in ${mode.displayLabel} to produce the first usable build slice for ${deliverableSummary}. Include data flow, files or screens, acceptance checks, deferred features, and what to do if the first pass fails. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`
-        : `Use ${mode.displayLabel} to produce the first usable build slice directly for ${deliverableSummary}. Include data flow, files or screens, acceptance checks, deferred features, and what to do if the first pass fails. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
+        ? `Run the approved master prompt in ${mode.displayLabel} to produce the first usable build slice for ${deliverableSummary}. Include data flow, files or screens, acceptance checks, deferred features, and what to do if the first pass fails. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`
+        : usesPriorPlan
+          ? `Use ${mode.displayLabel} to implement the first usable slice from the approved scope and build plan for ${deliverableSummary}. Preserve its decisions, tests, boundaries, and deferred work. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`
+          : `Use ${mode.displayLabel} to produce the first usable build slice directly for ${deliverableSummary}. Include data flow, files or screens, acceptance checks, deferred features, and what to do if the first pass fails. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`;
     case "artifact-package":
-      return `Use ${mode.displayLabel} to package the reviewed result as ${task.outputType}. Keep sources limited to (${sourceText}) and keep warnings, checks, impact notes, and next action visible. ${reasonText}`;
+      return `Use ${mode.displayLabel} to package the reviewed result as ${task.outputType}. Keep sources limited to (${sourceText}) and keep warnings, checks, impact notes, and next action visible. ${outputContract} ${reasonText}`;
     case "quality-review":
-      return `Use ${mode.displayLabel} to check the result against the original task, promised deliverables, privacy limits, and acceptance checks. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
+      return `Use ${mode.displayLabel} to check the result against the original task, promised deliverables, privacy limits, and acceptance checks. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`;
     case "next-action":
-      return `Choose the smallest next action after review. Save what worked, what saved cost or energy, and when this route should be upgraded.`;
+      return `Use ${mode.displayLabel} to turn the approved plan into a short execution handoff: the first action, its owner, required inputs, completion check, and the next review point. Preserve the plan's decisions and boundaries; do not reopen the scope or redo the heavy reasoning. ${outputContract} ${reasonText} Upgrade trigger: ${upgradeTrigger}`;
   }
 }
 
@@ -794,6 +970,10 @@ function upgradeTriggerForRole(
   task: TaskIntake,
   usesSeparatePromptDesign: boolean,
 ) {
+  if (workRole === "scope-framing") {
+    return "upgrade only if the scope still has unresolved blockers, unsupported assumptions, or missing boundaries.";
+  }
+
   if (workRole === "evidence-check") {
     return "upgrade only if source coverage, citations, or current model/privacy facts are thin.";
   }
@@ -802,6 +982,10 @@ function upgradeTriggerForRole(
     return task.qualityBar === "high" || task.qualityBar === "critical"
       ? "upgrade if the prompt misses deliverables, privacy limits, acceptance checks, or the execution model choice."
       : "upgrade if the prompt is vague enough that execution would require guessing.";
+  }
+
+  if (workRole === "plan-synthesis") {
+    return "upgrade only if the plan still misses real dependencies, decisions, risks, measures, or acceptance checks after one focused retry.";
   }
 
   if (workRole === "build-slice" || workRole === "execution") {
@@ -838,9 +1022,12 @@ function buildCandidateSummary(input: {
   usesManualPrimaryStep: boolean;
   usesPremiumBenchmark: boolean;
   hasResearchStep: boolean;
+  hasScopeStep: boolean;
+  hasPlanStep: boolean;
   hasPromptStep: boolean;
   hasArtifactStep: boolean;
   hasReviewStep: boolean;
+  hasNextActionStep: boolean;
   requiresHumanApproval: boolean;
   workItemCount: number;
   reasoning: TaskReasoningProfile;
@@ -855,32 +1042,30 @@ function buildCandidateSummary(input: {
     input.usesPremiumBenchmark
       ? "It stays visible as a premium benchmark so the lower-cost route can be compared with heavier premium-style use."
       : null,
+    input.hasScopeStep
+      ? "A scope-framing pass drafts the brief, assumptions, boundaries, and blocking questions instead of handing that work back to the user."
+      : null,
     input.hasResearchStep ? "A source check is included because evidence affects the answer." : null,
+    input.hasPlanStep
+      ? "A dedicated reasoning pass synthesizes the actual ordered plan from the framed scope."
+      : null,
     input.hasPromptStep
       ? input.reasoning.promptArtifactRequested
         ? "Prompt design is the requested output."
-        : "A planning handoff is included because it adds useful structure before specialist execution."
-      : "The main helper produces the requested output directly; a prompt-only handoff did not earn a place.",
+        : "A prompt handoff is included because the request explicitly asks for one."
+      : input.hasPlanStep
+        ? "The plan is synthesized from the checked scope without adding a separate prompt-only relay."
+        : "The main helper produces the requested output directly; a prompt-only handoff did not earn a place.",
     input.hasArtifactStep ? "A specialist packaging pass is included because it improves the requested artifact." : null,
     input.hasReviewStep ? "A separate AI review is included because an independent check adds value here." : null,
+    input.hasNextActionStep
+      ? "A lighter downstream pass turns the approved result into an immediate action without repeating the expensive reasoning."
+      : null,
     input.requiresHumanApproval ? "It ends with human approval before anything important is used." : null,
     "It uses only the helpers and information allowed by your choices.",
   ].filter((part): part is string => part !== null);
 
   return routeParts.join(" ");
-}
-
-function shouldAddEvidenceStep(task: TaskIntake, context: Pick<CandidateContext, "decomposition">) {
-  return taskNeedsEvidenceCheckFromDecomposition(task, context.decomposition);
-}
-
-function taskNeedsEvidenceCheckFromDecomposition(task: TaskIntake, decomposition: TaskDecomposition) {
-  return (
-    task.requiresCurrentFacts ||
-    task.requiresCitations ||
-    taskHasModelSelectionIntent(task) ||
-    decomposition.deliverables.some((deliverable) => deliverable.roles.includes("evidence-check"))
-  );
 }
 
 function permissionLevelForSourceIds(sourceIds: string[], sources: SourcePermission[]): PermissionLevel {
