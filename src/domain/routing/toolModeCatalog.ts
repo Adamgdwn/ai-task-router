@@ -120,6 +120,26 @@ export function selectToolModeForRole({ task, modes, role, strategy }: SelectToo
     }
   }
 
+  if (
+    strategy === "balanced" &&
+    role === "execution" &&
+    (task.qualityBar === "quick" || task.qualityBar === "standard")
+  ) {
+    const ordinaryExecutionModes = eligibleModes.filter(
+      (mode) => mode.modeKind !== "benchmark" && mode.resourceProfile !== "premium" && mode.modelTier !== "frontier",
+    );
+
+    if (ordinaryExecutionModes.length > 0) {
+      return (
+        [...ordinaryExecutionModes].sort(
+          (left, right) => modeScore(right, role, strategy, task) - modeScore(left, role, strategy, task),
+        )[0] ??
+        ordinaryExecutionModes[0] ??
+        null
+      );
+    }
+  }
+
   if (role === "build-slice") {
     const buildModes = eligibleModes.filter((mode) => mode.modeKind === "build");
     if (buildModes.length > 0) {

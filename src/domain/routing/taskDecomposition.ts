@@ -12,6 +12,11 @@ type TaskDeliverableKind =
   | "cost-energy"
   | "research"
   | "writing"
+  | "ownership"
+  | "dependencies"
+  | "risk"
+  | "measurement"
+  | "next-action"
   | "review"
   | "generic";
 
@@ -102,6 +107,36 @@ const detectorDefinitions: DeliverableDetector[] = [
     label: "current facts and source notes",
     patterns: [/\b(current facts|citations?|sources?|research|changed recently|latest|newest)\b/],
     roles: ["evidence-check", "prompt-design", "quality-review"],
+  },
+  {
+    kind: "ownership",
+    label: "responsibilities and owners",
+    patterns: [/\b(responsibilit(y|ies)|owners?|ownership|who does what|accountab(le|ility))\b/],
+    roles: ["prompt-design", "execution", "quality-review"],
+  },
+  {
+    kind: "dependencies",
+    label: "dependencies and ordering",
+    patterns: [/\b(dependenc(y|ies)|depends? on|prerequisites?|sequence|sequencing|order of work)\b/],
+    roles: ["prompt-design", "execution", "quality-review"],
+  },
+  {
+    kind: "risk",
+    label: "risks and responses",
+    patterns: [/\b(risks?|mitigat(e|ion|ions)|failure modes?|blockers?)\b/],
+    roles: ["prompt-design", "execution", "quality-review"],
+  },
+  {
+    kind: "measurement",
+    label: "measures and review points",
+    patterns: [/\b(measures?|metrics?|success criteria|review points?|milestones?|checkpoints?)\b/],
+    roles: ["prompt-design", "execution", "quality-review"],
+  },
+  {
+    kind: "next-action",
+    label: "first concrete action",
+    patterns: [/\b(first|next|immediate) (action|step)|where to start|start now\b/],
+    roles: ["prompt-design", "execution", "quality-review", "next-action"],
   },
   {
     kind: "review",
@@ -215,6 +250,25 @@ export function deliverablesForWorkRole(task: TaskIntake, workRole: WorkRole): T
 
 export function taskNeedsFullBuildPlan(task: TaskIntake): boolean {
   return decomposeTask(task).complexBuildPlan;
+}
+
+/**
+ * A separate AI pass whose only output is another prompt is useful for build-shaped work and when
+ * the requested artifact is itself a prompt package. For ordinary plans, drafts, briefs, answers,
+ * and tables it adds a handoff without adding task knowledge, so the chosen helper should produce
+ * the requested output directly.
+ */
+export function taskNeedsSeparatePromptDesign(task: TaskIntake): boolean {
+  const decomposition = decomposeTask(task);
+
+  return (
+    decomposition.complexBuildPlan ||
+    taskHasBuildIntent(task) ||
+    task.knowledgeWorkType === "coding" ||
+    task.outputType === "code" ||
+    task.outputType === "prompt package" ||
+    decomposition.deliverables.some((deliverable) => deliverable.kind === "prompt")
+  );
 }
 
 function normalizedTaskText(task: TaskIntake) {

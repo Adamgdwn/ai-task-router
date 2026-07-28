@@ -149,7 +149,6 @@ describe("route card generator", () => {
       "frame",
       "gather",
       "create",
-      "package",
       "review",
       "act",
     ]);
@@ -159,16 +158,13 @@ describe("route card generator", () => {
       reviewChecks: expect.arrayContaining(["The goal, audience, inputs, and finish line are clear."]),
     });
     expect(card.stageGuidance.find((stage) => stage.stage === "create")).toMatchObject({
-      label: "Build the drafting prompt",
-      methodLabel: "Plan",
+      label: "Create the draft",
+      methodLabel: "Do",
       recommendedModelLabel: expect.stringMatching(/Gemini|ChatGPT|Claude/),
     });
-    expect(card.stageGuidance.find((stage) => stage.stage === "create")?.recommendedModelLabel).toContain("prompt builder");
-    expect(card.stageGuidance.find((stage) => stage.stage === "package")).toMatchObject({
-      label: "Run the prompt",
-      methodLabel: "Do",
-    });
-    expect(card.stageGuidance.map((stage) => stage.methodLabel)).toEqual(["Plan", "Plan", "Plan", "Do", "Check", "Act"]);
+    expect(card.stageGuidance.find((stage) => stage.stage === "create")?.purpose).toContain("directly");
+    expect(card.stageGuidance.find((stage) => stage.stage === "package")).toBeUndefined();
+    expect(card.stageGuidance.map((stage) => stage.methodLabel)).toEqual(["Plan", "Plan", "Do", "Check", "Act"]);
     expect(card.stageGuidance.map((stage) => stage.methodLabel).join(" ")).not.toMatch(
       /\b(DMAIC|Define|Measure|Analyze|Improve|Control)\b/,
     );
@@ -646,6 +642,7 @@ describe("route card generator", () => {
     const task = buildTask({
       id: "task-card-step-pricing",
       title: "Draft a public FAQ answer",
+      description: "Build a master prompt for a public FAQ answer, then use it to create the finished draft.",
       requestedSourceIds: ["web"],
     });
     const { hardGateResult, scoringResult } = generatePipeline(task, "balanced", models);

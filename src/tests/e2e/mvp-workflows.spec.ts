@@ -166,8 +166,9 @@ test("task intake routes, saves, prepares exports, and records feedback without 
   await expect(page.getByRole("heading", { name: "What this route costs to run" })).toBeVisible();
   await expect(page.locator("dt").filter({ hasText: "100k-token example" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Suggested AI toolkit" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Build the drafting prompt" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Run the prompt" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Recommended work path" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Create the draft" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Run the prompt" })).toHaveCount(0);
   await expect(page.locator(".stageGuidanceItem.stage-create")).toBeVisible();
   await expect(page.locator(".stageChoiceSummary").filter({ hasText: "Mode" }).first()).toBeVisible();
   await expect(page.locator(".stageChoiceSummary").filter({ hasText: "Why this help" }).first()).toBeVisible();

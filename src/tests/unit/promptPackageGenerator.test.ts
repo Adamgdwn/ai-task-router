@@ -165,6 +165,37 @@ describe("prompt package generator", () => {
     expect(instruction).not.toMatch(/\b(DMAIC|Define|Measure|Analyze|Improve|Control)\b/);
   });
 
+  it("turns a straightforward planning request into a direct working-plan instruction", () => {
+    const task = buildTask({
+      id: "task-prompt-direct-plan",
+      title: "Plan a community open house",
+      description:
+        "Create a practical plan for a community open house with responsibilities, dependencies, risks, review points, and the first action.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      qualityBar: "standard",
+      requiresCurrentFacts: false,
+      requiresCitations: false,
+      requestedSourceIds: [],
+    });
+    const { hardGateResult, scoringResult } = generatePipeline(task);
+    const selectedRoute = requireRecommendedRoute(scoringResult);
+
+    const promptPackage = generatePromptPackage({ task, selectedRoute, hardGateResult });
+    const directStep = promptPackage.steps.find((step) => step.title.includes("Produce Requested Output"));
+    const instruction = directStep?.instruction ?? "";
+
+    expectValidPromptPackage(promptPackage);
+    expect(selectedRoute.steps.map((step) => step.workRole)).toEqual(["execution"]);
+    expect(instruction).toContain("Produce the requested plan itself.");
+    expect(instruction).toContain("Order phases or numbered steps by real dependencies.");
+    expect(instruction).toContain("concrete output, required inputs, owner or first action, decision point, and exit condition");
+    expect(instruction).toContain("assumptions, missing information, blockers, and risks");
+    expect(instruction).toContain("success measures, review points, and the first action");
+    expect(instruction).not.toContain("Paste the approved master prompt");
+    expect(instruction).not.toContain("four sections only: Plan, Do, Check, Act");
+  });
+
   it("includes current-facts and citation reminders without implying the app searches", () => {
     const task = buildTask({
       id: "task-prompt-current-facts",

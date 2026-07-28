@@ -586,7 +586,7 @@ function GeneratedResults({
 
       <StageGuidancePanel
         stages={result.routeCard.stageGuidance}
-        lead="Follow these stages as a simple project plan. Each stage shows who or what should help, and where to review before moving on."
+        lead="The work path, recommended help, expected output, and review gate for this task."
       />
 
       <ImpactInsightPanel

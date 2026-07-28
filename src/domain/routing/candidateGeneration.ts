@@ -6,6 +6,7 @@ import {
   requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
+  taskNeedsSeparatePromptDesign,
   type TaskDecomposition,
 } from "./taskDecomposition";
 import {
@@ -314,7 +315,9 @@ function selectRouteRoleModes(input: {
 } {
   const { strategy, task, context } = input;
   const executionWorkRole = taskHasBuildIntent(task) || task.outputType === "code" ? "build-slice" : "execution";
-  const promptDesign = selectToolModeForRole({ task, modes: context.modes, role: "prompt-design", strategy });
+  const promptDesign = taskNeedsSeparatePromptDesign(task)
+    ? selectToolModeForRole({ task, modes: context.modes, role: "prompt-design", strategy })
+    : null;
   const execution = selectExecutionModeForRoute({
     strategy,
     task,
@@ -322,16 +325,36 @@ function selectRouteRoleModes(input: {
     executionWorkRole,
     promptDesign,
   });
+  const directExecution = !promptDesign && execution ? directWorkMode(execution) : execution;
 
   return {
     evidence: shouldAddEvidenceStep(task, context)
       ? selectToolModeForRole({ task, modes: context.modes, role: "evidence-check", strategy })
       : null,
     promptDesign,
-    execution,
+    execution: directExecution,
     artifact: shouldAddArtifactStep(task)
       ? selectToolModeForRole({ task, modes: context.modes, role: "artifact-package", strategy })
       : null,
+  };
+}
+
+function directWorkMode(mode: ToolModeCandidate): ToolModeCandidate {
+  const modeLabel = mode.modeLabel
+    .replace("after the master prompt is clear", "for direct execution")
+    .replace("after the prompt is clear", "for direct execution");
+  const displayLabel =
+    mode.providerId === "none"
+      ? mode.displayLabel
+      : `${mode.providerLabel} ${mode.accountLabel} - ${modeLabel}`;
+
+  return {
+    ...mode,
+    modeLabel,
+    displayLabel,
+    selectionReasons: [
+      "This request is straightforward enough to produce directly; a separate AI run whose only output is another prompt would add a handoff without adding task knowledge.",
+    ],
   };
 }
 
@@ -467,7 +490,7 @@ function roleActionLabel(workRole: WorkRole, task: TaskIntake) {
     case "prompt-design":
       return taskHasBuildIntent(task) ? "master build prompt" : "master prompt";
     case "execution":
-      return "run the finished prompt";
+      return taskNeedsSeparatePromptDesign(task) ? "run the finished prompt" : `produce the requested ${task.outputType} directly`;
     case "build-slice":
       return "first usable build slice";
     case "artifact-package":
@@ -498,7 +521,9 @@ function roleInstruction(input: {
     case "prompt-design":
       return `Use ${mode.displayLabel} for the thinking-heavy prompt-design pass. Build a master prompt that covers ${deliverableSummary}, names allowed inputs, privacy limits, acceptance checks, four sections only (Plan, Do, Check, Act), the execution helper, and the upgrade trigger. ${context.decomposition.complexBuildPlan ? "Do not create only prompt advice; make the prompt require the actual build plan and first usable slice. " : ""}${reasonText} Upgrade trigger: ${upgradeTrigger}. The app does not send task data to the model.`;
     case "execution":
-      return `Run the approved master prompt in ${mode.displayLabel}. Produce the requested ${task.outputType} for ${deliverableSummary}, not another prompt-writing plan. Keep the first pass small enough to review. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
+      return taskNeedsSeparatePromptDesign(task)
+        ? `Run the approved master prompt in ${mode.displayLabel}. Produce the requested ${task.outputType} for ${deliverableSummary}, not another prompt-writing plan. Keep the first pass small enough to review. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`
+        : `Use ${mode.displayLabel} to produce the requested ${task.outputType} directly for ${deliverableSummary}. Do not spend a separate run asking one AI to write a prompt for another. Require an ordered result with inputs, dependencies, decisions, risks, measures, review points, and a first action where they fit the task. Mark missing information instead of inventing it. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
     case "build-slice":
       return `Run the approved master prompt in ${mode.displayLabel} to produce the first usable build slice for ${deliverableSummary}. Include data flow, files or screens, acceptance checks, deferred features, and what to do if the first pass fails. ${reasonText} Upgrade trigger: ${upgradeTrigger}.`;
     case "artifact-package":
@@ -522,7 +547,9 @@ function upgradeTriggerForRole(workRole: WorkRole, mode: ToolModeCandidate, task
   }
 
   if (workRole === "build-slice" || workRole === "execution") {
-    return "upgrade only if the lighter execution pass ignores the master prompt, misses requested deliverables, or fails review twice.";
+    return taskNeedsSeparatePromptDesign(task)
+      ? "upgrade only if the lighter execution pass ignores the master prompt, misses requested deliverables, or fails review twice."
+      : "upgrade only if the direct result misses requested deliverables or fails review after a focused retry.";
   }
 
   if (mode.resourceProfile === "premium") {

@@ -1,5 +1,9 @@
 import { defaultSources } from "../../domain/defaults/defaultSources";
-import { decomposeTask, deliverablesForWorkRole } from "../../domain/routing/taskDecomposition";
+import {
+  decomposeTask,
+  deliverablesForWorkRole,
+  taskNeedsSeparatePromptDesign,
+} from "../../domain/routing/taskDecomposition";
 import type { TaskIntake } from "../../domain/types";
 
 const createdAt = "2026-07-06T23:24:00-06:00";
@@ -140,6 +144,45 @@ describe("task decomposition", () => {
     expect(deliverablesForWorkRole(task, "evidence-check").map((item) => item.label)).toContain(
       "current facts and source notes",
     );
+    expect(taskNeedsSeparatePromptDesign(task)).toBe(false);
+  });
+
+  it("reserves a separate prompt-design run for explicit prompt or build work", () => {
+    const straightforwardPlan = buildTask({
+      id: "task-decomposition-straightforward-plan",
+      title: "Plan a community open house",
+      description: "Create an ordered working plan with responsibilities, dependencies, risks, and the first action.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+    });
+    const promptBuild = buildTask({
+      id: "task-decomposition-explicit-prompt",
+      title: "Build a reusable planning prompt",
+      description: "Create a master prompt that another model can use to plan a community open house.",
+      knowledgeWorkType: "planning",
+      outputType: "prompt package",
+    });
+
+    expect(taskNeedsSeparatePromptDesign(straightforwardPlan)).toBe(false);
+    expect(taskNeedsSeparatePromptDesign(promptBuild)).toBe(true);
+  });
+
+  it("keeps explicit planning requirements visible instead of collapsing them into a generic review label", () => {
+    const task = buildTask({
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      description:
+        "Create a practical plan for a community open house with responsibilities, dependencies, risks, review points, and the first action.",
+    });
+
+    expect(labelsFor(task)).toEqual([
+      "responsibilities and owners",
+      "dependencies and ordering",
+      "risks and responses",
+      "measures and review points",
+      "first concrete action",
+      "review and acceptance checks",
+    ]);
   });
 
   it("adds review work for public copy drafts", () => {

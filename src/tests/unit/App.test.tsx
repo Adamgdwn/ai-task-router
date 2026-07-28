@@ -314,7 +314,7 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Premium route", level: 4 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Start with: Balanced route" })).toBeInTheDocument();
     expect(screen.getByText(/This looks like a write or rewrite job/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Quick project plan" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Recommended work path" })).toBeInTheDocument();
     expect(screen.getByText("Frame the outcome")).toBeInTheDocument();
     expect(screen.getAllByText("Recommended help").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Mode").length).toBeGreaterThan(0);
@@ -664,7 +664,7 @@ describe("App", () => {
     expect((screen.getByRole("combobox", { name: "Saved decision card" }) as HTMLSelectElement).value).toMatch(
       /^route-card-/,
     );
-    expect(screen.getByRole("heading", { name: "Quick project plan" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Recommended work path" })).toBeInTheDocument();
     expect(screen.getByText("Options and tradeoffs")).toBeInTheDocument();
     expect(screen.getByText("Left out for safety")).toBeInTheDocument();
     expect(screen.getByText("Warnings")).toBeInTheDocument();
@@ -673,7 +673,7 @@ describe("App", () => {
 
     const markdownPreview = screen.getByLabelText("Prepared route card Markdown") as HTMLTextAreaElement;
     expect(markdownPreview.value).toContain("# Route card: Draft public-facing copy");
-    expect(markdownPreview.value).toContain("## Quick Project Plan");
+    expect(markdownPreview.value).toContain("## Recommended Work Path");
     expect(markdownPreview.value).toContain("Recommended help:");
     expect(markdownPreview.value).toContain("## Route Options");
 

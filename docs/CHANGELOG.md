@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed straightforward tasks being forced through the same prompt-builder relay: ordinary plans, drafts, briefs, answers, and tables now go directly to the right-sized execution helper, while separate prompt-design remains reserved for build-shaped or explicitly prompt-producing work. Planning paths and copy-ready instructions now carry the requested responsibilities, dependencies, risks, measures, review points, and first action into the actual output contract.
 - Fixed Stage 2 reasoning guidance so ChatGPT Go no longer treats GPT-5.5 Thinking Medium as the usual highest choice when High, Extra High, or Max is available; repaired the Stage 3 handoff and project-plan layout while keeping all five concrete build items visible.
 - Initial project setup.
 - Added the desktop trust and distribution planning baseline for future hosted/PWA and signed desktop release paths.

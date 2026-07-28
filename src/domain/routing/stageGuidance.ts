@@ -20,6 +20,7 @@ import {
   taskHasModelSelectionIntent,
   taskNeedsEvidenceCheck,
   taskNeedsFullBuildPlan,
+  taskNeedsSeparatePromptDesign,
   type TaskDecomposition,
   type TaskDeliverable,
 } from "./taskDecomposition";
@@ -53,15 +54,18 @@ export function buildProjectStageGuidance({
   const manualReviewModel = models.find((model) => model.tier === "human");
   const decomposition = decomposeTask(task);
   const researchStep = firstStepOfWorkRole(selectedOption, "evidence-check") ?? firstStepOfKind(selectedOption, "research");
-  const promptStep = firstStepOfWorkRole(selectedOption, "prompt-design") ?? primaryWorkStep(selectedOption);
-  const primaryStep = promptStep;
+  const promptStep = firstStepOfWorkRole(selectedOption, "prompt-design");
   const executionStep =
     firstStepOfWorkRole(selectedOption, "build-slice") ??
     firstStepOfWorkRole(selectedOption, "execution") ??
     primaryWorkStep(selectedOption);
+  const primaryStep = promptStep ?? executionStep ?? primaryWorkStep(selectedOption);
+  const usesSeparatePromptDesign = taskNeedsSeparatePromptDesign(task) && promptStep !== null;
   const artifactStep = firstStepOfKind(selectedOption, "artifact");
   const humanApprovalStep = firstStepOfKind(selectedOption, "human review");
-  const reviewSupportStep = firstStepOfWorkRole(selectedOption, "quality-review") ?? aiReviewSupportStep(task, promptStep);
+  const reviewSupportStep =
+    firstStepOfWorkRole(selectedOption, "quality-review") ??
+    aiReviewSupportStep(task, promptStep ?? executionStep);
   const promptBuilderModelLabel = modelLabelForStageStep(
     task,
     promptStep,
@@ -117,28 +121,28 @@ export function buildProjectStageGuidance({
 
   stages.push({
     stage: "create",
-    methodLabel: "Plan",
-    label: createStageLabel(task),
-    purpose: createStagePurpose(task),
-    actions: createStageActions(task),
-    reviewChecks: createStageChecks(task),
-    routeStep: primaryStep,
+    methodLabel: usesSeparatePromptDesign ? "Plan" : "Do",
+    label: usesSeparatePromptDesign ? createStageLabel(task) : directWorkStageLabel(task),
+    purpose: usesSeparatePromptDesign ? createStagePurpose(task) : directWorkStagePurpose(task),
+    actions: usesSeparatePromptDesign ? createStageActions(task) : directWorkStageActions(task),
+    reviewChecks: usesSeparatePromptDesign ? createStageChecks(task) : directWorkStageChecks(task),
+    routeStep: usesSeparatePromptDesign ? promptStep : executionStep,
     fallbackModelLabel: "You first",
-    recommendedModelLabel: promptBuilderModelLabel,
-    recommendedModelId: primaryStep?.modelId,
+    recommendedModelLabel: usesSeparatePromptDesign ? promptBuilderModelLabel : executionModelLabel,
+    recommendedModelId: (usesSeparatePromptDesign ? promptStep : executionStep)?.modelId,
     workItems: buildStageWorkItems({
       task,
       decomposition,
       stage: "create",
-      workRole: "prompt-design",
-      routeStep: promptStep,
+      workRole: usesSeparatePromptDesign ? "prompt-design" : "execution",
+      routeStep: usesSeparatePromptDesign ? promptStep : executionStep,
       modelById,
       manualReviewModel,
       fallbackModelLabel: "You first",
     }),
   });
 
-  if (shouldAddPackageStage(task, artifactStep)) {
+  if (shouldAddPackageStage(artifactStep, promptStep)) {
     stages.push({
       stage: "package",
       methodLabel: "Do",
@@ -350,6 +354,11 @@ function workItemLabel(
     case "prompt-design":
       return deliverables.length > 1 || needsFullBuildPlan(task) ? "Build one master prompt" : `Build the prompt for ${deliverableLabel}`;
     case "execution":
+      if (!taskNeedsSeparatePromptDesign(task)) {
+        return task.outputType === "plan"
+          ? "Produce the requested working plan"
+          : `Produce ${friendlyOutputName(task.outputType)}`;
+      }
       return deliverables.length > 1 ? "Run the finished prompt" : `Execute ${deliverableLabel}`;
     case "build-slice":
       return deliverables.length === 1 ? buildSliceItemLabel(deliverables[0]) : "Create the first usable build slice";
@@ -397,7 +406,9 @@ function expectedOutputForWorkItem(
     case "artifact-package":
       return `A saved or copy-ready ${task.outputType} package with warnings, checks, and next action visible.`;
     case "quality-review":
-      return `A pass/fail review of ${deliverableText || "the result"} against the prompt, privacy limits, and acceptance checks.`;
+      return `A pass/fail review of ${deliverableText || "the result"} against ${
+        taskNeedsSeparatePromptDesign(task) ? "the approved prompt" : "the original task"
+      }, privacy limits, and acceptance checks.`;
     case "next-action":
       return "The smallest next action, the measure to check next, and whether the route should be reused or upgraded.";
   }
@@ -442,7 +453,9 @@ function upgradeTriggerForWorkItem(task: TaskIntake, workRole: WorkRole) {
   }
 
   if (workRole === "execution" || workRole === "build-slice") {
-    return "Upgrade execution only if the lighter mode ignores the master prompt or fails review after a focused retry.";
+    return taskNeedsSeparatePromptDesign(task)
+      ? "Upgrade execution only if the lighter mode ignores the master prompt or fails review after a focused retry."
+      : "Upgrade execution only if the direct result misses requested deliverables or fails review after a focused retry.";
   }
 
   if (workRole === "evidence-check") {
@@ -538,7 +551,9 @@ function gatherStageActions(task: TaskIntake) {
       "Check which models or modes are actually available in the tools you selected.",
       "Write down the minimum execution mode, the stronger prompt-design mode, and the upgrade trigger.",
       "Note privacy limits before moving any project details into a helper.",
-      "Bring only the relevant availability notes into the master prompt.",
+      taskNeedsSeparatePromptDesign(task)
+        ? "Bring only the relevant availability notes into the master prompt."
+        : "Bring only the relevant availability notes into the direct working brief.",
     ];
   }
 
@@ -710,11 +725,71 @@ function createStageChecks(task: TaskIntake) {
   return checks;
 }
 
-function shouldAddPackageStage(
-  _task: TaskIntake,
-  _artifactStep: RouteStep | null,
-) {
-  return true;
+function directWorkStageLabel(task: TaskIntake) {
+  switch (task.outputType) {
+    case "answer":
+      return "Produce the answer";
+    case "brief":
+      return "Draft the brief";
+    case "plan":
+      return "Build the working plan";
+    case "draft":
+      return "Create the draft";
+    case "code":
+      return "Build the first code slice";
+    case "table":
+      return "Build the table";
+    case "slide outline":
+      return "Draft the slide outline";
+    case "route card":
+      return "Create the decision card";
+    case "prompt package":
+      return "Build the prompt package";
+  }
+}
+
+function directWorkStagePurpose(task: TaskIntake) {
+  if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
+    return "Produce the plan itself in one deliberate pass. A separate AI run that only rewrites the request as a master prompt would add a handoff without adding task knowledge.";
+  }
+
+  return `Produce ${friendlyOutputName(task.outputType)} directly with the selected helper. Use the task details as the working brief instead of asking one AI to write a prompt for another.`;
+}
+
+function directWorkStageActions(task: TaskIntake) {
+  if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
+    return [
+      `Start with the actual outcome and required pieces: ${compactTaskDeliverableSummary(task)}.`,
+      "Order the work into phases or numbered steps based on dependencies, not generic Plan/Do/Check/Act headings.",
+      "For each phase, name its output, needed inputs, owner or first action, decision point, and what must be true before the next phase starts.",
+      "List assumptions, missing information, blockers, and risks separately; use conditional branches instead of inventing facts.",
+      "End with measures, review points, and the first action that can start now.",
+    ];
+  }
+
+  return [
+    `Produce ${friendlyOutputName(task.outputType)} for: ${compactTaskDeliverableSummary(task)}.`,
+    "Use the supplied facts and constraints directly; mark missing information instead of inventing it.",
+    "Make the result usable on the first pass, with decisions, checks, and next action visible.",
+  ];
+}
+
+function directWorkStageChecks(task: TaskIntake) {
+  if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
+    return [
+      "The result is the requested plan, not prompt-writing advice or a restatement of the tool sequence.",
+      "The sequence follows real dependencies and names outputs, missing inputs, decisions, risks, measures, review points, and a first action.",
+    ];
+  }
+
+  return [
+    `The result is ${friendlyOutputName(task.outputType)}, not another prompt or a description of how to ask for it.`,
+    "Every requested deliverable is present or explicitly marked as missing.",
+  ];
+}
+
+function shouldAddPackageStage(artifactStep: RouteStep | null, promptStep: RouteStep | null) {
+  return artifactStep !== null || promptStep !== null;
 }
 
 function packageStageLabel(task: TaskIntake) {
@@ -909,7 +984,9 @@ function reviewStagePurpose(task: TaskIntake) {
     return "Compare the result against the goal and tighten anything weak or unsupported.";
   }
 
-  return "Compare the executed result against the master prompt, acceptance checks, and original task before deciding what to do next.";
+  return taskNeedsSeparatePromptDesign(task)
+    ? "Compare the executed result against the master prompt, acceptance checks, and original task before deciding what to do next."
+    : "Compare the result against the original task, requested deliverables, and direct-work checks before deciding what to do next.";
 }
 
 function reviewStageActions(task: TaskIntake) {
@@ -924,7 +1001,9 @@ function reviewStageActions(task: TaskIntake) {
   }
 
   const actions = [
-    "Read the prompt and the result together, from the perspective of the person who has to use it.",
+    taskNeedsSeparatePromptDesign(task)
+      ? "Read the prompt and the result together, from the perspective of the person who has to use it."
+      : "Read the result against the original task from the perspective of the person who has to use it.",
     "Fix unclear steps, unsupported claims, missing context, or places where the helper ignored the prompt.",
     "Mark anything that needs one more pass before action.",
   ];
@@ -976,7 +1055,9 @@ function actStagePurpose(task: TaskIntake) {
   }
 
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
-    return "Pick the smallest next step, decide what to measure, and note whether the prompt should be reused, tightened, or rerun with stronger help.";
+    return taskNeedsSeparatePromptDesign(task)
+      ? "Pick the smallest next step, decide what to measure, and note whether the prompt should be reused, tightened, or rerun with stronger help."
+      : "Pick the smallest next step, decide what to measure, and note whether the direct plan should be edited or rerun with stronger help.";
   }
 
   if (task.qualityBar === "critical" || task.publicFacing) {
@@ -1172,7 +1253,11 @@ function modelLabelForStageStep(
       return step.modelId;
     }
 
-    if (stageMode === "execution" && step.workRole === "build-slice" && step.modeLabel) {
+    if (
+      stageMode === "execution" &&
+      step.modeLabel &&
+      (step.workRole === "build-slice" || !taskNeedsSeparatePromptDesign(task))
+    ) {
       return `${model.label} (execution ${step.modeLabel})`;
     }
 

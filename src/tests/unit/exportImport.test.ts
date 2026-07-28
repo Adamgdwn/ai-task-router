@@ -63,7 +63,7 @@ describe("export and import utilities", () => {
     expect(routeCardMarkdown).toContain("# Route card: Export fixture");
     expect(routeCardMarkdown).toContain("## Manual Use Boundary");
     expect(routeCardMarkdown).toContain("The app does not send prompts, call tools, connect accounts, approve output, or execute outside actions.");
-    expect(routeCardMarkdown).toContain("## Quick Project Plan");
+    expect(routeCardMarkdown).toContain("## Recommended Work Path");
     expect(routeCardMarkdown).toContain("Method: Plan");
     expect(routeCardMarkdown).not.toContain("Method: Plan - Define");
     expect(routeCardMarkdown).toContain("Recommended help: Local export model");

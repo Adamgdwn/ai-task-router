@@ -6,6 +6,7 @@ import {
   requestedDeliverableSummary,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
+  taskNeedsSeparatePromptDesign,
 } from "../routing/taskDecomposition";
 
 type GeneratePromptPackageInput = {
@@ -100,7 +101,11 @@ function buildPromptStep(input: {
 
   return {
     id: `prompt-step-${selectedRoute.id}-${routeStep.id}`,
-    title: promptStepTitle(routeStep, routeStepIndex),
+    title: promptStepTitle(
+      routeStep,
+      routeStepIndex,
+      selectedRoute.steps.some((step) => step.workRole === "prompt-design"),
+    ),
     instruction: buildPromptInstruction({
       task,
       selectedRoute,
@@ -134,6 +139,7 @@ function buildPromptInstruction(input: {
   const routeDeliverables = routeStep.deliverableIds.length
     ? decomposition.deliverables.filter((deliverable) => routeStep.deliverableIds.includes(deliverable.id))
     : decomposition.deliverables;
+  const hasSeparatePromptDesign = selectedRoute.steps.some((step) => step.workRole === "prompt-design");
   const deliverableText = routeDeliverables.length
     ? routeDeliverables.map((deliverable) => deliverable.label).join(", ")
     : requestedDeliverableSummary(task);
@@ -141,7 +147,7 @@ function buildPromptInstruction(input: {
     manualUseBoundary,
     stepPosition,
     `Recommended route: ${selectedRoute.label} (${selectedRoute.strategy}); score ${selectedRoute.score}.`,
-    ...stageHandoffLines(routeStep),
+    ...stageHandoffLines(routeStep, hasSeparatePromptDesign),
     routeStep.workRole ? `Work role: ${routeStep.workRole}.` : "",
     routeStep.modeLabel ? `Recommended mode: ${routeStep.modeLabel}.` : "",
     routeStep.selectionReasons.length ? `Why this helper/mode: ${routeStep.selectionReasons.join(" ")}` : "",
@@ -156,27 +162,27 @@ function buildPromptInstruction(input: {
     safeSourceIds.length ? sourceBoundary : "",
     ...factAndCitationReminders(task),
     warningReminder(context.routeWarnings),
-    promptTextForStep({ task, routeStep, sourceRefs, expectedOutput }),
+    promptTextForStep({ task, routeStep, sourceRefs, expectedOutput, hasSeparatePromptDesign }),
   ];
 
   return lines.filter((line): line is string => typeof line === "string" && line.length > 0).join("\n\n");
 }
 
-function stageHandoffLines(routeStep: RouteStep): string[] {
+function stageHandoffLines(routeStep: RouteStep, hasSeparatePromptDesign: boolean): string[] {
   return [
-    `Handoff stage: ${stageLabelForRouteStep(routeStep)}.`,
+    `Handoff stage: ${stageLabelForRouteStep(routeStep, hasSeparatePromptDesign)}.`,
     `Recommended help: ${recommendedHelpForRouteStep(routeStep)}.`,
-    `Review checks: ${reviewChecksForPromptHandoff(routeStep).join(" ")}`,
-    `Upgrade trigger: ${upgradeTriggerForPromptHandoff(routeStep)}.`,
+    `Review checks: ${reviewChecksForPromptHandoff(routeStep, hasSeparatePromptDesign).join(" ")}`,
+    `Upgrade trigger: ${upgradeTriggerForPromptHandoff(routeStep, hasSeparatePromptDesign)}.`,
   ];
 }
 
-function stageLabelForRouteStep(routeStep: RouteStep): string {
+function stageLabelForRouteStep(routeStep: RouteStep, hasSeparatePromptDesign: boolean): string {
   if (routeStep.workRole) {
     const stageByWorkRole: Record<WorkRole, string> = {
       "evidence-check": "Gather",
       "prompt-design": "Create",
-      execution: "Package",
+      execution: hasSeparatePromptDesign ? "Package" : "Do",
       "build-slice": "Package",
       "artifact-package": "Package",
       "quality-review": "Review",
@@ -209,7 +215,7 @@ function toolLabelForRouteStep(routeStep: RouteStep): string {
   return routeStep.modeLabel ?? routeStep.label;
 }
 
-function reviewChecksForPromptHandoff(routeStep: RouteStep): string[] {
+function reviewChecksForPromptHandoff(routeStep: RouteStep, hasSeparatePromptDesign: boolean): string[] {
   if (routeStep.workRole) {
     const checksByWorkRole: Record<WorkRole, string[]> = {
       "evidence-check": [
@@ -219,7 +225,11 @@ function reviewChecksForPromptHandoff(routeStep: RouteStep): string[] {
       "prompt-design": [
         "The master prompt covers the requested deliverables, execution mode, privacy limits, acceptance checks, and upgrade trigger.",
       ],
-      execution: ["The output follows the approved master prompt and is ready for review, not another layer of prompt advice."],
+      execution: [
+        hasSeparatePromptDesign
+          ? "The output follows the approved master prompt and is ready for review, not another layer of prompt advice."
+          : "The output is the requested result itself, not prompt-writing advice or a restatement of the route.",
+      ],
       "build-slice": ["The first usable slice is small enough to review before adding features."],
       "artifact-package": ["Warnings, checks, impact notes, and next action remain visible in the package."],
       "quality-review": ["Every requested deliverable is present or explicitly marked missing, and privacy limits are still respected."],
@@ -236,7 +246,7 @@ function reviewChecksForPromptHandoff(routeStep: RouteStep): string[] {
   return ["The step output matches the task, allowed sources, privacy limits, and route warnings."];
 }
 
-function upgradeTriggerForPromptHandoff(routeStep: RouteStep): string {
+function upgradeTriggerForPromptHandoff(routeStep: RouteStep, hasSeparatePromptDesign: boolean): string {
   switch (routeStep.workRole) {
     case "evidence-check":
       return "Upgrade research only if current facts, citations, or model/privacy details are too thin";
@@ -244,7 +254,9 @@ function upgradeTriggerForPromptHandoff(routeStep: RouteStep): string {
       return "Upgrade prompt design only if the master prompt misses deliverables, checks, privacy, or the execution model choice";
     case "execution":
     case "build-slice":
-      return "Upgrade execution only if the lighter mode ignores the master prompt or fails review after one focused retry";
+      return hasSeparatePromptDesign
+        ? "Upgrade execution only if the lighter mode ignores the master prompt or fails review after one focused retry"
+        : "Upgrade execution only if the direct result misses requested deliverables or fails review after one focused retry";
     case "artifact-package":
       return "Use stronger packaging help only if warnings, checks, or next action become unclear";
     case "quality-review":
@@ -263,8 +275,9 @@ function promptTextForStep(input: {
   routeStep: RouteStep;
   sourceRefs: string;
   expectedOutput: string;
+  hasSeparatePromptDesign: boolean;
 }) {
-  const { task, routeStep, sourceRefs, expectedOutput } = input;
+  const { task, routeStep, sourceRefs, expectedOutput, hasSeparatePromptDesign } = input;
 
   if (routeStep.kind === "human review") {
     return [
@@ -277,7 +290,7 @@ function promptTextForStep(input: {
   }
 
   if (routeStep.workRole) {
-    return promptTextForWorkRole({ task, routeStep, sourceRefs, expectedOutput });
+    return promptTextForWorkRole({ task, routeStep, sourceRefs, expectedOutput, hasSeparatePromptDesign });
   }
 
   return [
@@ -318,8 +331,9 @@ function promptTextForWorkRole(input: {
   routeStep: RouteStep;
   sourceRefs: string;
   expectedOutput: string;
+  hasSeparatePromptDesign: boolean;
 }) {
-  const { task, routeStep, sourceRefs, expectedOutput } = input;
+  const { task, routeStep, sourceRefs, expectedOutput, hasSeparatePromptDesign } = input;
   const deliverableText = requestedDeliverableSummary(task);
   const reviewLines = [
     "- Check that every requested deliverable is present or explicitly marked missing.",
@@ -350,6 +364,32 @@ function promptTextForWorkRole(input: {
         `Expected output: ${expectedOutput}`,
       ].join("\n");
     case "execution":
+      if (!hasSeparatePromptDesign && !taskNeedsSeparatePromptDesign(task)) {
+        return [
+          "Direct-work instruction:",
+          `Produce the requested ${task.outputType} itself. Do not return a master prompt, prompt-writing advice, or a restatement of which tools to use.`,
+          `Task title: ${task.title}`,
+          `Task description: ${task.description}`,
+          `The result must cover: ${deliverableText}.`,
+          `Use only these source IDs: ${sourceRefs}.`,
+          ...(task.outputType === "plan" || task.knowledgeWorkType === "planning"
+            ? [
+                "Build an actual working plan:",
+                "- Start with the outcome, starting state, constraints, and decisions that must be made.",
+                "- Order phases or numbered steps by real dependencies.",
+                "- For each phase, name its concrete output, required inputs, owner or first action, decision point, and exit condition.",
+                "- Separate assumptions, missing information, blockers, and risks; use conditional branches instead of inventing facts.",
+                "- End with success measures, review points, and the first action that can start now.",
+              ]
+            : [
+                "- Make the first pass usable rather than describing how to create it.",
+                "- Mark assumptions and missing information instead of inventing facts.",
+              ]),
+          ...reviewLines,
+          `Expected output: ${expectedOutput}`,
+        ].join("\n");
+      }
+
       return [
         "Execution instruction:",
         "Paste the approved master prompt into this lighter execution helper.",
@@ -457,7 +497,9 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
       case "prompt-design":
         return `A master prompt for "${task.title}" that covers ${requestedDeliverableSummary(task)}, names the execution mode, and includes checks and upgrade triggers.`;
       case "execution":
-        return `The first usable ${task.outputType} for "${task.title}" produced from the approved master prompt.`;
+        return taskNeedsSeparatePromptDesign(task)
+          ? `The first usable ${task.outputType} for "${task.title}" produced from the approved master prompt.`
+          : `The requested ${task.outputType} for "${task.title}" itself, with dependencies, decisions, missing inputs, risks, measures, review points, and first action made explicit where relevant.`;
       case "build-slice":
         return `A first usable build-plan slice for "${task.title}" with data flow, screens or files, tests, acceptance checks, deferred work, and next action.`;
       case "artifact-package":
@@ -485,12 +527,12 @@ function expectedOutputForStep(task: TaskIntake, routeStep: RouteStep) {
   }
 }
 
-function promptStepTitle(routeStep: RouteStep, routeStepIndex: number) {
+function promptStepTitle(routeStep: RouteStep, routeStepIndex: number, hasSeparatePromptDesign: boolean) {
   if (routeStep.workRole) {
     const actionByRole: Record<NonNullable<RouteStep["workRole"]>, string> = {
       "evidence-check": "Check Evidence",
       "prompt-design": "Build Master Prompt",
-      execution: "Run Finished Prompt",
+      execution: hasSeparatePromptDesign ? "Run Finished Prompt" : "Produce Requested Output",
       "build-slice": "Execute Build Slice",
       "artifact-package": "Package Output",
       "quality-review": "Review Quality",

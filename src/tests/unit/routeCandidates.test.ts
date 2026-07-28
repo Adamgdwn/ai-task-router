@@ -93,29 +93,80 @@ describe("route candidate generation", () => {
     });
     expect(lean.steps).toEqual([
       expect.objectContaining({
-        id: "route-task-public-writing-lean-prompt-design",
-        kind: "model",
-        modelId: "user-free-small-model",
-        workRole: "prompt-design",
-        modeLabel: expect.stringContaining("master prompt"),
-        sourceIds: ["web", "github"],
-      }),
-      expect.objectContaining({
         id: "route-task-public-writing-lean-execution",
         kind: "model",
         modelId: "user-free-small-model",
         workRole: "execution",
+        modeLabel: expect.stringContaining("direct execution"),
         sourceIds: ["web", "github"],
       }),
     ]);
-    expect(balanced.steps[0]).toMatchObject({ modelId: "user-mid-synthesis-model", workRole: "prompt-design" });
-    expect(balanced.steps[1]).toMatchObject({ modelId: "user-mid-synthesis-model", workRole: "execution" });
-    expect(premium.steps[0]).toMatchObject({ modelId: "user-frontier-quality-model", workRole: "prompt-design" });
+    expect(balanced.steps).toEqual([
+      expect.objectContaining({ modelId: "user-mid-synthesis-model", workRole: "execution" }),
+    ]);
+    expect(premium.steps).toEqual([
+      expect.objectContaining({ modelId: "user-frontier-quality-model", workRole: "execution" }),
+    ]);
+    expect(candidateResult.candidates.flatMap((candidate) => candidate.steps)).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ workRole: "prompt-design" })]),
+    );
 
     for (const candidate of candidateResult.candidates) {
       expect(candidate.summary).not.toMatch(/score|scoring|weighted/i);
       expectValidRouteSteps(candidate);
     }
+  });
+
+  it("produces a straightforward plan directly instead of parroting a fixed three-tool handoff", () => {
+    const manualReviewModel = routeReadyModels.find((model) => model.id === "manual-human-review");
+    if (!manualReviewModel) {
+      throw new Error("Manual review model is required for this test.");
+    }
+    const models = [
+      manualReviewModel,
+      createEverydayToolModel({
+        id: "chatgpt-go",
+        providerId: "chatgpt",
+        accountId: "go",
+        frequencyId: "daily",
+      }),
+      createEverydayToolModel({
+        id: "perplexity-free",
+        providerId: "perplexity",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+      createEverydayToolModel({
+        id: "copilot-free",
+        providerId: "copilot",
+        accountId: "basic",
+        frequencyId: "weekly",
+      }),
+    ] satisfies ModelInventoryItem[];
+    const task = buildTask({
+      id: "task-straightforward-plan",
+      title: "Plan a community open house",
+      description:
+        "Create a practical plan for a community open house with responsibilities, dependencies, risks, review points, and the first action.",
+      knowledgeWorkType: "planning",
+      outputType: "plan",
+      qualityBar: "standard",
+      requiresCurrentFacts: false,
+      requiresCitations: false,
+      requestedSourceIds: [],
+    });
+
+    const { candidateResult } = generateForTask(task, models);
+    const balanced = requireCandidate(candidateResult, "balanced");
+
+    expect(balanced.steps.map((step) => step.workRole)).toEqual(["execution"]);
+    expect(balanced.steps[0]).toMatchObject({
+      modelId: "chatgpt-go",
+      modeLabel: expect.stringContaining("direct execution"),
+      instruction: expect.stringContaining("produce the requested plan directly"),
+    });
+    expect(balanced.steps[0]?.instruction).toContain("dependencies, decisions, risks, measures, review points");
+    expect(balanced.steps[0]?.instruction).not.toContain("Run the approved master prompt");
   });
 
   it("uses only allowed confidential sources and skips blocked model options", () => {
@@ -617,8 +668,8 @@ describe("route candidate generation", () => {
     ]);
 
     const lean = requireCandidate(candidateResult, "lean");
-    expect(lean.steps.map((step) => step.kind)).toEqual(["manual", "manual", "human review"]);
-    expect(lean.steps.map((step) => step.workRole)).toEqual(["prompt-design", "execution", undefined]);
+    expect(lean.steps.map((step) => step.kind)).toEqual(["manual", "human review"]);
+    expect(lean.steps.map((step) => step.workRole)).toEqual(["execution", undefined]);
     expect(lean.steps[0]).toMatchObject({
       modelId: "manual-human-review",
       sourceIds: ["secure-local-source"],

@@ -8,7 +8,7 @@ type StageGuidancePanelProps = {
 
 export function StageGuidancePanel({
   stages,
-  lead = "A beginner-friendly checklist with the recommended help beside each stage.",
+  lead = "The work path, recommended help, expected output, and review gate for this task.",
 }: StageGuidancePanelProps) {
   if (stages.length === 0) {
     return null;
@@ -17,7 +17,7 @@ export function StageGuidancePanel({
   return (
     <section className="routingSection stageGuidanceSection" aria-labelledby="stage-guidance-heading">
       <div className="sectionHeading">
-        <h3 id="stage-guidance-heading">Quick project plan</h3>
+        <h3 id="stage-guidance-heading">Recommended work path</h3>
         <p>{lead}</p>
       </div>
       <ol className="stageGuidanceList">
