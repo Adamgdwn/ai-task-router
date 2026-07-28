@@ -1,15 +1,15 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.11.0
+Version: 1.12.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: At the next production deployment
-Last Updated: 2026-07-27T20:26:56-06:00
-Status Updated: 2026-07-27T20:26:56-06:00
+Last Updated: 2026-07-27T21:07:32-06:00
+Status Updated: 2026-07-27T21:07:32-06:00
 
 ## Purpose
 
@@ -46,6 +46,8 @@ If a future deploy hits `9109` again, the token's allowed-IP list is the thing t
 **Re-run 2026-07-27 for the followed-choice clarification.** The same account-owned token passed the actual Pages-project authorization check and Wrangler deployed source `e3671b2` to `https://eb485f5c.ai-task-router.pages.dev` in one attempt. Canonical and immutable assets both serve `index-CtA-qQF5.js` at 661,862 bytes with `Accepted or edited choices`, `Review saved choices`, and the saved-but-uncounted explanation present; the old exact `Followed choices` header is absent. Hosted E2E passes 7/7 after its local-store readiness race was made deterministic.
 
 **Re-run 2026-07-27T20:26:56-06:00 with the same account-owned control-plane credential.** Wrangler deployed source `68a7e1d` to `https://86dbe307.ai-task-router.pages.dev`; two files uploaded and seven were reused. Two local launcher attempts stopped before contacting Cloudflare because the secure environment wrapper had no Node path; the approved Node path was then supplied explicitly and the one actual Cloudflare attempt succeeded. Canonical HTML pointed at the new asset immediately. Its first asset fetch returned the documented 962-byte SPA fallback, which the byte-length gate rejected; the next clean-path fetch matched the exact 669,064-byte local asset. Hosted E2E passed 7/7.
+
+**Re-run 2026-07-27T21:07:32-06:00 with the same account-owned control-plane credential.** A read-only request to the actual Pages project returned HTTP 200, then Wrangler deployed source `1b5ea8f` to `https://0e76221f.ai-task-router.pages.dev` in one attempt; two files uploaded and seven were reused. Canonical and immutable HTML both pointed at `index-BJ8G6-nl.js`, and the clean asset path returned exactly 678,109 bytes, matching `dist`. The task-reasoning, stage-utility, and selected-mode markers are present, both stale script/default markers are absent, the PWA resources return HTTP 200, and hosted E2E passed 8/8.
 
 ## Verification Traps
 
@@ -85,12 +87,13 @@ Absence of a forbidden phrase is only evidence when the haystack is real.
 
 ## Which URL Is Live Right Now
 
-Verified 2026-07-27T20:26:56-06:00 by fetching each URL and comparing the hashed asset it references.
+Verified 2026-07-27T21:07:32-06:00 by fetching each URL and comparing the hashed asset it references.
 
 | Item | Status | Notes |
 |---|---|---|
-| Canonical production URL | live at source `68a7e1d`; application build current | `https://ai-task-router.pages.dev/` serves `index-B-i3htL0.js` from deployment `https://86dbe307.ai-task-router.pages.dev/`. The only post-deploy `main` changes are release records. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; per-deploy hash URLs must not be published. |
-| Live build contents | current repair confirmed | The canonical and immutable URLs both serve the exact 669,064-byte local asset rather than the SPA fallback. `Recommended work path`, `Produce Requested Output`, `Accepted or edited choices`, and the no-unnecessary-handoff explanation are present; `Quick project plan`, the old generic project-plan lead, and the old exact `Followed choices` header are absent. Manifest and service worker return 200, and hosted E2E passed 7/7. |
+| Canonical production URL | live at source `1b5ea8f`; application build current | `https://ai-task-router.pages.dev/` serves `index-BJ8G6-nl.js` from deployment `https://0e76221f.ai-task-router.pages.dev/`. The only post-deploy `main` changes are release records. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; per-deploy hash URLs must not be published. |
+| Live build contents | task-reasoning repair confirmed | The canonical and immutable URLs both serve the exact 678,109-byte local asset rather than the SPA fallback. The reasoning-demand, prompt-stage utility, and selected-mode adequacy markers are present; the stale `This request is straightforward enough` script and old GPT-5.5 Thinking Medium default are absent. Manifest and service worker return 200, and hosted E2E passed 8/8, including different task-dependent modes and paths from the same saved tools. |
+| `https://86dbe307.ai-task-router.pages.dev` | superseded | Serves `index-B-i3htL0.js` from source `68a7e1d`, the structural direct-work repair deployed immediately before the task-reasoning engine repair. |
 | `https://eb485f5c.ai-task-router.pages.dev` | superseded | Serves `index-CtA-qQF5.js` from source `e3671b2`, the followed-choice clarification deployed immediately before the direct-work routing repair. |
 | `https://79dab484.ai-task-router.pages.dev` | superseded | Serves `index-X2Tnl_UX.js` from source `50478e0`, the Stage 2/3 repair deployed immediately before the followed-choice clarification. |
 | `https://743db3ef.ai-task-router.pages.dev` | superseded | Serves the prior catalog-review build from source `0c81132`. |

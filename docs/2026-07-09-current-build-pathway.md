@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.17.0
+Version: 1.18.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: During the next substantial build session
-Last Updated: 2026-07-27T21:04:49-06:00
-Status Updated: 2026-07-27T21:04:49-06:00
+Last Updated: 2026-07-27T21:07:32-06:00
+Status Updated: 2026-07-27T21:07:32-06:00
 
 ## Purpose
 
@@ -31,14 +31,14 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live; application build current | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://86dbe307.ai-task-router.pages.dev` from source `68a7e1d`, deployed 2026-07-27. It carries the Stage 2/3 repair, followed-choice clarification, and direct-work routing repair; the only post-deploy `main` changes are release records. |
+| Browser/PWA app | live; application build current | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://0e76221f.ai-task-router.pages.dev` from source `1b5ea8f`, deployed 2026-07-27. It carries the task-reasoning engine repair; the only post-deploy `main` changes are release records. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Desktop track | abandoned 2026-07-26T09:31:44-06:00 | Removed entirely: Tauri shell, local discovery, packaging and gate scripts, and the "Desktop app - Coming Soon!" card that promised computer checking on production. Planning and evidence docs are in `docs/archive/`. See [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts Accepted or Edited saved routes in local impact. Legacy Deferred or Rejected saves are explicitly excluded and link directly to Past Choices for review. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Task-reasoning engine repair: integration complete; deploy pending | The earlier direct-work repair changed the fixed route script but did not make stage or mode choices depend deeply enough on the task. The router now evaluates reasoning demand and the marginal value of evidence, prompt design, specialist packaging, and independent review before selecting stages. Mode adequacy distinguishes fast and thinking modes even when account cost is identical. Local release gates pass; production still serves the prior structural repair until this source is committed and deployed. |
+| Active chunk | Task-reasoning engine repair: task complete and live | The earlier direct-work repair changed the fixed route script but did not make stage or mode choices depend deeply enough on the task. The router now evaluates reasoning demand and the marginal value of evidence, prompt design, specialist packaging, and independent review before selecting stages. Mode adequacy distinguishes fast and thinking modes even when account cost is identical. Full local and hosted release gates pass, and production serves the exact verified build. |
 
 ## Product Boundary
 
@@ -97,7 +97,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 8 | Stage reasoning and project-plan repair | task complete; live | Task complete | Removes the contradictory GPT-5.5 Medium default, makes the Stage 3 handoff actionable, and repairs the stretched project-plan layout without adding a feature or changing the product boundary. |
 | 9 | Followed-choice clarification | task complete; live | Task complete | Explains that only Accepted or Edited outcomes count, gives legacy Deferred saves a direct review path, and avoids inventing usage history the app cannot observe. |
 | 10 | Direct-work routing repair | task complete; live | Task complete | Stops straightforward tasks from parroting the same prompt relay, preserves explicit task requirements, and produces a usable direct-work contract without adding provider execution. |
-| 11 | Task-reasoning engine repair | integration complete; deploy pending | Integration complete | Replaces the remaining fixed role sequence with task-dependent stage utility and model-mode adequacy, proven by different routes for different tasks using the same saved tools. |
+| 11 | Task-reasoning engine repair | task complete; live | Task complete | Replaces the remaining fixed role sequence with task-dependent stage utility and model-mode adequacy, proven by different routes for different tasks using the same saved tools. |
 
 ## Plan Chunks
 
@@ -501,6 +501,7 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 | 2026-07-27T20:03:54-06:00 | Diagnose, repair, deploy, and verify followed-choice tracking | pass | Git history showed legacy saves were created with `outcome: "deferred"` while the counter intentionally counts only Accepted or Edited outcomes. The fix names that contract, explains saved-but-uncounted records, links to Past Choices, and does not silently rewrite user history. Vitest passed 175/175; script tests 5/5; build budgets passed at 661.86 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; scan clean; local Playwright 7/7; desktop and 390 px browser checks showed no errors or overflow. Wrangler deployed source `e3671b2` to `https://eb485f5c.ai-task-router.pages.dev`. Canonical and immutable assets match `index-CtA-qQF5.js` at 661,862 bytes with all new markers present and the old exact header absent. Hosted verification initially exposed the documented seconds-long edge cache, then a test-fixture race with asynchronous local-store seeding; the E2E helper now waits for configuration readiness and the full canonical suite passes 7/7. |
 | 2026-07-27T20:26:56-06:00 | Repair and deploy direct-work routing | pass | The router had structurally selected prompt design plus execution for nearly every task, and stage guidance then wrapped that fixed route in the same project-plan story. Source `68a7e1d` makes separate prompt design conditional on build-shaped or explicit prompt work, gives ordinary tasks one direct execution step, preserves explicit planning requirements, and generates a direct copy-ready output contract. Vitest passed 179/179; script tests 5/5; build budgets passed at 669.06 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; scan and governance preflight passed; local Playwright passed 7/7; desktop and 390 px checks showed no errors or overflow. Wrangler deployed to `https://86dbe307.ai-task-router.pages.dev`. Canonical and immutable URLs serve the exact `index-B-i3htL0.js` asset at 669,064 bytes. Direct-work markers are present, the old `Quick project plan` and generic lead are absent, root/PWA files return 200, and hosted Playwright passes 7/7. The documented 962-byte SPA fallback appeared once during canonical asset propagation and was rejected by the length assertion before string checks. |
 | 2026-07-27T21:04:49-06:00 | Replace fixed role sequencing with task reasoning | pass; integration complete, deploy pending | Root cause confirmed: route candidates selected role slots before assessing whether each stage added value; scoring compared three prebuilt bundles; fast and thinking modes shared capability vectors; zero marginal account price erased their resource difference. Added deterministic task-reasoning analysis, stage-utility decisions, mode-specific capability and adequacy scoring, and task-specific route explanations. With the same ChatGPT Go, Perplexity Free, and Microsoft Copilot Free inventory, the structured plan regression selects GPT-5.5 Thinking for direct reasoning with no prompt relay, while a simple rewrite selects GPT-5.5 Instant. Governance preflight passed with 0 warnings; Vitest passed 184/184; script tests 5/5; production build and bundle budgets passed at 678.10 kB JavaScript and 43.76 kB CSS; audit found 0 vulnerabilities; release-candidate scan and `git diff --check` passed; local Playwright passed 8/8, including the same-tools contrast and narrow-layout checks. No provider calls, accounts, telemetry, execution, or new UI feature were added. |
+| 2026-07-27T21:07:32-06:00 | Deploy and verify the task-reasoning engine repair | pass | Source `1b5ea8f` pushed to `main`. The account-owned control-plane credential returned HTTP 200 for the actual `ai-task-router` Pages project, then Wrangler deployed it to `https://0e76221f.ai-task-router.pages.dev` in one attempt. Canonical and immutable URLs both serve `index-BJ8G6-nl.js` at exactly 678,109 bytes, matching `dist`; task-reasoning, stage-utility, and selected-mode markers are present, while the stale direct-work script and old GPT-5.5 Medium-default markers are absent. Manifest and service worker return HTTP 200. Hosted Playwright passed 8/8, including the same-tools contrast: the structured plan uses GPT-5.5 Thinking for direct reasoning with no Perplexity or Copilot relay, and the simple rewrite uses GPT-5.5 Instant. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -567,7 +568,7 @@ A functional audit of `59dd849` on 2026-07-25 found gaps between what the app cl
 
 The Cloudflare deploy blocker is resolved. The original user-scoped token path was rejected, but the account-owned control-plane token added on 2026-07-27 returned HTTP 200 for the actual Pages project and completed the deployment on the first attempt. Use [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) as the deploy runbook.
 
-**The production application build is current at source `68a7e1d`, deployed 2026-07-27; the only post-deploy `main` changes are release records.** The deployment carries the Stage 2/3 repair, followed-choice clarification, and direct-work routing repair. Canonical production serves the exact 669,064-byte local asset; `Recommended work path`, `Produce Requested Output`, the no-unnecessary-handoff explanation, and explicit planning requirements are present; `Quick project plan` and the old generic project-plan lead are absent; and hosted E2E passes 7/7. The repair is deliberately narrow: no provider connection, execution behavior, analytics, or silent outcome migration was added.
+**The production application build is current at source `1b5ea8f`, deployed 2026-07-27; the only post-deploy `main` changes are release records.** The deployment replaces fixed role sequencing with task-reasoning, stage-utility, and actual mode-adequacy decisions. Canonical production serves the exact 678,109-byte local asset; the structured-plan regression selects GPT-5.5 Thinking for direct reasoning without a Perplexity or Copilot relay, while the same saved tools select GPT-5.5 Instant for a simple rewrite; and hosted E2E passes 8/8. The repair is deliberately narrow: no provider connection, execution behavior, analytics, silent outcome migration, or new UI feature was added.
 
 Two verification lessons from the last deploy are worth carrying, because both would have produced a confident wrong answer:
 
