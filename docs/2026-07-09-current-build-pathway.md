@@ -1,15 +1,15 @@
 # 2026-07-09T03:04:01+00:00 - Current Build Pathway
 
 Document ID: PATH-ENG-002
-Version: 1.11.0
+Version: 1.12.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: During the next substantial build session
-Last Updated: 2026-07-27T18:53:34-06:00
-Status Updated: 2026-07-27T18:53:34-06:00
+Last Updated: 2026-07-27T19:03:04-06:00
+Status Updated: 2026-07-27T19:03:04-06:00
 
 ## Purpose
 
@@ -31,14 +31,14 @@ Use this file for current chunks, validation notes, and handoff. Superseded path
 
 | Item | Status | Notes |
 |---|---|---|
-| Browser/PWA app | live; current stage repair is undeployed | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://743db3ef.ai-task-router.pages.dev` from source `0c81132`, deployed 2026-07-26T21:40:00-06:00. The 2026-07-27 Stage 2 reasoning and Stage 3 project-plan repair is validated locally and requires separate release authorization before deployment. |
+| Browser/PWA app | live; current stage repair is undeployed and deployment is blocked | Production URL: `https://ai-task-router.pages.dev/`; latest deployment `https://743db3ef.ai-task-router.pages.dev` from source `0c81132`, deployed 2026-07-26T21:40:00-06:00. The owner authorized deployment of the Stage 2 reasoning and Stage 3 project-plan repair on 2026-07-27, but Cloudflare rejected the single attempt with authentication error `10000` before upload. |
 | Old Skool AI hub | live | Public hub: `https://oldskoolai.com/ai-task-router/`; security route: `https://oldskoolai.com/security/`. |
 | Desktop track | abandoned 2026-07-26T09:31:44-06:00 | Removed entirely: Tauri shell, local discovery, packaging and gate scripts, and the "Desktop app - Coming Soon!" card that promised computer checking on production. Planning and evidence docs are in `docs/archive/`. See [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | PDCA planning simplification | task complete | Visible planning now uses `Plan`, `Do`, `Check`, `Act`; expanded routing detail shows helper/model/mode and upgrade trigger. |
 | Owner routing feedback | task complete | Cost chart points now expose hover/focus values; routing detail shows explicit decisions, reasons, checks, and upgrade triggers; complex build requests split build-stage detail into concrete build items instead of collapsing into prompting only. Average-person routing probes now keep ordinary phrases like "build an itinerary" out of software-build routing unless the task asks for an app, tool, code, automation, workflow, or build slice. Best Options now shows stage paths without a hidden disclosure, lets the user choose which route to accept, and counts accepted saved routes in local followed-choice impact. |
 | Compact active pathway extraction | task complete | The active pathway is now this compact file; the long `2026-07-03` pathway is archive-only. |
 | Retired pathway de-reference | task complete | No active docs, required-doc lists, or governance checks reference the retired pathway filename. |
-| Active chunk | Stage reasoning and project-plan repair: integration complete | ChatGPT Go prompt design no longer calls Medium the usual highest choice: it tells the user to select the highest GPT-5.5 Thinking level actually shown, including High, Extra High, or Max when available. Stage 3 is an explicit manual handoff into Copy-Ready Prompts and the recommended execution mode. Its path now sits below aligned overview/actions, shared routing details render once, and all five concrete build items remain visible. Full local gates pass; production remains on `0c81132` pending separate release authorization. |
+| Active chunk | Stage reasoning and project-plan repair: integration complete, deployment blocked | ChatGPT Go prompt design no longer calls Medium the usual highest choice: it tells the user to select the highest GPT-5.5 Thinking level actually shown, including High, Extra High, or Max when available. Stage 3 is an explicit manual handoff into Copy-Ready Prompts and the recommended execution mode. Its path now sits below aligned overview/actions, shared routing details render once, and all five concrete build items remain visible. Full release gates pass. The authorized Cloudflare attempt failed with authentication error `10000`; production remains on `0c81132`. |
 
 ## Product Boundary
 
@@ -94,7 +94,7 @@ Keep each chunk small enough to finish, validate, commit, and hand off without l
 | 5 | Opt-in local estimator UI | paused | Draft complete | Optional enhancement; only start if the owner explicitly wants a local impact-estimate surface. |
 | 6 | ~~Windows Store/MSIX trust slice~~ | cancelled 2026-07-26T09:31:44-06:00 | n/a | The desktop track was abandoned; see [ADR-0002](decisions/adr-0002-abandon-desktop-track.md). |
 | 7 | Audit remediation queue (R0-R12) | complete | Integration complete | Closes the gaps found by the 2026-07-25 functional audit between what the app claims and what it does. R0 (deploy current `main`), R1 (artifacts follow the chosen route), R2 (honest impact numbers), R3 (first-run honesty), R4 (clean the copied prompt text), R10 (reframe the product promise), R11 (price each step by the model it names), and R12 (name the lean style by what it actually does), R5 (dead code and lint feedback loop), R6 (catalog staleness signal), R7 (help screen), R9 (resolve the frequency question), and R8 (real first-run E2E coverage) are complete. All thirteen chunks are done. R0 shipped all of the above to production, so the remediation work is now visible to users rather than sitting on `main`. The docs now say the app recommends a tier and a shape of work, not a vendor, and use one impact vocabulary shared with the app UI. Each step is now priced against the model that step tells the user to open, and the per-step figures are shown so a route total can be checked against its parts. Cost figures are now API-equivalent per-token estimates shown beside what is actually billed, and no surface claims the user saved money. R5 removed 388 lines of unreachable code and turned on `noUnusedLocals` and `noUnusedParameters`, so unused code now fails `npm run build`; it changed nothing a user sees. R7 replaced the developer placeholder on the Help tab with a real screen explaining what the app does, what it will never do, what the three routes and the numbers mean, and where saved choices live, and deleted `PlaceholderScreen` with it. R6 gave the app a way to admit its model knowledge is ageing: catalog age is computed from the review dates already recorded beside the catalogs, and Best Options shows a notice past 90 days telling the user to check their tool's current model list. The catalog is 20 days old, so the notice is correctly silent today. Two risks were added to the register, R-009 for recommendation-quality drift with a 90-day review cadence and R-010 for impact-claim accuracy. R9 resolved the setup question that collected how often each tool is used and then changed nothing: the app no longer computes a `preferredModelId` from it, and the setup screen now says plainly that account level shapes recommendations while frequency is the user's own note. A guard test asserts routing decisions are identical whether every tool is marked rarely used or used many times a day. R8 closed the last gap with a cold-path E2E test that injects nothing into IndexedDB: it routes once before any tool exists to prove the app admits the plan is manual, then adds ChatGPT Plus through the picker, describes a task in free text, and checks the saved decision card names the tool the user actually chose. Owner decisions on impact framing and product promise are recorded; no chunk is blocked on input. Detail lives in `docs/2026-07-25-audit-remediation-plan.md`. |
-| 8 | Stage reasoning and project-plan repair | integration complete; undeployed | Task complete | Removes the contradictory GPT-5.5 Medium default, makes the Stage 3 handoff actionable, and repairs the stretched project-plan layout without adding a feature or changing the product boundary. |
+| 8 | Stage reasoning and project-plan repair | integration complete; deployment blocked | Task complete | Removes the contradictory GPT-5.5 Medium default, makes the Stage 3 handoff actionable, and repairs the stretched project-plan layout without adding a feature or changing the product boundary. |
 
 ## Plan Chunks
 
@@ -493,6 +493,7 @@ As of 2026-07-08T22:17:33-06:00, the owner considers the core web/PWA tool funct
 
 | 2026-07-26T21:40:00-06:00 | Deploy and verify the catalog review | pass | Source `0c81132` to `https://743db3ef.ai-task-router.pages.dev`, one attempt from `70.65.205.71`; sixth consecutive success. Canonical alias followed on the first cache-busted check. Live bundle 660,237 characters, matching the build. Present: `Gemini 3 Flash on Fast`, `Gemini 3 Pro`, `Claude Opus 5 with effort`, `Grok 4.5 for hard reasoning`, and both dated-change strings. Absent, as intended: `Gemini 2.5 Flash`, `Gemini 2.5 Pro`, `Claude Opus 4.8` - the retired names are gone from what users see. No R-010 vocabulary. Hosted E2E 7/7 first run. |
 | 2026-07-27T18:53:34-06:00 | Stage reasoning and project-plan repair | pass; integration complete, undeployed | Governance preflight passed with 0 warnings. Vitest passed 17 files and 174 tests; script tests passed 5/5; TypeScript/Vite production build and bundle budget passed (javascript raw 660.74 kB / 700.00 kB, stylesheet raw 43.70 kB / 60.00 kB); local Playwright passed 7/7; `npm audit --audit-level=moderate` found 0 vulnerabilities; the web release-candidate scan found no release-blocking findings. Browser reproduction confirmed the original Stage 3 row was 3,350 px high with a 389 px method pill; the repaired row is 1,591 px with a 25 px pill, aligned overview/actions, a full-width path, and all five build items visible. No deployment was attempted. |
+| 2026-07-27T19:01:40-06:00 | Authorized Cloudflare production deployment of `b75ed3e` | blocked before upload | Clean install and full release gates passed again: 174/174 Vitest, 5/5 script tests, 7/7 local Playwright, production build and bundle budget, 0 audit vulnerabilities, clean release-candidate scan, and all PWA artifacts present. Public IP was the previously allowed `70.65.205.71`; `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing values. Wrangler rejected the one permitted attempt with authentication error `10000`. No files uploaded and production stayed on asset `index-BHonc_lf.js` at 660,237 characters; it contains the old Medium copy and not the repair marker. |
 
 ## Completed Chunk - Compact Active Pathway Extraction
 
@@ -559,7 +560,7 @@ A functional audit of `59dd849` on 2026-07-25 found gaps between what the app cl
 
 The Cloudflare deploy blocker is resolved. It was the network location the token was used from, not the token or the build, and the recovery path in [docs/2026-07-09-cloudflare-deploy-turnover.md](2026-07-09-cloudflare-deploy-turnover.md) has now worked unchanged from the owner's home network four times. Use that note as the deploy runbook.
 
-**Production remains at `0c81132`, deployed 2026-07-26T21:40:00-06:00.** The 2026-07-27 Stage 2 reasoning and Stage 3 project-plan repair is integration-complete but undeployed; release requires separate owner authorization. The repair is deliberately narrow: no new provider connection or execution behavior was added.
+**Production remains at `0c81132`, deployed 2026-07-26T21:40:00-06:00.** The owner authorized deployment of the integration-complete Stage 2 reasoning and Stage 3 project-plan repair on 2026-07-27, but Cloudflare rejected the single attempt with authentication error `10000` before upload. Refresh or replace the scoped Cloudflare token before another authorized attempt. The repair is deliberately narrow: no new provider connection or execution behavior was added.
 
 Two verification lessons from the last deploy are worth carrying, because both would have produced a confident wrong answer:
 

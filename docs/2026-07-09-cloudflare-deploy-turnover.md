@@ -1,15 +1,15 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.6.0
-Status: resolved
+Version: 1.7.0
+Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
-Last Reviewed: 2026-07-26
-Next Review: During the next production deploy attempt; the recovery path in this note is now proven five times
-Last Updated: 2026-07-26T21:12:00-06:00
-Status Updated: 2026-07-25T16:28:35-06:00
+Last Reviewed: 2026-07-27
+Next Review: After the scoped Cloudflare token is refreshed or replaced
+Last Updated: 2026-07-27T19:03:04-06:00
+Status Updated: 2026-07-27T19:03:04-06:00
 
 ## Purpose
 
@@ -38,6 +38,8 @@ If a future deploy hits `9109` again, the token's allowed-IP list is the thing t
 **Re-run 2026-07-26T21:12:00-06:00 from the same location.** Source `e58f81b` deployed to `https://3db20d3b.ai-task-router.pages.dev` on the first attempt, unchanged. Fifth consecutive success. Both traps below fired on this run and both were caught by this runbook rather than by luck.
 
 **Re-run 2026-07-26T11:41:28-06:00 from the same location.** Source `b8069fa` deployed to `https://cc915a90.ai-task-router.pages.dev` on the first attempt, unchanged. Fourth consecutive success. This run is the one that exposed the verification traps below: the canonical alias appeared stale on the first plain fetch and was not, and the first bundle string check ran against an SPA fallback and reported a clean pass it had not earned.
+
+**Attempt 2026-07-27T19:01:40-06:00 from the same home network, public IP `70.65.205.71`.** The owner authorized deployment of source `b75ed3e`. Clean install and all release gates passed, and both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing their values. Wrangler rejected the request before upload with authentication error `10000`. The one-attempt stop rule was observed. Production did not change; refresh or replace the scoped token before another attempt.
 
 ## Verification Traps
 
@@ -81,8 +83,8 @@ Verified 2026-07-26T11:41:28-06:00 by fetching each URL and comparing the hashed
 
 | Item | Status | Notes |
 |---|---|---|
-| Canonical production URL | live and current with `main` at `e58f81b` | Re-verified 2026-07-26T21:12:00-06:00. `https://ai-task-router.pages.dev/` serves asset `index-6b9W6nFf.js`, the same build as `https://3db20d3b.ai-task-router.pages.dev/`. The alias needed one retry to catch up. The alias did follow the deploy, but this time only a cache-busted fetch showed it — see Verification Traps above. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; hash URLs like `cc915a90.` are per-deploy and must not be published. |
-| Live build contents | current with `main` at `e58f81b` | The live asset is 658,310 characters, matching the build output, so the string check below ran against the real bundle. It contains `Why which tool you pick matters`, `Smaller is not automatically better`, `Energy moves with it`, `How you have been choosing`, `If this run were metered`, `Against the heaviest offered`, `10-watt LED bulb`, and `Which routes you followed`, confirming all five teaching-audit fixes reached users, and still contains `What this app does` from the R7 Help screen. It contains none of `Estimated savings`, `Energy saved`, `Est. saved`, or `avoided cost`. Nothing on `main` is undeployed. |
+| Canonical production URL | live at source `0c81132`; current repair undeployed | Re-verified 2026-07-27T19:02:03-06:00. `https://ai-task-router.pages.dev/` serves asset `index-BHonc_lf.js` from deployment `https://743db3ef.ai-task-router.pages.dev/`. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; per-deploy hash URLs must not be published. |
+| Live build contents | prior build confirmed after failed deploy | The live asset is 660,237 characters, proving the check used the real bundle rather than the SPA fallback. It contains `usually GPT-5.5 Thinking Medium` and does not contain `not Medium by default`, confirming source `b75ed3e` was not uploaded. |
 | `https://cc915a90.ai-task-router.pages.dev` | superseded | Serves `index-Dc_ddyS3.js` from source `b8069fa`. Production for roughly ten hours on 2026-07-26. |
 | `https://9d00dce4.ai-task-router.pages.dev` | superseded | Serves `index-Dv6r8WOf.js` from source `a34d839`. It was the production deployment for roughly thirty minutes on 2026-07-26; it is no longer what the canonical URL points at. |
 | `https://d81aef5b.ai-task-router.pages.dev` | superseded | Serves `index-CBWnLbEK.js` from source `69b31a2`. It was the production deployment for roughly fifty minutes on 2026-07-26; it is no longer what the canonical URL points at. |
