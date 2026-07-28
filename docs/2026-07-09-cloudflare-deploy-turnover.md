@@ -1,15 +1,15 @@
 # 2026-07-09 - Cloudflare Deploy Turnover
 
 Document ID: PATH-ENG-003
-Version: 1.9.0
+Version: 1.10.0
 Status: active
 Owner: Technical Lead
 Approver: Project Owner
 Effective Date: 2026-07-09
 Last Reviewed: 2026-07-27
 Next Review: At the next production deployment
-Last Updated: 2026-07-27T19:38:42-06:00
-Status Updated: 2026-07-27T19:38:42-06:00
+Last Updated: 2026-07-27T20:03:54-06:00
+Status Updated: 2026-07-27T20:03:54-06:00
 
 ## Purpose
 
@@ -42,6 +42,8 @@ If a future deploy hits `9109` again, the token's allowed-IP list is the thing t
 **Attempt 2026-07-27T19:01:40-06:00 from the same home network, public IP `70.65.205.71`.** The owner authorized deployment of source `b75ed3e`. Clean install and all release gates passed, and both `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were present without exposing their values. Wrangler rejected the request before upload with authentication error `10000`. The configured Pages project returned `403 / 10000`; the user-token verification endpoint reported the token active, but Cloudflare documents that verification does not apply client-IP restrictions, so that result was not proof that the token was operationally authorized. The one-attempt stop rule was observed and production did not change.
 
 **Resolved 2026-07-27T19:37:14-06:00 with the new account-owned control-plane token.** A read-only request to the actual `ai-task-router` Pages project returned HTTP 200 before deployment. The generic user-token verification endpoint returned 401 because it is not the correct verifier for this account-owned credential; the resource request was the authoritative check. After all release gates passed, Wrangler deployed source `50478e0`, carrying the Stage 2 reasoning and Stage 3 project-plan repair from `b75ed3e`, to `https://79dab484.ai-task-router.pages.dev` in one attempt. The canonical alias served the exact local asset immediately, and hosted E2E passed 7/7.
+
+**Re-run 2026-07-27 for the followed-choice clarification.** The same account-owned token passed the actual Pages-project authorization check and Wrangler deployed source `e3671b2` to `https://eb485f5c.ai-task-router.pages.dev` in one attempt. Canonical and immutable assets both serve `index-CtA-qQF5.js` at 661,862 bytes with `Accepted or edited choices`, `Review saved choices`, and the saved-but-uncounted explanation present; the old exact `Followed choices` header is absent. Hosted E2E passes 7/7 after its local-store readiness race was made deterministic.
 
 ## Verification Traps
 
@@ -81,12 +83,13 @@ Absence of a forbidden phrase is only evidence when the haystack is real.
 
 ## Which URL Is Live Right Now
 
-Verified 2026-07-27T19:38:42-06:00 by fetching each URL and comparing the hashed asset it references.
+Verified 2026-07-27T20:03:54-06:00 by fetching each URL and comparing the hashed asset it references.
 
 | Item | Status | Notes |
 |---|---|---|
-| Canonical production URL | live at source `50478e0`; application build current | `https://ai-task-router.pages.dev/` serves `index-X2Tnl_UX.js` from deployment `https://79dab484.ai-task-router.pages.dev/`. The only post-deploy `main` changes are release-record documentation. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; per-deploy hash URLs must not be published. |
-| Live build contents | current repair confirmed | The canonical and immutable URLs both serve the exact 660,744-byte local asset rather than the SPA fallback. `not Medium by default` and `Run the build-plan prompt` are present; `usually GPT-5.5 Thinking Medium` is absent. Manifest and service worker return 200, and hosted E2E passed 7/7. |
+| Canonical production URL | live at source `e3671b2`; application build current | `https://ai-task-router.pages.dev/` serves `index-CtA-qQF5.js` from deployment `https://eb485f5c.ai-task-router.pages.dev/`. The only post-deploy `main` changes are the hosted-test readiness fix and release records. Per R-008 the canonical URL is the only one that should appear on `oldskoolai.com`, `guidedailabs.com`, or `guidedaijourney.com`; per-deploy hash URLs must not be published. |
+| Live build contents | current repair confirmed | The canonical and immutable URLs both serve the exact 661,862-byte local asset rather than the SPA fallback. `Accepted or edited choices`, `Review saved choices`, `not Medium by default`, and `Run the build-plan prompt` are present; the old exact `Followed choices` header and `usually GPT-5.5 Thinking Medium` are absent. Manifest and service worker return 200, and hosted E2E passed 7/7. |
+| `https://79dab484.ai-task-router.pages.dev` | superseded | Serves `index-X2Tnl_UX.js` from source `50478e0`, the Stage 2/3 repair deployed immediately before the followed-choice clarification. |
 | `https://743db3ef.ai-task-router.pages.dev` | superseded | Serves the prior catalog-review build from source `0c81132`. |
 | `https://cc915a90.ai-task-router.pages.dev` | superseded | Serves `index-Dc_ddyS3.js` from source `b8069fa`. Production for roughly ten hours on 2026-07-26. |
 | `https://9d00dce4.ai-task-router.pages.dev` | superseded | Serves `index-Dv6r8WOf.js` from source `a34d839`. It was the production deployment for roughly thirty minutes on 2026-07-26; it is no longer what the canonical URL points at. |
@@ -183,7 +186,7 @@ After deployment, verify the owner-facing fixes on `https://ai-task-router.pages
 - Each stage path has a clear user action, helper/model/mode recommendation, reason, check, and upgrade trigger where applicable.
 - Route cards let the user select which route to accept.
 - The save panel names the selected route before saving.
-- Followed-choice impact increments after saving an accepted route.
+- Accepted-or-edited impact increments after saving an accepted route; a legacy Deferred or Rejected save explains why it is not counted and offers Review saved choices.
 - If avoided cost or energy cannot be meaningfully estimated, the UI does not imply exact zero cost or watt-hours.
 - True software/app/workflow build tasks still get concrete build-stage items.
 - Ordinary planning language such as "build an itinerary" stays in planning/execution/table routing rather than app-build routing.

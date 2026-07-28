@@ -352,6 +352,7 @@ test("corrected screens do not overflow on a narrow viewport", async ({ page }) 
 async function openApp(page: Page) {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Start Here", level: 2 })).toBeVisible();
+  await waitForLocalConfiguration(page);
 }
 
 async function openAppWithRouteReadyModels(page: Page) {
@@ -359,6 +360,37 @@ async function openAppWithRouteReadyModels(page: Page) {
   await replaceIndexedDbRecords(page, "modelInventory", routeReadyModels);
   await page.reload();
   await expect(page.getByRole("heading", { name: "Start Here", level: 2 })).toBeVisible();
+}
+
+async function waitForLocalConfiguration(page: Page) {
+  await expect
+    .poll(() =>
+      page.evaluate(async (databaseName) => {
+        const database = await new Promise<IDBDatabase>((resolve, reject) => {
+          const request = indexedDB.open(databaseName);
+
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => resolve(request.result);
+        });
+        const storeNames = ["modelInventory", "sourcePermissions", "policySettings"];
+        const transaction = database.transaction(storeNames, "readonly");
+        const counts = await Promise.all(
+          storeNames.map(
+            (storeName) =>
+              new Promise<number>((resolve, reject) => {
+                const request = transaction.objectStore(storeName).count();
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+              }),
+          ),
+        );
+
+        database.close();
+        return counts.every((count) => count > 0);
+      }, localStoreDatabaseName),
+    )
+    .toBe(true);
 }
 
 function toolRows(page: Page) {
