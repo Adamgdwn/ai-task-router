@@ -913,7 +913,7 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
 
     return {
       color: routeChartColor(strategy),
-      costPerUse: numericChartValue(option?.estimatedCostUsd),
+      costPerUse: numericChartValue(option?.apiEquivalentCostUsd),
       energyPerUse: numericChartValue(option?.estimatedEnergyWh),
       id: option?.id ?? `${strategy}-route-unavailable-chart-series`,
       label: option?.label ?? `${optionLabel(strategy)} route`,
@@ -978,7 +978,7 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
           times used
         </text>
 
-        {series.map((item) => (
+        {[...series].reverse().map((item) => (
           <ChartTrendLine
             key={`${item.id}-cost`}
             color={item.color}
@@ -993,7 +993,7 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
             yForValue={yForValue}
           />
         ))}
-        {series.map((item) => (
+        {[...series].reverse().map((item) => (
           <ChartTrendLine
             dashed
             key={`${item.id}-energy`}
