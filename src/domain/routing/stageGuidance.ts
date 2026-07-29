@@ -95,8 +95,8 @@ export function buildProjectStageGuidance({
       methodLabel: "Plan",
       label: scopeStep ? "Build the scope and working brief" : "Frame the outcome",
       purpose: scopeStep
-        ? "Use the recommended helper to draft the outcome, boundaries, assumptions, missing decisions, and finish line. Confirm the draft instead of building the scope from scratch."
-        : "Write down the goal, who will use the result, what inputs are allowed, and what done looks like.",
+        ? "Most rough requests, handed directly to a production model, end up solving the wrong problem. This stage turns the request into a workable brief before anything expensive runs."
+        : "Before a model can help, the task needs a clear goal, output type, and finish line. This is the cheapest step in the path.",
       actions: frameStageActions(task, scopeStep !== null),
       reviewChecks: frameStageChecks(task, scopeStep !== null),
       routeStep: scopeStep ?? undefined,
@@ -624,35 +624,25 @@ function roundEstimate(value: number) {
 function frameStageActions(task: TaskIntake, usesScopeHelper: boolean) {
   if (usesScopeHelper) {
     return [
-      "Paste the rough request into the recommended helper.",
-      `Ask it to draft the full working scope for ${friendlyOutputName(task.outputType)}: ${compactTaskDeliverableSummary(task)}.`,
-      "Require explicit assumptions, boundaries, missing decisions, dependencies, risks, measures, and acceptance checks.",
-      "Tell it to make reasonable assumptions and ask only about unknowns that genuinely block the work.",
-      "Carry the finished working brief into the planning stage.",
+      "Scope framing is exploratory — you're figuring out what you're building, not producing yet. A lightweight model handles this well. Bringing your most capable model in before the goal is clear spends money correcting the wrong problem.",
     ];
   }
 
   return [
-    "Restate the task in one plain sentence.",
-    `Name the finished output: ${friendlyOutputName(task.outputType)}.`,
-    `Split the request into visible deliverables: ${compactTaskDeliverableSummary(task)}.`,
-    "List the information you will use and anything that is off limits.",
-    "Decide what good enough looks like before opening a helper.",
+    "Before any model can help, the task needs a clear goal, audience, output, and finish line. Two minutes here prevents a wasted run — it is the cheapest step in the path.",
   ];
 }
 
 function frameStageChecks(task: TaskIntake, usesScopeHelper: boolean) {
-  const checks = [
-    usesScopeHelper
-      ? "The helper drafted a usable scope; the user only needs to confirm or correct it."
-      : "The goal, audience, inputs, and finish line are clear.",
-  ];
-
   if (task.sensitivityClass !== "public") {
-    checks.push("Private or sensitive details stay out of tools that are not allowed for them.");
+    return [
+      "Ready to move on when the goal, output type, and finish criteria are clear. Keep private or sensitive details out of tools that are not cleared for them.",
+    ];
   }
 
-  return checks;
+  return [
+    "Ready to move on when the goal, output type, and finish criteria are clear enough that a stranger could describe what you are building.",
+  ];
 }
 
 function shouldAddGatherStage(task: TaskIntake) {
@@ -693,69 +683,37 @@ function gatherStagePurpose(task: TaskIntake) {
 function gatherStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (taskHasModelSelectionIntent(task)) {
     return [
-      "Check which models or modes are actually available in the tools you selected.",
-      "Write down the minimum execution mode, the stronger prompt-design mode, and the upgrade trigger.",
-      "Note privacy limits before moving any project details into a helper.",
-      usesSeparatePromptDesign
-        ? "Bring only the relevant availability notes into the master prompt."
-        : "Bring only the relevant availability notes into the direct working brief.",
+      "Model availability changes. Checking before prompting costs nothing and prevents building a route around a tool you cannot access.",
     ];
   }
 
   if (task.requiresCurrentFacts && task.requiresCitations) {
     return [
-      "Open the allowed sources yourself.",
-      "Capture the claim, source link or citation note, and date checked.",
-      "Separate confirmed facts from assumptions or guesses.",
-      "Bring only the relevant notes into the next stage.",
+      "Facts and citations are the one input AI cannot reliably invent. Gather them yourself before prompting — a model that searches on your behalf often returns confident-sounding guesses.",
     ];
   }
 
   if (task.requiresCurrentFacts) {
-    const actions = [
-      "Check the newest allowed source before prompt design or execution.",
-      "Write down what changed and what still looks stable.",
-      "Mark anything that should be verified again later.",
+    return [
+      "Stale assumptions produce stale plans. A quick source check before prompting costs minutes and prevents corrections that cost much more.",
     ];
-
-    if (taskHasModelSelectionIntent(task)) {
-      actions.push("Check current tool/model availability, limits, and privacy notes before choosing the execution model.");
-    }
-
-    return actions;
   }
 
   if (task.requiresCitations) {
     return [
-      "Collect source notes for any claim that matters.",
-      "Keep citation details beside the fact they support.",
-      "Leave unsupported claims out of the prompt and first output.",
+      "Unsupported claims discovered after the fact require expensive rewrites. Collect source notes before prompting, not after.",
     ];
   }
 
   return [
-    "Gather only the files, links, notes, or context you plan to use.",
-    "Remove unrelated material before pasting anything into a helper.",
-    "Put the most important details at the top.",
+    "Moving unfiltered context into a model raises cost and lowers quality. Gather only what the task needs, then bring it in cleanly.",
   ];
 }
 
 function gatherStageChecks(task: TaskIntake) {
-  const checks = ["The next stage has enough context to work without guessing."];
-
-  if (taskHasModelSelectionIntent(task)) {
-    checks.push("The model or mode choice is named clearly enough for a novice to select it.");
-  }
-
-  if (task.requiresCurrentFacts) {
-    checks.push("Current facts have been checked recently.");
-  }
-
-  if (task.requiresCitations) {
-    checks.push("Important claims have source notes.");
-  }
-
-  return checks;
+  return [
+    "Ready to move on when the next stage has enough verified context to work without guessing.",
+  ];
 }
 
 function createStageLabel(task: TaskIntake) {
@@ -812,62 +770,43 @@ function createStagePurpose(task: TaskIntake) {
 function createStageActions(task: TaskIntake) {
   if (needsFullBuildPlan(task)) {
     return [
-      "Choose the strongest prompt-building model and reasoning level actually shown in your selected account; do not stop at a default Medium setting when a higher level is available.",
-      `Make one prompt cover the main deliverables: ${compactTaskDeliverableSummary(task)}.`,
-      `Require the prompt to produce the actual build path: ${buildPlanCoverageSummary(task)}.`,
-      "Include four sections only: Plan, Do, Check, and Act, plus privacy limits, acceptance checks, exact execution mode, and upgrade trigger.",
+      "Prompt design is the most cognitively demanding stage — use your strongest available model here. The payoff: every execution run that follows can use a lighter, cheaper model because the quality lives in the prompt, not the run.",
     ];
   }
 
   if (task.knowledgeWorkType === "coding") {
     return [
-      "Ask for a master build prompt, not the finished app yet.",
-      "Make the prompt name the smallest usable version, data flow, screens, files, tests, and acceptance checks.",
-      "Include what to avoid, what to ask before building, and what can wait for a later version.",
-      "Ask which execution helper is the minimum safe choice and what would justify upgrading.",
+      "A precise build prompt can run on a lighter execution model. One expensive prompt-design pass now replaces several expensive debugging runs later.",
     ];
   }
 
   if (task.knowledgeWorkType === "review") {
     return [
-      "Ask for a review prompt with categories for defects, risks, missing context, and improvement options.",
-      "Require the prompt to separate must-fix items, nice-to-have ideas, and open questions.",
-      "Add a human decision rule for approve, revise, stop, or reroute.",
+      "A structured review prompt produces consistent, actionable feedback. One good prompt design pass means the reviewer never has to re-derive what to look for.",
     ];
   }
 
   if (task.knowledgeWorkType === "analysis") {
     return [
-      "Ask for a prompt that compares options, tradeoffs, assumptions, unknowns, and a recommendation.",
-      "Require a short decision table or ranked list if that would make the result easier to inspect.",
-      "Add a check for unsupported claims or stale information.",
+      "The cognitive cost of analysis is in defining what to compare and why. A good prompt does that work once; a cheaper model then runs the comparison.",
     ];
   }
 
   if (task.knowledgeWorkType === "planning" || task.outputType === "plan") {
     return [
-      "Ask for a master prompt, not the finished output yet.",
-      `Make the prompt cover every main deliverable: ${compactTaskDeliverableSummary(task)}.`,
-      "Make it require four sections only: Plan, Do, Check, and Act.",
-      "Require the prompt to name the minimum execution model or mode and what would justify upgrading.",
+      "A master prompt designed at the highest available reasoning level can execute on a lighter model. The thinking cost is front-loaded so the production cost is light.",
     ];
   }
 
   return [
-    "Ask for the exact prompt you should run next, not the final answer yet.",
-    "Include the allowed inputs, finish line, output format, tone, and constraints from stage 1.",
-    "Require checks for assumptions, missing information, and when to use stronger help.",
+    "Designing the prompt before running it shifts cost to the right place. A precise prompt runs cheaper and produces better output on the first pass.",
   ];
 }
 
 function createStageChecks(task: TaskIntake) {
-  const checks = ["The prompt is specific enough that another helper could execute it without guessing."];
-
-  if (task.qualityBar === "high" || task.qualityBar === "critical") {
-    checks.push("The prompt includes acceptance checks, stop conditions, and an upgrade trigger.");
-  }
-
-  return checks;
+  return [
+    "Ready to move on when the prompt is specific enough that another model could execute it without reopening the task.",
+  ];
 }
 
 function directWorkStageLabel(task: TaskIntake) {
@@ -904,32 +843,24 @@ function directWorkStagePurpose(task: TaskIntake) {
 function directWorkStageActions(task: TaskIntake) {
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
     return [
-      `Start with the actual outcome and required pieces: ${compactTaskDeliverableSummary(task)}.`,
-      "Order the work into phases or numbered steps based on dependencies, not generic Plan/Do/Check/Act headings.",
-      "For each phase, name its output, needed inputs, owner or first action, decision point, and what must be true before the next phase starts.",
-      "List assumptions, missing information, blockers, and risks separately; use conditional branches instead of inventing facts.",
-      "End with measures, review points, and the first action that can start now.",
+      "This route skips a separate prompt-design pass because the task is clear enough to execute directly. The recommended model is calibrated for this level of complexity — not over-powered, not under-powered.",
     ];
   }
 
   return [
-    `Produce ${friendlyOutputName(task.outputType)} for: ${compactTaskDeliverableSummary(task)}.`,
-    "Use the supplied facts and constraints directly; mark missing information instead of inventing it.",
-    "Make the result usable on the first pass, with decisions, checks, and next action visible.",
+    "A direct execution route skips the prompt-design overhead. The recommended model is calibrated for this specific task — use it directly with the task brief as context.",
   ];
 }
 
 function directWorkStageChecks(task: TaskIntake) {
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
     return [
-      "The result is the requested plan, not prompt-writing advice or a restatement of the tool sequence.",
-      "The sequence follows real dependencies and names outputs, missing inputs, decisions, risks, measures, review points, and a first action.",
+      "Ready to move on when the result is the actual plan, not advice about planning.",
     ];
   }
 
   return [
-    `The result is ${friendlyOutputName(task.outputType)}, not another prompt or a description of how to ask for it.`,
-    "Every requested deliverable is present or explicitly marked as missing.",
+    "Ready to move on when every requested deliverable is present or explicitly noted as missing.",
   ];
 }
 
@@ -1010,110 +941,38 @@ function packageStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean
 
 function packageStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
-    const actions = usesSeparatePromptDesign
-      ? [
-          "Save this route and open Copy-Ready Prompts.",
-          "Copy the finished master prompt and paste it into the recommended execution model or mode shown here.",
-        ]
-      : [
-          "Carry the approved scope and build plan into the recommended execution model or mode.",
-          "Tell the helper to preserve the decisions, boundaries, and deferred work already agreed.",
-        ];
-
     return [
-      ...actions,
-      `Implement the first usable slice, not more planning advice: ${buildPlanCoverageSummary(task)}.`,
-      "Require data flow, screens or files, acceptance tests, and what can wait for a later pass.",
-      "Stop after the first usable slice is clear enough for a human review.",
+      "The expensive thinking is done. The execution model's job is to implement, not re-derive. A lighter or cheaper execution mode is appropriate here — the quality lives in the prompt.",
     ];
   }
 
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return [
-      usesSeparatePromptDesign
-        ? "Paste the master prompt into the selected execution helper."
-        : "Give the selected execution helper the approved scope and build plan.",
-      "Build only the first useful slice before adding polish or extra features.",
-      "Ask for the files, components, tests, and manual checks needed for that slice.",
-      "Stop and upgrade only if the build plan is confused, unsafe, or repeatedly failing review.",
+      "Build the smallest useful slice first. A model doing focused implementation work does not need to be your most powerful option — it needs a clear prompt, which you have already built.",
     ];
   }
 
   if (task.outputType === "plan") {
-    const actions = [
-      "Paste the master prompt into the selected execution helper.",
-      "Create the ordered plan with phases or numbered steps.",
-      "Add owners or first actions, needed inputs, blockers, measures, and review points.",
-      "Mark when to stay lightweight and when a stronger helper would be worth it.",
-    ];
-
-    if (taskHasBuildIntent(task) || requestedDeliverableLabels(task).length > 0) {
-      actions.splice(
-        2,
-        0,
-        `Make the output explicitly cover: ${compactTaskDeliverableSummary(task)}.`,
-      );
-      return actions.slice(0, 5);
-    }
-
-    return actions;
-  }
-
-  if (task.outputType === "table") {
     return [
-      "Paste the prompt and produce clear rows and columns.",
-      "Use labels that a non-expert can scan quickly.",
-      "Leave unknown values blank or marked for review.",
-    ];
-  }
-
-  if (task.outputType === "slide outline") {
-    return [
-      "Paste the prompt and break the result into slide-sized sections.",
-      "Give each slide one job and a short talking point.",
-      "Move extra detail into notes instead of crowding the outline.",
-    ];
-  }
-
-  if (task.outputType === "route card" || task.outputType === "prompt package") {
-    return [
-      "Paste the prompt and convert the result into copy-ready instructions.",
-      "Keep inputs, constraints, review checks, and stop points visible.",
-      "Remove anything you would not actually paste or follow.",
+      "The reasoning cost is already paid. Paste the master prompt and let a lighter execution model produce the plan — execution is the cheap part of this route.",
     ];
   }
 
   return [
-    "Paste the master prompt into the selected execution helper.",
-    "Create the first usable version before asking for polish.",
-    "Put the most useful part first.",
-    "Add any missing labels, next steps, or review notes.",
+    "The prompt contains the thinking. The execution model's job is to follow it accurately on the first pass, using the smallest model that can pass the review checks.",
   ];
 }
 
 function packageStageChecks(task: TaskIntake, usesSeparatePromptDesign: boolean) {
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
-    return ["The first slice works well enough to review before more features are added."];
+    return ["Ready to move on when the first slice is complete enough to review before more features are added."];
   }
 
   if (needsFullBuildPlan(task)) {
-    return [
-      usesSeparatePromptDesign
-        ? "The handoff preserves the master prompt, execution model choice, build sequence, checks, privacy limits, and impact comparison."
-        : "The implementation preserves the approved scope, build sequence, checks, privacy limits, and deferred work.",
-      "The first build slice is small enough to start without trying to build the whole product at once.",
-    ];
+    return ["Ready to move on when the first build slice is small enough to start, with decisions, data flow, acceptance checks, and deferred work visible."];
   }
 
-  if (taskHasBuildIntent(task)) {
-    return ["The plan names the first build slice, execution model, data flow, checks, and what can wait."];
-  }
-
-  if (task.outputType === "plan") {
-    return ["A novice can see the first action, the sequence, the measure, and the next review point."];
-  }
-
-  return ["The result follows the master prompt and is ready for review before outside use."];
+  return ["Ready to move on when the result follows the master prompt and is ready for review."];
 }
 
 function reviewStageLabel(task: TaskIntake) {
@@ -1161,51 +1020,27 @@ function reviewStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean)
 }
 
 function reviewStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
-  if (needsFullBuildPlan(task)) {
+  if (task.publicFacing || task.sensitivityClass === "public-facing risk" || task.qualityBar === "critical") {
     return [
-      "Read the master prompt and execution result together.",
-      `Confirm the result covers: ${compactTaskDeliverableSummary(task)}.`,
-      "Check that the model choice, data flow, privacy limits, cost, energy, and acceptance checks are explicit.",
-      "Mark any unclear build step, missing input, unsupported claim, or upgrade trigger.",
-      "Decide whether the same prompt can be reused or needs one stronger prompt-design pass.",
+      "Human review is required before anything public, sensitive, or high-stakes leaves your hands. Tone, facts, permissions, and risk are not reliably caught by automated checks — and every error caught here saves an expensive re-run.",
     ];
   }
 
-  const actions = [
-    usesSeparatePromptDesign
-      ? "Read the prompt and the result together, from the perspective of the person who has to use it."
-      : "Read the result against the original task from the perspective of the person who has to use it.",
-    "Fix unclear steps, unsupported claims, missing context, or places where the helper ignored the prompt.",
-    "Mark anything that needs one more pass before action.",
+  return [
+    "A quick human pass costs less than a re-run. Models cannot verify their own accuracy against the real-world outcome — that is what this stage is for.",
   ];
-
-  if (requestedDeliverableLabels(task).length > 0) {
-    actions.splice(1, 0, `Check that the result covers: ${compactTaskDeliverableSummary(task)}.`);
-  }
-
-  if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
-    actions.splice(1, 0, "Check tone, permissions, facts, and risk before sharing.");
-  }
-
-  return actions.slice(0, 5);
 }
 
 function reviewStageChecks(task: TaskIntake) {
-  const checks = ["The result matches the prompt, the original task, and the promised output format."];
-
-  if (needsFullBuildPlan(task)) {
-    checks.push("The plan covers the full requested build path, not only the prompt-writing setup.");
+  if (task.publicFacing || task.sensitivityClass === "public-facing risk" || task.qualityBar === "critical") {
+    return [
+      "Ready to move on when a human has reviewed the result and made a decision: approve, revise, or stop.",
+    ];
   }
 
-  if (task.publicFacing || task.sensitivityClass === "public-facing risk") {
-    checks.push("Nothing public leaves your hands without human approval.");
-  }
-
-  if (task.qualityBar === "critical") {
-    checks.push("A careful human pass is complete before relying on it.");
-  }
-
-  return checks;
+  return [
+    "Ready to move on when the result matches the task and the requested output format.",
+  ];
 }
 
 function actStageLabel(task: TaskIntake) {
@@ -1253,50 +1088,37 @@ function actStageActions(
 ) {
   if (usesNextActionHelper) {
     return [
-      "Paste the approved plan into the recommended lighter helper.",
-      "Ask for the first action, its owner, required inputs, completion signal, and next review point.",
-      "Tell it to preserve the approved scope and decisions instead of reopening the plan.",
+      "The approved plan is done. A lighter model can package it into an immediate action without repeating the expensive planning work.",
     ];
   }
 
   if (needsFullBuildPlan(task)) {
     return [
-      "Choose one first build action, such as the spreadsheet import, category rules, or first tracking view.",
-      usesSeparatePromptDesign
-        ? "Save the master prompt and the execution model choice beside the plan."
-        : "Save the direct working brief and the execution model choice beside the plan.",
-      "Record what this route was expected to cost in tool use, energy, and your own time, so the route can be learned from later.",
+      "Record what this route cost and whether it was worth it. A library of working routes — validated prompts, model choices, and stage sequences — is what makes the next task cheaper.",
     ];
   }
 
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
     return [
-      "Choose one first action that can be started today.",
-      "Name the measure that will show whether the plan helped.",
-      usesSeparatePromptDesign
-        ? "Decide the trigger for looping back to the prompt or upgrading the helper."
-        : "Decide the trigger for revising the direct brief or upgrading the helper.",
+      "The planning work is done. Pick the smallest next action and decide what measure will show whether it helped. Note whether this prompt is worth keeping.",
     ];
   }
 
   return [
-    "Decide whether to use, edit, or reject the result.",
-    "Accept and save the route if this is the path you intend to follow.",
-    "Carry one prompt or routing lesson into the next similar task.",
+    "Decide whether to use, save, or adjust the result. The pattern that builds efficiency over time is a library of tested routes — prompts and model choices you have already validated.",
   ];
 }
 
 function actStageChecks(task: TaskIntake) {
-  const checks = ["There is a clear next action, owner, or decision."];
-
   if (task.outputType === "plan" || task.knowledgeWorkType === "planning") {
-    checks.push("The plan says what to check after the first action.");
-    if (taskHasBuildIntent(task)) {
-      checks.push("The first action starts the smallest useful build slice, not the whole product at once.");
-    }
+    return [
+      "Ready to move on when there is a clear first action, a measure, and a note on whether this prompt should be reused or adjusted.",
+    ];
   }
 
-  return checks;
+  return [
+    "Ready to move on when there is a clear next action or a decision to close the task.",
+  ];
 }
 
 function needsFullBuildPlan(task: TaskIntake) {
@@ -1308,7 +1130,7 @@ function buildPlanCoverageSummary(task: TaskIntake) {
   const coverage = [
     deliverables.includes("spreadsheet import or paste-in data flow") ? "spreadsheet import or paste-in data flow" : null,
     deliverables.includes("categorization rules") ? "category rules" : null,
-    deliverables.includes("month-over-month tracking") ? "month-over-month tracking view" : null,
+    deliverables.includes("trend and progress tracking") ? "trend and progress tracking view" : null,
     deliverables.includes("improvement and strength insights") ? "improvement and strength signals" : null,
     deliverables.includes("model/tool choice for execution") ? "model and tool choice for execution" : null,
     deliverables.includes("privacy check for sensitive data") ? "sensitive-data privacy limits" : null,

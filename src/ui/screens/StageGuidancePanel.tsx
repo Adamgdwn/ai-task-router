@@ -78,7 +78,12 @@ function StageGuidanceItem({
         ) : null}
       </div>
       <div className="stageActionGrid">
-        {stage.actions.length ? (
+        {stage.actions.length === 1 ? (
+          <div className="stageDetailBlock">
+            <strong>Why this approach</strong>
+            <p>{stage.actions[0]}</p>
+          </div>
+        ) : stage.actions.length > 1 ? (
           <div className="stageDetailBlock">
             <strong>Do this</strong>
             <ul>
@@ -88,7 +93,12 @@ function StageGuidanceItem({
             </ul>
           </div>
         ) : null}
-        {stage.reviewChecks.length ? (
+        {stage.reviewChecks.length === 1 ? (
+          <div className="stageDetailBlock">
+            <strong>Done when</strong>
+            <p>{stage.reviewChecks[0]}</p>
+          </div>
+        ) : stage.reviewChecks.length > 1 ? (
           <div className="stageDetailBlock">
             <strong>Check</strong>
             <ul>

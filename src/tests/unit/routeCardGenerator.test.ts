@@ -154,8 +154,8 @@ describe("route card generator", () => {
     ]);
     expect(card.stageGuidance[0]).toMatchObject({
       methodLabel: "Plan",
-      actions: expect.arrayContaining(["Restate the task in one plain sentence."]),
-      reviewChecks: expect.arrayContaining(["The goal, audience, inputs, and finish line are clear."]),
+      actions: expect.arrayContaining([expect.stringContaining("cheapest step")]),
+      reviewChecks: expect.arrayContaining([expect.stringContaining("Ready to move on")]),
     });
     expect(card.stageGuidance.find((stage) => stage.stage === "create")).toMatchObject({
       label: "Create the draft",
@@ -252,10 +252,10 @@ describe("route card generator", () => {
     expect(createStage?.workItems[0]?.modeLabel).not.toContain("usually GPT-5.5 Thinking Medium");
     expect(createStage?.workItems.map((item) => item.label).join(" ")).not.toContain("Prompt section");
     expect(createStage?.workItems[0]?.expectedOutput).toContain("One master prompt");
-    expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
-    expect(createStage?.actions.join(" ")).toContain("categorization rules");
-    expect(createStage?.actions.join(" ")).toContain("trend and progress tracking");
-    expect(createStage?.actions.join(" ")).toContain("model and tool choice for execution");
+    expect(createStage?.actions).toHaveLength(1);
+    expect(createStage?.actions[0]).toContain("strongest available model");
+    expect(createStage?.reviewChecks).toHaveLength(1);
+    expect(createStage?.reviewChecks[0]).toContain("Ready to move on");
     expect(packageStage).toMatchObject({
       label: "Run the build-plan prompt",
       recommendedModelLabel: expect.stringContaining("execution GPT-5.5 Instant"),
@@ -277,16 +277,16 @@ describe("route card generator", () => {
         upgradeTrigger: expect.stringContaining("Upgrade execution only if"),
       });
     }
-    expect(packageStage?.actions.join(" ")).toContain("Implement the first usable slice");
-    expect(packageStage?.actions.join(" ")).toContain("Copy-Ready Prompts");
-    expect(packageStage?.actions.join(" ")).toContain("model and tool choice for execution");
-    expect(packageStage?.reviewChecks.join(" ")).toContain("first build slice");
+    expect(packageStage?.actions).toHaveLength(1);
+    expect(packageStage?.actions[0]).toContain("expensive thinking");
+    expect(packageStage?.reviewChecks).toHaveLength(1);
+    expect(packageStage?.reviewChecks[0]).toContain("Ready to move on");
     expect(reviewStage?.recommendedModelLabel).toBe("My own final review");
     expect(reviewStage?.recommendedModelLabel).not.toContain("GPT-5.5");
     expect(reviewStage?.recommendedModelLabel).not.toBe(packageStage?.recommendedModelLabel);
-    expect(reviewStage?.actions.join(" ")).toContain("improvement and strength insights");
-    expect(reviewStage?.reviewChecks.join(" ")).toContain("full requested build path");
-    expect(actStage?.reviewChecks.join(" ")).toContain("smallest useful build slice");
+    expect(reviewStage?.actions).toHaveLength(1);
+    expect(reviewStage?.reviewChecks).toHaveLength(1);
+    expect(actStage?.reviewChecks).toHaveLength(1);
   });
 
   it("keeps least-resource public build guidance on concrete AI modes when ChatGPT Go is available", () => {
@@ -340,7 +340,7 @@ describe("route card generator", () => {
     expect(createStage?.recommendedModelLabel).toContain("not Medium by default");
     expect(createStage?.recommendedModelLabel).not.toContain("You first");
     expect(createStage?.actions.join(" ")).not.toContain("best model to execute the mini application");
-    expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
+    expect(createStage?.actions).toHaveLength(1);
     expect(packageStage?.recommendedModelLabel).toContain("GPT-5.5 Instant");
     expect(packageStage?.recommendedModelLabel).not.toContain("You first");
   });
