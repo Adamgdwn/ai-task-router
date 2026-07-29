@@ -15,7 +15,6 @@ import {
 } from "./modelGuidance";
 import {
   decomposeTask,
-  requestedDeliverableLabels,
   taskHasBuildIntent,
   taskHasModelSelectionIntent,
   taskNeedsEvidenceCheck,
@@ -621,7 +620,7 @@ function roundEstimate(value: number) {
   return Math.round(value * 1000) / 1000;
 }
 
-function frameStageActions(task: TaskIntake, usesScopeHelper: boolean) {
+function frameStageActions(_task: TaskIntake, usesScopeHelper: boolean) {
   if (usesScopeHelper) {
     return [
       "Scope framing is exploratory — you're figuring out what you're building, not producing yet. A lightweight model handles this well. Bringing your most capable model in before the goal is clear spends money correcting the wrong problem.",
@@ -633,7 +632,7 @@ function frameStageActions(task: TaskIntake, usesScopeHelper: boolean) {
   ];
 }
 
-function frameStageChecks(task: TaskIntake, usesScopeHelper: boolean) {
+function frameStageChecks(task: TaskIntake, _usesScopeHelper: boolean) {
   if (task.sensitivityClass !== "public") {
     return [
       "Ready to move on when the goal, output type, and finish criteria are clear. Keep private or sensitive details out of tools that are not cleared for them.",
@@ -680,7 +679,7 @@ function gatherStagePurpose(task: TaskIntake) {
   return "Gather only the information you intend to use, then move it into the chosen helper yourself.";
 }
 
-function gatherStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
+function gatherStageActions(task: TaskIntake, _usesSeparatePromptDesign: boolean) {
   if (taskHasModelSelectionIntent(task)) {
     return [
       "Model availability changes. Checking before prompting costs nothing and prevents building a route around a tool you cannot access.",
@@ -710,7 +709,7 @@ function gatherStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean)
   ];
 }
 
-function gatherStageChecks(task: TaskIntake) {
+function gatherStageChecks(_task: TaskIntake) {
   return [
     "Ready to move on when the next stage has enough verified context to work without guessing.",
   ];
@@ -803,7 +802,7 @@ function createStageActions(task: TaskIntake) {
   ];
 }
 
-function createStageChecks(task: TaskIntake) {
+function createStageChecks(_task: TaskIntake) {
   return [
     "Ready to move on when the prompt is specific enough that another model could execute it without reopening the task.",
   ];
@@ -939,7 +938,7 @@ function packageStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean
   return "Use the prompt to create the requested output with the smallest helper that can pass the checks.";
 }
 
-function packageStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
+function packageStageActions(task: TaskIntake, _usesSeparatePromptDesign: boolean) {
   if (needsFullBuildPlan(task)) {
     return [
       "The expensive thinking is done. The execution model's job is to implement, not re-derive. A lighter or cheaper execution mode is appropriate here — the quality lives in the prompt.",
@@ -963,7 +962,7 @@ function packageStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean
   ];
 }
 
-function packageStageChecks(task: TaskIntake, usesSeparatePromptDesign: boolean) {
+function packageStageChecks(task: TaskIntake, _usesSeparatePromptDesign: boolean) {
   if (task.knowledgeWorkType === "coding" || task.outputType === "code") {
     return ["Ready to move on when the first slice is complete enough to review before more features are added."];
   }
@@ -1019,7 +1018,7 @@ function reviewStagePurpose(task: TaskIntake, usesSeparatePromptDesign: boolean)
     : "Compare the result against the original task, requested deliverables, and direct-work checks before deciding what to do next.";
 }
 
-function reviewStageActions(task: TaskIntake, usesSeparatePromptDesign: boolean) {
+function reviewStageActions(task: TaskIntake, _usesSeparatePromptDesign: boolean) {
   if (task.publicFacing || task.sensitivityClass === "public-facing risk" || task.qualityBar === "critical") {
     return [
       "Human review is required before anything public, sensitive, or high-stakes leaves your hands. Tone, facts, permissions, and risk are not reliably caught by automated checks — and every error caught here saves an expensive re-run.",
@@ -1083,7 +1082,7 @@ function actStagePurpose(
 
 function actStageActions(
   task: TaskIntake,
-  usesSeparatePromptDesign: boolean,
+  _usesSeparatePromptDesign: boolean,
   usesNextActionHelper: boolean,
 ) {
   if (usesNextActionHelper) {
@@ -1123,26 +1122,6 @@ function actStageChecks(task: TaskIntake) {
 
 function needsFullBuildPlan(task: TaskIntake) {
   return taskNeedsFullBuildPlan(task);
-}
-
-function buildPlanCoverageSummary(task: TaskIntake) {
-  const deliverables = requestedDeliverableLabels(task);
-  const coverage = [
-    deliverables.includes("spreadsheet import or paste-in data flow") ? "spreadsheet import or paste-in data flow" : null,
-    deliverables.includes("categorization rules") ? "category rules" : null,
-    deliverables.includes("trend and progress tracking") ? "trend and progress tracking view" : null,
-    deliverables.includes("improvement and strength insights") ? "improvement and strength signals" : null,
-    deliverables.includes("model/tool choice for execution") ? "model and tool choice for execution" : null,
-    deliverables.includes("privacy check for sensitive data") ? "sensitive-data privacy limits" : null,
-    deliverables.includes("cost, savings, or energy comparison") ? "cost, savings, and energy comparison" : null,
-    taskHasBuildIntent(task) ? "first usable build slice" : null,
-  ].filter((item): item is string => item !== null);
-
-  return inlineList(uniqueLabels(coverage.length ? coverage : compactDeliverableLabels(decomposeTask(task).deliverables)));
-}
-
-function compactTaskDeliverableSummary(task: TaskIntake) {
-  return inlineList(compactDeliverableLabels(decomposeTask(task).deliverables));
 }
 
 function compactDeliverableText(deliverables: readonly TaskDeliverable[]) {
