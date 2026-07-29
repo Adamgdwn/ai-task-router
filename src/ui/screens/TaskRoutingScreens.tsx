@@ -1,4 +1,4 @@
-import { type FormEvent, type ReactNode } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { assessCatalogFreshness } from "../../domain/catalog/catalogFreshness";
 import {
   formatEnergyAsEverydayEquivalent,
@@ -907,6 +907,8 @@ function RouteTrustPanel({
 }
 
 function RouteHundredUseComparison({ options }: { options: readonly RouteOption[] }) {
+  const [hoverUse, setHoverUse] = useState<number | null>(null);
+
   const optionByStrategy = new Map(options.map((option) => [option.strategy, option]));
   const series = routeStrategies.map((strategy) => {
     const option = optionByStrategy.get(strategy);
@@ -927,6 +929,7 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
   const maxEnergy = maxChartValue(series.map((item) => item.energyPerUse));
   const xStart = 76;
   const xEnd = 1134;
+  const viewBoxWidth = 1200;
   const costTop = 48;
   const energyTop = 124;
   const plotHeight = 42;
@@ -934,92 +937,195 @@ function RouteHundredUseComparison({ options }: { options: readonly RouteOption[
   const yForValue = (value: number, maxValue: number, top: number, showZeroFloor = false) =>
     top + plotHeight - linearChartRatio(value, maxValue, showZeroFloor) * plotHeight;
 
+  function handleOverlayMouseMove(e: React.MouseEvent<SVGRectElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const svgX = ((e.clientX - rect.left) / rect.width) * viewBoxWidth;
+    const uses = Math.round(((svgX - xStart) / (xEnd - xStart)) * 100);
+    setHoverUse(Math.max(0, Math.min(100, uses)));
+  }
+
+  const tooltipLeftPct = hoverUse !== null ? (xForUse(hoverUse) / viewBoxWidth) * 100 : 0;
+  const tooltipOnLeft = hoverUse !== null && hoverUse > 55;
+
   return (
     <div className="routeHundredUseChart" aria-label="100 use route cost and energy comparison">
-      <svg aria-labelledby="route-chart-title route-chart-desc" role="img" viewBox="0 0 1200 200">
-        <title id="route-chart-title">100-use comparison</title>
-        <desc id="route-chart-desc">
-          Compares cumulative estimated cost and energy for available lean, balanced, and premium routes from 0 to 100
-          uses on a linear cumulative scale, with exact 100-use totals shown below.
-        </desc>
-        <text className="chartTitle" x="76" y="20">
-          100-use scenario
-        </text>
-        <text className="chartSubtitle" x="248" y="20">
-          linear scale; exact totals below
-        </text>
+      <div className="routeHundredUseChartSvgWrap">
+        <svg aria-labelledby="route-chart-title route-chart-desc" role="img" viewBox="0 0 1200 200">
+          <title id="route-chart-title">100-use comparison</title>
+          <desc id="route-chart-desc">
+            Compares cumulative estimated cost and energy for available lean, balanced, and premium routes from 0 to 100
+            uses on a linear cumulative scale, with exact 100-use totals shown below.
+          </desc>
+          <text className="chartTitle" x="76" y="20">
+            100-use scenario
+          </text>
+          <text className="chartSubtitle" x="248" y="20">
+            linear scale; exact totals below
+          </text>
 
-        <ChartPanelAxes
-          label="Cost"
-          maxLabel={formatUsd(maxCost)}
-          plotHeight={plotHeight}
-          top={costTop}
-          xEnd={xEnd}
-          xStart={xStart}
-        />
-        <ChartPanelAxes
-          label="Energy"
-          maxLabel={formatEnergyAxis(maxEnergy)}
-          plotHeight={plotHeight}
-          top={energyTop}
-          xEnd={xEnd}
-          xStart={xStart}
-        />
-
-        {usageTicks.map((tick) => (
-          <g key={tick}>
-            <line className="chartGridLine" x1={xForUse(tick)} x2={xForUse(tick)} y1={costTop} y2={energyTop + plotHeight} />
-            <text className="chartTickLabel" textAnchor="middle" x={xForUse(tick)} y="188">
-              {tick}
-            </text>
-          </g>
-        ))}
-        <text className="chartAxisTitle" textAnchor="middle" x={(xStart + xEnd) / 2} y="198">
-          times used
-        </text>
-
-        {[...series].reverse().map((item) => (
-          <ChartTrendLine
-            key={`${item.id}-cost`}
-            color={item.color}
-            label={item.label}
-            maxValue={maxCost}
-            perUseValue={item.costPerUse}
-            plotTop={costTop}
-            seriesKind="cost"
-            showZeroFloor
-            usageTicks={usageTicks}
-            xForUse={xForUse}
-            yForValue={yForValue}
+          <ChartPanelAxes
+            label="Cost"
+            maxLabel={formatUsd(maxCost)}
+            plotHeight={plotHeight}
+            top={costTop}
+            xEnd={xEnd}
+            xStart={xStart}
           />
-        ))}
-        {[...series].reverse().map((item) => (
-          <ChartTrendLine
-            dashed
-            key={`${item.id}-energy`}
-            color={item.color}
-            label={item.label}
-            maxValue={maxEnergy}
-            perUseValue={item.energyPerUse}
-            plotTop={energyTop}
-            seriesKind="energy"
-            usageTicks={usageTicks}
-            xForUse={xForUse}
-            yForValue={yForValue}
+          <ChartPanelAxes
+            label="Energy"
+            maxLabel={formatEnergyAxis(maxEnergy)}
+            plotHeight={plotHeight}
+            top={energyTop}
+            xEnd={xEnd}
+            xStart={xStart}
           />
-        ))}
 
-        <g className="chartLegend">
-          {series.map((item, index) => (
-            <g key={item.id} transform={`translate(${720 + index * 138} 16)`}>
-              <line stroke={item.color} strokeLinecap="round" strokeWidth="4" x1="0" x2="22" y1="0" y2="0" />
-              <text x="30" y="5">
-                {item.unavailable ? `${item.label.replace(" route", "")} blocked` : item.label.replace(" route", "")}
+          {usageTicks.map((tick) => (
+            <g key={tick}>
+              <line className="chartGridLine" x1={xForUse(tick)} x2={xForUse(tick)} y1={costTop} y2={energyTop + plotHeight} />
+              <text className="chartTickLabel" textAnchor="middle" x={xForUse(tick)} y="188">
+                {tick}
               </text>
             </g>
           ))}
-        </g>
-      </svg>
+          <text className="chartAxisTitle" textAnchor="middle" x={(xStart + xEnd) / 2} y="198">
+            times used
+          </text>
+
+          {[...series].reverse().map((item) => (
+            <ChartTrendLine
+              key={`${item.id}-cost`}
+              color={item.color}
+              label={item.label}
+              maxValue={maxCost}
+              perUseValue={item.costPerUse}
+              plotTop={costTop}
+              seriesKind="cost"
+              showZeroFloor
+              usageTicks={usageTicks}
+              xForUse={xForUse}
+              yForValue={yForValue}
+            />
+          ))}
+          {[...series].reverse().map((item) => (
+            <ChartTrendLine
+              dashed
+              key={`${item.id}-energy`}
+              color={item.color}
+              label={item.label}
+              maxValue={maxEnergy}
+              perUseValue={item.energyPerUse}
+              plotTop={energyTop}
+              seriesKind="energy"
+              usageTicks={usageTicks}
+              xForUse={xForUse}
+              yForValue={yForValue}
+            />
+          ))}
+
+          {hoverUse !== null && (
+            <line
+              className="chartCrosshair"
+              x1={xForUse(hoverUse)}
+              x2={xForUse(hoverUse)}
+              y1={costTop}
+              y2={energyTop + plotHeight}
+            />
+          )}
+          {hoverUse !== null &&
+            series.map(
+              (item) =>
+                item.costPerUse !== null && (
+                  <circle
+                    cx={xForUse(hoverUse)}
+                    cy={yForValue(item.costPerUse * hoverUse, maxCost, costTop, item.costPerUse === 0)}
+                    fill={item.color}
+                    key={`crosshair-cost-${item.id}`}
+                    r="5"
+                    stroke="var(--panel)"
+                    strokeWidth="2"
+                  />
+                ),
+            )}
+          {hoverUse !== null &&
+            series.map(
+              (item) =>
+                item.energyPerUse !== null && (
+                  <circle
+                    cx={xForUse(hoverUse)}
+                    cy={yForValue(item.energyPerUse * hoverUse, maxEnergy, energyTop)}
+                    fill={item.color}
+                    key={`crosshair-energy-${item.id}`}
+                    r="5"
+                    stroke="var(--panel)"
+                    strokeWidth="2"
+                  />
+                ),
+            )}
+
+          <rect
+            fill="transparent"
+            height={energyTop + plotHeight - costTop}
+            onMouseLeave={() => setHoverUse(null)}
+            onMouseMove={handleOverlayMouseMove}
+            style={{ cursor: "crosshair" }}
+            width={xEnd - xStart}
+            x={xStart}
+            y={costTop}
+          />
+
+          <g className="chartLegend">
+            {series.map((item, index) => (
+              <g key={item.id} transform={`translate(${720 + index * 138} 16)`}>
+                <line stroke={item.color} strokeLinecap="round" strokeWidth="4" x1="0" x2="22" y1="0" y2="0" />
+                <text x="30" y="5">
+                  {item.unavailable ? `${item.label.replace(" route", "")} blocked` : item.label.replace(" route", "")}
+                </text>
+              </g>
+            ))}
+          </g>
+        </svg>
+
+        {hoverUse !== null && (
+          <div
+            className="chartHoverTooltip"
+            style={{
+              left: `${tooltipLeftPct}%`,
+              transform: tooltipOnLeft ? "translateX(calc(-100% - 10px))" : "translateX(10px)",
+            }}
+          >
+            <strong className="chartHoverTooltipTitle">{hoverUse} uses</strong>
+            <div className="chartHoverTooltipSection">
+              <span className="chartHoverTooltipSectionLabel">Cost (API equivalent)</span>
+              {series.map(
+                (item) =>
+                  !item.unavailable &&
+                  item.costPerUse !== null && (
+                    <div className="chartHoverTooltipRow" key={`tip-cost-${item.id}`}>
+                      <span className="chartHoverTooltipDot" style={{ background: item.color }} />
+                      <span className="chartHoverTooltipLabel">{item.label.replace(" route", "")}</span>
+                      <span className="chartHoverTooltipValue">{formatUsd(item.costPerUse * hoverUse)}</span>
+                    </div>
+                  ),
+              )}
+            </div>
+            <div className="chartHoverTooltipSection">
+              <span className="chartHoverTooltipSectionLabel">Energy</span>
+              {series.map(
+                (item) =>
+                  !item.unavailable &&
+                  item.energyPerUse !== null && (
+                    <div className="chartHoverTooltipRow" key={`tip-energy-${item.id}`}>
+                      <span className="chartHoverTooltipDot" style={{ background: item.color }} />
+                      <span className="chartHoverTooltipLabel">{item.label.replace(" route", "")}</span>
+                      <span className="chartHoverTooltipValue">{formatWattHours(item.energyPerUse * hoverUse)}</span>
+                    </div>
+                  ),
+              )}
+            </div>
+          </div>
+        )}
+      </div>
       <div className="routeHundredUseKey" aria-label="comparison chart key">
         <span>Solid: cost</span>
         <span>Dashed: energy</span>

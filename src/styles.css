@@ -1927,11 +1927,85 @@ button:focus-visible {
   padding: 10px 12px 12px;
 }
 
+.routeHundredUseChartSvgWrap {
+  position: relative;
+}
+
 .routeHundredUseChart svg {
   aspect-ratio: 6 / 1;
   display: block;
   min-height: 150px;
   width: 100%;
+}
+
+.chartCrosshair {
+  pointer-events: none;
+  stroke: #334b5a;
+  stroke-dasharray: 4 3;
+  stroke-width: 1.25;
+}
+
+.chartHoverTooltip {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  min-width: 180px;
+  padding: 8px 10px;
+  pointer-events: none;
+  position: absolute;
+  top: 4px;
+  z-index: 10;
+}
+
+.chartHoverTooltipTitle {
+  color: var(--brand-navy);
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.chartHoverTooltipSection {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.chartHoverTooltipSection:last-child {
+  margin-bottom: 0;
+}
+
+.chartHoverTooltipSectionLabel {
+  color: #516678;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.chartHoverTooltipRow {
+  align-items: center;
+  display: flex;
+  gap: 5px;
+}
+
+.chartHoverTooltipDot {
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 8px;
+  width: 8px;
+}
+
+.chartHoverTooltipLabel {
+  color: var(--body-ink);
+  flex: 1;
+  font-size: 0.8rem;
+}
+
+.chartHoverTooltipValue {
+  color: var(--brand-navy);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .chartTitle {
