@@ -100,7 +100,7 @@ const strategyDefinitions: Record<RouteCandidateStrategy, StrategyDefinition> = 
     primaryModelTiers: ["small", "human"],
     unavailableReasonCode: "no-safe-lean-path",
     unavailableReason: "No safe small or manual route remains after hard gates.",
-    posture: "Start small: get a usable first pass before spending time or money on heavier tools.",
+    posture: "Use the lightest helper that meets this task's capability floor — start here and upgrade if it falls short.",
   },
   balanced: {
     label: "Balanced route",

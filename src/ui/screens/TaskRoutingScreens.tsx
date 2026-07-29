@@ -779,7 +779,7 @@ function routeAimLabel(recommended: RouteOption | undefined) {
   }
 
   if (recommended.estimatedCostLevel === "low") {
-    return recommended.estimatedEffortLevel === "high" ? "Keep tool use light" : "Start with the smallest helper";
+    return recommended.estimatedEffortLevel === "high" ? "Keep tool use light" : "Use the lightest adequate helper";
   }
 
   if (recommended.estimatedCostLevel === "medium") {
@@ -1406,11 +1406,11 @@ function routeResourceExplanation(candidate: RouteOption) {
   if (candidate.estimatedCostLevel === "low") {
     return candidate.estimatedEffortLevel === "high"
       ? "It spends less compute and more of your own framing and review time."
-      : "It starts with the smallest adequate helper, so it uses less compute than a premium pass.";
+      : "It selects the lightest helper that meets this task's capability floor — resource use reflects whichever helper qualifies.";
   }
 
   if (candidate.estimatedCostLevel === "medium") {
-    return "It spends more compute than the lean route to produce a cleaner first pass, which can mean fewer repeat runs.";
+    return "It selects a capable everyday helper capped below frontier-tier for direct execution, aiming for a cleaner first pass with fewer repeat runs.";
   }
 
   return "It spends the most compute, and it earns that mainly by reducing risk: fewer expensive mistakes, missed checks, or weak public-facing outputs.";
@@ -1422,7 +1422,7 @@ function routeTradeoff(candidate: RouteOption) {
   }
 
   if (candidate.estimatedCostLevel === "medium") {
-    return "It spends more tool capacity than the lean route, so it should earn that cost by reducing rework.";
+    return "It intentionally caps below frontier-tier for direct execution, so it should earn its place by producing a cleaner result with less rework.";
   }
 
   return "It uses the most resource, so it should be reserved for tasks where quality or risk truly matters.";
