@@ -462,7 +462,7 @@ function routeOptionMarkdownLines(option: RouteCard["options"][number], displayI
       ? [
           `- Added to your bill: ${
             option.estimatedCostUsd === 0
-              ? "$0.00 (covered by tools you already have)"
+              ? "Subscription-covered ($0.00)"
               : `about ${formatUsd(option.estimatedCostUsd)}`
           }`,
         ]

@@ -82,7 +82,7 @@ describe("export and import utilities", () => {
     // two-significant-figure "$0.051" an earlier pass produced. Locale is pinned in
     // src/domain/format.ts, so the "$" is safe to assert.
     expect(routeCardMarkdown).toContain("- If you paid per token: about $0.05");
-    expect(routeCardMarkdown).toContain("- Added to your bill: $0.00 (covered by tools you already have)");
+    expect(routeCardMarkdown).toContain("- Added to your bill: Subscription-covered ($0.00)");
     expect(routeCardMarkdown).toContain("- Estimated energy: about 12 Wh per use");
     expect(routeCardMarkdown).not.toMatch(/saved|savings|avoided/i);
     expect(routeCardMarkdown).toContain("## Prompt package: Export fixture");

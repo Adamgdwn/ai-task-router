@@ -803,7 +803,7 @@ function routeBilledCostLabel(candidate: RouteOption) {
   }
 
   return candidate.estimatedCostUsd === 0
-    ? "$0.00 - covered by tools you already have"
+    ? "Covered by subscription — see per-token equivalent above"
     : `about ${formatUsd(candidate.estimatedCostUsd)}`;
 }
 

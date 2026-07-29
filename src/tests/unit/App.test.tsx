@@ -347,7 +347,7 @@ describe("App", () => {
     // saving. The only permitted "saved" is the app's own wording for stored plans.
     expect(screen.getAllByText("If you paid per token").length).toBe(6);
     expect(screen.getAllByText("Added to your bill").length).toBe(6);
-    expect(screen.getAllByText(/covered by tools you already have/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Covered by subscription/).length).toBeGreaterThan(0);
     expect(screen.queryByText(/est\. saved|Estimated savings|Energy saved|Savings aim|Savings recommendation/i)).toBeNull();
     expect(document.body.textContent).not.toMatch(/\bavoided\b/i);
     expect(document.body.textContent).not.toMatch(/\bsavings\b/i);
