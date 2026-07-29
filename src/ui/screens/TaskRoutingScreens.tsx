@@ -793,7 +793,7 @@ function routeAimLabel(recommended: RouteOption | undefined) {
 function routeApiEquivalentCostLabel(candidate: RouteOption) {
   return candidate.apiEquivalentCostUsd === undefined
     ? "Estimate unavailable"
-    : `about ${formatUsd(candidate.apiEquivalentCostUsd)} (${candidate.estimatedCostLevel})`;
+    : `about ${formatUsd(candidate.apiEquivalentCostUsd)}`;
 }
 
 /** What the route adds to the user's bill on the accounts they already have. */
