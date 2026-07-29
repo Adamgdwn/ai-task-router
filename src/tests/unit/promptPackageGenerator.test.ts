@@ -156,7 +156,7 @@ describe("prompt package generator", () => {
     expect(instruction).toContain("copy-ready master prompt");
     expect(instruction).toContain("spreadsheet import or paste-in data flow");
     expect(instruction).toContain("categorization rules");
-    expect(instruction).toContain("month-over-month tracking");
+    expect(instruction).toContain("trend and progress tracking");
     expect(instruction).toContain("model/tool choice for execution");
     expect(instruction).toContain("name the specific execution model or mode");
     expect(instruction).toContain("Handoff stage: Create.");

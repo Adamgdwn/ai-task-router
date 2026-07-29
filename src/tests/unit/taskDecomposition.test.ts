@@ -56,7 +56,7 @@ describe("task decomposition", () => {
         "first usable tool or app build",
         "spreadsheet import or paste-in data flow",
         "categorization rules",
-        "month-over-month tracking",
+        "trend and progress tracking",
         "improvement and strength insights",
         "model/tool choice for execution",
         "privacy check for sensitive data",
@@ -82,7 +82,7 @@ describe("task decomposition", () => {
         "first usable tool or app build",
         "spreadsheet import or paste-in data flow",
         "categorization rules",
-        "month-over-month tracking",
+        "trend and progress tracking",
         "improvement and strength insights",
       ]),
     );
@@ -104,7 +104,7 @@ describe("task decomposition", () => {
       expect.arrayContaining([
         "first usable tool or app build",
         "spreadsheet import or paste-in data flow",
-        "month-over-month tracking",
+        "trend and progress tracking",
         "improvement and strength insights",
         "review and acceptance checks",
       ]),

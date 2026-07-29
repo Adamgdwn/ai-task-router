@@ -46,7 +46,7 @@ type DeliverableDetector = {
 };
 
 const buildIntentPatterns = [
-  /\b(app|application|tool|tracker|dashboard|prototype|mini app|mini application|code|codebase|software|website|web app|build slice|code slice|first usable (build|code|app|tool) slice)\b/,
+  /\b(app|application|tool|tracker|dashboard|prototype|mini app|mini application|code|codebase|software|website|web app)\b/,
   /\b(build|create|make|develop|implement|ship)\s+(a |an |the )?(app|application|tool|tracker|dashboard|prototype|mini app|mini application|website|web app|codebase|automation|workflow)\b/,
   /\bautomate\b.*\b(workflow|process|spreadsheet|quote|invoice)\b/,
 ];
@@ -91,7 +91,7 @@ const detectorDefinitions: DeliverableDetector[] = [
   {
     kind: "data-flow",
     label: "spreadsheet import or paste-in data flow",
-    patterns: [/\b(spreadsheets?|sheets?|excel|csv|downloads?|uploads?|imports?|exports?|paste)\b/],
+    patterns: [/\b(spreadsheets?|sheets?|excel|csv|downloads?|uploads?|imports?|exports?)\b/],
     roles: ["scope-framing", "plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
@@ -102,14 +102,14 @@ const detectorDefinitions: DeliverableDetector[] = [
   },
   {
     kind: "tracking",
-    label: "month-over-month tracking",
-    patterns: [/\b(monthly|months?|month over month|month-over-month|tracks?|tracking|track them month|track.*month|over month|trends?|timeline)\b/],
+    label: "trend and progress tracking",
+    patterns: [/\b(monthly|months?|month over month|month-over-month|tracks?|tracking|trends?|timeline)\b/],
     roles: ["plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
   },
   {
     kind: "insight",
     label: "improvement and strength insights",
-    patterns: [/\b(improves?|improvement|where .*doing well|doing really well|strength|insights?|recommends?|recommendations?|next actions?|opportunit(y|ies))\b/],
+    patterns: [/\b(improves?|improvement|strength|insights?|recommends?|recommendations?|next actions?|opportunit(y|ies))\b/],
     roles: ["plan-synthesis", "prompt-design", "execution", "build-slice", "quality-review"],
   },
   {

@@ -254,7 +254,7 @@ describe("route card generator", () => {
     expect(createStage?.workItems[0]?.expectedOutput).toContain("One master prompt");
     expect(createStage?.actions.join(" ")).toContain("spreadsheet import or paste-in data flow");
     expect(createStage?.actions.join(" ")).toContain("categorization rules");
-    expect(createStage?.actions.join(" ")).toContain("month-over-month tracking");
+    expect(createStage?.actions.join(" ")).toContain("trend and progress tracking");
     expect(createStage?.actions.join(" ")).toContain("model and tool choice for execution");
     expect(packageStage).toMatchObject({
       label: "Run the build-plan prompt",

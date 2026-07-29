@@ -245,7 +245,7 @@ function scopeSourceNeedFor(
       !["outcome", "scope", "assumptions", "privacy", "review"].includes(deliverable.kind),
   ).length;
   const exploratory =
-    /\b(help me|figure out|explore|options?|best way|what should|what would it take|not sure|rough plan|strategy|launch|market|campaign|community|trip|event|policy|industry)\b/.test(
+    /\b(help me|figure out|explore|options?|best way|what should|what would it take|not sure|rough plan|strategy)\b/.test(
       text,
     );
   const roughRequest = wordCount < 36 || substantiveDeliverables < 3;
