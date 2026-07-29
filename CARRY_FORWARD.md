@@ -1,8 +1,8 @@
 # 2026-07-03T11:51:11-06:00 - Carry-Forward Flags
 
-Last Updated: 2026-07-27T22:22:45-06:00
+Last Updated: 2026-07-29T17:40:45-06:00
 Status: open
-Status Updated: 2026-07-27T22:22:45-06:00
+Status Updated: 2026-07-29T17:40:45-06:00
 
 Use this file to record anything that must survive a context reset:
 blockers, unresolved decisions, open risks, next-chunk prerequisites.
@@ -12,6 +12,7 @@ the coding agent will surface them before suggesting /compact.
 
 | Flag | Added | Owner | Status | Notes |
 |---|---|---|---|---|
+| Chart accuracy + crosshair tooltip on `main`, not on canonical URL | 2026-07-29T17:40:45-06:00 | Project Owner | Open, deployment authorization required | Sources `9bf2e1f` and `902f33b`. Fixes: 100-use chart was using billed cost ($0 for subscriptions) instead of API-equivalent cost; Lean energy line was invisible due to SVG draw order. Adds: crosshair hover tooltip showing cost and energy for all three routes simultaneously. Deployed to immutable `https://5d772046.ai-task-router.pages.dev`; canonical URL still on `1b5054f`. Ships in the same deploy as `b565331` if `main` HEAD is used. |
 | Stage-first planning grammar is integration complete but not deployed | 2026-07-27T22:18:56-06:00 | Project Owner | Open, deployment authorization required | Source `b565331` is committed and pushed to `main`. It infers task work before assigning tools. With Perplexity Free, ChatGPT Go, and Copilot Free, the normal planning regression uses Perplexity for scope framing from approved inputs, highest available GPT-5.5 Thinking for the actual plan, and Copilot for the lightweight action handoff; the same inventory keeps a simple rewrite on GPT-5.5 Instant. Local gates pass: 190/190 Vitest, 5/5 script tests, 8/8 Playwright, build/budget, 0 vulnerabilities, clean release-candidate scan, and governance preflight 0 warnings. Cloudflare deployment is a separate production action and needs fresh owner authorization. |
 | ~~The direct-work repair changed the route script but still did not make the router reason about the task~~ | 2026-07-27T20:26:56-06:00 | Technical Lead | Resolved 2026-07-27T21:07:32-06:00 | The owner's correction was accurate: source `68a7e1d` removed one unconditional prompt relay but still chose from a fixed role sequence and prebuilt Lean/Balanced/Premium bundles. Source `1b5ea8f` repairs the decision engine itself. It assesses task reasoning demand and whether evidence, prompt design, specialist packaging, or independent review adds enough value; it scores actual model modes for the role instead of treating Fast and Thinking as equivalent or collapsing both to `free`. With the exact same ChatGPT Go + Perplexity Free + Microsoft Copilot Free inventory, a structured multi-part plan selects GPT-5.5 Thinking for direct reasoning with no prompt relay, while a simple rewrite selects GPT-5.5 Instant. Production deployment `https://0e76221f.ai-task-router.pages.dev` serves the exact 678,109-byte asset and hosted E2E passes 8/8. No provider calls, execution, telemetry, account connection, or new UI feature was added. |
 | ~~Followed choices remains at zero beside saved plans~~ | 2026-07-27T20:03:54-06:00 | Technical Lead | Resolved 2026-07-27T20:03:54-06:00 | Git history showed older route saves were initialized as Deferred, while the impact summary intentionally counts only Accepted or Edited outcomes. The app had no explanation or direct path to update them. Production source `e3671b2` now labels the metric `Accepted or edited choices`, explains when saved Deferred or Rejected records are excluded, and links to Past Choices through `Review saved choices`. Existing outcomes were not silently migrated because the app cannot know whether the route was actually used. |

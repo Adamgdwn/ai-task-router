@@ -1,6 +1,6 @@
 # 2026-07-09T03:04:01+00:00 - Start Here
 
-Last Updated: 2026-07-27T22:20:04-06:00
+Last Updated: 2026-07-29T17:40:45-06:00
 Status: draft
 Status Updated: 2026-07-09T12:41:50-06:00
 Owner: Project Owner
@@ -25,7 +25,7 @@ Current priorities:
 
 ## Current Build Pathway
 
-**Resume point: [docs/2026-07-27-session-turnover.md](docs/2026-07-27-session-turnover.md).** Written at the close of the 2026-07-27 session after Chunk 12 reached Integration complete. Read it first, then this file, then the Chunk 12 acceptance result and Next Handoff in the active pathway below.
+**Resume point: [docs/2026-07-29-session-turnover.md](docs/2026-07-29-session-turnover.md).** Written at the close of the 2026-07-29 session after chart accuracy and tooltip work. Read it first, then this file, then the Chunk 12 acceptance result and Next Handoff in the active pathway below.
 
 Default live build route: [docs/2026-07-09-current-build-pathway.md](docs/2026-07-09-current-build-pathway.md).
 
