@@ -1,7 +1,6 @@
 import { formatUsd, formatWattHoursWithEveryday } from "../../domain/format";
 import { displayedCostMultiple } from "../../domain/impact/routeComparison";
 import type { PublicImpactSnapshot } from "../../domain/impact/publicImpactSnapshot";
-import type { TrackedImpactSummary } from "../../domain/impact/impactCounter";
 import type { RouteOption, TaskIntake } from "../../domain/types";
 
 type ImpactInsightPanelProps = {
@@ -11,9 +10,6 @@ type ImpactInsightPanelProps = {
     TaskIntake,
     "costPreference" | "energyPreference" | "knowledgeWorkType" | "outputType" | "qualityBar"
   >;
-  trackedImpact?: TrackedImpactSummary;
-  trackedImpactMessage?: string;
-  onReviewPastChoices?: () => void;
 };
 
 /**
@@ -36,15 +32,9 @@ export function ImpactInsightPanel({
   recommended,
   snapshot,
   task,
-  trackedImpact,
-  trackedImpactMessage,
-  onReviewPastChoices,
 }: ImpactInsightPanelProps) {
   const { environmentalExample, rightSizingExample, tokenBenchmark } = snapshot;
   const benchmarkMultiple = displayedCostMultiple(tokenBenchmark.lowerCostUsd, tokenBenchmark.comparisonCostUsd);
-  const notCountedPlanCount = trackedImpact
-    ? Math.max(0, trackedImpact.savedPlanCount - trackedImpact.followedPlanCount)
-    : 0;
 
   return (
     <section className="impactSection" aria-labelledby="impact-insight-heading">
@@ -58,47 +48,6 @@ export function ImpactInsightPanel({
           bill, not money you saved, and not a guarantee.
         </p>
       </div>
-
-      {trackedImpact ? (
-        <div className="impactCounterPanel" aria-label="Accepted and edited choice impact">
-          <div>
-            <span>Accepted or edited choices</span>
-            <strong>{formatInteger(trackedImpact.followedPlanCount)}</strong>
-            <small>{trackedImpactMessage ?? "Accepted or edited choices counted on this device."}</small>
-            {notCountedPlanCount > 0 && onReviewPastChoices ? (
-              <button className="impactCounterReviewButton" onClick={onReviewPastChoices} type="button">
-                Review saved choices
-              </button>
-            ) : null}
-          </div>
-          <dl>
-            <div>
-              <dt>If those runs were metered</dt>
-              <dd>{formatUsd(trackedImpact.apiEquivalentCostUsd)}</dd>
-            </div>
-            <div>
-              <dt>Estimated energy used</dt>
-              <dd>{formatWattHoursWithEveryday(trackedImpact.estimatedEnergyWh)}</dd>
-            </div>
-            <div>
-              <dt>Saved plans</dt>
-              <dd>{formatInteger(trackedImpact.savedPlanCount)}</dd>
-            </div>
-            {trackedImpact.followedPlanCount > 0 ? (
-              <div>
-                <dt>Which routes you followed</dt>
-                <dd>{followedStrategyMixLabel(trackedImpact.followedByStrategy)}</dd>
-              </div>
-            ) : null}
-          </dl>
-          {trackedImpact.plansWithoutEstimateCount > 0 ? (
-            <p className="impactCaveat">
-              {formatInteger(trackedImpact.plansWithoutEstimateCount)} followed plan(s) were saved before per-token
-              estimates existed and are not included in these totals.
-            </p>
-          ) : null}
-        </div>
-      ) : null}
 
       <dl className="impactMetricGrid">
         <div>
@@ -176,24 +125,6 @@ function formatReviewedDate(timestamp: string) {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
   }).format(new Date(timestamp));
-}
-
-/**
- * The one place a user can see their own routing habit rather than a single task's estimate.
- *
- * This breakdown was computed and thrown away: the counter tracked lean/balanced/premium all along
- * and the panel showed only a total, which is the number least able to answer "am I reaching for
- * heavier help than the work needs?" - the question the app says it exists to build a habit around.
- *
- * Stated as a plain count, in route order, with no praise and no scolding. A user who legitimately
- * needs premium every time should not read a nudge here, and the mix itself is the teaching.
- */
-function followedStrategyMixLabel(followedByStrategy: TrackedImpactSummary["followedByStrategy"]) {
-  const parts = (["lean", "balanced", "premium"] as const)
-    .filter((strategy) => followedByStrategy[strategy] > 0)
-    .map((strategy) => `${formatInteger(followedByStrategy[strategy])} ${strategy}`);
-
-  return parts.length ? parts.join(", ") : "None counted yet";
 }
 
 function formatInteger(value: number) {

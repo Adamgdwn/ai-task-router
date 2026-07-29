@@ -357,7 +357,6 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Accept selected route and save prompts" }));
 
     expect(await screen.findByText("Selected route, decision card, prompts, and followed-choice impact saved on this device.")).toBeInTheDocument();
-    expect(await screen.findByText("1 accepted or edited choice counted on this device.")).toBeInTheDocument();
 
     const records = await store.loadRouteRecords();
     expect(records.routeCards).toHaveLength(1);
@@ -617,33 +616,6 @@ describe("App", () => {
     );
   });
 
-  it("explains why deferred saved choices stay at zero and links directly to Past Choices", async () => {
-    const user = userEvent.setup();
-    const store = buildTestStore();
-
-    render(<App store={store} />);
-
-    await generateAndSavePublicFacingRoute(user);
-    await user.click(screen.getByRole("button", { name: "Past Choices" }));
-    await screen.findByRole("heading", { name: "Route card: Draft public-facing copy" });
-    await user.selectOptions(screen.getByRole("combobox", { name: "What happened?" }), "deferred");
-    await user.click(screen.getByRole("button", { name: "Save feedback" }));
-    await screen.findByText("Feedback saved in this browser.");
-
-    await user.click(screen.getByRole("button", { name: "Best Options" }));
-
-    expect(
-      await screen.findByText(
-        '1 saved choice is marked Deferred or Rejected, so this stays at zero. Review Past Choices and update "What happened?" after you use a route.',
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Accepted or edited choices")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Review saved choices" }));
-
-    expect(await screen.findByRole("heading", { name: "Past Choices", level: 2 })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "What happened?" })).toHaveValue("deferred");
-  });
 
   it("shows saved route cards with local copy and Markdown download preparation", async () => {
     const user = userEvent.setup();
